@@ -1,3 +1,5 @@
+hljs.initHighlightingOnLoad();
+
 /*
 function htmlEncode(value) {
 	return value.toString()
@@ -88,14 +90,13 @@ $(function(){
 	$('.webgl-starter').each(function(){
 		var container=$(this);
 		var code;
-		//container.html("<code><pre>"+generateCode()+"</code></pre>");
 		container.empty().append(
-			$("<code>").append(code=$("<pre>").text(generateCode()))
+			$("<pre>").append(code=$("<code>").text(generateCode()))
 		).append(
 			$("<button type='button'>Run</button>").click(function(){
-				//window.open("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==","generatedCode");
 				window.open(getHtmlDataUri(code.text()),"generatedCode");
 			})
 		);
+		//hljs.highlightBlock(code[0]);
 	});
 });
