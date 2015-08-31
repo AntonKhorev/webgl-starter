@@ -8,6 +8,20 @@ function htmlEncode(value) {
 */
 
 function generateCode(options) {
+	function indent(level,lines) {
+		return lines.map(function(line){
+			return Array(level+1).join("	")+line;
+		});
+	}
+	function render() {
+		return [].concat(options.clearBackground?[
+			"gl.clear(gl.COLOR_BUFFER_BIT);",
+		]:[],options.rotate?[
+			"gl.uniform1f(rotationAngleLoc,(time-startTime)*360/5000);",
+		]:[],[
+			"gl.drawArrays(gl.TRIANGLES,0,nVertices);",
+		]);
+	}
 	return [].concat([
 		"<!DOCTYPE html>",
 		"<html lang='en'>",
@@ -15,10 +29,23 @@ function generateCode(options) {
 		"<meta charset='utf-8' />",
 		"<title>Generated code</title>",
 		"<script id='myVertexShader' type='x-shader/x-vertex'>",
+	],options.rotate?[
+		"	uniform float rotationAngle;",
+		"	attribute vec2 position;",
+		"	void main() {",
+		"		float c=cos(radians(rotationAngle));",
+		"		float s=sin(radians(rotationAngle));",
+		"		gl_Position=vec4(mat2(",
+		"			 c, s,",
+		"			-s, c",
+		"		)*position,0,1);",
+		"	}",
+	]:[
 		"	attribute vec4 position;",
 		"	void main() {",
 		"		gl_Position=position;",
 		"	}",
+	],[
 		"</script>",
 		"<script id='myFragmentShader' type='x-shader/x-fragment'>",
 		"	precision mediump float;",
@@ -111,10 +138,16 @@ function generateCode(options) {
 		"	gl.vertexAttribPointer(positionLoc,2,gl.FLOAT,false,0,0);",
 		"	gl.enableVertexAttribArray(positionLoc);",
 		"	",
-	],options.clearBackground?[
-		"	gl.clear(gl.COLOR_BUFFER_BIT);",
-	]:[],[
-		"	gl.drawArrays(gl.TRIANGLES,0,nVertices);",
+	],options.rotate?[].concat([
+		"	var rotationAngleLoc=gl.getUniformLocation(program,'rotationAngle');",
+		"	",
+		"	var startTime=performance.now();",
+		"	function animate(time) {",
+	],indent(2,render()),[
+		"		requestAnimationFrame(animate);",
+		"	}",
+		"	requestAnimationFrame(animate);",
+	]):indent(1,render()),[
 		"</script>",
 		"</body>",
 		"</html>",
@@ -134,6 +167,7 @@ $(function(){
 		var options={
 			clearBackground: false,
 			draw: 'triangle',
+			rotate: false,
 		};
 		var code;
 		container.empty().append(
@@ -151,6 +185,16 @@ $(function(){
 				$("<label>").text("Draw ").append(
 					$("<select><option>triangle</option><option>gasket</option></select>").change(function(){
 						options.draw=this.value;
+						code.text(generateCode(options));
+						hljs.highlightBlock(code[0]);
+					})
+				)
+			)
+		).append(
+			$("<div>").append(
+				$("<label>").text(" Animated rotation").prepend(
+					$("<input type='checkbox'>").change(function(){
+						options.rotate=$(this).prop('checked');
 						code.text(generateCode(options));
 						hljs.highlightBlock(code[0]);
 					})
