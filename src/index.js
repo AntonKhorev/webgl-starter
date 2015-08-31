@@ -1,5 +1,3 @@
-hljs.initHighlightingOnLoad();
-
 /*
 function htmlEncode(value) {
 	return value.toString()
@@ -9,8 +7,8 @@ function htmlEncode(value) {
 }
 */
 
-function generateCode() {
-	return [
+function generateCode(options) {
+	return [].concat([
 		"<!DOCTYPE html>",
 		"<html lang='en'>",
 		"<head>",
@@ -50,6 +48,9 @@ function generateCode() {
 		"	",
 		"	var canvas=document.getElementById('myCanvas');",
 		"	var gl=canvas.getContext('webgl')||canvas.getContext('experimental-webgl');",
+	],options.clearBackground?[
+		"	gl.clearColor(1.0,1.0,1.0,1.0);",
+	]:[],[
 		"	var program=makeProgram(",
 		"		document.getElementById('myVertexShader').text,",
 		"		document.getElementById('myFragmentShader').text",
@@ -72,11 +73,14 @@ function generateCode() {
 		"	gl.vertexAttribPointer(positionLoc,2,gl.FLOAT,false,0,0);",
 		"	gl.enableVertexAttribArray(positionLoc);",
 		"	",
+	],options.clearBackground?[
+		"	gl.clear(gl.COLOR_BUFFER_BIT);",
+	]:[],[
 		"	gl.drawArrays(gl.TRIANGLES,0,3);",
 		"</script>",
 		"</body>",
 		"</html>",
-	].join("\n");
+	]).join("\n");
 }
 
 function getHtmlDataUri(html) {
@@ -89,14 +93,27 @@ function getHtmlDataUri(html) {
 $(function(){
 	$('.webgl-starter').each(function(){
 		var container=$(this);
+		var options={
+			clearBackground: false,
+		};
 		var code;
 		container.empty().append(
-			$("<pre>").append(code=$("<code>").text(generateCode()))
+			$("<div>").append(
+				$("<label>").text("Clear background").prepend( // TODO fix misleading option name - background is clear (transparent) by default
+					$("<input type='checkbox'>").change(function(){
+						options.clearBackground=$(this).prop('checked');
+						code.text(generateCode(options));
+						hljs.highlightBlock(code[0]);
+					})
+				)
+			)
+		).append(
+			$("<pre>").append(code=$("<code>").text(generateCode(options)))
 		).append(
 			$("<button type='button'>Run</button>").click(function(){
 				window.open(getHtmlDataUri(code.text()),"generatedCode");
 			})
 		);
-		//hljs.highlightBlock(code[0]);
+		hljs.highlightBlock(code[0]);
 	});
 });
