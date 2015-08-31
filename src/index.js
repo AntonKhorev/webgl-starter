@@ -57,17 +57,55 @@ function generateCode(options) {
 		"	);",
 		"	gl.useProgram(program);",
 		"	",
+	],options.draw=='triangle'?[
+		"	var nVertices=3;",
+		"	var vertices=new Float32Array([",
+		"		-1.0, -1.0,",
+		"		 0.0,  1.0,",
+		"		 1.0, -1.0,",
+		"	]);",
+	]:[],options.draw=='gasket'?[
+		"	var gasketDepth=6;",
+		"	var nVertices=Math.pow(3,gasketDepth)*3;",
+		"	var vertices=new Float32Array(nVertices*2);",
+		"	function storeVertices() {",
+		"		var iv=0;",
+		"		function pushVertex(v) {",
+		"			vertices[iv++]=v[0]; vertices[iv++]=v[1];",
+		"		}",
+		"		function mix(a,b,m) {",
+		"			return [",
+		"				a[0]*(1-m)+b[0]*m,",
+		"				a[1]*(1-m)+b[1]*m,",
+		"			];",
+		"		}",
+		"		function triangle(depth,a,b,c) {",
+		"			if (depth<=0) {",
+		"				pushVertex(a);",
+		"				pushVertex(b);",
+		"				pushVertex(c);",
+		"			} else {",
+		"				var ab=mix(a,b,0.5);",
+		"				var bc=mix(b,c,0.5);",
+		"				var ca=mix(c,a,0.5);",
+		"				triangle(depth-1,a,ab,ca);",
+		"				triangle(depth-1,b,bc,ab);",
+		"				triangle(depth-1,c,ca,bc);",
+		"			}",
+		"		}",
+		"		triangle(",
+		"			gasketDepth,",
+		"			[0,1],",
+		"			[-Math.sin(2/3*Math.PI),Math.cos(2/3*Math.PI)],",
+		"			[-Math.sin(4/3*Math.PI),Math.cos(4/3*Math.PI)]",
+		"		);",
+		"	}",
+		"	storeVertices();",
+	]:[],[
+		"	",
 		"	var buffer=gl.createBuffer();",
 		"	gl.bindBuffer(gl.ARRAY_BUFFER,buffer);",
-		"	gl.bufferData(",
-		"		gl.ARRAY_BUFFER,",
-		"		new Float32Array([",
-		"			-1.0, -1.0,",
-		"			 0.0,  1.0,",
-		"			 1.0, -1.0,",
-		"		]),",
-		"		gl.STATIC_DRAW",
-		"	);",
+		"	gl.bufferData(gl.ARRAY_BUFFER,vertices,gl.STATIC_DRAW);",
 		"	",
 		"	var positionLoc=gl.getAttribLocation(program,'position');",
 		"	gl.vertexAttribPointer(positionLoc,2,gl.FLOAT,false,0,0);",
@@ -76,7 +114,7 @@ function generateCode(options) {
 	],options.clearBackground?[
 		"	gl.clear(gl.COLOR_BUFFER_BIT);",
 	]:[],[
-		"	gl.drawArrays(gl.TRIANGLES,0,3);",
+		"	gl.drawArrays(gl.TRIANGLES,0,nVertices);",
 		"</script>",
 		"</body>",
 		"</html>",
@@ -95,13 +133,24 @@ $(function(){
 		var container=$(this);
 		var options={
 			clearBackground: false,
+			draw: 'triangle',
 		};
 		var code;
 		container.empty().append(
 			$("<div>").append(
-				$("<label>").text("Clear background").prepend( // TODO fix misleading option name - background is clear (transparent) by default
+				$("<label>").text(" Clear background").prepend( // TODO fix misleading option name - background is clear (transparent) by default
 					$("<input type='checkbox'>").change(function(){
 						options.clearBackground=$(this).prop('checked');
+						code.text(generateCode(options));
+						hljs.highlightBlock(code[0]);
+					})
+				)
+			)
+		).append(
+			$("<div>").append(
+				$("<label>").text("Draw ").append(
+					$("<select><option>triangle</option><option>gasket</option></select>").change(function(){
+						options.draw=this.value;
 						code.text(generateCode(options));
 						hljs.highlightBlock(code[0]);
 					})
