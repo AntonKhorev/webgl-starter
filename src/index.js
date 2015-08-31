@@ -203,9 +203,13 @@ $(function(){
 		).append(
 			$("<pre>").append(code=$("<code>").text(generateCode(options)))
 		).append(
-			$("<button type='button'>Run</button>").click(function(){
-				window.open(getHtmlDataUri(code.text()),"generatedCode");
-			})
+			$("<div>").append(
+				$("<button type='button'>Run in new window</button>").click(function(){
+					window.open(getHtmlDataUri(code.text()),"generatedCode");
+				})
+			).append(
+				" running in new window doesn't work in Internet Explorer"
+			)
 		);
 		hljs.highlightBlock(code[0]);
 	});
