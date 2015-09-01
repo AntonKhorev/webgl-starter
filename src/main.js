@@ -73,9 +73,9 @@ var i18n=function(id){ // fake temporary i18n
 		'options.animation.rotation': 'Rotation around z axis',
 
 		'options.input': 'Input options',
-		'options.fragmentColorR': 'Fragment color red component',
-		'options.fragmentColorG': 'Fragment color green component',
-		'options.fragmentColorB': 'Fragment color blue component',
+		'options.fragmentColor.r': 'Fragment color red component',
+		'options.fragmentColor.g': 'Fragment color green component',
+		'options.fragmentColor.b': 'Fragment color blue component',
 		'options.*.input': 'Make this input available to users',
 	}[id];
 };
@@ -86,7 +86,7 @@ $(function(){
 		var options=new Options();
 		var code;
 		function updateCode() {
-			code.text(generateCode(options));
+			code.text(generateCode(options,i18n));
 			hljs.highlightBlock(code[0]);
 		}
 		function writeGeneralOption(option) {
@@ -142,7 +142,7 @@ $(function(){
 				options.inputOptions.map(writeInputOption)
 			)
 		).append(
-			$("<pre>").append(code=$("<code>").text(generateCode(options)))
+			$("<pre>").append(code=$("<code>").text(generateCode(options,i18n)))
 		).append(
 			$("<div>").append(
 				$("<button type='button'>Run in new window</button>").click(function(){

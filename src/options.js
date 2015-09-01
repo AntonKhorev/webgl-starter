@@ -17,9 +17,9 @@ Options.prototype.generalOptions=[
 	new Option('animation',['none','rotation']),
 ];
 Options.prototype.inputOptions=[
-	new Option('fragmentColorR',[0,1],1),
-	new Option('fragmentColorG',[0,1]),
-	new Option('fragmentColorB',[0,1]),
+	new Option('fragmentColor.r',[0,1],1),
+	new Option('fragmentColor.g',[0,1]),
+	new Option('fragmentColor.b',[0,1]),
 ];
 Options.prototype.reset=function(){
 	this.generalOptions.forEach(function(option){
@@ -31,16 +31,16 @@ Options.prototype.reset=function(){
 	},this);
 };
 Options.prototype.hasInputs=function(){
-	this.inputOptions.some(function(option){
+	return this.inputOptions.some(function(option){
 		return this[option.name+'.input'];
-	});
+	},this);
 };
 Options.prototype.hasInputsFor=function(prefix){
-	this.inputOptions.filter(function(option){
-		return option.name.indexOf(prefix)===0;
-	}).some(function(option){
+	return this.inputOptions.filter(function(option){
+		return option.name.indexOf(prefix+'.')===0;
+	},this).some(function(option){
 		return this[option.name+'.input'];
-	});
+	},this);
 };
 
 module.exports=Options;

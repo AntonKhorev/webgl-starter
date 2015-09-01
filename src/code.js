@@ -1,4 +1,4 @@
-module.exports=function(options){
+module.exports=function(options,i18n){
 	function indent(level,lines) {
 		return lines.map(function(line){
 			return Array(level+1).join("	")+line;
@@ -66,35 +66,27 @@ module.exports=function(options){
 		}
 		return lines;
 	}
-	function colorComponentValue(name) {
+	function floatOptionValue(name) {
 		return options[name].toFixed(3);
 	}
 	function colorValue(prefix) {
-		return colorComponentValue(prefix+'R')+","+
-		       colorComponentValue(prefix+'G')+","+
-		       colorComponentValue(prefix+'B');
+		return floatOptionValue(prefix+'.r')+","+
+		       floatOptionValue(prefix+'.g')+","+
+		       floatOptionValue(prefix+'.b');
 	}
-	function colorInput(name) {
-		return ["// TODO color input for "+name];
-		/*
+	function inputs() {
 		return [].concat.apply([],
-			['red','green','blue'].map(function(component){
-				var c=component.charAt(0);
-				var C=c.toUpperCase();
-				var intName=name+'.value.'+c;
-				var extName='my'+name.charAt(0).toUpperCase()+name.slice(1)+C;
+			options.inputOptions.filter(function(option){
+				return options[option.name+'.input'];
+			}).map(function(option){
 				return [
 					"<div>",
-					"	<label for='"+extName+"'>Fragment color: "+component+"</label>",
-					"	0% <input id='"+extName+"' type='range' min='0' max='1' step='0.001' value='"+colorComponentValue(intName)+"' /> 100%",
+					"	<label for='"+option.name+"'>"+i18n('options.'+option.name)+":</label>",
+					"	"+option.availableValues[0]+" <input type='range' id='"+option.name+"' min='"+option.availableValues[0]+"' max='"+option.availableValues[1]+"' step='any' value='"+floatOptionValue(option.name)+"'> "+option.availableValues[1],
 					"</div>",
 				];
 			})
 		);
-		*/
-	}
-	function inputs() {
-		return ["// TODO inputs"];
 	}
 	return [].concat([
 		"<!DOCTYPE html>",
