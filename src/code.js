@@ -1,10 +1,72 @@
 module.exports=function(options,i18n){
-	function indent(level,lines) {
+	function floatOptionValue(name) {
+		return options[name].toFixed(3);
+	}
+	function colorValue(prefix) {
+		return floatOptionValue(prefix+'.r')+","+
+		       floatOptionValue(prefix+'.g')+","+
+		       floatOptionValue(prefix+'.b');
+	}
+	function indentLines(level,lines) {
 		return lines.map(function(line){
 			return Array(level+1).join("	")+line;
 		});
 	}
-	function render() {
+
+	function generateInputLines() {
+		return [].concat.apply([],
+			options.inputOptions.filter(function(option){
+				return options[option.name+'.input'];
+			}).map(function(option){
+				return [
+					"<div>",
+					"	<label for='"+option.name+"'>"+i18n('options.'+option.name)+":</label>",
+					"	"+option.availableValues[0]+" <input type='range' id='"+option.name+"' min='"+option.availableValues[0]+"' max='"+option.availableValues[1]+"' step='any' value='"+floatOptionValue(option.name)+"'> "+option.availableValues[1],
+					"</div>",
+				];
+			})
+		);
+	}
+	function generateInputHandlerLines() {
+		/*
+		"	var fragmentColorLoc=gl.getUniformLocation(program,'fragmentColor');",
+		"	function updateFragmentColor() {",
+		"		gl.uniform3fv(fragmentColorLoc,['myFragmentColorR','myFragmentColorG','myFragmentColorB'].map(function(id){",
+		"			return parseFloat(document.getElementById(id).value);",
+		"		}));",
+		"	}",
+		"	updateFragmentColor();",
+		"	[].forEach.call(document.querySelectorAll('#myFragmentColorR, #myFragmentColorG, #myFragmentColorB'),function(el){",
+		],options.animation=='rotation'?[
+		"		el.addEventListener('change',updateFragmentColor);",
+		]:[
+		"		el.addEventListener('change',function(){",
+		"			updateFragmentColor();",
+		"			updateCanvas();",
+		"		});",
+                ],[
+		"	});",
+		*/
+		lines=[];
+		if (options.hasInputsFor('fragmentColor')) {
+			lines.push(
+				"var fragmentColorLoc=gl.getUniformLocation(program,'fragmentColor');",
+				"function updateFragmentColor() {",
+				"	gl.uniform3fv(fragmentColorLoc,["+['fragmentColor.r','fragmentColor.g','fragmentColor.b'].map(function(name){
+					if (options[name+'.input']) {
+						return "parseFloat(document.getElementById('"+name+"').value)";
+					} else {
+						return floatOptionValue(name);
+					}
+				}).join()+"]);",
+				"}",
+				"updateFragmentColor();"
+			);
+		}
+		if (lines.length) lines.push("	");
+		return lines;
+	}
+	function generateRenderLines() {
 		function renderInner() {
 			var lines=[];
 			if (options.background=='solid') {
@@ -31,63 +93,42 @@ module.exports=function(options,i18n){
 		var lines=[];
 		if (options.animation=='rotation') {
 			lines.push(
-				"	var startTime=performance.now();"
+				"var startTime=performance.now();"
 			);
 		}
 		var needUpdateCanvasFunction=options.animation=='rotation'||options.hasInputs()
 		if (needUpdateCanvasFunction) {
 			lines.push(
-				"	function updateCanvas(time) {"
+				"function updateCanvas(time) {"
 			);
 			lines=lines.concat(
-				indent(2,renderInner())
-			);
-			if (options.animation=='rotation') {
-				lines.push(
-					"		requestAnimationFrame(updateCanvas);"
-				);
-			}
-			lines.push(
-				"	}"
+				indentLines(1,renderInner())
 			);
 			if (options.animation=='rotation') {
 				lines.push(
 					"	requestAnimationFrame(updateCanvas);"
 				);
+			}
+			lines.push(
+				"}"
+			);
+			if (options.animation=='rotation') {
+				lines.push(
+					"requestAnimationFrame(updateCanvas);"
+				);
 			} else {
 				lines.push(
-					"	updateCanvas();"
+					"updateCanvas();"
 				);
 			}
 		} else {
 			lines=lines.concat(
-				indent(1,renderInner())
+				renderInner()
 			);
 		}
 		return lines;
 	}
-	function floatOptionValue(name) {
-		return options[name].toFixed(3);
-	}
-	function colorValue(prefix) {
-		return floatOptionValue(prefix+'.r')+","+
-		       floatOptionValue(prefix+'.g')+","+
-		       floatOptionValue(prefix+'.b');
-	}
-	function inputs() {
-		return [].concat.apply([],
-			options.inputOptions.filter(function(option){
-				return options[option.name+'.input'];
-			}).map(function(option){
-				return [
-					"<div>",
-					"	<label for='"+option.name+"'>"+i18n('options.'+option.name)+":</label>",
-					"	"+option.availableValues[0]+" <input type='range' id='"+option.name+"' min='"+option.availableValues[0]+"' max='"+option.availableValues[1]+"' step='any' value='"+floatOptionValue(option.name)+"'> "+option.availableValues[1],
-					"</div>",
-				];
-			})
-		);
-	}
+
 	return [].concat([
 		"<!DOCTYPE html>",
 		"<html lang='en'>",
@@ -140,7 +181,7 @@ module.exports=function(options,i18n){
 		"<div>",
 		"	<canvas id='myCanvas' width='512' height='512'></canvas>",
 		"</div>",
-	],inputs(),[
+	],generateInputLines(),[
 		"<script>",
 		"	function makeProgram(vertexShaderSrc,fragmentShaderSrc) {",
 		"		var vertexShader=gl.createShader(gl.VERTEX_SHADER);",
@@ -231,30 +272,10 @@ module.exports=function(options,i18n){
 		"	gl.vertexAttribPointer(positionLoc,2,gl.FLOAT,false,0,0);",
 		"	gl.enableVertexAttribArray(positionLoc);",
 		"	",
-	],false/*TODO options['fragmentColor.input']*/?[].concat([
-		"	var fragmentColorLoc=gl.getUniformLocation(program,'fragmentColor');",
-		"	function updateFragmentColor() {",
-		"		gl.uniform3fv(fragmentColorLoc,['myFragmentColorR','myFragmentColorG','myFragmentColorB'].map(function(id){",
-		"			return parseFloat(document.getElementById(id).value);",
-		"		}));",
-		"	}",
-		"	updateFragmentColor();",
-		"	[].forEach.call(document.querySelectorAll('#myFragmentColorR, #myFragmentColorG, #myFragmentColorB'),function(el){",
-		],options.animation=='rotation'?[
-		"		el.addEventListener('change',updateFragmentColor);",
-		]:[
-		"		el.addEventListener('change',function(){",
-		"			updateFragmentColor();",
-		"			updateCanvas();",
-		"		});",
-                ],[
-		"	});",
-		"	",
-	]):[],[
-	],options.animation=='rotation'?[
+	],indentLines(1,generateInputHandlerLines()),options.animation=='rotation'?[
 		"	var rotationAngleLoc=gl.getUniformLocation(program,'rotationAngle');",
 		"	",
-	]:[],render(),[
+	]:[],indentLines(1,generateRenderLines()),[
 		"</script>",
 		"</body>",
 		"</html>",
