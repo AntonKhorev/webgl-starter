@@ -28,25 +28,6 @@ module.exports=function(options,i18n){
 		);
 	}
 	function generateInputHandlerLines() {
-		/*
-		"	var fragmentColorLoc=gl.getUniformLocation(program,'fragmentColor');",
-		"	function updateFragmentColor() {",
-		"		gl.uniform3fv(fragmentColorLoc,['myFragmentColorR','myFragmentColorG','myFragmentColorB'].map(function(id){",
-		"			return parseFloat(document.getElementById(id).value);",
-		"		}));",
-		"	}",
-		"	updateFragmentColor();",
-		"	[].forEach.call(document.querySelectorAll('#myFragmentColorR, #myFragmentColorG, #myFragmentColorB'),function(el){",
-		],options.animation=='rotation'?[
-		"		el.addEventListener('change',updateFragmentColor);",
-		]:[
-		"		el.addEventListener('change',function(){",
-		"			updateFragmentColor();",
-		"			updateCanvas();",
-		"		});",
-                ],[
-		"	});",
-		*/
 		lines=[];
 		if (options.hasInputsFor('fragmentColor')) {
 			lines.push(
@@ -73,7 +54,23 @@ module.exports=function(options,i18n){
 			}
 			lines.push(
 				"}",
-				"updateFragmentColor();"
+				"updateFragmentColor();",
+				"[].forEach.call(document.querySelectorAll('[id^=\"fragmentColor.\"]'),function(el){"
+			);
+			if (options.animation=='rotation') {
+				lines.push(
+					"	el.addEventListener('change',updateFragmentColor);"
+				)
+			} else {
+				lines.push(
+					"	el.addEventListener('change',function(){",
+					"		updateFragmentColor();",
+					"		updateCanvas();",
+					"	});"
+				);
+			}
+			lines.push(
+				"});"
 			);
 		}
 		if (lines.length) lines.push("	");
