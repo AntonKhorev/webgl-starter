@@ -88,6 +88,15 @@ function generateCode(options) {
 		"<head>",
 		"<meta charset='utf-8' />",
 		"<title>Generated code</title>",
+	],options['fragmentColor.input']?[
+		"<style>",
+		"	label {",
+		"		display: inline-block;",
+		"		width: 15em;",
+		"		text-align: right;",
+		"	}",
+		"</style>",
+	]:[],[
 		"<script id='myVertexShader' type='x-shader/x-vertex'>",
 	],options.rotate?[
 		"	uniform float rotationAngle;",
