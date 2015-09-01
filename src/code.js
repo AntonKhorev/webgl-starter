@@ -13,12 +13,13 @@ module.exports=function(options,i18n){
 		});
 	}
 	function appendLinesToLastLine(lines,addedLines) {
+		var lastLine=lines.pop();
+		var indent=/^\s*/.exec(lastLine)[0];
 		addedLines.forEach(function(line,i){
 			if (i==0) {
-				lines.push(lines.pop()+line);
+				lines.push(lastLine+line);
 			} else {
-				// TODO indent
-				lines.push(line);
+				lines.push(indent+line);
 			}
 		});
 	}
