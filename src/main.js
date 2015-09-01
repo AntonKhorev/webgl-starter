@@ -48,6 +48,7 @@ var Options=function(){
 };
 */
 
+var Options=require('./options.js');
 var generateCode=require('./code.js');
 
 function getHtmlDataUri(html) {
@@ -56,16 +57,6 @@ function getHtmlDataUri(html) {
 	// without base64: https://en.wikipedia.org/wiki/Data_URI_scheme
 	return 'data:text/html;charset=utf-8,'+encodeURIComponent(html);
 }
-
-Option=function(name,availableValues,defaultValue){
-	this.name=name;
-	this.availableValues=availableValues;
-	if (defaultValue===undefined) {
-		this.defaultValue=availableValues[0];
-	} else {
-		this.defaultValue=defaultValue;
-	}
-};
 
 var i18n=function(id){ // fake temporary i18n
 	return {
@@ -86,28 +77,7 @@ var i18n=function(id){ // fake temporary i18n
 $(function(){
 	$('.webgl-starter').each(function(){
 		var container=$(this);
-		var options={
-			generalOptions: [
-				new Option('background',['none','solid']),
-				new Option('shape',['square','triangle','gasket']),
-				new Option('animation',['none','rotation']),
-			],
-			inputOptions: [
-				new Option('fragmentColorR',[0,1],1),
-				new Option('fragmentColorG',[0,1]),
-				new Option('fragmentColorB',[0,1]),
-			],
-			reset: function(){
-				this.generalOptions.forEach(function(option){
-					this[option.name]=option.defaultValue;
-				},this);
-				this.inputOptions.forEach(function(option){
-					this[option.name]=option.defaultValue;
-					this[option.name+'.input']=false;
-				},this);
-			},
-		};
-		options.reset();
+		var options=new Options();
 		var code;
 		function updateCode() {
 			code.text(generateCode(options));
