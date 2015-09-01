@@ -58,6 +58,30 @@ function generateCode(options) {
 			"gl.drawArrays(gl.TRIANGLES,0,nVertices);",
 		]);
 	}
+	function colorComponentValue(intName) {
+		return options[intName].toFixed(3);
+	}
+	function colorValue(name) {
+		return colorComponentValue(name+'.value.r')+","+
+		       colorComponentValue(name+'.value.g')+","+
+		       colorComponentValue(name+'.value.b');
+	}
+	function colorInput(name) {
+		return [].concat.apply([],
+			['red','green','blue'].map(function(component){
+				var c=component.charAt(0);
+				var C=c.toUpperCase();
+				var intName=name+'.value.'+c;
+				var extName='my'+name.charAt(0).toUpperCase()+name.slice(1)+C;
+				return [
+					"<div>",
+					"	<label for='"+extName+"'>Fragment color: "+component+"</label>",
+					"	0% <input id='"+extName+"' type='range' min='0' max='1' step='0.001' value='"+colorComponentValue(intName)+"' /> 100%",
+					"</div>",
+				];
+			})
+		);
+	}
 	return [].concat([
 		"<!DOCTYPE html>",
 		"<html lang='en'>",
@@ -86,14 +110,15 @@ function generateCode(options) {
 		"<script id='myFragmentShader' type='x-shader/x-fragment'>",
 		"	precision mediump float;",
 		"	void main() {",
-		"		gl_FragColor=vec4("+options['fragmentColor.value.r'].toFixed(3)+","+
-		                                    options['fragmentColor.value.g'].toFixed(3)+","+
-		                                    options['fragmentColor.value.b'].toFixed(3)+",1.0);",
+		"		gl_FragColor=vec4("+colorValue('fragmentColor')+",1.0);",
 		"	}",
 		"</script>",
 		"</head>",
 		"<body>",
-		"<div><canvas id='myCanvas' width='512' height='512'></canvas></div>",
+		"<div>",
+		"	<canvas id='myCanvas' width='512' height='512'></canvas>",
+		"</div>",
+	],options['fragmentColor.input']?colorInput('fragmentColor'):[],[
 		"<script>",
 		"	function makeProgram(vertexShaderSrc,fragmentShaderSrc) {",
 		"		var vertexShader=gl.createShader(gl.VERTEX_SHADER);",
@@ -210,7 +235,7 @@ $(function(){
 			'fragmentColor.value.r': 1.0,
 			'fragmentColor.value.g': 0.0,
 			'fragmentColor.value.b': 0.0,
-			//'fragmentColor.input': false,
+			'fragmentColor.input': false,
 		};
 		var code;
 		function updateCode() {
@@ -270,6 +295,15 @@ $(function(){
 						updateCode();
 					})
 				).append(" 100%")
+			)
+		).append(
+			$("<div>").append(
+				$("<label>").text(" Provide fragment color inputs to users").prepend(
+					$("<input type='checkbox'>").change(function(){
+						options['fragmentColor.input']=$(this).prop('checked');
+						updateCode();
+					})
+				)
 			)
 		).append(
 			$("<pre>").append(code=$("<code>").text(generateCode(options)))
