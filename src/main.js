@@ -86,7 +86,7 @@ $(function(){
 		function writeGeneralOption(option) {
 			var id=generateId;
 			return $("<div>")
-				.append("<label for='"+id+"'>"+i18n('options.'+option.name)+"</label>")
+				.append("<label for='"+id+"'>"+i18n('options.'+option.name)+":</label>")
 				.append(" ")
 				.append(
 					$("<select id='"+id+"'>").append(

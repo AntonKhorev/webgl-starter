@@ -5,11 +5,16 @@ var source=require('vinyl-source-stream');
 var buffer=require('vinyl-buffer');
 var sourcemaps=require('gulp-sourcemaps');
 var uglify=require('gulp-uglify');
+var less=require('gulp-less');
+var autoprefixer=require('gulp-autoprefixer');
+var minifyCss=require('gulp-minify-css');
+
+var destination='public_html';
 
 gulp.task('html',function(){
 	gulp.src('src/index.jade')
 		.pipe(jade())
-		.pipe(gulp.dest('public_html'));
+		.pipe(gulp.dest(destination));
 });
 
 gulp.task('js',function(){
@@ -27,7 +32,19 @@ gulp.task('js',function(){
 		.pipe(sourcemaps.write('.',{
 			sourceRoot: '.'
 		}))
-		.pipe(gulp.dest('public_html'));
+		.pipe(gulp.dest(destination));
 });
 
-gulp.task('default',['html','js']);
+gulp.task('css',function(){
+	gulp.src('src/index.less')
+		.pipe(sourcemaps.init())
+		.pipe(less())
+		.pipe(autoprefixer())
+		.pipe(minifyCss())
+		.pipe(sourcemaps.write('.',{
+			sourceRoot: '.'
+		}))
+		.pipe(gulp.dest(destination));
+});
+
+gulp.task('default',['html','js','css']);
