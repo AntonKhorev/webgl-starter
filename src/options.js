@@ -30,5 +30,17 @@ Options.prototype.reset=function(){
 		this[option.name+'.input']=false;
 	},this);
 };
+Options.prototype.hasInputs=function(){
+	this.inputOptions.some(function(option){
+		return this[option.name+'.input'];
+	});
+};
+Options.prototype.hasInputsFor=function(prefix){
+	this.inputOptions.filter(function(option){
+		return option.name.indexOf(prefix)===0;
+	}).some(function(option){
+		return this[option.name+'.input'];
+	});
+};
 
 module.exports=Options;

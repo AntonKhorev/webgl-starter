@@ -7,17 +7,17 @@ module.exports=function(options){
 	function render() {
 		function renderInner() {
 			var lines=[];
-			if (options.clearBackground) {
+			if (options.background=='solid') {
 				lines.push(
 					"gl.clear(gl.COLOR_BUFFER_BIT);"
 				);
 			}
-			if (options.rotate) {
+			if (options.animation=='rotation') {
 				lines.push(
 					"gl.uniform1f(rotationAngleLoc,(time-startTime)*360/5000);"
 				);
 			}
-			if (options.draw=='square') {
+			if (options.shape=='square') {
 				lines.push(
 					"gl.drawArrays(gl.TRIANGLE_FAN,0,nVertices);"
 				);
@@ -29,19 +29,20 @@ module.exports=function(options){
 			return lines;
 		}
 		var lines=[];
-		if (options.rotate) {
+		if (options.animation=='rotation') {
 			lines.push(
 				"	var startTime=performance.now();"
 			);
 		}
-		if (options.rotate||options['fragmentColor.input']) {
+		var needUpdateCanvasFunction=options.animation=='rotation'||options.hasInputs()
+		if (needUpdateCanvasFunction) {
 			lines.push(
 				"	function updateCanvas(time) {"
 			);
 			lines=lines.concat(
 				indent(2,renderInner())
 			);
-			if (options.rotate) {
+			if (options.animation=='rotation') {
 				lines.push(
 					"		requestAnimationFrame(updateCanvas);"
 				);
@@ -49,7 +50,7 @@ module.exports=function(options){
 			lines.push(
 				"	}"
 			);
-			if (options.rotate) {
+			if (options.animation=='rotation') {
 				lines.push(
 					"	requestAnimationFrame(updateCanvas);"
 				);
@@ -65,15 +66,17 @@ module.exports=function(options){
 		}
 		return lines;
 	}
-	function colorComponentValue(intName) {
-		return options[intName].toFixed(3);
+	function colorComponentValue(name) {
+		return options[name].toFixed(3);
 	}
-	function colorValue(name) {
-		return colorComponentValue(name+'.value.r')+","+
-		       colorComponentValue(name+'.value.g')+","+
-		       colorComponentValue(name+'.value.b');
+	function colorValue(prefix) {
+		return colorComponentValue(prefix+'R')+","+
+		       colorComponentValue(prefix+'G')+","+
+		       colorComponentValue(prefix+'B');
 	}
 	function colorInput(name) {
+		return ["// TODO color input for "+name];
+		/*
 		return [].concat.apply([],
 			['red','green','blue'].map(function(component){
 				var c=component.charAt(0);
@@ -88,6 +91,10 @@ module.exports=function(options){
 				];
 			})
 		);
+		*/
+	}
+	function inputs() {
+		return ["// TODO inputs"];
 	}
 	return [].concat([
 		"<!DOCTYPE html>",
@@ -95,7 +102,7 @@ module.exports=function(options){
 		"<head>",
 		"<meta charset='utf-8' />",
 		"<title>Generated code</title>",
-	],options['fragmentColor.input']?[
+	],options.hasInputs()?[
 		"<style>",
 		"	label {",
 		"		display: inline-block;",
@@ -105,7 +112,7 @@ module.exports=function(options){
 		"</style>",
 	]:[],[
 		"<script id='myVertexShader' type='x-shader/x-vertex'>",
-	],options.rotate?[
+	],options.animation=='rotation'?[
 		"	uniform float rotationAngle;",
 		"	attribute vec2 position;",
 		"	void main() {",
@@ -125,7 +132,7 @@ module.exports=function(options){
 		"</script>",
 		"<script id='myFragmentShader' type='x-shader/x-fragment'>",
 		"	precision mediump float;",
-	],options['fragmentColor.input']?[
+	],options.hasInputsFor('fragmentColor')?[
 		"	uniform vec3 fragmentColor;",
 		"	void main() {",
 		"		gl_FragColor=vec4(fragmentColor,1.0);",
@@ -141,7 +148,7 @@ module.exports=function(options){
 		"<div>",
 		"	<canvas id='myCanvas' width='512' height='512'></canvas>",
 		"</div>",
-	],options['fragmentColor.input']?colorInput('fragmentColor'):[],[
+	],inputs(),[
 		"<script>",
 		"	function makeProgram(vertexShaderSrc,fragmentShaderSrc) {",
 		"		var vertexShader=gl.createShader(gl.VERTEX_SHADER);",
@@ -161,7 +168,7 @@ module.exports=function(options){
 		"	",
 		"	var canvas=document.getElementById('myCanvas');",
 		"	var gl=canvas.getContext('webgl')||canvas.getContext('experimental-webgl');",
-	],options.clearBackground?[
+	],options.background=='solid'?[
 		"	gl.clearColor(1.0,1.0,1.0,1.0);",
 	]:[],[
 		"	var program=makeProgram(",
@@ -170,7 +177,7 @@ module.exports=function(options){
 		"	);",
 		"	gl.useProgram(program);",
 		"	",
-	],options.draw=='square'?[
+	],options.shape=='square'?[
 		"	var nVertices=4;",
 		"	var vertices=new Float32Array([",
 		"		-0.5,-0.5,",
@@ -178,14 +185,14 @@ module.exports=function(options){
 		"		+0.5,+0.5,",
 		"		-0.5,+0.5,",
 		"	]);",
-	]:[],options.draw=='triangle'?[
+	]:[],options.shape=='triangle'?[
 		"	var nVertices=3;",
 		"	var vertices=new Float32Array([",
 		"		-Math.sin(0/3*Math.PI),Math.cos(0/3*Math.PI),",
 		"		-Math.sin(2/3*Math.PI),Math.cos(2/3*Math.PI),",
 		"		-Math.sin(4/3*Math.PI),Math.cos(4/3*Math.PI),",
 		"	]);",
-	]:[],options.draw=='gasket'?[
+	]:[],options.shape=='gasket'?[
 		"	var gasketDepth=6;",
 		"	var nVertices=Math.pow(3,gasketDepth)*3;",
 		"	var vertices=new Float32Array(nVertices*2);",
@@ -232,7 +239,7 @@ module.exports=function(options){
 		"	gl.vertexAttribPointer(positionLoc,2,gl.FLOAT,false,0,0);",
 		"	gl.enableVertexAttribArray(positionLoc);",
 		"	",
-	],options['fragmentColor.input']?[].concat([
+	],false/*TODO options['fragmentColor.input']*/?[].concat([
 		"	var fragmentColorLoc=gl.getUniformLocation(program,'fragmentColor');",
 		"	function updateFragmentColor() {",
 		"		gl.uniform3fv(fragmentColorLoc,['myFragmentColorR','myFragmentColorG','myFragmentColorB'].map(function(id){",
@@ -241,7 +248,7 @@ module.exports=function(options){
 		"	}",
 		"	updateFragmentColor();",
 		"	[].forEach.call(document.querySelectorAll('#myFragmentColorR, #myFragmentColorG, #myFragmentColorB'),function(el){",
-		],options.rotate?[
+		],options.animation=='rotation'?[
 		"		el.addEventListener('change',updateFragmentColor);",
 		]:[
 		"		el.addEventListener('change',function(){",
@@ -252,7 +259,7 @@ module.exports=function(options){
 		"	});",
 		"	",
 	]):[],[
-	],options.rotate?[
+	],options.animation=='rotation'?[
 		"	var rotationAngleLoc=gl.getUniformLocation(program,'rotationAngle');",
 		"	",
 	]:[],render(),[

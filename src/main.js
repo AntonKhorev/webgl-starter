@@ -99,7 +99,10 @@ $(function(){
 						option.availableValues.map(function(availableValue){
 							return $("<option>").val(availableValue).html(i18n('options.'+option.name+'.'+availableValue))
 						})
-					).val(options[option.name])
+					).val(options[option.name]).change(function(){
+						options[option.name]=this.value;
+						updateCode();
+					})
 				);
 		}
 		function writeInputOption(option) {
@@ -113,11 +116,19 @@ $(function(){
 						.attr('min',option.availableValues[0])
 						.attr('max',option.availableValues[1])
 						.val(options[option.name])
+						.change(function(){
+							options[option.name]=parseFloat(this.value);
+							updateCode();
+						})
 				)
 				.append(" "+option.availableValues[1]+" ")
 				.append(
 					$("<input type='checkbox' id='"+checkboxId+"'>")
 						.prop('checked',options[option.name+'.input'])
+						.change(function(){
+							options[option.name+'.input']=$(this).prop('checked');
+							updateCode();
+						})
 				)
 				.append(" ")
 				.append("<label for='"+checkboxId+"'>"+i18n('options.*.input')+"</label>");
@@ -129,71 +140,6 @@ $(function(){
 		).append(
 			$("<fieldset>").append("<legend>"+i18n('options.input')+"</legend>").append(
 				options.inputOptions.map(writeInputOption)
-			)
-		);
-		/*
-		container.empty().append(
-			$("<div>").append(
-				$("<label>").text(" Clear background").prepend(
-					$("<input type='checkbox'>").change(function(){
-						options.clearBackground=$(this).prop('checked');
-						updateCode();
-					})
-				)
-			)
-		).append(
-			$("<div>").append(
-				$("<label>").text("Draw ").append(
-					$("<select><option>square</option><option>triangle</option><option>gasket</option></select>").change(function(){
-						options.draw=this.value;
-						updateCode();
-					})
-				)
-			)
-		).append(
-			$("<div>").append(
-				$("<label>").text(" Animated rotation").prepend(
-					$("<input type='checkbox'>").change(function(){
-						options.rotate=$(this).prop('checked');
-						updateCode();
-					})
-				)
-			)
-		).append(
-			$("<div>").append(
-				$("<label>").append("Fragment color: red 0% ").append(
-					$("<input type='range' min='0' max='1' step='0.001' value='1'>").change(function(){
-						options['fragmentColor.value.r']=parseFloat(this.value);
-						updateCode();
-					})
-				).append(" 100%")
-			)
-		).append(
-			$("<div>").append(
-				$("<label>").append("Fragment color: green 0% ").append(
-					$("<input type='range' min='0' max='1' step='0.001' value='0'>").change(function(){
-						options['fragmentColor.value.g']=parseFloat(this.value);
-						updateCode();
-					})
-				).append(" 100%")
-			)
-		).append(
-			$("<div>").append(
-				$("<label>").append("Fragment color: blue 0% ").append(
-					$("<input type='range' min='0' max='1' step='0.001' value='0'>").change(function(){
-						options['fragmentColor.value.b']=parseFloat(this.value);
-						updateCode();
-					})
-				).append(" 100%")
-			)
-		).append(
-			$("<div>").append(
-				$("<label>").text(" Provide fragment color inputs to users").prepend(
-					$("<input type='checkbox'>").change(function(){
-						options['fragmentColor.input']=$(this).prop('checked');
-						updateCode();
-					})
-				)
 			)
 		).append(
 			$("<pre>").append(code=$("<code>").text(generateCode(options)))
@@ -207,6 +153,5 @@ $(function(){
 			)
 		);
 		hljs.highlightBlock(code[0]);
-		*/
 	});
 });
