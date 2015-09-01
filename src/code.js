@@ -51,14 +51,27 @@ module.exports=function(options,i18n){
 		if (options.hasInputsFor('fragmentColor')) {
 			lines.push(
 				"var fragmentColorLoc=gl.getUniformLocation(program,'fragmentColor');",
-				"function updateFragmentColor() {",
-				"	gl.uniform3fv(fragmentColorLoc,["+['fragmentColor.r','fragmentColor.g','fragmentColor.b'].map(function(name){
-					if (options[name+'.input']) {
-						return "parseFloat(document.getElementById('"+name+"').value)";
-					} else {
-						return floatOptionValue(name);
-					}
-				}).join()+"]);",
+				"function updateFragmentColor() {"
+			);
+			if (options.hasAllInputsFor('fragmentColor')) {
+				lines.push(
+					"	gl.uniform3fv(fragmentColorLoc,['r','g','b'].map(function(c){",
+					"		return parseFloat(document.getElementById('fragmentColor.'+c).value);",
+					"	}));"
+				);
+			} else {
+				lines.push(
+					"	gl.uniform3fv(fragmentColorLoc,["+['r','g','b'].map(function(c){
+						var name='fragmentColor.'+c;
+						if (options[name+'.input']) {
+							return "parseFloat(document.getElementById('"+name+"').value)";
+						} else {
+							return floatOptionValue(name);
+						}
+					}).join()+"]);"
+				);
+			}
+			lines.push(
 				"}",
 				"updateFragmentColor();"
 			);

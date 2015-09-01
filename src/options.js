@@ -42,5 +42,12 @@ Options.prototype.hasInputsFor=function(prefix){
 		return this[option.name+'.input'];
 	},this);
 };
+Options.prototype.hasAllInputsFor=function(prefix){
+	return this.inputOptions.filter(function(option){
+		return option.name.indexOf(prefix+'.')===0;
+	},this).every(function(option){
+		return this[option.name+'.input'];
+	},this);
+};
 
 module.exports=Options;
