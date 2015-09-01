@@ -71,6 +71,12 @@ var i18n=function(id){ // fake temporary i18n
 		'options.animation': 'Animation',
 		'options.animation.none': 'None',
 		'options.animation.rotation': 'Rotation around z axis',
+
+		'options.input': 'Input options',
+		'options.fragmentColorR': 'Fragment color red component',
+		'options.fragmentColorG': 'Fragment color green component',
+		'options.fragmentColorB': 'Fragment color blue component',
+		'options.*.input': 'Make this input available to users',
 	}[id];
 };
 
@@ -84,7 +90,7 @@ $(function(){
 			hljs.highlightBlock(code[0]);
 		}
 		function writeGeneralOption(option) {
-			var id=generateId;
+			var id=generateId();
 			return $("<div>")
 				.append("<label for='"+id+"'>"+i18n('options.'+option.name)+":</label>")
 				.append(" ")
@@ -93,12 +99,36 @@ $(function(){
 						option.availableValues.map(function(availableValue){
 							return $("<option>").val(availableValue).html(i18n('options.'+option.name+'.'+availableValue))
 						})
-					)
+					).val(options[option.name])
+				);
+		}
+		function writeInputOption(option) {
+			var id=generateId();
+			var checkboxId=generateId();
+			return $("<div>")
+				.append("<label for='"+id+"'>"+i18n('options.'+option.name)+":</label>")
+				.append(" "+option.availableValues[0]+" ")
+				.append(
+					$("<input type='range' id='"+id+"' step='any'>")
+						.attr('min',option.availableValues[0])
+						.attr('max',option.availableValues[1])
+						.val(options[option.name])
 				)
+				.append(" "+option.availableValues[1]+" ")
+				.append(
+					$("<input type='checkbox' id='"+checkboxId+"'>")
+						.prop('checked',options[option.name+'.input'])
+				)
+				.append(" ")
+				.append("<label for='"+checkboxId+"'>"+i18n('options.*.input')+"</label>");
 		}
 		container.empty().append(
 			$("<fieldset>").append("<legend>"+i18n('options.general')+"</legend>").append(
 				options.generalOptions.map(writeGeneralOption)
+			)
+		).append(
+			$("<fieldset>").append("<legend>"+i18n('options.input')+"</legend>").append(
+				options.inputOptions.map(writeInputOption)
 			)
 		);
 		/*
