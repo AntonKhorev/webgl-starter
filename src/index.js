@@ -118,9 +118,16 @@ function generateCode(options) {
 		"</script>",
 		"<script id='myFragmentShader' type='x-shader/x-fragment'>",
 		"	precision mediump float;",
+	],options['fragmentColor.input']?[
+		"	uniform vec3 fragmentColor;",
+		"	void main() {",
+		"		gl_FragColor=vec4(fragmentColor,1.0);",
+		"	}",
+	]:[
 		"	void main() {",
 		"		gl_FragColor=vec4("+colorValue('fragmentColor')+",1.0);",
 		"	}",
+	],[
 		"</script>",
 		"</head>",
 		"<body>",
@@ -210,15 +217,28 @@ function generateCode(options) {
 		"	gl.vertexAttribPointer(positionLoc,2,gl.FLOAT,false,0,0);",
 		"	gl.enableVertexAttribArray(positionLoc);",
 		"	",
+	],options['fragmentColor.input']?[
+		"	var fragmentColorLoc=gl.getUniformLocation(program,'fragmentColor');",
+		"	function updateFragmentColor() {",
+		"		gl.uniform3fv(fragmentColorLoc,['myFragmentColorR','myFragmentColorG','myFragmentColorB'].map(function(id){",
+		"			return parseFloat(document.getElementById(id).value);",
+		"		}));",
+		"	}",
+		"	updateFragmentColor();",
+		"	[].forEach.call(document.querySelectorAll('#myFragmentColorR, #myFragmentColorG, #myFragmentColorB'),function(el){",
+		"		el.addEventListener('change',updateFragmentColor);",
+		"	});",
+		"	",
+	]:[],[
 	],options.rotate?[].concat([
 		"	var rotationAngleLoc=gl.getUniformLocation(program,'rotationAngle');",
 		"	",
 		"	var startTime=performance.now();",
-		"	function animate(time) {",
+		"	function updateCanvas(time) {",
 	],indent(2,render()),[
-		"		requestAnimationFrame(animate);",
+		"		requestAnimationFrame(updateCanvas);",
 		"	}",
-		"	requestAnimationFrame(animate);",
+		"	requestAnimationFrame(updateCanvas);",
 	]):indent(1,render()),[
 		"</script>",
 		"</body>",
@@ -281,7 +301,7 @@ $(function(){
 		).append(
 			$("<div>").append(
 				$("<label>").append("Fragment color: red 0% ").append(
-					$("<input type='range' min='0' max='1' step='0.001' value='1'>").change(function(){ // TODO ie fix
+					$("<input type='range' min='0' max='1' step='0.001' value='1'>").change(function(){
 						options['fragmentColor.value.r']=parseFloat(this.value);
 						updateCode();
 					})
@@ -290,7 +310,7 @@ $(function(){
 		).append(
 			$("<div>").append(
 				$("<label>").append("Fragment color: green 0% ").append(
-					$("<input type='range' min='0' max='1' step='0.001' value='0'>").change(function(){ // TODO ie fix
+					$("<input type='range' min='0' max='1' step='0.001' value='0'>").change(function(){
 						options['fragmentColor.value.g']=parseFloat(this.value);
 						updateCode();
 					})
@@ -299,7 +319,7 @@ $(function(){
 		).append(
 			$("<div>").append(
 				$("<label>").append("Fragment color: blue 0% ").append(
-					$("<input type='range' min='0' max='1' step='0.001' value='0'>").change(function(){ // TODO ie fix
+					$("<input type='range' min='0' max='1' step='0.001' value='0'>").change(function(){
 						options['fragmentColor.value.b']=parseFloat(this.value);
 						updateCode();
 					})
