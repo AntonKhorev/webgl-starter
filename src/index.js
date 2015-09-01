@@ -50,13 +50,51 @@ function generateCode(options) {
 		});
 	}
 	function render() {
-		return [].concat(options.clearBackground?[
-			"gl.clear(gl.COLOR_BUFFER_BIT);",
-		]:[],options.rotate?[
-			"gl.uniform1f(rotationAngleLoc,(time-startTime)*360/5000);",
-		]:[],[
-			"gl.drawArrays(gl.TRIANGLES,0,nVertices);",
-		]);
+		function renderInner() {
+			return [].concat(options.clearBackground?[
+				"gl.clear(gl.COLOR_BUFFER_BIT);",
+			]:[],options.rotate?[
+				"gl.uniform1f(rotationAngleLoc,(time-startTime)*360/5000);",
+			]:[],[
+				"gl.drawArrays(gl.TRIANGLES,0,nVertices);",
+			]);
+		}
+		var lines=[];
+		if (options.rotate) {
+			lines.push(
+				"	var startTime=performance.now();"
+			);
+		}
+		if (options.rotate||options['fragmentColor.input']) {
+			lines.push(
+				"	function updateCanvas(time) {"
+			);
+			lines=lines.concat(
+				indent(2,renderInner())
+			);
+			if (options.rotate) {
+				lines.push(
+					"		requestAnimationFrame(updateCanvas);"
+				);
+			}
+			lines.push(
+				"	}"
+			);
+			if (options.rotate) {
+				lines.push(
+					"	requestAnimationFrame(updateCanvas);"
+				);
+			} else {
+				lines.push(
+					"	updateCanvas();"
+				);
+			}
+		} else {
+			lines=lines.concat(
+				indent(1,renderInner())
+			);
+		}
+		return lines;
 	}
 	function colorComponentValue(intName) {
 		return options[intName].toFixed(3);
@@ -217,7 +255,7 @@ function generateCode(options) {
 		"	gl.vertexAttribPointer(positionLoc,2,gl.FLOAT,false,0,0);",
 		"	gl.enableVertexAttribArray(positionLoc);",
 		"	",
-	],options['fragmentColor.input']?[
+	],options['fragmentColor.input']?[].concat([
 		"	var fragmentColorLoc=gl.getUniformLocation(program,'fragmentColor');",
 		"	function updateFragmentColor() {",
 		"		gl.uniform3fv(fragmentColorLoc,['myFragmentColorR','myFragmentColorG','myFragmentColorB'].map(function(id){",
@@ -226,20 +264,21 @@ function generateCode(options) {
 		"	}",
 		"	updateFragmentColor();",
 		"	[].forEach.call(document.querySelectorAll('#myFragmentColorR, #myFragmentColorG, #myFragmentColorB'),function(el){",
+		],options.rotate?[
 		"		el.addEventListener('change',updateFragmentColor);",
+		]:[
+		"		el.addEventListener('change',function(){",
+		"			updateFragmentColor();",
+		"			updateCanvas();",
+		"		});",
+                ],[
 		"	});",
 		"	",
-	]:[],[
-	],options.rotate?[].concat([
+	]):[],[
+	],options.rotate?[
 		"	var rotationAngleLoc=gl.getUniformLocation(program,'rotationAngle');",
 		"	",
-		"	var startTime=performance.now();",
-		"	function updateCanvas(time) {",
-	],indent(2,render()),[
-		"		requestAnimationFrame(updateCanvas);",
-		"	}",
-		"	requestAnimationFrame(updateCanvas);",
-	]):indent(1,render()),[
+	]:[],render(),[
 		"</script>",
 		"</body>",
 		"</html>",
