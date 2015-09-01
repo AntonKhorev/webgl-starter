@@ -1,3 +1,8 @@
+var idCounter=0;
+function generateId() {
+	return 'webgl-starter-id-'+(idCounter++);
+}
+
 /*
 function htmlEncode(value) {
 	return value.toString()
@@ -52,27 +57,84 @@ function getHtmlDataUri(html) {
 	return 'data:text/html;charset=utf-8,'+encodeURIComponent(html);
 }
 
+Option=function(name,availableValues,defaultValue){
+	this.name=name;
+	this.availableValues=availableValues;
+	if (defaultValue===undefined) {
+		this.defaultValue=availableValues[0];
+	} else {
+		this.defaultValue=defaultValue;
+	}
+};
+
+var i18n=function(id){ // fake temporary i18n
+	return {
+		'options.general': 'General options',
+		'options.background': 'Background',
+		'options.background.none': 'None (transparent)',
+		'options.background.solid': 'Solid color',
+		'options.shape': 'Shape to draw',
+		'options.shape.square': 'Square',
+		'options.shape.triangle': 'Triangle',
+		'options.shape.gasket': 'Sierpinski gasket', // wp: Sierpinski triangle
+		'options.animation': 'Animation',
+		'options.animation.none': 'None',
+		'options.animation.rotation': 'Rotation around z axis',
+	}[id];
+};
+
 $(function(){
 	$('.webgl-starter').each(function(){
 		var container=$(this);
 		var options={
-			clearBackground: false,
-			draw: 'square',
-			rotate: false,
-			// inputs
-			'fragmentColor.value.r': 1.0,
-			'fragmentColor.value.g': 0.0,
-			'fragmentColor.value.b': 0.0,
-			'fragmentColor.input': false,
+			generalOptions: [
+				new Option('background',['none','solid']),
+				new Option('shape',['square','triangle','gasket']),
+				new Option('animation',['none','rotation']),
+			],
+			inputOptions: [
+				new Option('fragmentColorR',[0,1],1),
+				new Option('fragmentColorG',[0,1]),
+				new Option('fragmentColorB',[0,1]),
+			],
+			reset: function(){
+				this.generalOptions.forEach(function(option){
+					this[option.name]=option.defaultValue;
+				},this);
+				this.inputOptions.forEach(function(option){
+					this[option.name]=option.defaultValue;
+					this[option.name+'.input']=false;
+				},this);
+			},
 		};
+		options.reset();
 		var code;
 		function updateCode() {
 			code.text(generateCode(options));
 			hljs.highlightBlock(code[0]);
 		}
+		function writeGeneralOption(option) {
+			var id=generateId;
+			return $("<div>")
+				.append("<label for='"+id+"'>"+i18n('options.'+option.name)+"</label>")
+				.append(" ")
+				.append(
+					$("<select id='"+id+"'>").append(
+						option.availableValues.map(function(availableValue){
+							return $("<option>").val(availableValue).html(i18n('options.'+option.name+'.'+availableValue))
+						})
+					)
+				)
+		}
+		container.empty().append(
+			$("<fieldset>").append("<legend>"+i18n('options.general')+"</legend>").append(
+				options.generalOptions.map(writeGeneralOption)
+			)
+		);
+		/*
 		container.empty().append(
 			$("<div>").append(
-				$("<label>").text(" Clear background").prepend( // TODO fix misleading option name - background is clear (transparent) by default
+				$("<label>").text(" Clear background").prepend(
 					$("<input type='checkbox'>").change(function(){
 						options.clearBackground=$(this).prop('checked');
 						updateCode();
@@ -145,5 +207,6 @@ $(function(){
 			)
 		);
 		hljs.highlightBlock(code[0]);
+		*/
 	});
 });
