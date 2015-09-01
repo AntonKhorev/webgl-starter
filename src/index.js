@@ -51,13 +51,27 @@ function generateCode(options) {
 	}
 	function render() {
 		function renderInner() {
-			return [].concat(options.clearBackground?[
-				"gl.clear(gl.COLOR_BUFFER_BIT);",
-			]:[],options.rotate?[
-				"gl.uniform1f(rotationAngleLoc,(time-startTime)*360/5000);",
-			]:[],[
-				"gl.drawArrays(gl.TRIANGLES,0,nVertices);",
-			]);
+			var lines=[];
+			if (options.clearBackground) {
+				lines.push(
+					"gl.clear(gl.COLOR_BUFFER_BIT);"
+				);
+			}
+			if (options.rotate) {
+				lines.push(
+					"gl.uniform1f(rotationAngleLoc,(time-startTime)*360/5000);"
+				);
+			}
+			if (options.draw=='square') {
+				lines.push(
+					"gl.drawArrays(gl.TRIANGLE_FAN,0,nVertices);"
+				);
+			} else {
+				lines.push(
+					"gl.drawArrays(gl.TRIANGLES,0,nVertices);"
+				);
+			}
+			return lines;
 		}
 		var lines=[];
 		if (options.rotate) {
@@ -201,7 +215,15 @@ function generateCode(options) {
 		"	);",
 		"	gl.useProgram(program);",
 		"	",
-	],options.draw=='triangle'?[
+	],options.draw=='square'?[
+		"	var nVertices=4;",
+		"	var vertices=new Float32Array([",
+		"		-0.5,-0.5,",
+		"		+0.5,-0.5,",
+		"		+0.5,+0.5,",
+		"		-0.5,+0.5,",
+		"	]);",
+	]:[],options.draw=='triangle'?[
 		"	var nVertices=3;",
 		"	var vertices=new Float32Array([",
 		"		-Math.sin(0/3*Math.PI),Math.cos(0/3*Math.PI),",
@@ -297,7 +319,7 @@ $(function(){
 		var container=$(this);
 		var options={
 			clearBackground: false,
-			draw: 'triangle',
+			draw: 'square',
 			rotate: false,
 			// inputs
 			'fragmentColor.value.r': 1.0,
@@ -322,7 +344,7 @@ $(function(){
 		).append(
 			$("<div>").append(
 				$("<label>").text("Draw ").append(
-					$("<select><option>triangle</option><option>gasket</option></select>").change(function(){
+					$("<select><option>square</option><option>triangle</option><option>gasket</option></select>").change(function(){
 						options.draw=this.value;
 						updateCode();
 					})
