@@ -7,6 +7,42 @@ function htmlEncode(value) {
 }
 */
 
+/*
+var OptionsSection=function(){
+	this.added=[];
+};
+OptionsSection.prototype.add=function(name,type){
+	function getDefaultValue() {
+		if (Array.isArray(type)) {
+			return
+		} else if (type=='bool') {
+			return false;
+		} else if (type=='color') {
+			return {
+				r: 1.0,
+				g: 1.0,
+				b: 1.0,
+			};
+		}
+	}
+	this.added.push({
+		name: name,
+		type: type,
+		value: getDefaultValue(),
+	});
+};
+
+var Options=function(){
+	//this.fixed= // TODO stuff like language
+	this.code=new OptionsSection();
+	this.code.add('clearBackground','bool');
+	this.code.add('draw',['triangle','gasket']);
+	this.code.add('rotate','bool');
+	this.inputs=new OptionsSection(); // TODO recreate based on this.code
+	this.inputs.add('fragmentColor','color');
+};
+*/
+
 function generateCode(options) {
 	function indent(level,lines) {
 		return lines.map(function(line){
@@ -50,7 +86,9 @@ function generateCode(options) {
 		"<script id='myFragmentShader' type='x-shader/x-fragment'>",
 		"	precision mediump float;",
 		"	void main() {",
-		"		gl_FragColor=vec4(1.0,0.0,0.0,1.0);",
+		"		gl_FragColor=vec4("+options['fragmentColor.value.r'].toFixed(3)+","+
+		                                    options['fragmentColor.value.g'].toFixed(3)+","+
+		                                    options['fragmentColor.value.b'].toFixed(3)+",1.0);",
 		"	}",
 		"</script>",
 		"</head>",
@@ -168,15 +206,23 @@ $(function(){
 			clearBackground: false,
 			draw: 'triangle',
 			rotate: false,
+			// inputs
+			'fragmentColor.value.r': 1.0,
+			'fragmentColor.value.g': 0.0,
+			'fragmentColor.value.b': 0.0,
+			//'fragmentColor.input': false,
 		};
 		var code;
+		function updateCode() {
+			code.text(generateCode(options));
+			hljs.highlightBlock(code[0]);
+		}
 		container.empty().append(
 			$("<div>").append(
 				$("<label>").text(" Clear background").prepend( // TODO fix misleading option name - background is clear (transparent) by default
 					$("<input type='checkbox'>").change(function(){
 						options.clearBackground=$(this).prop('checked');
-						code.text(generateCode(options));
-						hljs.highlightBlock(code[0]);
+						updateCode();
 					})
 				)
 			)
@@ -185,8 +231,7 @@ $(function(){
 				$("<label>").text("Draw ").append(
 					$("<select><option>triangle</option><option>gasket</option></select>").change(function(){
 						options.draw=this.value;
-						code.text(generateCode(options));
-						hljs.highlightBlock(code[0]);
+						updateCode();
 					})
 				)
 			)
@@ -195,10 +240,36 @@ $(function(){
 				$("<label>").text(" Animated rotation").prepend(
 					$("<input type='checkbox'>").change(function(){
 						options.rotate=$(this).prop('checked');
-						code.text(generateCode(options));
-						hljs.highlightBlock(code[0]);
+						updateCode();
 					})
 				)
+			)
+		).append(
+			$("<div>").append(
+				$("<label>").append("Fragment color: red 0% ").append(
+					$("<input type='range' min='0' max='1' step='0.001' value='1'>").change(function(){ // TODO ie fix
+						options['fragmentColor.value.r']=parseFloat(this.value);
+						updateCode();
+					})
+				).append(" 100%")
+			)
+		).append(
+			$("<div>").append(
+				$("<label>").append("Fragment color: green 0% ").append(
+					$("<input type='range' min='0' max='1' step='0.001' value='0'>").change(function(){ // TODO ie fix
+						options['fragmentColor.value.g']=parseFloat(this.value);
+						updateCode();
+					})
+				).append(" 100%")
+			)
+		).append(
+			$("<div>").append(
+				$("<label>").append("Fragment color: blue 0% ").append(
+					$("<input type='range' min='0' max='1' step='0.001' value='0'>").change(function(){ // TODO ie fix
+						options['fragmentColor.value.b']=parseFloat(this.value);
+						updateCode();
+					})
+				).append(" 100%")
 			)
 		).append(
 			$("<pre>").append(code=$("<code>").text(generateCode(options)))
