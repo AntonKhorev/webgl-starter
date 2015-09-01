@@ -12,6 +12,16 @@ module.exports=function(options,i18n){
 			return Array(level+1).join("	")+line;
 		});
 	}
+	function appendLinesToLastLine(lines,addedLines) {
+		addedLines.forEach(function(line,i){
+			if (i==0) {
+				lines.push(lines.pop()+line);
+			} else {
+				// TODO indent
+				lines.push(line);
+			}
+		});
+	}
 
 	function generateInputLines() {
 		return [].concat.apply([],
@@ -28,7 +38,37 @@ module.exports=function(options,i18n){
 		);
 	}
 	function generateInputHandlerLines() {
-		lines=[];
+		var lines=[];
+		function eventListener() {
+			var onlyInput=options.getOnlyInputFor('fragmentColor');
+			if (onlyInput===null) {
+				lines.push(
+					"[].forEach.call(document.querySelectorAll('[id^=\"fragmentColor.\"]'),function(el){",
+					"	el"
+				);
+			} else {
+				lines.push(
+					"document.getElementById('"+onlyInput.name+"')"
+				);
+			}
+			if (options.animation=='rotation') {
+				appendLinesToLastLine(lines,[
+					".addEventListener('change',updateFragmentColor);",
+				]);
+			} else {
+				appendLinesToLastLine(lines,[
+					".addEventListener('change',function(){",
+					"	updateFragmentColor();",
+					"	updateCanvas();",
+					"});"
+				]);
+			}
+			if (onlyInput===null) {
+				lines.push(
+					"});"
+				);
+			}
+		}
 		if (options.hasInputsFor('fragmentColor')) {
 			lines.push(
 				"var fragmentColorLoc=gl.getUniformLocation(program,'fragmentColor');",
@@ -54,24 +94,9 @@ module.exports=function(options,i18n){
 			}
 			lines.push(
 				"}",
-				"updateFragmentColor();",
-				"[].forEach.call(document.querySelectorAll('[id^=\"fragmentColor.\"]'),function(el){"
+				"updateFragmentColor();"
 			);
-			if (options.animation=='rotation') {
-				lines.push(
-					"	el.addEventListener('change',updateFragmentColor);"
-				)
-			} else {
-				lines.push(
-					"	el.addEventListener('change',function(){",
-					"		updateFragmentColor();",
-					"		updateCanvas();",
-					"	});"
-				);
-			}
-			lines.push(
-				"});"
-			);
+			eventListener();
 		}
 		if (lines.length) lines.push("	");
 		return lines;

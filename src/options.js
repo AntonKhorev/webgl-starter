@@ -49,5 +49,15 @@ Options.prototype.hasAllInputsFor=function(prefix){
 		return this[option.name+'.input'];
 	},this);
 };
+Options.prototype.getOnlyInputFor=function(prefix){
+	var matchedOptions=this.inputOptions.filter(function(option){
+		return option.name.indexOf(prefix+'.')===0 && this[option.name+'.input'];
+	},this);
+	if (matchedOptions.length==1) {
+		return matchedOptions[0];
+	} else {
+		return null;
+	}
+};
 
 module.exports=Options;
