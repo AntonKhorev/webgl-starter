@@ -7,6 +7,12 @@ Option=function(name,availableValues,defaultValue){
 		this.defaultValue=defaultValue;
 	}
 };
+Option.prototype.doesValueHideOption=function(value,option){
+	function optionStartsWith(prefix) {
+		return option.name.indexOf(prefix)===0;
+	}
+	return optionStartsWith(this.name+'.') && !optionStartsWith(this.name+'.'+value+'.');
+};
 
 var Options=function(){
 	this.reset();
@@ -63,6 +69,26 @@ Options.prototype.getOnlyInputFor=function(prefix){
 	} else {
 		return null;
 	}
+};
+Options.prototype.cloneWithoutHidden=function(){
+	// clone and set .input=false for hidden sections
+	var newOptions=new Options();
+	this.generalOptions.forEach(function(option){
+		newOptions[option.name]=this[option.name];
+	},this);
+	this.inputOptions.forEach(function(option){
+		newOptions[option.name]=this[option.name];
+		if (
+			this.generalOptions.some(function(generalOption){
+				return generalOption.doesValueHideOption(this[generalOption.name],option);
+			},this)
+		) {
+			newOptions[option.name+'.input']=false;
+		} else {
+			newOptions[option.name+'.input']=this[option.name+'.input'];
+		}
+	},this);
+	return newOptions;
 };
 
 module.exports=Options;

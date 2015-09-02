@@ -100,7 +100,7 @@ $(function(){
 				.not("[data-option^='"+optionName+"."+optionValue+".']").hide();
 		}
 		function updateCode() {
-			codeNode.text(generateCode(options,i18n));
+			codeNode.text(generateCode(options.cloneWithoutHidden(),i18n));
 			if (window.hljs) hljs.highlightBlock(codeNode[0]);
 		}
 		function writeGeneralOption(option) {
@@ -168,7 +168,7 @@ $(function(){
 		containerNode.empty().append(optionsNode=writeOptions());
 		hideSuboptionInputs();
 		containerNode.append(
-			$("<pre>").append(codeNode=$("<code>").text(generateCode(options,i18n)))
+			$("<pre>").append(codeNode=$("<code>").text(generateCode(options.cloneWithoutHidden(),i18n)))
 		);
 		if (window.hljs) {
 			hljs.highlightBlock(codeNode[0]);
