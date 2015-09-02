@@ -40,11 +40,11 @@ module.exports=function(options,i18n){
 	}
 	function generateInputHandlerLines() {
 		var lines=[];
-		function eventListener() {
-			var onlyInput=options.getOnlyInputFor('fragmentColor');
+		function eventListener(optionPrefix,updateFnName) {
+			var onlyInput=options.getOnlyInputFor(optionPrefix);
 			if (onlyInput===null) {
 				lines.push(
-					"[].forEach.call(document.querySelectorAll('[id^=\"fragmentColor.\"]'),function(el){",
+					"[].forEach.call(document.querySelectorAll('[id^=\""+optionPrefix+".\"]'),function(el){",
 					"	el"
 				);
 			} else {
@@ -54,12 +54,12 @@ module.exports=function(options,i18n){
 			}
 			if (options.animation=='rotation') {
 				appendLinesToLastLine(lines,[
-					".addEventListener('change',updateFragmentColor);",
+					".addEventListener('change',"+updateFnName+");",
 				]);
 			} else {
 				appendLinesToLastLine(lines,[
 					".addEventListener('change',function(){",
-					"	updateFragmentColor();",
+					"	"+updateFnName+"();",
 					"	updateCanvas();",
 					"});"
 				]);
@@ -69,6 +69,38 @@ module.exports=function(options,i18n){
 					"});"
 				);
 			}
+		}
+		if (options.hasInputsFor('background.solid.color')) {
+			lines.push(
+				"function updateClearColor() {"
+			);
+			/*
+			// TODO after enabling alpha components
+			if (options.hasAllInputsFor('background.solid.color')) {
+				lines.push(
+						gl.clearColor.apply(['r','g','b','a']
+
+					"	gl.uniform3fv(fragmentColorLoc,['r','g','b'].map(function(c){",
+					"		return parseFloat(document.getElementById('fragmentColor.'+c).value);",
+					"	}));"
+				);
+			} else {*/
+				lines.push(
+					"	gl.clearColor("+['r','g','b'].map(function(c){
+						var name='background.solid.color.'+c;
+						if (options[name+'.input']) {
+							return "parseFloat(document.getElementById('"+name+"').value)";
+						} else {
+							return floatOptionValue(name);
+						}
+					}).join()+",1.0);"
+				);
+			/*}*/
+			lines.push(
+				"}",
+				"updateClearColor();"
+			);
+			eventListener('background.solid.color','updateClearColor');
 		}
 		if (options.hasInputsFor('fragmentColor')) {
 			lines.push(
@@ -97,7 +129,7 @@ module.exports=function(options,i18n){
 				"}",
 				"updateFragmentColor();"
 			);
-			eventListener();
+			eventListener('fragmentColor','updateFragmentColor');
 		}
 		if (lines.length) lines.push("	");
 		return lines;
@@ -237,8 +269,8 @@ module.exports=function(options,i18n){
 		"	",
 		"	var canvas=document.getElementById('myCanvas');",
 		"	var gl=canvas.getContext('webgl')||canvas.getContext('experimental-webgl');",
-	],options.background=='solid'?[
-		"	gl.clearColor(1.0,1.0,1.0,1.0);",
+	],(options.background=='solid' && !options.hasInputsFor('background.solid.color'))?[
+		"	gl.clearColor("+colorValue('background.solid.color')+",1.0);",
 	]:[],[
 		"	var program=makeProgram(",
 		"		document.getElementById('myVertexShader').text,",
