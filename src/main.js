@@ -75,6 +75,9 @@ var i18n=function(id){ // fake temporary i18n
 		'options.animation.rotation': 'Rotation around z axis',
 
 		'options.input': 'Input options',
+		'options.background.solid.color.r': 'Background color red component',
+		'options.background.solid.color.g': 'Background color green component',
+		'options.background.solid.color.b': 'Background color blue component',
 		'options.fragmentColor.r': 'Fragment color red component',
 		'options.fragmentColor.g': 'Fragment color green component',
 		'options.fragmentColor.b': 'Fragment color blue component',
@@ -84,12 +87,19 @@ var i18n=function(id){ // fake temporary i18n
 
 $(function(){
 	$('.webgl-starter').each(function(){
-		var container=$(this);
+		var containerNode=$(this);
+		var optionsNode;
+		var codeNode;
 		var options=new Options();
-		var code;
+
+		function showHideSuboptionInputs(optionName,optionValue) {
+			// TODO sub-sub option support?
+			optionsNode.find("[data-option^='"+optionName+".']").show()
+				.not("[data-option^='"+optionName+"."+optionValue+".']").hide();
+		}
 		function updateCode() {
-			code.text(generateCode(options,i18n));
-			if (window.hljs) hljs.highlightBlock(code[0]);
+			codeNode.text(generateCode(options,i18n));
+			if (window.hljs) hljs.highlightBlock(codeNode[0]);
 		}
 		function writeGeneralOption(option) {
 			var id=generateId();
@@ -103,6 +113,7 @@ $(function(){
 						})
 					).val(options[option.name]).change(function(){
 						options[option.name]=this.value;
+						showHideSuboptionInputs(option.name,this.value);
 						updateCode();
 					})
 				);
@@ -110,7 +121,7 @@ $(function(){
 		function writeInputOption(option) {
 			var id=generateId();
 			var checkboxId=generateId();
-			return $("<div>")
+			return $("<div data-option='"+option.name+"'>")
 				.append("<label for='"+id+"'>"+i18n('options.'+option.name)+":</label>")
 				.append(" "+option.availableValues[0]+" ")
 				.append(
@@ -135,26 +146,37 @@ $(function(){
 				.append(" ")
 				.append("<label for='"+checkboxId+"'>"+i18n('options.*.input')+"</label>");
 		}
-		container.empty().append(
-			$("<fieldset>").append("<legend>"+i18n('options.general')+"</legend>").append(
-				options.generalOptions.map(writeGeneralOption)
-			)
-		).append(
-			$("<fieldset>").append("<legend>"+i18n('options.input')+"</legend>").append(
-				options.inputOptions.map(writeInputOption)
-			)
-		).append(
-			$("<pre>").append(code=$("<code>").text(generateCode(options,i18n)))
+		function writeOptions() {
+			return $("<div>").append(
+				$("<fieldset>").append("<legend>"+i18n('options.general')+"</legend>").append(
+					options.generalOptions.map(writeGeneralOption)
+				)
+			).append(
+				$("<fieldset>").append("<legend>"+i18n('options.input')+"</legend>").append(
+					options.inputOptions.map(writeInputOption)
+				)
+			);
+		}
+		function hideSuboptionInputs() {
+			options.generalOptions.forEach(function(option){
+				showHideSuboptionInputs(option.name,options[options.name]);
+			});
+		}
+
+		containerNode.empty().append(optionsNode=writeOptions());
+		hideSuboptionInputs();
+		containerNode.append(
+			$("<pre>").append(codeNode=$("<code>").text(generateCode(options,i18n)))
 		);
 		if (window.hljs) {
-			hljs.highlightBlock(code[0]);
+			hljs.highlightBlock(codeNode[0]);
 		} else {
-			container.append("<p>"+i18n('message.hljs')+"</p>");
+			containerNode.append("<p>"+i18n('message.hljs')+"</p>");
 		}
-		container.append(
+		containerNode.append(
 			$("<div>").append(
 				$("<button type='button'>Run in new window</button>").click(function(){
-					window.open(getHtmlDataUri(code.text()),"generatedCode");
+					window.open(getHtmlDataUri(codeNode.text()),"generatedCode");
 				})
 			).append(
 				" running in new window doesn't work in Internet Explorer"

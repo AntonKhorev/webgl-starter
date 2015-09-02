@@ -17,6 +17,9 @@ Options.prototype.generalOptions=[
 	new Option('animation',['none','rotation']),
 ];
 Options.prototype.inputOptions=[
+	new Option('background.solid.color.r',[0,1],1),
+	new Option('background.solid.color.g',[0,1],1),
+	new Option('background.solid.color.b',[0,1],1),
 	new Option('fragmentColor.r',[0,1],1),
 	new Option('fragmentColor.g',[0,1]),
 	new Option('fragmentColor.b',[0,1]),
