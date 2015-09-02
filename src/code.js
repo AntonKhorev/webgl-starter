@@ -37,7 +37,10 @@ module.exports=function(options,i18n){
 					"<div>",
 					"	<label for='"+option.name+"'>"+i18n('options.'+option.name)+":</label>",
 					"	<span class='min'>"+option.getMinLabel()+"</span> "+
-						"<input type='range' id='"+option.name+"' min='"+option.getMin()+"' max='"+option.getMax()+"' step='"+option.getStep()+"' value='"+floatOptionValue(option.name)+"' />"+
+						(option.getStep()==1
+							? "<input type='range' id='"+option.name+"' min='"+option.getMin()+"' max='"+option.getMax()+"' value='"+intOptionValue(option.name)+"' />"
+							: "<input type='range' id='"+option.name+"' min='"+option.getMin()+"' max='"+option.getMax()+"' step='"+option.getStep()+"' value='"+floatOptionValue(option.name)+"' />"
+						)+
 						" <span class='max'>"+option.getMaxLabel()+"</span>",
 					"</div>",
 				];
