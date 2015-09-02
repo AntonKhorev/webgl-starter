@@ -13,6 +13,12 @@ Option.prototype.doesValueHideOption=function(value,option){
 	}
 	return optionStartsWith(this.name+'.') && !optionStartsWith(this.name+'.'+value+'.');
 };
+Option.prototype.getMinLabel=function(){
+	return this.availableValues[0].toString().replace('-','−');
+};
+Option.prototype.getMaxLabel=function(){
+	return this.availableValues[1].toString().replace('-','−');
+};
 
 var Options=function(){
 	this.reset();

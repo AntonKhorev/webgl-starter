@@ -33,7 +33,9 @@ module.exports=function(options,i18n){
 				return [
 					"<div>",
 					"	<label for='"+option.name+"'>"+i18n('options.'+option.name)+":</label>",
-					"	<span class='min'>"+option.availableValues[0]+"</span> <input type='range' id='"+option.name+"' min='"+option.availableValues[0]+"' max='"+option.availableValues[1]+"' step='any' value='"+floatOptionValue(option.name)+"'> <span class='max'>"+option.availableValues[1]+"</span>",
+					"	<span class='min'>"+option.getMinLabel()+"</span> "+
+						"<input type='range' id='"+option.name+"' min='"+option.availableValues[0]+"' max='"+option.availableValues[1]+"' step='any' value='"+floatOptionValue(option.name)+"' />"+
+						" <span class='max'>"+option.getMaxLabel()+"</span>",
 					"</div>",
 				];
 			})
