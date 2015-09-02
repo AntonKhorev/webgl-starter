@@ -1,6 +1,6 @@
 Option=function(name,availableValues,defaultValue){
 	this.name=name;
-	this.availableValues=availableValues;
+	this.availableValues=availableValues; // for range its [min,max,step]
 	if (defaultValue===undefined) {
 		this.defaultValue=availableValues[0];
 	} else {
@@ -13,11 +13,24 @@ Option.prototype.doesValueHideOption=function(value,option){
 	}
 	return optionStartsWith(this.name+'.') && !optionStartsWith(this.name+'.'+value+'.');
 };
+Option.prototype.getMin=function(){
+	return this.availableValues[0];
+}
+Option.prototype.getMax=function(){
+	return this.availableValues[1];
+}
+Option.prototype.getStep=function(){
+	if (this.availableValues.length>=3) {
+		return this.availableValues[2];
+	} else {
+		return 'any';
+	}
+}
 Option.prototype.getMinLabel=function(){
-	return this.availableValues[0].toString().replace('-','−');
+	return this.getMin().toString().replace('-','−');
 };
 Option.prototype.getMaxLabel=function(){
-	return this.availableValues[1].toString().replace('-','−');
+	return this.getMax().toString().replace('-','−');
 };
 
 var Options=function(){
@@ -37,7 +50,7 @@ Options.prototype.inputOptions=[
 	new Option('fragmentColor.g',[0,1]),
 	new Option('fragmentColor.b',[0,1]),
 	new Option('fragmentColor.a',[0,1],1),
-	new Option('shape.gasket.depth',[0,10],6),
+	new Option('shape.gasket.depth',[0,10,1],6),
 	new Option('animation.rotation.speed',[-1,1],0.2),
 ];
 Options.prototype.reset=function(){

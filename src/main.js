@@ -84,9 +84,10 @@ $(function(){
 				.append("<label for='"+id+"'>"+i18n('options.'+option.name)+":</label>")
 				.append(" <span class='min'>"+option.getMinLabel()+"</span> ")
 				.append(
-					$("<input type='range' id='"+id+"' step='any'>")
-						.attr('min',option.availableValues[0])
-						.attr('max',option.availableValues[1])
+					$("<input type='range' id='"+id+"'>")
+						.attr('min',option.getMin())
+						.attr('max',option.getMax())
+						.attr('step',option.getStep())
 						.val(options[option.name])
 						.change(function(){
 							options[option.name]=parseFloat(this.value);
