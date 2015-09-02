@@ -41,6 +41,33 @@ module.exports=function(options,i18n){
 	}
 	function generateInputHandlerLines() {
 		var lines=[];
+		function updater(optionPrefix,updateFnName,allInputsPre,allInputsPost,someInputsPre,someInputsPost) {
+			lines.push(
+				"function "+updateFnName+"() {"
+			);
+			if (options.hasAllInputsFor(optionPrefix)) {
+				lines.push(
+					"	"+allInputsPre+"['r','g','b','a'].map(function(c){",
+					"		return parseFloat(document.getElementById('"+optionPrefix+".'+c).value);",
+					"	})"+allInputsPost
+				);
+			} else {
+				lines.push(
+					"	"+someInputsPre+['r','g','b','a'].map(function(c){
+						var name=optionPrefix+'.'+c;
+						if (options[name+'.input']) {
+							return "parseFloat(document.getElementById('"+name+"').value)";
+						} else {
+							return floatOptionValue(name);
+						}
+					}).join()+someInputsPost
+				);
+			}
+			lines.push(
+				"}",
+				updateFnName+"();"
+			);
+		}
 		function eventListener(optionPrefix,updateFnName) {
 			var onlyInput=options.getOnlyInputFor(optionPrefix);
 			if (onlyInput===null) {
@@ -72,59 +99,21 @@ module.exports=function(options,i18n){
 			}
 		}
 		if (options.hasInputsFor('background.solid.color')) {
-			lines.push(
-				"function updateClearColor() {"
-			);
-			if (options.hasAllInputsFor('background.solid.color')) {
-				lines.push(
-					"	gl.clearColor.apply(gl,['r','g','b','a'].map(function(c){",
-					"		return parseFloat(document.getElementById('background.solid.color.'+c).value);",
-					"	}));"
-				);
-			} else {
-				lines.push(
-					"	gl.clearColor("+['r','g','b','a'].map(function(c){
-						var name='background.solid.color.'+c;
-						if (options[name+'.input']) {
-							return "parseFloat(document.getElementById('"+name+"').value)";
-						} else {
-							return floatOptionValue(name);
-						}
-					}).join()+");"
-				);
-			}
-			lines.push(
-				"}",
-				"updateClearColor();"
+			updater(
+				'background.solid.color','updateClearColor',
+				'gl.clearColor.apply(gl,',');',
+				'gl.clearColor(',');'
 			);
 			eventListener('background.solid.color','updateClearColor');
 		}
 		if (options.hasInputsFor('fragmentColor')) {
 			lines.push(
-				"var fragmentColorLoc=gl.getUniformLocation(program,'fragmentColor');",
-				"function updateFragmentColor() {"
+				"var fragmentColorLoc=gl.getUniformLocation(program,'fragmentColor');"
 			);
-			if (options.hasAllInputsFor('fragmentColor')) {
-				lines.push(
-					"	gl.uniform4fv(fragmentColorLoc,['r','g','b','a'].map(function(c){",
-					"		return parseFloat(document.getElementById('fragmentColor.'+c).value);",
-					"	}));"
-				);
-			} else {
-				lines.push(
-					"	gl.uniform4fv(fragmentColorLoc,["+['r','g','b','a'].map(function(c){
-						var name='fragmentColor.'+c;
-						if (options[name+'.input']) {
-							return "parseFloat(document.getElementById('"+name+"').value)";
-						} else {
-							return floatOptionValue(name);
-						}
-					}).join()+"]);"
-				);
-			}
-			lines.push(
-				"}",
-				"updateFragmentColor();"
+			updater(
+				'fragmentColor','updateFragmentColor',
+				'gl.uniform4fv(fragmentColorLoc,',');',
+				'gl.uniform4fv(fragmentColorLoc,[',']);'
 			);
 			eventListener('fragmentColor','updateFragmentColor');
 		}
