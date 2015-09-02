@@ -126,7 +126,7 @@ $(function(){
 			var checkboxId=generateId();
 			return $("<div data-option='"+option.name+"'>")
 				.append("<label for='"+id+"'>"+i18n('options.'+option.name)+":</label>")
-				.append(" "+option.availableValues[0]+" ")
+				.append(" <span class='min'>"+option.availableValues[0]+"</span> ")
 				.append(
 					$("<input type='range' id='"+id+"' step='any'>")
 						.attr('min',option.availableValues[0])
@@ -137,7 +137,7 @@ $(function(){
 							updateCode();
 						})
 				)
-				.append(" "+option.availableValues[1]+" ")
+				.append(" <span class='max'>"+option.availableValues[1]+"</span> ")
 				.append(
 					$("<input type='checkbox' id='"+checkboxId+"'>")
 						.prop('checked',options[option.name+'.input'])

@@ -33,7 +33,7 @@ module.exports=function(options,i18n){
 				return [
 					"<div>",
 					"	<label for='"+option.name+"'>"+i18n('options.'+option.name)+":</label>",
-					"	"+option.availableValues[0]+" <input type='range' id='"+option.name+"' min='"+option.availableValues[0]+"' max='"+option.availableValues[1]+"' step='any' value='"+floatOptionValue(option.name)+"'> "+option.availableValues[1],
+					"	<span class='min'>"+option.availableValues[0]+"</span> <input type='range' id='"+option.name+"' min='"+option.availableValues[0]+"' max='"+option.availableValues[1]+"' step='any' value='"+floatOptionValue(option.name)+"'> <span class='max'>"+option.availableValues[1]+"</span>",
 					"</div>",
 				];
 			})
@@ -216,6 +216,16 @@ module.exports=function(options,i18n){
 		"		display: inline-block;",
 		"		width: 15em;",
 		"		text-align: right;",
+		"	}",
+		"	.min {",
+		"		display: inline-block;",
+		"		width: 1.5em;",
+		"		text-align: right;",
+		"	}",
+		"	.max {",
+		"		display: inline-block;",
+		"		width: 1.5em;",
+		"		text-align: left;",
 		"	}",
 		"</style>",
 	]:[],[
