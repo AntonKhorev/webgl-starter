@@ -60,6 +60,8 @@ function getHtmlDataUri(html) {
 
 var i18n=function(id){ // fake temporary i18n
 	return {
+		'message.hljs': "<a href='https://highlightjs.org/'>highlight.js</a> (hosted on cdnjs.cloudflare.com) is not loaded. Syntax highlighting is disabled.",
+
 		'options.general': 'General options',
 		'options.background': 'Background',
 		'options.background.none': 'None (transparent)',
@@ -87,7 +89,7 @@ $(function(){
 		var code;
 		function updateCode() {
 			code.text(generateCode(options,i18n));
-			hljs.highlightBlock(code[0]);
+			if (window.hljs) hljs.highlightBlock(code[0]);
 		}
 		function writeGeneralOption(option) {
 			var id=generateId();
@@ -143,7 +145,13 @@ $(function(){
 			)
 		).append(
 			$("<pre>").append(code=$("<code>").text(generateCode(options,i18n)))
-		).append(
+		);
+		if (window.hljs) {
+			hljs.highlightBlock(code[0]);
+		} else {
+			container.append("<p>"+i18n('message.hljs')+"</p>");
+		}
+		container.append(
 			$("<div>").append(
 				$("<button type='button'>Run in new window</button>").click(function(){
 					window.open(getHtmlDataUri(code.text()),"generatedCode");
@@ -152,6 +160,5 @@ $(function(){
 				" running in new window doesn't work in Internet Explorer"
 			)
 		);
-		hljs.highlightBlock(code[0]);
 	});
 });
