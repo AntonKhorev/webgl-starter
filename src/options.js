@@ -38,6 +38,7 @@ var Options=function(){
 };
 Options.prototype.generalOptions=[
 	new Option('background',['none','solid']),
+	new Option('shader',['single','vertex']),
 	new Option('shape',['square','triangle','gasket']),
 	new Option('animation',['none','rotation']),
 ];
@@ -46,10 +47,10 @@ Options.prototype.inputOptions=[
 	new Option('background.solid.color.g',[0,1],1),
 	new Option('background.solid.color.b',[0,1],1),
 	new Option('background.solid.color.a',[0,1],1),
-	new Option('fragmentColor.r',[0,1],1),
-	new Option('fragmentColor.g',[0,1]),
-	new Option('fragmentColor.b',[0,1]),
-	new Option('fragmentColor.a',[0,1],1),
+	new Option('shader.single.color.r',[0,1],1),
+	new Option('shader.single.color.g',[0,1]),
+	new Option('shader.single.color.b',[0,1]),
+	new Option('shader.single.color.a',[0,1],1),
 	new Option('shape.gasket.depth',[0,10,1],6),
 	new Option('animation.rotation.speed',[-1,1],0.2),
 ];

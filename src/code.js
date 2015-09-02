@@ -207,16 +207,16 @@ module.exports=function(options,i18n){
 			);
 			eventListener('background.solid.color','updateClearColor');
 		}
-		if (options.hasInputsFor('fragmentColor')) {
+		if (options.hasInputsFor('shader.single.color')) {
 			lines.push(
 				"var fragmentColorLoc=gl.getUniformLocation(program,'fragmentColor');"
 			);
 			updater(
-				'fragmentColor','updateFragmentColor',
+				'shader.single.color','updateFragmentColor',
 				'gl.uniform4fv(fragmentColorLoc,',');',
 				'gl.uniform4fv(fragmentColorLoc,[',']);'
 			);
-			eventListener('fragmentColor','updateFragmentColor');
+			eventListener('shader.single.color','updateFragmentColor');
 		}
 		if (options['shape.gasket.depth.input']) {
 			lines.push(
@@ -366,14 +366,14 @@ module.exports=function(options,i18n){
 		"</script>",
 		"<script id='myFragmentShader' type='x-shader/x-fragment'>",
 		"	precision mediump float;",
-	],options.hasInputsFor('fragmentColor')?[
+	],options.hasInputsFor('shader.single.color')?[
 		"	uniform vec4 fragmentColor;",
 		"	void main() {",
 		"		gl_FragColor=fragmentColor;",
 		"	}",
 	]:[
 		"	void main() {",
-		"		gl_FragColor=vec4("+colorValue('fragmentColor')+");",
+		"		gl_FragColor=vec4("+colorValue('shader.single.color')+");",
 		"	}",
 	],[
 		"</script>",
