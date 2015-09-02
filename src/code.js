@@ -67,11 +67,25 @@ module.exports=function(options,i18n){
 			];
 		}
 		function gasket() {
-			return [
-				"var gasketDepth="+intOptionValue('shape.gasket.depth')+";",
-				"var nVertices=Math.pow(3,gasketDepth)*3;",
-				"var vertices=new Float32Array(nVertices*2);",
-				"function storeGasketVertices() {",
+			lines=[];
+			if (options['shape.gasket.depth.input']) {
+				lines.push(
+					"var gasketMaxDepth=10;",
+					"var nMaxVertices=Math.pow(3,gasketMaxDepth)*3;",
+					"var vertices=new Float32Array(nMaxVertices*2);",
+					"var nVertices;",
+					"function storeGasketVertices(gasketDepth) {",
+					"	nVertices=Math.pow(3,gasketDepth)*3;"
+				);
+			} else {
+				lines.push(
+					"var gasketDepth="+intOptionValue('shape.gasket.depth')+";",
+					"var nVertices=Math.pow(3,gasketDepth)*3;",
+					"var vertices=new Float32Array(nVertices*2);",
+					"function storeGasketVertices() {"
+				);
+			}
+			lines.push(
 				"	var iv=0;",
 				"	function pushVertex(v) {",
 				"		vertices[iv++]=v[0]; vertices[iv++]=v[1];",
@@ -102,9 +116,18 @@ module.exports=function(options,i18n){
 				"		[-Math.sin(2/3*Math.PI),Math.cos(2/3*Math.PI)],",
 				"		[-Math.sin(4/3*Math.PI),Math.cos(4/3*Math.PI)]",
 				"	);",
-				"}",
-				"storeGasketVertices();",
-			];
+				"}"
+			);
+			if (options['shape.gasket.depth.input']) {
+				lines.push(
+					"storeGasketVertices("+intOptionValue('shape.gasket.depth')+");"
+				);
+			} else {
+				lines.push(
+					"storeGasketVertices();"
+				);
+			}
+			return lines;
 		}
 		if (options.shape=='square') {
 			return square();
@@ -191,6 +214,21 @@ module.exports=function(options,i18n){
 				'gl.uniform4fv(fragmentColorLoc,[',']);'
 			);
 			eventListener('fragmentColor','updateFragmentColor');
+		}
+		if (options['shape.gasket.depth.input']) {
+			lines.push(
+				"document.getElementById('shape.gasket.depth').addEventListener('change',function(){",
+				"	storeGasketVertices(parseInt(this.value));",
+				"	gl.bufferData(gl.ARRAY_BUFFER,vertices,gl.STATIC_DRAW);"
+			);
+			if (options.animation!='rotation') {
+				lines.push(
+					"	updateCanvas();"
+				);
+			}
+			lines.push(
+				"});"
+			);
 		}
 		if (lines.length) lines.push("	");
 		return lines;
