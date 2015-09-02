@@ -178,11 +178,18 @@ $(function(){
 		}
 		containerNode.append(
 			$("<div>").append(
+				$("<a download='source.html'><button type='button'>Save source code</button></a>").click(function(){
+					// yes I want a button, but download attr is only available for links
+					$(this).attr('href',getHtmlDataUri(codeNode.text()));
+				})
+			).append(
+				" "
+			).append(
 				$("<button type='button'>Run in new window</button>").click(function(){
 					window.open(getHtmlDataUri(codeNode.text()),"generatedCode");
 				})
 			).append(
-				" running in new window doesn't work in Internet Explorer"
+				" these buttons don't work in Internet Explorer, copy-paste the code manually"
 			)
 		);
 	});
