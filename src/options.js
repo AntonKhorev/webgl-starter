@@ -31,6 +31,7 @@ Options.prototype.inputOptions=[
 	new Option('fragmentColor.g',[0,1]),
 	new Option('fragmentColor.b',[0,1]),
 	new Option('fragmentColor.a',[0,1],1),
+	new Option('animation.rotation.speed',[-1,1],0.2),
 ];
 Options.prototype.reset=function(){
 	this.generalOptions.forEach(function(option){

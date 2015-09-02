@@ -130,7 +130,7 @@ module.exports=function(options,i18n){
 			}
 			if (options.animation=='rotation') {
 				lines.push(
-					"gl.uniform1f(rotationAngleLoc,(time-startTime)*360/5000);"
+					"gl.uniform1f(rotationAngleLoc,"+floatOptionValue('animation.rotation.speed')+"*360*(time-startTime)/1000);"
 				);
 			}
 			if (options.shape=='square') {
