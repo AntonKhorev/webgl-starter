@@ -38,6 +38,7 @@ var i18n=function(id){ // fake temporary i18n
 		'options.fragmentColor.g': 'Fragment color green component',
 		'options.fragmentColor.b': 'Fragment color blue component',
 		'options.fragmentColor.a': 'Fragment color alpha component',
+		'options.shape.gasket.depth': 'Sierpinski gasket recursion depth',
 		'options.animation.rotation.speed': 'Z axis rotation speed',
 		'options.*.input': 'Make this input available to users',
 	}[id];

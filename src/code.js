@@ -1,4 +1,7 @@
 module.exports=function(options,i18n){
+	function intOptionValue(name) {
+		return parseInt(options[name]);
+	}
 	function floatOptionValue(name) {
 		return options[name].toFixed(3);
 	}
@@ -313,7 +316,7 @@ module.exports=function(options,i18n){
 		"		-Math.sin(4/3*Math.PI),Math.cos(4/3*Math.PI),",
 		"	]);",
 	]:[],options.shape=='gasket'?[
-		"	var gasketDepth=6;",
+		"	var gasketDepth="+intOptionValue('shape.gasket.depth')+";",
 		"	var nVertices=Math.pow(3,gasketDepth)*3;",
 		"	var vertices=new Float32Array(nVertices*2);",
 		"	function storeGasketVertices() {",
