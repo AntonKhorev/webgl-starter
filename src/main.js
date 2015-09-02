@@ -122,7 +122,7 @@ $(function(){
 		}
 		function hideSuboptionInputs() {
 			options.generalOptions.forEach(function(option){
-				showHideSuboptionInputs(option.name,options[options.name]);
+				showHideSuboptionInputs(option.name,options[option.name]);
 			});
 		}
 
