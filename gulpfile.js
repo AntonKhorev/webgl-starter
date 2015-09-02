@@ -13,7 +13,11 @@ var destination='public_html';
 
 gulp.task('html',function(){
 	gulp.src('src/index.jade')
-		.pipe(jade())
+		.pipe(jade({
+			locals: {
+				navbar: require('./src/navbar.js')
+			}
+		}))
 		.pipe(gulp.dest(destination));
 });
 

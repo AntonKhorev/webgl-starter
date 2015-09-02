@@ -17,10 +17,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/AntonKhorev/webgl-starter.git"
-  },
+  "repository": "AntonKhorev/webgl-starter",
   "keywords": [
     "webgl"
   ],
