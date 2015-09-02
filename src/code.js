@@ -75,17 +75,13 @@ module.exports=function(options,i18n){
 			lines.push(
 				"function updateClearColor() {"
 			);
-			/*
-			// TODO after enabling alpha components
 			if (options.hasAllInputsFor('background.solid.color')) {
 				lines.push(
-						gl.clearColor.apply(['r','g','b','a']
-
-					"	gl.uniform3fv(fragmentColorLoc,['r','g','b'].map(function(c){",
-					"		return parseFloat(document.getElementById('fragmentColor.'+c).value);",
+					"	gl.clearColor.apply(gl,['r','g','b','a'].map(function(c){",
+					"		return parseFloat(document.getElementById('background.solid.color.'+c).value);",
 					"	}));"
 				);
-			} else {*/
+			} else {
 				lines.push(
 					"	gl.clearColor("+['r','g','b','a'].map(function(c){
 						var name='background.solid.color.'+c;
@@ -96,7 +92,7 @@ module.exports=function(options,i18n){
 						}
 					}).join()+");"
 				);
-			/*}*/
+			}
 			lines.push(
 				"}",
 				"updateClearColor();"
