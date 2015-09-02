@@ -3,51 +3,6 @@ function generateId() {
 	return 'webgl-starter-id-'+(idCounter++);
 }
 
-/*
-function htmlEncode(value) {
-	return value.toString()
-		.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')
-		.replace(/</g,'&lt;').replace(/>/g,'&gt;')
-	; // https://github.com/emn178/js-htmlencode/blob/master/src/htmlencode.js
-}
-*/
-
-/*
-var OptionsSection=function(){
-	this.added=[];
-};
-OptionsSection.prototype.add=function(name,type){
-	function getDefaultValue() {
-		if (Array.isArray(type)) {
-			return
-		} else if (type=='bool') {
-			return false;
-		} else if (type=='color') {
-			return {
-				r: 1.0,
-				g: 1.0,
-				b: 1.0,
-			};
-		}
-	}
-	this.added.push({
-		name: name,
-		type: type,
-		value: getDefaultValue(),
-	});
-};
-
-var Options=function(){
-	//this.fixed= // TODO stuff like language
-	this.code=new OptionsSection();
-	this.code.add('clearBackground','bool');
-	this.code.add('draw',['triangle','gasket']);
-	this.code.add('rotate','bool');
-	this.inputs=new OptionsSection(); // TODO recreate based on this.code
-	this.inputs.add('fragmentColor','color');
-};
-*/
-
 var Options=require('./options.js');
 var generateCode=require('./code.js');
 
