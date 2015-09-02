@@ -9,7 +9,7 @@ var less=require('gulp-less');
 var autoprefixer=require('gulp-autoprefixer');
 var minifyCss=require('gulp-minify-css');
 
-var destination='public_html';
+var destination='public_html/en/base';
 
 gulp.task('html',function(){
 	gulp.src('src/index.jade')
