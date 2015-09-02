@@ -78,9 +78,11 @@ var i18n=function(id){ // fake temporary i18n
 		'options.background.solid.color.r': 'Background color red component',
 		'options.background.solid.color.g': 'Background color green component',
 		'options.background.solid.color.b': 'Background color blue component',
+		'options.background.solid.color.a': 'Background color alpha component',
 		'options.fragmentColor.r': 'Fragment color red component',
 		'options.fragmentColor.g': 'Fragment color green component',
 		'options.fragmentColor.b': 'Fragment color blue component',
+		'options.fragmentColor.a': 'Fragment color alpha component',
 		'options.*.input': 'Make this input available to users',
 	}[id];
 };

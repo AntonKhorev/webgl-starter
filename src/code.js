@@ -5,7 +5,8 @@ module.exports=function(options,i18n){
 	function colorValue(prefix) {
 		return floatOptionValue(prefix+'.r')+","+
 		       floatOptionValue(prefix+'.g')+","+
-		       floatOptionValue(prefix+'.b');
+		       floatOptionValue(prefix+'.b')+","+
+		       floatOptionValue(prefix+'.a');
 	}
 	function indentLines(level,lines) {
 		return lines.map(function(line){
@@ -86,14 +87,14 @@ module.exports=function(options,i18n){
 				);
 			} else {*/
 				lines.push(
-					"	gl.clearColor("+['r','g','b'].map(function(c){
+					"	gl.clearColor("+['r','g','b','a'].map(function(c){
 						var name='background.solid.color.'+c;
 						if (options[name+'.input']) {
 							return "parseFloat(document.getElementById('"+name+"').value)";
 						} else {
 							return floatOptionValue(name);
 						}
-					}).join()+",1.0);"
+					}).join()+");"
 				);
 			/*}*/
 			lines.push(
@@ -109,13 +110,13 @@ module.exports=function(options,i18n){
 			);
 			if (options.hasAllInputsFor('fragmentColor')) {
 				lines.push(
-					"	gl.uniform3fv(fragmentColorLoc,['r','g','b'].map(function(c){",
+					"	gl.uniform4fv(fragmentColorLoc,['r','g','b','a'].map(function(c){",
 					"		return parseFloat(document.getElementById('fragmentColor.'+c).value);",
 					"	}));"
 				);
 			} else {
 				lines.push(
-					"	gl.uniform3fv(fragmentColorLoc,["+['r','g','b'].map(function(c){
+					"	gl.uniform4fv(fragmentColorLoc,["+['r','g','b','a'].map(function(c){
 						var name='fragmentColor.'+c;
 						if (options[name+'.input']) {
 							return "parseFloat(document.getElementById('"+name+"').value)";
@@ -234,13 +235,13 @@ module.exports=function(options,i18n){
 		"<script id='myFragmentShader' type='x-shader/x-fragment'>",
 		"	precision mediump float;",
 	],options.hasInputsFor('fragmentColor')?[
-		"	uniform vec3 fragmentColor;",
+		"	uniform vec4 fragmentColor;",
 		"	void main() {",
-		"		gl_FragColor=vec4(fragmentColor,1.0);",
+		"		gl_FragColor=fragmentColor;",
 		"	}",
 	]:[
 		"	void main() {",
-		"		gl_FragColor=vec4("+colorValue('fragmentColor')+",1.0);",
+		"		gl_FragColor=vec4("+colorValue('fragmentColor')+");",
 		"	}",
 	],[
 		"</script>",
@@ -270,7 +271,7 @@ module.exports=function(options,i18n){
 		"	var canvas=document.getElementById('myCanvas');",
 		"	var gl=canvas.getContext('webgl')||canvas.getContext('experimental-webgl');",
 	],(options.background=='solid' && !options.hasInputsFor('background.solid.color'))?[
-		"	gl.clearColor("+colorValue('background.solid.color')+",1.0);",
+		"	gl.clearColor("+colorValue('background.solid.color')+");",
 	]:[],[
 		"	var program=makeProgram(",
 		"		document.getElementById('myVertexShader').text,",
