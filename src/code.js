@@ -44,6 +44,76 @@ module.exports=function(options,i18n){
 			})
 		);
 	}
+	function generateShapeLines() {
+		function square() {
+			return [
+				"var nVertices=4;",
+				"var vertices=new Float32Array([",
+				"	-0.5,-0.5,",
+				"	+0.5,-0.5,",
+				"	+0.5,+0.5,",
+				"	-0.5,+0.5,",
+				"]);",
+			];
+		}
+		function triangle() {
+			return [
+				"var nVertices=3;",
+				"var vertices=new Float32Array([",
+				"	-Math.sin(0/3*Math.PI),Math.cos(0/3*Math.PI),",
+				"	-Math.sin(2/3*Math.PI),Math.cos(2/3*Math.PI),",
+				"	-Math.sin(4/3*Math.PI),Math.cos(4/3*Math.PI),",
+				"]);",
+			];
+		}
+		function gasket() {
+			return [
+				"var gasketDepth="+intOptionValue('shape.gasket.depth')+";",
+				"var nVertices=Math.pow(3,gasketDepth)*3;",
+				"var vertices=new Float32Array(nVertices*2);",
+				"function storeGasketVertices() {",
+				"	var iv=0;",
+				"	function pushVertex(v) {",
+				"		vertices[iv++]=v[0]; vertices[iv++]=v[1];",
+				"	}",
+				"	function mix(a,b,m) {",
+				"		return [",
+				"			a[0]*(1-m)+b[0]*m,",
+				"			a[1]*(1-m)+b[1]*m,",
+				"		];",
+				"	}",
+				"	function triangle(depth,a,b,c) {",
+				"		if (depth<=0) {",
+				"			pushVertex(a);",
+				"			pushVertex(b);",
+				"			pushVertex(c);",
+				"		} else {",
+				"			var ab=mix(a,b,0.5);",
+				"			var bc=mix(b,c,0.5);",
+				"			var ca=mix(c,a,0.5);",
+				"			triangle(depth-1,a,ab,ca);",
+				"			triangle(depth-1,b,bc,ab);",
+				"			triangle(depth-1,c,ca,bc);",
+				"		}",
+				"	}",
+				"	triangle(",
+				"		gasketDepth,",
+				"		[-Math.sin(0/3*Math.PI),Math.cos(0/3*Math.PI)],",
+				"		[-Math.sin(2/3*Math.PI),Math.cos(2/3*Math.PI)],",
+				"		[-Math.sin(4/3*Math.PI),Math.cos(4/3*Math.PI)]",
+				"	);",
+				"}",
+				"storeGasketVertices();",
+			];
+		}
+		if (options.shape=='square') {
+			return square();
+		} else if (options.shape=='triangle') {
+			return triangle();
+		} else if (options.shape=='gasket') {
+			return gasket();
+		}
+	}
 	function generateInputHandlerLines() {
 		var lines=[];
 		function updater(optionPrefix,updateFnName,allInputsPre,allInputsPost,someInputsPre,someInputsPost) {
@@ -300,59 +370,7 @@ module.exports=function(options,i18n){
 		"	);",
 		"	gl.useProgram(program);",
 		"	",
-	],options.shape=='square'?[
-		"	var nVertices=4;",
-		"	var vertices=new Float32Array([",
-		"		-0.5,-0.5,",
-		"		+0.5,-0.5,",
-		"		+0.5,+0.5,",
-		"		-0.5,+0.5,",
-		"	]);",
-	]:[],options.shape=='triangle'?[
-		"	var nVertices=3;",
-		"	var vertices=new Float32Array([",
-		"		-Math.sin(0/3*Math.PI),Math.cos(0/3*Math.PI),",
-		"		-Math.sin(2/3*Math.PI),Math.cos(2/3*Math.PI),",
-		"		-Math.sin(4/3*Math.PI),Math.cos(4/3*Math.PI),",
-		"	]);",
-	]:[],options.shape=='gasket'?[
-		"	var gasketDepth="+intOptionValue('shape.gasket.depth')+";",
-		"	var nVertices=Math.pow(3,gasketDepth)*3;",
-		"	var vertices=new Float32Array(nVertices*2);",
-		"	function storeGasketVertices() {",
-		"		var iv=0;",
-		"		function pushVertex(v) {",
-		"			vertices[iv++]=v[0]; vertices[iv++]=v[1];",
-		"		}",
-		"		function mix(a,b,m) {",
-		"			return [",
-		"				a[0]*(1-m)+b[0]*m,",
-		"				a[1]*(1-m)+b[1]*m,",
-		"			];",
-		"		}",
-		"		function triangle(depth,a,b,c) {",
-		"			if (depth<=0) {",
-		"				pushVertex(a);",
-		"				pushVertex(b);",
-		"				pushVertex(c);",
-		"			} else {",
-		"				var ab=mix(a,b,0.5);",
-		"				var bc=mix(b,c,0.5);",
-		"				var ca=mix(c,a,0.5);",
-		"				triangle(depth-1,a,ab,ca);",
-		"				triangle(depth-1,b,bc,ab);",
-		"				triangle(depth-1,c,ca,bc);",
-		"			}",
-		"		}",
-		"		triangle(",
-		"			gasketDepth,",
-		"			[-Math.sin(0/3*Math.PI),Math.cos(0/3*Math.PI)],",
-		"			[-Math.sin(2/3*Math.PI),Math.cos(2/3*Math.PI)],",
-		"			[-Math.sin(4/3*Math.PI),Math.cos(4/3*Math.PI)]",
-		"		);",
-		"	}",
-		"	storeGasketVertices();",
-	]:[],[
+	],indentLines(1,generateShapeLines()),[
 		"	",
 		"	var buffer=gl.createBuffer();",
 		"	gl.bindBuffer(gl.ARRAY_BUFFER,buffer);",
