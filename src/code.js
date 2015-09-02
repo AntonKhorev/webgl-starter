@@ -129,9 +129,17 @@ module.exports=function(options,i18n){
 				);
 			}
 			if (options.animation=='rotation') {
-				lines.push(
-					"gl.uniform1f(rotationAngleLoc,"+floatOptionValue('animation.rotation.speed')+"*360*(time-startTime)/1000);"
-				);
+				if (options['animation.rotation.speed.input']) {
+					// TODO angle needs to be a state if speed is controllable
+					lines.push(
+						"var rotationSpeed=parseFloat(document.getElementById('animation.rotation.speed').value);",
+						"gl.uniform1f(rotationAngleLoc,rotationSpeed*360*(time-startTime)/1000);"
+					);
+				} else {
+					lines.push(
+						"gl.uniform1f(rotationAngleLoc,"+floatOptionValue('animation.rotation.speed')+"*360*(time-startTime)/1000);"
+					);
+				}
 			}
 			if (options.shape=='square') {
 				lines.push(
