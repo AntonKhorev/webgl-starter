@@ -130,10 +130,10 @@ module.exports=function(options,i18n){
 			}
 			if (options.animation=='rotation') {
 				if (options['animation.rotation.speed.input']) {
-					// TODO angle needs to be a state if speed is controllable
 					lines.push(
 						"var rotationSpeed=parseFloat(document.getElementById('animation.rotation.speed').value);",
-						"gl.uniform1f(rotationAngleLoc,rotationSpeed*360*(time-startTime)/1000);"
+						"rotationAngle+=rotationSpeed*360*(time-prevTime)/1000;",
+						"gl.uniform1f(rotationAngleLoc,rotationAngle);"
 					);
 				} else {
 					lines.push(
@@ -154,9 +154,17 @@ module.exports=function(options,i18n){
 		}
 		var lines=[];
 		if (options.animation=='rotation') {
-			lines.push(
-				"var startTime=performance.now();"
-			);
+			if (options['animation.rotation.speed.input']) {
+				// angle needs to be a state only if speed is controllable
+				lines.push(
+					"var rotationAngle=0;",
+					"var prevTime=performance.now();"
+				);
+			} else {
+				lines.push(
+					"var startTime=performance.now();"
+				);
+			}
 		}
 		var needUpdateCanvasFunction=options.animation=='rotation'||options.hasInputs()
 		if (needUpdateCanvasFunction) {
@@ -167,6 +175,11 @@ module.exports=function(options,i18n){
 				indentLines(1,renderInner())
 			);
 			if (options.animation=='rotation') {
+				if (options['animation.rotation.speed.input']) {
+					lines.push(
+						"	prevTime=time;"
+					);
+				}
 				lines.push(
 					"	requestAnimationFrame(updateCanvas);"
 				);
