@@ -116,14 +116,16 @@ module.exports=function(options,i18n){
 		);
 	}
 	function generateShapeLines() {
+		var c=options.shader=='vertex';
 		function square() {
 			return [
 				"var nVertices=4;",
 				"var vertices=new Float32Array([",
-				"	-0.5,-0.5,",
-				"	+0.5,-0.5,",
-				"	+0.5,+0.5,",
-				"	-0.5,+0.5,",
+				"	// x    y    r    g    b",
+				"	-0.5,-0.5,"+(c?" 1.0, 0.0, 0.0,":""),
+				"	+0.5,-0.5,"+(c?" 0.0, 1.0, 0.0,":""),
+				"	+0.5,+0.5,"+(c?" 0.0, 0.0, 1.0,":""),
+				"	-0.5,+0.5,"+(c?" 1.0, 1.0, 0.0,":""),
 				"]);",
 			];
 		}
@@ -131,9 +133,10 @@ module.exports=function(options,i18n){
 			return [
 				"var nVertices=3;",
 				"var vertices=new Float32Array([",
-				"	-Math.sin(0/3*Math.PI),Math.cos(0/3*Math.PI),",
-				"	-Math.sin(2/3*Math.PI),Math.cos(2/3*Math.PI),",
-				"	-Math.sin(4/3*Math.PI),Math.cos(4/3*Math.PI),",
+				"	//                   x                      y    r    g    b",
+				"	-Math.sin(0/3*Math.PI), Math.cos(0/3*Math.PI),"+(c?" 1.0, 0.0, 0.0,":""),
+				"	-Math.sin(2/3*Math.PI), Math.cos(2/3*Math.PI),"+(c?" 0.0, 1.0, 0.0,":""),
+				"	-Math.sin(4/3*Math.PI), Math.cos(4/3*Math.PI),"+(c?" 0.0, 0.0, 1.0,":""),
 				"]);",
 			];
 		}
@@ -143,7 +146,7 @@ module.exports=function(options,i18n){
 				lines.push(
 					"var gasketMaxDepth=10;",
 					"var nMaxVertices=Math.pow(3,gasketMaxDepth)*3;",
-					"var vertices=new Float32Array(nMaxVertices*2);",
+					"var vertices=new Float32Array(nMaxVertices*"+(c?5:2)+");",
 					"var nVertices;",
 					"function storeGasketVertices(gasketDepth) {",
 					"	nVertices=Math.pow(3,gasketDepth)*3;"
@@ -152,15 +155,28 @@ module.exports=function(options,i18n){
 				lines.push(
 					"var gasketDepth="+intOptionValue('shape.gasket.depth')+";",
 					"var nVertices=Math.pow(3,gasketDepth)*3;",
-					"var vertices=new Float32Array(nVertices*2);",
+					"var vertices=new Float32Array(nVertices*"+(c?5:2)+");",
 					"function storeGasketVertices() {"
 				);
 			}
 			lines.push(
-				"	var iv=0;",
-				"	function pushVertex(v) {",
-				"		vertices[iv++]=v[0]; vertices[iv++]=v[1];",
-				"	}",
+				"	var iv=0;"
+			);
+			if (c) {
+				lines.push(
+					"	function pushVertex(v,r,g,b) {",
+					"		vertices[iv++]=v[0]; vertices[iv++]=v[1];",
+					"		vertices[iv++]=r; vertices[iv++]=g; vertices[iv++]=b;",
+					"	}"
+				);
+			} else {
+				lines.push(
+					"	function pushVertex(v) {",
+					"		vertices[iv++]=v[0]; vertices[iv++]=v[1];",
+					"	}"
+				);
+			}
+			lines.push(
 				"	function mix(a,b,m) {",
 				"		return [",
 				"			a[0]*(1-m)+b[0]*m,",
@@ -168,10 +184,22 @@ module.exports=function(options,i18n){
 				"		];",
 				"	}",
 				"	function triangle(depth,a,b,c) {",
-				"		if (depth<=0) {",
-				"			pushVertex(a);",
-				"			pushVertex(b);",
-				"			pushVertex(c);",
+				"		if (depth<=0) {"
+			);
+			if (c) {
+				lines.push(
+					"			pushVertex(a,1.0,0.0,0.0);",
+					"			pushVertex(b,0.0,1.0,0.0);",
+					"			pushVertex(c,0.0,0.0,1.0);"
+				);
+			} else {
+				lines.push(
+					"			pushVertex(a);",
+					"			pushVertex(b);",
+					"			pushVertex(c);"
+				);
+			}
+			lines.push(
 				"		} else {",
 				"			var ab=mix(a,b,0.5);",
 				"			var bc=mix(b,c,0.5);",
