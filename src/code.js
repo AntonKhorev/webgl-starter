@@ -51,6 +51,22 @@ module.exports=function(options,i18n){
 			];
 		}
 	}
+	function generateFragmentShaderLines() {
+		if (options.hasInputsFor('shader.single.color')) {
+			return [
+				"uniform vec4 fragmentColor;",
+				"void main() {",
+				"	gl_FragColor=fragmentColor;",
+				"}",
+			];
+		} else {
+			return [
+				"void main() {",
+				"	gl_FragColor=vec4("+colorValue('shader.single.color')+");",
+				"}",
+			];
+		}
+	}
 	function generateInputLines() {
 		return [].concat.apply([],
 			options.inputOptions.filter(function(option){
@@ -373,16 +389,7 @@ module.exports=function(options,i18n){
 		"</script>",
 		"<script id='myFragmentShader' type='x-shader/x-fragment'>",
 		"	precision mediump float;",
-	],options.hasInputsFor('shader.single.color')?[
-		"	uniform vec4 fragmentColor;",
-		"	void main() {",
-		"		gl_FragColor=fragmentColor;",
-		"	}",
-	]:[
-		"	void main() {",
-		"		gl_FragColor=vec4("+colorValue('shader.single.color')+");",
-		"	}",
-	],[
+	],indentLines(1,generateFragmentShaderLines()),[
 		"</script>",
 		"</head>",
 		"<body>",
