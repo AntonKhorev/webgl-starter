@@ -28,6 +28,29 @@ module.exports=function(options,i18n){
 		});
 	}
 
+	function generateVertexShaderLines() {
+		if (options.animation=='rotation') {
+			return [
+				"uniform float rotationAngle;",
+				"attribute vec2 position;",
+				"void main() {",
+				"	float c=cos(radians(rotationAngle));",
+				"	float s=sin(radians(rotationAngle));",
+				"	gl_Position=vec4(mat2(",
+				"		 c, s,",
+				"		-s, c",
+				"	)*position,0,1);",
+				"}",
+			];
+		} else {
+			return [
+				"attribute vec4 position;",
+				"void main() {",
+				"	gl_Position=position;",
+				"}",
+			];
+		}
+	}
 	function generateInputLines() {
 		return [].concat.apply([],
 			options.inputOptions.filter(function(option){
@@ -346,23 +369,7 @@ module.exports=function(options,i18n){
 		"</style>",
 	]:[],[
 		"<script id='myVertexShader' type='x-shader/x-vertex'>",
-	],options.animation=='rotation'?[
-		"	uniform float rotationAngle;",
-		"	attribute vec2 position;",
-		"	void main() {",
-		"		float c=cos(radians(rotationAngle));",
-		"		float s=sin(radians(rotationAngle));",
-		"		gl_Position=vec4(mat2(",
-		"			 c, s,",
-		"			-s, c",
-		"		)*position,0,1);",
-		"	}",
-	]:[
-		"	attribute vec4 position;",
-		"	void main() {",
-		"		gl_Position=position;",
-		"	}",
-	],[
+	],indentLines(1,generateVertexShaderLines()),[
 		"</script>",
 		"<script id='myFragmentShader' type='x-shader/x-fragment'>",
 		"	precision mediump float;",
