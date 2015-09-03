@@ -29,34 +29,63 @@ module.exports=function(options,i18n){
 	}
 
 	function generateVertexShaderLines() {
+		lines=[];
 		if (options.animation=='rotation') {
-			return [
+			lines.push(
 				"uniform float rotationAngle;",
-				"attribute vec2 position;",
-				"void main() {",
+				"attribute vec2 position;"
+			);
+		} else {
+			lines.push(
+				"attribute vec4 position;"
+			);
+		}
+		if (options.shader=='vertex') {
+			lines.push(
+				"attribute vec4 color;",
+				"varying vec4 interpolatedColor;"
+			);
+		}
+		lines.push(
+			"void main() {"
+		);
+		if (options.animation=='rotation') {
+			lines.push(
 				"	float c=cos(radians(rotationAngle));",
 				"	float s=sin(radians(rotationAngle));",
 				"	gl_Position=vec4(mat2(",
 				"		 c, s,",
 				"		-s, c",
-				"	)*position,0,1);",
-				"}",
-			];
+				"	)*position,0,1);"
+			);
 		} else {
-			return [
-				"attribute vec4 position;",
-				"void main() {",
-				"	gl_Position=position;",
-				"}",
-			];
+			lines.push(
+				"	gl_Position=position;"
+			);
 		}
+		if (options.shader=='vertex') {
+			lines.push(
+				"	interpolatedColor=color;"
+			);
+		}
+		lines.push(
+			"}"
+		);
+		return lines;
 	}
 	function generateFragmentShaderLines() {
-		if (options.hasInputsFor('shader.single.color')) {
+		if (options.shader=='vertex') {
 			return [
-				"uniform vec4 fragmentColor;",
+				"varying vec4 interpolatedColor;",
 				"void main() {",
-				"	gl_FragColor=fragmentColor;",
+				"	gl_FragColor=interpolatedColor;",
+				"}",
+			];
+		} else if (options.hasInputsFor('shader.single.color')) {
+			return [
+				"uniform vec4 color;",
+				"void main() {",
+				"	gl_FragColor=color;",
 				"}",
 			];
 		} else {
@@ -248,14 +277,14 @@ module.exports=function(options,i18n){
 		}
 		if (options.hasInputsFor('shader.single.color')) {
 			lines.push(
-				"var fragmentColorLoc=gl.getUniformLocation(program,'fragmentColor');"
+				"var colorLoc=gl.getUniformLocation(program,'color');"
 			);
 			updater(
-				'shader.single.color','updateFragmentColor',
-				'gl.uniform4fv(fragmentColorLoc,',');',
-				'gl.uniform4fv(fragmentColorLoc,[',']);'
+				'shader.single.color','updateColor',
+				'gl.uniform4fv(colorLoc,',');',
+				'gl.uniform4fv(colorLoc,[',']);'
 			);
-			eventListener('shader.single.color','updateFragmentColor');
+			eventListener('shader.single.color','updateColor');
 		}
 		if (options['shape.gasket.depth.input']) {
 			lines.push(
