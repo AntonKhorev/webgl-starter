@@ -121,7 +121,7 @@ module.exports=function(options,i18n){
 			return [
 				"var nVertices=4;",
 				"var vertices=new Float32Array([",
-				"	// x    y    r    g    b",
+				"	// x    y"+(c?"    r    g    b":""),
 				"	-0.5,-0.5,"+(c?" 1.0, 0.0, 0.0,":""),
 				"	+0.5,-0.5,"+(c?" 0.0, 1.0, 0.0,":""),
 				"	+0.5,+0.5,"+(c?" 0.0, 0.0, 1.0,":""),
@@ -133,7 +133,7 @@ module.exports=function(options,i18n){
 			return [
 				"var nVertices=3;",
 				"var vertices=new Float32Array([",
-				"	//                   x                      y    r    g    b",
+				"	//                   x                      y"+(c?"    r    g    b":""),
 				"	-Math.sin(0/3*Math.PI), Math.cos(0/3*Math.PI),"+(c?" 1.0, 0.0, 0.0,":""),
 				"	-Math.sin(2/3*Math.PI), Math.cos(2/3*Math.PI),"+(c?" 0.0, 1.0, 0.0,":""),
 				"	-Math.sin(4/3*Math.PI), Math.cos(4/3*Math.PI),"+(c?" 0.0, 0.0, 1.0,":""),
@@ -235,6 +235,39 @@ module.exports=function(options,i18n){
 		} else if (options.shape=='gasket') {
 			return gasket();
 		}
+	}
+	function generateBufferLines() {
+		var lines=[
+			"var buffer=gl.createBuffer();",
+			"gl.bindBuffer(gl.ARRAY_BUFFER,buffer);",
+			"gl.bufferData(gl.ARRAY_BUFFER,vertices,gl.STATIC_DRAW);",
+			"",
+			"var positionLoc=gl.getAttribLocation(program,'position');",
+		];
+		if (options.shader=='vertex') {
+			lines.push(
+				"gl.vertexAttribPointer(",
+				"	positionLoc,2,gl.FLOAT,false,",
+				"	Float32Array.BYTES_PER_ELEMENT*5,",
+				"	Float32Array.BYTES_PER_ELEMENT*0",
+				");",
+				"gl.enableVertexAttribArray(positionLoc);",
+				"",
+				"var colorLoc=gl.getAttribLocation(program,'color');",
+				"gl.vertexAttribPointer(",
+				"	colorLoc,3,gl.FLOAT,false,",
+				"	Float32Array.BYTES_PER_ELEMENT*5,",
+				"	Float32Array.BYTES_PER_ELEMENT*2",
+				");",
+				"gl.enableVertexAttribArray(colorLoc);"
+			);
+		} else {
+			lines.push(
+				"gl.vertexAttribPointer(positionLoc,2,gl.FLOAT,false,0,0);",
+				"gl.enableVertexAttribArray(positionLoc);"
+			);
+		}
+		return lines;
 	}
 	function generateInputHandlerLines() {
 		var lines=[];
@@ -484,13 +517,7 @@ module.exports=function(options,i18n){
 		"	",
 	],indentLines(1,generateShapeLines()),[
 		"	",
-		"	var buffer=gl.createBuffer();",
-		"	gl.bindBuffer(gl.ARRAY_BUFFER,buffer);",
-		"	gl.bufferData(gl.ARRAY_BUFFER,vertices,gl.STATIC_DRAW);",
-		"	",
-		"	var positionLoc=gl.getAttribLocation(program,'position');",
-		"	gl.vertexAttribPointer(positionLoc,2,gl.FLOAT,false,0,0);",
-		"	gl.enableVertexAttribArray(positionLoc);",
+	],indentLines(1,generateBufferLines()),[
 		"	",
 	],indentLines(1,generateInputHandlerLines()),options.animation=='rotation'?[
 		"	var rotationAngleLoc=gl.getUniformLocation(program,'rotationAngle');",
