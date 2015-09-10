@@ -495,6 +495,29 @@ module.exports=function(options,i18n){
 			lines.push(
 				"});"
 			);
+		} else if (options['shape.gasket.depth.input']=='mousemovex') {
+			lines.push(
+				"canvas.addEventListener('mousemove',function(ev){",
+				"	var rect=this.getBoundingClientRect();",
+				"	var gasketDepth=Math.floor((10+1)*(ev.clientX-rect.left)/rect.width);"
+			);
+			if (options.debugInputs) {
+				lines.push(
+					"	console.log('shape.gasket.depth input value:',gasketDepth);"
+				);
+			}
+			lines.push(
+				"	storeGasketVertices(gasketDepth);",
+				"	gl.bufferData(gl.ARRAY_BUFFER,vertices,gl.STATIC_DRAW);"
+			);
+			if (options.animation!='rotation') {
+				lines.push(
+					"	updateCanvas();"
+				);
+			}
+			lines.push(
+				"});"
+			);
 		}
 		if (options['animation.rotation.speed.input']=='slider' && options.debugInputs) {
 			// listener is only for logging
