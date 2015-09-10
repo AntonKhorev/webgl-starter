@@ -115,6 +115,38 @@ module.exports=function(options,i18n){
 			})
 		);
 	}
+	function generateMakeProgramLines() {
+		lines=[
+			"function makeProgram(vertexShaderSrc,fragmentShaderSrc) {",
+			"	var vertexShader=gl.createShader(gl.VERTEX_SHADER);",
+			"	gl.shaderSource(vertexShader,vertexShaderSrc);",
+			"	gl.compileShader(vertexShader);",
+		];
+		if (options['debug.shader']) {
+			lines.push(
+				"	if (!gl.getShaderParameter(vertexShader,gl.COMPILE_STATUS)) console.log(gl.getShaderInfoLog(vertexShader));"
+			);
+		}
+		lines.push(
+			"	var fragmentShader=gl.createShader(gl.FRAGMENT_SHADER);",
+			"	gl.shaderSource(fragmentShader,fragmentShaderSrc);",
+			"	gl.compileShader(fragmentShader);"
+		);
+		if (options['debug.shader']) {
+			lines.push(
+				"	if (!gl.getShaderParameter(fragmentShader,gl.COMPILE_STATUS)) console.log(gl.getShaderInfoLog(fragmentShader));"
+			);
+		}
+		lines.push(
+			"	var program=gl.createProgram();",
+			"	gl.attachShader(program,vertexShader);",
+			"	gl.attachShader(program,fragmentShader);",
+			"	gl.linkProgram(program);",
+			"	return program;",
+			"}"
+		);
+		return lines;
+	}
 	function generateShapeLines() {
 		var c=options.shader=='vertex';
 		function square() {
@@ -488,21 +520,7 @@ module.exports=function(options,i18n){
 		"</div>",
 	],generateInputLines(),[
 		"<script>",
-		"	function makeProgram(vertexShaderSrc,fragmentShaderSrc) {",
-		"		var vertexShader=gl.createShader(gl.VERTEX_SHADER);",
-		"		gl.shaderSource(vertexShader,vertexShaderSrc);",
-		"		gl.compileShader(vertexShader);",
-		"		if (!gl.getShaderParameter(vertexShader,gl.COMPILE_STATUS)) console.log(gl.getShaderInfoLog(vertexShader));",
-		"		var fragmentShader=gl.createShader(gl.FRAGMENT_SHADER);",
-		"		gl.shaderSource(fragmentShader,fragmentShaderSrc);",
-		"		gl.compileShader(fragmentShader);",
-		"		if (!gl.getShaderParameter(fragmentShader,gl.COMPILE_STATUS)) console.log(gl.getShaderInfoLog(fragmentShader));",
-		"		var program=gl.createProgram();",
-		"		gl.attachShader(program,vertexShader);",
-		"		gl.attachShader(program,fragmentShader);",
-		"		gl.linkProgram(program);",
-		"		return program;",
-		"	}",
+	],indentLines(1,generateMakeProgramLines()),[
 		"	",
 		"	var canvas=document.getElementById('myCanvas');",
 		"	var gl=canvas.getContext('webgl')||canvas.getContext('experimental-webgl');",

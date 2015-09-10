@@ -43,11 +43,13 @@ var i18n=function(id){ // fake temporary i18n
 		'options.shader.single.color.a': 'Fragment color alpha component',
 		'options.shape.gasket.depth': 'Sierpinski gasket recursion depth',
 		'options.animation.rotation.speed': 'Z axis rotation speed',
-
 		'options.*.input': 'This value is',
 		'options.*.input.constant': 'kept constant',
 		'options.*.input.slider': 'updated with a slider',
 		//'options.*.input.animated': 'animated',
+
+		'options.debug': 'Debug options',
+		'options.debug.shader': 'Log shader compilation errors',
 	}[id];
 };
 
@@ -114,6 +116,19 @@ $(function(){
 					})
 				);
 		}
+		function writeDebugOption(option) {
+			var id=generateId();
+			return $("<div>")
+				.append(
+					$("<input type='checkbox' id='"+id+"'>")
+						.prop('checked',options[option.name])
+						.change(function(){
+							options[option.name]=$(this).prop('checked');
+							updateCode();
+						})
+				)
+				.append(" <label for='"+id+"'>"+i18n('options.'+option.name)+"</label>");
+		}
 		function writeOptions() {
 			return $("<div>").append(
 				$("<fieldset>").append("<legend>"+i18n('options.general')+"</legend>").append(
@@ -122,6 +137,10 @@ $(function(){
 			).append(
 				$("<fieldset>").append("<legend>"+i18n('options.input')+"</legend>").append(
 					options.inputOptions.map(writeInputOption)
+				)
+			).append(
+				$("<fieldset>").append("<legend>"+i18n('options.debug')+"</legend>").append(
+					options.debugOptions.map(writeDebugOption)
 				)
 			);
 		}

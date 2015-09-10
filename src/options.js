@@ -33,6 +33,12 @@ Option.prototype.getMaxLabel=function(){
 	return this.getMax().toString().replace('-','−');
 };
 
+CheckboxOption=function(name,defaultValue){
+	Option.call(this,name,[false,true],defaultValue);
+};
+CheckboxOption.prototype=Object.create(Option.prototype);
+CheckboxOption.prototype.constructor=Option;
+
 var Options=function(){
 	this.reset();
 };
@@ -54,6 +60,9 @@ Options.prototype.inputOptions=[
 	new Option('shape.gasket.depth',[0,10,1],6),
 	new Option('animation.rotation.speed',[-1,1],0.2),
 ];
+Options.prototype.debugOptions=[
+	new CheckboxOption('debug.shader',true),
+];
 Options.prototype.reset=function(){
 	this.generalOptions.forEach(function(option){
 		this[option.name]=option.defaultValue;
@@ -61,6 +70,9 @@ Options.prototype.reset=function(){
 	this.inputOptions.forEach(function(option){
 		this[option.name]=option.defaultValue;
 		this[option.name+'.input']='constant';
+	},this);
+	this.debugOptions.forEach(function(option){
+		this[option.name]=option.defaultValue;
 	},this);
 };
 Options.prototype.hasInputs=function(){
@@ -93,7 +105,7 @@ Options.prototype.getOnlyInputFor=function(prefix){
 	}
 };
 Options.prototype.cloneWithoutHidden=function(){
-	// clone and set .input=false for hidden sections
+	// clone and set .input=constant for hidden sections
 	var newOptions=new Options();
 	this.generalOptions.forEach(function(option){
 		newOptions[option.name]=this[option.name];
@@ -109,6 +121,9 @@ Options.prototype.cloneWithoutHidden=function(){
 		} else {
 			newOptions[option.name+'.input']=this[option.name+'.input'];
 		}
+	},this);
+	this.debugOptions.forEach(function(option){
+		newOptions[option.name]=this[option.name];
 	},this);
 	return newOptions;
 };
