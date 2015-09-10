@@ -19,7 +19,7 @@ InputOption=function(name,rangeOfValues,defaultValue){
 }
 InputOption.prototype=Object.create(Option.prototype);
 InputOption.prototype.constructor=InputOption;
-InputOption.prototype.availableInputTypes=['constant','slider','mousemovex'];
+InputOption.prototype.availableInputTypes=['constant','slider','mousemovex','mousemovey'];
 InputOption.prototype.getMin=function(){
 	return this.availableValues[0];
 }

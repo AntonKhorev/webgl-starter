@@ -303,11 +303,14 @@ module.exports=function(options,i18n){
 		return lines;
 	}
 	function generateInputHandlerLines() {
+		function isMousemoveInput(name) {
+			return ['mousemovex','mousemovey'].indexOf(options[name+'.input'])>=0;
+		}
 		var lines=[];
 		function colorStates(optionPrefix,updateFnName,stateVarPrefix) {
 			['r','g','b','a'].forEach(function(c){
 				var name=optionPrefix+'.'+c;
-				if (options[name+'.input']=='mousemovex') {
+				if (isMousemoveInput(name)) {
 					lines.push(
 						"var "+stateVarPrefix+c.toUpperCase()+'='+floatOptionValue(name)+';'
 					);
@@ -331,7 +334,7 @@ module.exports=function(options,i18n){
 						var name=optionPrefix+'.'+c;
 						if (options[name+'.input']=='slider') {
 							return "parseFloat(document.getElementById('"+name+"').value)";
-						} else if (options[name+'.input']=='mousemovex') {
+						} else if (isMousemoveInput(name)) {
 							return stateVarPrefix+c.toUpperCase();
 						} else {
 							return floatOptionValue(name);
@@ -413,12 +416,20 @@ module.exports=function(options,i18n){
 					lines.push(
 						"});"
 					);
-				} else if (options[name+'.input']=='mousemovex') {
+				} else if (isMousemoveInput(name)) {
 					lines.push(
 						"canvas.addEventListener('mousemove',function(ev){",
-						"	var rect=this.getBoundingClientRect();",
-						"	"+varName+"=(ev.clientX-rect.left)/(rect.width-1);"
+						"	var rect=this.getBoundingClientRect();"
 					);
+					if (options[name+'.input']=='mousemovex') {
+						lines.push(
+							"	"+varName+"=(ev.clientX-rect.left)/(rect.width-1);"
+						);
+					} else if (options[name+'.input']=='mousemovey') {
+						lines.push(
+							"	"+varName+"=(rect.bottom-1-ev.clientY)/(rect.height-1);"
+						);
+					}
 					if (options.debugInputs) {
 						lines.push(
 							"	console.log('"+name+" input value:',"+varName+");"

@@ -47,6 +47,7 @@ var i18n=function(id){ // fake temporary i18n
 		'options.*.input.constant': 'kept constant',
 		'options.*.input.slider': 'updated with a slider',
 		'options.*.input.mousemovex': 'updated by moving a mouse horizontally',
+		'options.*.input.mousemovey': 'updated by moving a mouse vertically',
 		//'options.*.input.animated': 'animated',
 
 		'options.debug': 'Debug options',
