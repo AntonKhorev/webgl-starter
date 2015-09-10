@@ -499,7 +499,7 @@ module.exports=function(options,i18n){
 			lines.push(
 				"canvas.addEventListener('mousemove',function(ev){",
 				"	var rect=this.getBoundingClientRect();",
-				"	var gasketDepth=Math.floor((10+1)*(ev.clientX-rect.left)/rect.width);"
+				"	var gasketDepth=Math.floor((gasketMaxDepth+1)*(ev.clientX-rect.left)/rect.width);"
 			);
 			if (options.debugInputs) {
 				lines.push(
