@@ -507,11 +507,21 @@ module.exports=function(options,i18n){
 			lines.push(
 				"});"
 			);
-		} else if (options['shape.gasket.depth.input']=='mousemovex') {
+		} else if (isMousemoveInput('shape.gasket.depth')) {
 			lines.push(
 				"canvas.addEventListener('mousemove',function(ev){",
-				"	var rect=this.getBoundingClientRect();",
-				"	var newGasketDepth=Math.floor((gasketMaxDepth+1)*(ev.clientX-rect.left)/rect.width);",
+				"	var rect=this.getBoundingClientRect();"
+			);
+			if (options['shape.gasket.depth.input']=='mousemovex') {
+				lines.push(
+					"	var newGasketDepth=Math.floor((gasketMaxDepth+1)*(ev.clientX-rect.left)/rect.width);"
+				);
+			} else if (options['shape.gasket.depth.input']=='mousemovey') {
+				lines.push(
+					"	var newGasketDepth=Math.floor((gasketMaxDepth+1)*(rect.bottom-1-ev.clientY)/rect.height);"
+				);
+			}
+			lines.push(
 				"	if (newGasketDepth!=gasketDepth) {"
 			);
 			if (options.debugInputs) {
@@ -540,13 +550,21 @@ module.exports=function(options,i18n){
 				"	console.log(this.id,'input value:',parseFloat(this.value));",
 				"});"
 			);
-		} else if (options['animation.rotation.speed.input']=='mousemovex') {
+		} else if (isMousemoveInput('animation.rotation.speed')) {
 			lines.push(
 				"var rotationSpeed="+floatOptionValue('animation.rotation.speed')+";",
 				"canvas.addEventListener('mousemove',function(ev){",
-				"	var rect=this.getBoundingClientRect();",
-				"	rotationSpeed=-1+2*(ev.clientX-rect.left)/(rect.width-1);"
+				"	var rect=this.getBoundingClientRect();"
 			);
+			if (options['animation.rotation.speed.input']=='mousemovex') {
+				lines.push(
+					"	rotationSpeed=-1+2*(ev.clientX-rect.left)/(rect.width-1);"
+				);
+			} else if (options['animation.rotation.speed.input']=='mousemovey') {
+				lines.push(
+					"	rotationSpeed=-1+2*(rect.bottom-1-ev.clientY)/(rect.height-1);"
+				);
+			}
 			if (options.debugInputs) {
 				lines.push(
 					"	console.log('animation.rotation.speed input value:',rotationSpeed);"
