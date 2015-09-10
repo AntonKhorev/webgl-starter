@@ -61,7 +61,8 @@ Options.prototype.inputOptions=[
 	new Option('animation.rotation.speed',[-1,1],0.2),
 ];
 Options.prototype.debugOptions=[
-	new CheckboxOption('debug.shader',true),
+	new CheckboxOption('debugShader',true),
+	new CheckboxOption('debugInputs'), // TODO hide if no inputs?
 ];
 Options.prototype.reset=function(){
 	this.generalOptions.forEach(function(option){

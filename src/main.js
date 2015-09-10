@@ -49,7 +49,8 @@ var i18n=function(id){ // fake temporary i18n
 		//'options.*.input.animated': 'animated',
 
 		'options.debug': 'Debug options',
-		'options.debug.shader': 'Log shader compilation errors',
+		'options.debugShader': 'Log shader compilation errors',
+		'options.debugInputs': 'Log input values',
 	}[id];
 };
 

@@ -122,7 +122,7 @@ module.exports=function(options,i18n){
 			"	gl.shaderSource(vertexShader,vertexShaderSrc);",
 			"	gl.compileShader(vertexShader);",
 		];
-		if (options['debug.shader']) {
+		if (options.debugShader) {
 			lines.push(
 				"	if (!gl.getShaderParameter(vertexShader,gl.COMPILE_STATUS)) console.log(gl.getShaderInfoLog(vertexShader));"
 			);
@@ -132,7 +132,7 @@ module.exports=function(options,i18n){
 			"	gl.shaderSource(fragmentShader,fragmentShaderSrc);",
 			"	gl.compileShader(fragmentShader);"
 		);
-		if (options['debug.shader']) {
+		if (options.debugShader) {
 			lines.push(
 				"	if (!gl.getShaderParameter(fragmentShader,gl.COMPILE_STATUS)) console.log(gl.getShaderInfoLog(fragmentShader));"
 			);
@@ -342,17 +342,32 @@ module.exports=function(options,i18n){
 					"document.getElementById('"+onlyInput.name+"')"
 				);
 			}
-			if (options.animation=='rotation') {
+			var listenerIsSingleFn=( options.animation=='rotation' && !options.debugInputs );
+			if (listenerIsSingleFn) {
 				appendLinesToLastLine(lines,[
 					".addEventListener('change',"+updateFnName+");",
 				]);
 			} else {
-				appendLinesToLastLine(lines,[
+				var listenerLines=[
 					".addEventListener('change',function(){",
-					"	"+updateFnName+"();",
-					"	updateCanvas();",
+				];
+				if (options.debugInputs) {
+					listenerLines.push(
+						"	console.log(this.id,'input value:',parseFloat(this.value));"
+					);
+				}
+				listenerLines.push(
+					"	"+updateFnName+"();"
+				);
+				if (options.animation!='rotation') {
+					listenerLines.push(
+						"	updateCanvas();"
+					);
+				}
+				listenerLines.push(
 					"});"
-				]);
+				);
+				appendLinesToLastLine(lines,listenerLines);
 			}
 			if (onlyInput===null) {
 				lines.push(
