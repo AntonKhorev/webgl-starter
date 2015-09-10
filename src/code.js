@@ -405,11 +405,13 @@ module.exports=function(options,i18n){
 					);
 				} else if (options[name+'.input']=='mousemovex') {
 					lines.push(
-						"canvas.addEventListener('mousemove',function(ev){"
+						"canvas.addEventListener('mousemove',function(ev){",
+						"	var rect=this.getBoundingClientRect();",
+						"	var val=(ev.clientX-rect.left)/(rect.width-1);"
 					);
 					if (options.debugInputs) {
 						lines.push(
-							"	console.log('"+name+" input value:',ev.pageX);"
+							"	console.log('"+name+" input value:',val);"
 						);
 					}
 					lines.push(
