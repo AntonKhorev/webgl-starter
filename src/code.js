@@ -396,7 +396,14 @@ module.exports=function(options,i18n){
 		}
 		if (options['shape.gasket.depth.input']=='slider') {
 			lines.push(
-				"document.getElementById('shape.gasket.depth').addEventListener('change',function(){",
+				"document.getElementById('shape.gasket.depth').addEventListener('change',function(){"
+			);
+			if (options.debugInputs) {
+				lines.push(
+					"	console.log(this.id,'input value:',parseInt(this.value));"
+				);
+			}
+			lines.push(
 				"	storeGasketVertices(parseInt(this.value));",
 				"	gl.bufferData(gl.ARRAY_BUFFER,vertices,gl.STATIC_DRAW);"
 			);
@@ -406,6 +413,14 @@ module.exports=function(options,i18n){
 				);
 			}
 			lines.push(
+				"});"
+			);
+		}
+		if (options['animation.rotation.speed.input']=='slider' && options.debugInputs) {
+			// listener is only for logging
+			lines.push(
+				"document.getElementById('animation.rotation.speed').addEventListener('change',function(){",
+				"	console.log(this.id,'input value:',parseFloat(this.value));",
 				"});"
 			);
 		}
