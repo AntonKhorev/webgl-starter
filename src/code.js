@@ -11,6 +11,9 @@ module.exports=function(options,i18n){
 		       floatOptionValue(prefix+'.b')+","+
 		       floatOptionValue(prefix+'.a');
 	}
+	function isMousemoveInput(name) {
+		return ['mousemovex','mousemovey'].indexOf(options[name+'.input'])>=0;
+	}
 	function indentLines(level,lines) {
 		return lines.map(function(line){
 			return Array(level+1).join("	")+line;
@@ -94,6 +97,18 @@ module.exports=function(options,i18n){
 				"	gl_FragColor=vec4("+colorValue('shader.single.color')+");",
 				"}",
 			];
+		}
+	}
+	function generateControlMessageLines() {
+		var lines=options.inputOptions.filter(function(option){
+			return isMousemoveInput(option.name);
+		}).map(function(option){
+			return "	<li>"+i18n('controls.type.'+options[option.name+'.input'])+" "+i18n('controls.to')+" <strong>"+i18n('options.'+option.name)+"</strong></li>";
+		});
+		if (lines.length) {
+			return ["<ul>"].concat(lines,["</ul>"]);
+		} else {
+			return [];
 		}
 	}
 	function generateInputLines() {
@@ -303,9 +318,6 @@ module.exports=function(options,i18n){
 		return lines;
 	}
 	function generateInputHandlerLines() {
-		function isMousemoveInput(name) {
-			return ['mousemovex','mousemovey'].indexOf(options[name+'.input'])>=0;
-		}
 		var lines=[];
 		function colorStates(optionPrefix,updateFnName,stateVarPrefix) {
 			['r','g','b','a'].forEach(function(c){
@@ -702,7 +714,7 @@ module.exports=function(options,i18n){
 		"<div>",
 		"	<canvas id='myCanvas' width='512' height='512'></canvas>",
 		"</div>",
-	],generateInputLines(),[
+	],generateControlMessageLines(),generateInputLines(),[
 		"<script>",
 	],indentLines(1,generateMakeProgramLines()),[
 		"	",

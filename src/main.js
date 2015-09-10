@@ -46,13 +46,30 @@ var i18n=function(id){ // fake temporary i18n
 		'options.*.input': 'This value is',
 		'options.*.input.constant': 'kept constant',
 		'options.*.input.slider': 'updated with a slider',
-		'options.*.input.mousemovex': 'updated by moving a mouse horizontally',
-		'options.*.input.mousemovey': 'updated by moving a mouse vertically',
+		'options.*.input.mousemovex': 'updated by moving the mouse horizontally',
+		'options.*.input.mousemovey': 'updated by moving the mouse vertically',
 		//'options.*.input.animated': 'animated',
 
 		'options.debug': 'Debug options',
 		'options.debugShader': 'Log shader compilation errors',
 		'options.debugInputs': 'Log input values',
+
+		'controls.type.mousemovex': 'Move the mouse pointer horizontally over the canvas',
+		'controls.type.mousemovey': 'Move the mouse pointer vertically over the canvas',
+		'controls.to': 'to update',
+		/*
+		// TODO
+		'controls.value.background.solid.color.r': 'Background color red component',
+		'controls.value.background.solid.color.g': 'Background color green component',
+		'controls.value.background.solid.color.b': 'Background color blue component',
+		'controls.value.background.solid.color.a': 'Background color alpha component',
+		'controls.value.shader.single.color.r': 'Fragment color red component',
+		'controls.value.shader.single.color.g': 'Fragment color green component',
+		'controls.value.shader.single.color.b': 'Fragment color blue component',
+		'controls.value.shader.single.color.a': 'Fragment color alpha component',
+		'controls.value.shape.gasket.depth': 'Sierpinski gasket recursion depth',
+		'controls.value.animation.rotation.speed': 'Z axis rotation speed',
+		*/
 	}[id];
 };
 
