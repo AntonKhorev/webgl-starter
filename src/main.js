@@ -151,19 +151,8 @@ $(function(){
 				showHideSuboptionInputs(option.name,options[option.name]);
 			});
 		}
-
-		containerNode.empty().append(optionsNode=writeOptions());
-		hideSuboptionInputs();
-		containerNode.append(
-			$("<pre>").append(codeNode=$("<code>").text(generateCode(options.cloneWithoutHidden(),i18n)))
-		);
-		if (window.hljs) {
-			hljs.highlightBlock(codeNode[0]);
-		} else {
-			containerNode.append("<p>"+i18n('message.hljs')+"</p>");
-		}
-		containerNode.append(
-			$("<div>").append(
+		function writeButtons() {
+			return $("<div>").append(
 				$("<a download='source.html'><button type='button'>Save source code</button></a>").click(function(){
 					// yes I want a button, but download attr is only available for links
 					$(this).attr('href',getHtmlDataUri(codeNode.text()));
@@ -177,6 +166,18 @@ $(function(){
 			).append(
 				" these buttons don't work in Internet Explorer, copy-paste the code manually"
 			)
+		}
+
+		containerNode.empty().append(optionsNode=writeOptions());
+		hideSuboptionInputs();
+		containerNode.append(writeButtons()).append(
+			$("<pre>").append(codeNode=$("<code>").text(generateCode(options.cloneWithoutHidden(),i18n)))
 		);
+		if (window.hljs) {
+			hljs.highlightBlock(codeNode[0]);
+		} else {
+			containerNode.append("<p>"+i18n('message.hljs')+"</p>");
+		}
+		containerNode.append(writeButtons());
 	});
 });
