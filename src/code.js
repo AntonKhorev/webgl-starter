@@ -179,8 +179,9 @@ module.exports=function(options,i18n){
 					"var gasketMaxDepth=10;",
 					"var nMaxVertices=Math.pow(3,gasketMaxDepth)*3;",
 					"var vertices=new Float32Array(nMaxVertices*"+(c?5:2)+");",
-					"var nVertices;",
-					"function storeGasketVertices(gasketDepth) {",
+					"var gasketDepth,nVertices;",
+					"function storeGasketVertices(newGasketDepth) {",
+					"	gasketDepth=newGasketDepth",
 					"	nVertices=Math.pow(3,gasketDepth)*3;"
 				);
 			} else {
@@ -499,23 +500,25 @@ module.exports=function(options,i18n){
 			lines.push(
 				"canvas.addEventListener('mousemove',function(ev){",
 				"	var rect=this.getBoundingClientRect();",
-				"	var gasketDepth=Math.floor((gasketMaxDepth+1)*(ev.clientX-rect.left)/rect.width);"
+				"	var newGasketDepth=Math.floor((gasketMaxDepth+1)*(ev.clientX-rect.left)/rect.width);",
+				"	if (newGasketDepth!=gasketDepth) {"
 			);
 			if (options.debugInputs) {
 				lines.push(
-					"	console.log('shape.gasket.depth input value:',gasketDepth);"
+					"		console.log('shape.gasket.depth input value:',newGasketDepth);"
 				);
 			}
 			lines.push(
-				"	storeGasketVertices(gasketDepth);",
-				"	gl.bufferData(gl.ARRAY_BUFFER,vertices,gl.STATIC_DRAW);"
+				"		storeGasketVertices(newGasketDepth);",
+				"		gl.bufferData(gl.ARRAY_BUFFER,vertices,gl.STATIC_DRAW);"
 			);
 			if (options.animation!='rotation') {
 				lines.push(
-					"	updateCanvas();"
+					"		updateCanvas();"
 				);
 			}
 			lines.push(
+				"	}",
 				"});"
 			);
 		}
