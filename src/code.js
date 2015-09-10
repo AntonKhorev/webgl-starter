@@ -99,7 +99,7 @@ module.exports=function(options,i18n){
 	function generateInputLines() {
 		return [].concat.apply([],
 			options.inputOptions.filter(function(option){
-				return options[option.name+'.input'];
+				return options[option.name+'.input']=='slider';
 			}).map(function(option){
 				return [
 					"<div>",
@@ -142,7 +142,7 @@ module.exports=function(options,i18n){
 		}
 		function gasket() {
 			lines=[];
-			if (options['shape.gasket.depth.input']) {
+			if (options['shape.gasket.depth.input']!='constant') {
 				lines.push(
 					"var gasketMaxDepth=10;",
 					"var nMaxVertices=Math.pow(3,gasketMaxDepth)*3;",
@@ -217,7 +217,7 @@ module.exports=function(options,i18n){
 				"	);",
 				"}"
 			);
-			if (options['shape.gasket.depth.input']) {
+			if (options['shape.gasket.depth.input']!='constant') {
 				lines.push(
 					"storeGasketVertices("+intOptionValue('shape.gasket.depth')+");"
 				);
@@ -285,7 +285,7 @@ module.exports=function(options,i18n){
 				lines.push(
 					"	"+someInputsPre+['r','g','b','a'].map(function(c){
 						var name=optionPrefix+'.'+c;
-						if (options[name+'.input']) {
+						if (options[name+'.input']=='slider') {
 							return "parseFloat(document.getElementById('"+name+"').value)";
 						} else {
 							return floatOptionValue(name);
@@ -347,7 +347,7 @@ module.exports=function(options,i18n){
 			);
 			eventListener('shader.single.color','updateColor');
 		}
-		if (options['shape.gasket.depth.input']) {
+		if (options['shape.gasket.depth.input']=='slider') {
 			lines.push(
 				"document.getElementById('shape.gasket.depth').addEventListener('change',function(){",
 				"	storeGasketVertices(parseInt(this.value));",
@@ -374,7 +374,7 @@ module.exports=function(options,i18n){
 				);
 			}
 			if (options.animation=='rotation') {
-				if (options['animation.rotation.speed.input']) {
+				if (options['animation.rotation.speed.input']=='slider') {
 					lines.push(
 						"var rotationSpeed=parseFloat(document.getElementById('animation.rotation.speed').value);",
 						"rotationAngle+=rotationSpeed*360*(time-prevTime)/1000;",
@@ -399,7 +399,7 @@ module.exports=function(options,i18n){
 		}
 		var lines=[];
 		if (options.animation=='rotation') {
-			if (options['animation.rotation.speed.input']) {
+			if (options['animation.rotation.speed.input']!='constant') {
 				// angle needs to be a state only if speed is controllable
 				lines.push(
 					"var rotationAngle=0;",
@@ -420,7 +420,7 @@ module.exports=function(options,i18n){
 				indentLines(1,renderInner())
 			);
 			if (options.animation=='rotation') {
-				if (options['animation.rotation.speed.input']) {
+				if (options['animation.rotation.speed.input']!='constant') {
 					lines.push(
 						"	prevTime=time;"
 					);

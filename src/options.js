@@ -60,31 +60,31 @@ Options.prototype.reset=function(){
 	},this);
 	this.inputOptions.forEach(function(option){
 		this[option.name]=option.defaultValue;
-		this[option.name+'.input']=false;
+		this[option.name+'.input']='constant';
 	},this);
 };
 Options.prototype.hasInputs=function(){
 	return this.inputOptions.some(function(option){
-		return this[option.name+'.input'];
+		return this[option.name+'.input']!='constant';
 	},this);
 };
 Options.prototype.hasInputsFor=function(prefix){
 	return this.inputOptions.filter(function(option){
 		return option.name.indexOf(prefix+'.')===0;
 	},this).some(function(option){
-		return this[option.name+'.input'];
+		return this[option.name+'.input']!='constant';
 	},this);
 };
 Options.prototype.hasAllInputsFor=function(prefix){
 	return this.inputOptions.filter(function(option){
 		return option.name.indexOf(prefix+'.')===0;
 	},this).every(function(option){
-		return this[option.name+'.input'];
+		return this[option.name+'.input']!='constant';
 	},this);
 };
 Options.prototype.getOnlyInputFor=function(prefix){
 	var matchedOptions=this.inputOptions.filter(function(option){
-		return option.name.indexOf(prefix+'.')===0 && this[option.name+'.input'];
+		return option.name.indexOf(prefix+'.')===0 && this[option.name+'.input']!='constant';
 	},this);
 	if (matchedOptions.length==1) {
 		return matchedOptions[0];
@@ -105,7 +105,7 @@ Options.prototype.cloneWithoutHidden=function(){
 				return generalOption.doesValueHideOption(this[generalOption.name],option);
 			},this)
 		) {
-			newOptions[option.name+'.input']=false;
+			newOptions[option.name+'.input']='constant';
 		} else {
 			newOptions[option.name+'.input']=this[option.name+'.input'];
 		}

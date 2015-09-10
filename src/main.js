@@ -43,7 +43,10 @@ var i18n=function(id){ // fake temporary i18n
 		'options.shader.single.color.a': 'Fragment color alpha component',
 		'options.shape.gasket.depth': 'Sierpinski gasket recursion depth',
 		'options.animation.rotation.speed': 'Z axis rotation speed',
-		'options.*.input': 'Make this input available to users',
+
+		'options.*.input.constant': 'Constant',
+		'options.*.input.slider': 'Slider input',
+		//'options.*.input.animated': 'Animated',
 	}[id];
 };
 
@@ -82,7 +85,7 @@ $(function(){
 		}
 		function writeInputOption(option) {
 			var id=generateId();
-			var checkboxId=generateId();
+			var inputId=generateId();
 			return $("<div data-option='"+option.name+"'>")
 				.append("<label for='"+id+"'>"+i18n('options.'+option.name)+":</label>")
 				.append(" <span class='min'>"+option.getMinLabel()+"</span> ")
@@ -99,15 +102,17 @@ $(function(){
 				)
 				.append(" <span class='max'>"+option.getMaxLabel()+"</span> ")
 				.append(
-					$("<input type='checkbox' id='"+checkboxId+"'>")
-						.prop('checked',options[option.name+'.input'])
-						.change(function(){
-							options[option.name+'.input']=$(this).prop('checked');
-							updateCode();
+					$("<select id='"+inputId+"'>").append(
+						['constant','slider'].map(function(availableInputValue){
+							return $("<option>").val(availableInputValue).html(i18n('options.*.input.'+availableInputValue))
 						})
-				)
-				.append(" ")
-				.append("<label for='"+checkboxId+"'>"+i18n('options.*.input')+"</label>");
+					).val(options[option.name+'.input']).change(function(){
+						options[option.name+'.input']=this.value;
+						updateCode();
+					})
+				);
+				//.append(" ")
+				//.append("<label for='"+checkboxId+"'>"+i18n('options.*.input')+"</label>");
 		}
 		function writeOptions() {
 			return $("<div>").append(
