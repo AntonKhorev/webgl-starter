@@ -503,6 +503,21 @@ module.exports=function(options,i18n){
 				"	console.log(this.id,'input value:',parseFloat(this.value));",
 				"});"
 			);
+		} else if (options['animation.rotation.speed.input']=='mousemovex') {
+			lines.push(
+				"var rotationSpeed="+floatOptionValue('animation.rotation.speed')+";",
+				"canvas.addEventListener('mousemove',function(ev){",
+				"	var rect=this.getBoundingClientRect();",
+				"	rotationSpeed=-1+2*(ev.clientX-rect.left)/(rect.width-1);"
+			);
+			if (options.debugInputs) {
+				lines.push(
+					"	console.log('animation.rotation.speed input value:',rotationSpeed);"
+				);
+			}
+			lines.push(
+				"});"
+			);
 		}
 		if (lines.length) lines.push("	");
 		return lines;
@@ -516,15 +531,19 @@ module.exports=function(options,i18n){
 				);
 			}
 			if (options.animation=='rotation') {
-				if (options['animation.rotation.speed.input']=='slider') {
-					lines.push(
-						"var rotationSpeed=parseFloat(document.getElementById('animation.rotation.speed').value);",
-						"rotationAngle+=rotationSpeed*360*(time-prevTime)/1000;",
-						"gl.uniform1f(rotationAngleLoc,rotationAngle);"
-					);
-				} else {
+				if (options['animation.rotation.speed.input']=='constant') {
 					lines.push(
 						"gl.uniform1f(rotationAngleLoc,"+floatOptionValue('animation.rotation.speed')+"*360*(time-startTime)/1000);"
+					);
+				} else {
+					if (options['animation.rotation.speed.input']=='slider') {
+						lines.push(
+							"var rotationSpeed=parseFloat(document.getElementById('animation.rotation.speed').value);"
+						);
+					}
+					lines.push(
+						"rotationAngle+=rotationSpeed*360*(time-prevTime)/1000;",
+						"gl.uniform1f(rotationAngleLoc,rotationAngle);"
 					);
 				}
 			}
