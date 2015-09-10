@@ -391,6 +391,7 @@ module.exports=function(options,i18n){
 		function colorMultipleListeners(optionPrefix,updateFnName,stateVarPrefix) {
 			['r','g','b','a'].forEach(function(c){
 				var name=optionPrefix+'.'+c;
+				var varName=stateVarPrefix+c.toUpperCase();
 				if (options[name+'.input']=='slider') {
 					lines.push(
 						"document.getElementById('"+name+"').addEventListener('change',function(){"
@@ -401,17 +402,33 @@ module.exports=function(options,i18n){
 						);
 					}
 					lines.push(
+						"	"+updateFnName+"();"
+					);
+					if (options.animation!='rotation') {
+						lines.push(
+							"	updateCanvas();"
+						);
+					}
+					lines.push(
 						"});"
 					);
 				} else if (options[name+'.input']=='mousemovex') {
 					lines.push(
 						"canvas.addEventListener('mousemove',function(ev){",
 						"	var rect=this.getBoundingClientRect();",
-						"	var val=(ev.clientX-rect.left)/(rect.width-1);"
+						"	"+varName+"=(ev.clientX-rect.left)/(rect.width-1);"
 					);
 					if (options.debugInputs) {
 						lines.push(
-							"	console.log('"+name+" input value:',val);"
+							"	console.log('"+name+" input value:',"+varName+");"
+						);
+					}
+					lines.push(
+						"	"+updateFnName+"();"
+					);
+					if (options.animation!='rotation') {
+						lines.push(
+							"	updateCanvas();"
 						);
 					}
 					lines.push(
