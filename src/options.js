@@ -13,31 +13,38 @@ Option.prototype.doesValueHideOption=function(value,option){
 	}
 	return optionStartsWith(this.name+'.') && !optionStartsWith(this.name+'.'+value+'.');
 };
-Option.prototype.getMin=function(){
+
+InputOption=function(name,rangeOfValues,defaultValue){
+	Option.call(this,name,rangeOfValues,defaultValue);
+}
+InputOption.prototype=Object.create(Option.prototype);
+InputOption.prototype.constructor=InputOption;
+InputOption.prototype.availableInputTypes=['constant','slider','mousemovex'];
+InputOption.prototype.getMin=function(){
 	return this.availableValues[0];
 }
-Option.prototype.getMax=function(){
+InputOption.prototype.getMax=function(){
 	return this.availableValues[1];
 }
-Option.prototype.getStep=function(){
+InputOption.prototype.getStep=function(){
 	if (this.availableValues.length>=3) {
 		return this.availableValues[2];
 	} else {
 		return 'any';
 	}
 }
-Option.prototype.getMinLabel=function(){
+InputOption.prototype.getMinLabel=function(){
 	return this.getMin().toString().replace('-','−');
 };
-Option.prototype.getMaxLabel=function(){
+InputOption.prototype.getMaxLabel=function(){
 	return this.getMax().toString().replace('-','−');
 };
 
-CheckboxOption=function(name,defaultValue){
+DebugOption=function(name,defaultValue){
 	Option.call(this,name,[false,true],defaultValue);
 };
-CheckboxOption.prototype=Object.create(Option.prototype);
-CheckboxOption.prototype.constructor=Option;
+DebugOption.prototype=Object.create(Option.prototype);
+DebugOption.prototype.constructor=DebugOption;
 
 var Options=function(){
 	this.reset();
@@ -49,20 +56,20 @@ Options.prototype.generalOptions=[
 	new Option('animation',['none','rotation']),
 ];
 Options.prototype.inputOptions=[
-	new Option('background.solid.color.r',[0,1],1),
-	new Option('background.solid.color.g',[0,1],1),
-	new Option('background.solid.color.b',[0,1],1),
-	new Option('background.solid.color.a',[0,1],1),
-	new Option('shader.single.color.r',[0,1],1),
-	new Option('shader.single.color.g',[0,1]),
-	new Option('shader.single.color.b',[0,1]),
-	new Option('shader.single.color.a',[0,1],1),
-	new Option('shape.gasket.depth',[0,10,1],6),
-	new Option('animation.rotation.speed',[-1,1],0.2),
+	new InputOption('background.solid.color.r',[0,1],1),
+	new InputOption('background.solid.color.g',[0,1],1),
+	new InputOption('background.solid.color.b',[0,1],1),
+	new InputOption('background.solid.color.a',[0,1],1),
+	new InputOption('shader.single.color.r',[0,1],1),
+	new InputOption('shader.single.color.g',[0,1]),
+	new InputOption('shader.single.color.b',[0,1]),
+	new InputOption('shader.single.color.a',[0,1],1),
+	new InputOption('shape.gasket.depth',[0,10,1],6),
+	new InputOption('animation.rotation.speed',[-1,1],0.2),
 ];
 Options.prototype.debugOptions=[
-	new CheckboxOption('debugShader',true),
-	new CheckboxOption('debugInputs'), // TODO hide if no inputs?
+	new DebugOption('debugShader',true),
+	new DebugOption('debugInputs'), // TODO hide if no inputs?
 ];
 Options.prototype.reset=function(){
 	this.generalOptions.forEach(function(option){
@@ -76,9 +83,16 @@ Options.prototype.reset=function(){
 		this[option.name]=option.defaultValue;
 	},this);
 };
+
+// TODO check what .has*() fns are in use
 Options.prototype.hasInputs=function(){
 	return this.inputOptions.some(function(option){
 		return this[option.name+'.input']!='constant';
+	},this);
+};
+Options.prototype.hasSliderInputs=function(){
+	return this.inputOptions.some(function(option){
+		return this[option.name+'.input']=='slider';
 	},this);
 };
 Options.prototype.hasInputsFor=function(prefix){
@@ -88,11 +102,11 @@ Options.prototype.hasInputsFor=function(prefix){
 		return this[option.name+'.input']!='constant';
 	},this);
 };
-Options.prototype.hasAllInputsFor=function(prefix){
+Options.prototype.hasAllSliderInputsFor=function(prefix){
 	return this.inputOptions.filter(function(option){
 		return option.name.indexOf(prefix+'.')===0;
 	},this).every(function(option){
-		return this[option.name+'.input']!='constant';
+		return this[option.name+'.input']=='slider';
 	},this);
 };
 Options.prototype.getOnlyInputFor=function(prefix){
@@ -105,6 +119,7 @@ Options.prototype.getOnlyInputFor=function(prefix){
 		return null;
 	}
 };
+
 Options.prototype.cloneWithoutHidden=function(){
 	// clone and set .input=constant for hidden sections
 	var newOptions=new Options();

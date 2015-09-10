@@ -46,6 +46,7 @@ var i18n=function(id){ // fake temporary i18n
 		'options.*.input': 'This value is',
 		'options.*.input.constant': 'kept constant',
 		'options.*.input.slider': 'updated with a slider',
+		'options.*.input.mousemovex': 'updated by moving a mouse horizontally',
 		//'options.*.input.animated': 'animated',
 
 		'options.debug': 'Debug options',
@@ -108,8 +109,8 @@ $(function(){
 				.append("<label for='"+inputId+"'>"+i18n('options.*.input')+"</label> ")
 				.append(
 					$("<select id='"+inputId+"'>").append(
-						['constant','slider'].map(function(availableInputValue){
-							return $("<option>").val(availableInputValue).html(i18n('options.*.input.'+availableInputValue))
+						option.availableInputTypes.map(function(availableInputType){
+							return $("<option>").val(availableInputType).html(i18n('options.*.input.'+availableInputType))
 						})
 					).val(options[option.name+'.input']).change(function(){
 						options[option.name+'.input']=this.value;

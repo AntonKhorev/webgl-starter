@@ -303,22 +303,35 @@ module.exports=function(options,i18n){
 	}
 	function generateInputHandlerLines() {
 		var lines=[];
-		function updater(optionPrefix,updateFnName,allInputsPre,allInputsPost,someInputsPre,someInputsPost) {
+		function colorStates(optionPrefix,updateFnName,stateVarPrefix) {
+			['r','g','b','a'].forEach(function(c){
+				var name=optionPrefix+'.'+c;
+				if (options[name+'.input']=='mousemovex') {
+					lines.push(
+						"var "+stateVarPrefix+c.toUpperCase()+'='+floatOptionValue(name)+';'
+					);
+				}
+			});
+		}
+		function colorUpdater(optionPrefix,updateFnName,stateVarPrefix,allInputsPre,allInputsPost,someInputsPre,someInputsPost) {
 			lines.push(
 				"function "+updateFnName+"() {"
 			);
-			if (options.hasAllInputsFor(optionPrefix)) {
+			if (options.hasAllSliderInputsFor(optionPrefix)) {
 				lines.push(
 					"	"+allInputsPre+"['r','g','b','a'].map(function(c){",
 					"		return parseFloat(document.getElementById('"+optionPrefix+".'+c).value);",
 					"	})"+allInputsPost
 				);
+			// TODO hasAllStateInputsFor(optionPrefix)
 			} else {
 				lines.push(
 					"	"+someInputsPre+['r','g','b','a'].map(function(c){
 						var name=optionPrefix+'.'+c;
 						if (options[name+'.input']=='slider') {
 							return "parseFloat(document.getElementById('"+name+"').value)";
+						} else if (options[name+'.input']=='mousemovex') {
+							return stateVarPrefix+c.toUpperCase();
 						} else {
 							return floatOptionValue(name);
 						}
@@ -330,7 +343,7 @@ module.exports=function(options,i18n){
 				updateFnName+"();"
 			);
 		}
-		function eventListener(optionPrefix,updateFnName) {
+		function colorSingleListener(optionPrefix,updateFnName,stateVarPrefix) {
 			var onlyInput=options.getOnlyInputFor(optionPrefix);
 			if (onlyInput===null) {
 				lines.push(
@@ -375,24 +388,72 @@ module.exports=function(options,i18n){
 				);
 			}
 		}
+		function colorMultipleListeners(optionPrefix,updateFnName,stateVarPrefix) {
+			['r','g','b','a'].forEach(function(c){
+				var name=optionPrefix+'.'+c;
+				if (options[name+'.input']=='slider') {
+					lines.push(
+						"document.getElementById('"+name+"').addEventListener('change',function(){"
+					);
+					if (options.debugInputs) {
+						lines.push(
+							"	console.log(this.id,'input value:',parseFloat(this.value));"
+						);
+					}
+					lines.push(
+						"});"
+					);
+				} else if (options[name+'.input']=='mousemovex') {
+					lines.push(
+						"canvas.addEventListener('mousemove',function(ev){"
+					);
+					if (options.debugInputs) {
+						lines.push(
+							"	console.log('"+name+" input value:',ev.pageX);"
+						);
+					}
+					lines.push(
+						"});"
+					);
+				}
+			});
+		}
+		function colorListeners(optionPrefix,updateFnName,stateVarPrefix) {
+			var needOnlyOneListener=['r','g','b','a'].every(function(c){
+				var inputType=options[optionPrefix+'.'+c+'.input'];
+				return inputType=='constant' || inputType=='slider';
+			});
+			if (needOnlyOneListener) {
+				colorSingleListener(optionPrefix,updateFnName,stateVarPrefix);
+			} else {
+				colorMultipleListeners(optionPrefix,updateFnName,stateVarPrefix);
+			}
+		}
+		function colorStatesAndUpdaterAndListeners(
+			optionPrefix,updateFnName,stateVarPrefix,
+			allInputsPre,allInputsPost,
+			someInputsPre,someInputsPost
+		) {
+			colorStates(optionPrefix,updateFnName,stateVarPrefix);
+			colorUpdater(optionPrefix,updateFnName,stateVarPrefix,allInputsPre,allInputsPost,someInputsPre,someInputsPost);
+			colorListeners(optionPrefix,updateFnName,stateVarPrefix);
+		}
 		if (options.hasInputsFor('background.solid.color')) {
-			updater(
-				'background.solid.color','updateClearColor',
+			colorStatesAndUpdaterAndListeners(
+				'background.solid.color','updateClearColor','clearColor',
 				'gl.clearColor.apply(gl,',');',
 				'gl.clearColor(',');'
 			);
-			eventListener('background.solid.color','updateClearColor');
 		}
 		if (options.hasInputsFor('shader.single.color')) {
 			lines.push(
 				"var colorLoc=gl.getUniformLocation(program,'color');"
 			);
-			updater(
-				'shader.single.color','updateColor',
+			colorStatesAndUpdaterAndListeners(
+				'shader.single.color','updateColor','color',
 				'gl.uniform4fv(colorLoc,',');',
 				'gl.uniform4fv(colorLoc,[',']);'
 			);
-			eventListener('shader.single.color','updateColor');
 		}
 		if (options['shape.gasket.depth.input']=='slider') {
 			lines.push(
@@ -473,7 +534,7 @@ module.exports=function(options,i18n){
 				);
 			}
 		}
-		var needUpdateCanvasFunction=options.animation=='rotation'||options.hasInputs()
+		var needUpdateCanvasFunction=options.animation=='rotation'||options.hasInputs();
 		if (needUpdateCanvasFunction) {
 			lines.push(
 				"function updateCanvas(time) {"
@@ -517,7 +578,7 @@ module.exports=function(options,i18n){
 		"<head>",
 		"<meta charset='utf-8' />",
 		"<title>Generated code</title>",
-	],options.hasInputs()?[
+	],options.hasSliderInputs()?[
 		"<style>",
 		"	label {",
 		"		display: inline-block;",
