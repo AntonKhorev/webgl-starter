@@ -44,9 +44,10 @@ var i18n=function(id){ // fake temporary i18n
 		'options.shape.gasket.depth': 'Sierpinski gasket recursion depth',
 		'options.animation.rotation.speed': 'Z axis rotation speed',
 
-		'options.*.input.constant': 'Constant',
-		'options.*.input.slider': 'Slider input',
-		//'options.*.input.animated': 'Animated',
+		'options.*.input': 'This value is',
+		'options.*.input.constant': 'kept constant',
+		'options.*.input.slider': 'updated with a slider',
+		//'options.*.input.animated': 'animated',
 	}[id];
 };
 
@@ -101,6 +102,7 @@ $(function(){
 						})
 				)
 				.append(" <span class='max'>"+option.getMaxLabel()+"</span> ")
+				.append("<label for='"+inputId+"'>"+i18n('options.*.input')+"</label> ")
 				.append(
 					$("<select id='"+inputId+"'>").append(
 						['constant','slider'].map(function(availableInputValue){
@@ -111,8 +113,6 @@ $(function(){
 						updateCode();
 					})
 				);
-				//.append(" ")
-				//.append("<label for='"+checkboxId+"'>"+i18n('options.*.input')+"</label>");
 		}
 		function writeOptions() {
 			return $("<div>").append(
