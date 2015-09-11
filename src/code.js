@@ -379,51 +379,6 @@ module.exports=function(options,i18n){
 				.log("console.log(this.id,'input value:',parseFloat(this.value));")
 				.post(updateFnName+"();");
 			writeListener(listener);
-			/*
-			////
-			if (onlyInput===null) {
-				lines.push(
-					"[].forEach.call(document.querySelectorAll('[id^=\""+optionPrefix+".\"]'),function(el){",
-					"	el"
-				);
-			} else {
-				lines.push(
-					"document.getElementById('"+onlyInput.name+"')"
-				);
-			}
-			var listenerIsSingleFn=( options.animation=='rotation' && !options.debugInputs );
-			if (listenerIsSingleFn) {
-				appendLinesToLastLine(lines,[
-					".addEventListener('change',"+updateFnName+");",
-				]);
-			} else {
-				var listenerLines=[
-					".addEventListener('change',function(){",
-				];
-				if (options.debugInputs) {
-					listenerLines.push(
-						"	console.log(this.id,'input value:',parseFloat(this.value));"
-					);
-				}
-				listenerLines.push(
-					"	"+updateFnName+"();"
-				);
-				if (options.animation!='rotation') {
-					listenerLines.push(
-						"	updateCanvas();"
-					);
-				}
-				listenerLines.push(
-					"});"
-				);
-				appendLinesToLastLine(lines,listenerLines);
-			}
-			if (onlyInput===null) {
-				lines.push(
-					"});"
-				);
-			}
-			*/
 		}
 		function colorMultipleListeners(optionPrefix,updateFnName,stateVarPrefix) {
 			['r','g','b','a'].forEach(function(c){

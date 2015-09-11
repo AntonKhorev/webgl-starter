@@ -30,8 +30,14 @@ Listener.prototype.enter=function(){
 	};
 	return proxy;
 };
-Listener.prototype.innerIndent=function(line){
-	return "\t"+line;
+Listener.prototype.innerPrependedLines=function(){
+	return [];
+};
+Listener.prototype.bracketFnArg=function(){
+	return "";
+};
+Listener.prototype.wrapCall=function(line){
+	return line;
 };
 Listener.prototype.write=function(haveToUpdateCanvas,haveToLogInput){
 	function indent(line) {
@@ -133,12 +139,25 @@ Listener.prototype.write=function(haveToUpdateCanvas,haveToLogInput){
 		}
 		closeEntryInnerLines();
 	});
-	var innerLines=writeInnerLines();
+	var br=this.bracketListener();
+	var innerLines=this.innerPrependedLines().concat(writeInnerLines());
+	if (innerLines.length==1) {
+		var match=/^(\w+)\(\);$/.exec(innerLines[0]);
+		if (match) {
+			return outerLines.concat(
+				this.wrapCall(
+					[br[0]+match[1]+br[1]]
+				)
+			);
+		}
+	}
 	if (innerLines.length) {
 		return outerLines.concat(
-			this.writeListenerStart(),
-			innerLines.map(this.innerIndent),
-			this.writeListenerEnd()
+			this.wrapCall([].concat(
+				[br[0]+"function("+this.bracketFnArg()+"){"],
+				innerLines.map(indent),
+				["}"+br[1]]
+			))
 		);
 	} else {
 		return outerLines;
@@ -151,15 +170,8 @@ var SliderListener=function(id){
 };
 SliderListener.prototype=Object.create(Listener.prototype);
 SliderListener.prototype.constructor=SliderListener;
-SliderListener.prototype.writeListenerStart=function(){
-	return [
-		"document.getElementById('"+this.id+"').addEventListener('change',function(){",
-	];
-};
-SliderListener.prototype.writeListenerEnd=function(){
-	return [
-		"});",
-	];
+SliderListener.prototype.bracketListener=function(){
+	return ["document.getElementById('"+this.id+"').addEventListener('change',",");"];
 };
 
 var MultipleSliderListener=function(query){
@@ -168,20 +180,17 @@ var MultipleSliderListener=function(query){
 };
 MultipleSliderListener.prototype=Object.create(Listener.prototype);
 MultipleSliderListener.prototype.constructor=MultipleSliderListener;
-MultipleSliderListener.prototype.writeListenerStart=function(){
-	return [
-		"[].forEach.call(document.querySelectorAll('"+this.query+"'),function(el){",
-		"	el.addEventListener('change',function(){",
-	];
+MultipleSliderListener.prototype.wrapCall=function(lines){
+	return [].concat(
+		["[].forEach.call(document.querySelectorAll('"+this.query+"'),function(el){"],
+		lines.map(function(line){
+			return "\t"+line;
+		}),
+		["});"]
+	);
 };
-MultipleSliderListener.prototype.innerIndent=function(line){
-	return "\t\t"+line;
-};
-MultipleSliderListener.prototype.writeListenerEnd=function(){
-	return [
-		"	});",
-		"});",
-	];
+MultipleSliderListener.prototype.bracketListener=function(){
+	return ["el.addEventListener('change',",");"];
 };
 
 var CanvasMousemoveListener=function(){
@@ -201,15 +210,15 @@ CanvasMousemoveListener.prototype.enter=function(){
 	};
 	return proxy;
 };
-CanvasMousemoveListener.prototype.writeListenerStart=function(){
-	return [
-		"canvas.addEventListener('mousemove',function(ev){",
-		"	var rect=this.getBoundingClientRect();",
-	];
+CanvasMousemoveListener.prototype.bracketListener=function(){
+	return ["canvas.addEventListener('mousemove',",");"];
 };
-CanvasMousemoveListener.prototype.writeListenerEnd=function(){
+CanvasMousemoveListener.prototype.bracketFnArg=function(){
+	return "ev";
+};
+CanvasMousemoveListener.prototype.innerPrependedLines=function(){
 	return [
-		"});",
+		"var rect=this.getBoundingClientRect();",
 	];
 };
 

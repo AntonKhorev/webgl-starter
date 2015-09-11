@@ -39,6 +39,17 @@ describe('MultipleSliderListener',function(){
 			"});",
 		]);
 	});
+	it('does not create anon fn when its body consists only of one fn call',function(){
+		var listener=new listeners.MultipleSliderListener('.mySliders');
+		listener.enter()
+			.post("postAction();");
+		var lines=listener.write(false,false);
+		assert.deepEqual(lines,[
+			"[].forEach.call(document.querySelectorAll('.mySliders'),function(el){",
+			"	el.addEventListener('change',postAction);",
+			"});",
+		]);
+	});
 });
 
 describe('CanvasMousemoveListener',function(){
