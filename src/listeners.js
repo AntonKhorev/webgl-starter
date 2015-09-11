@@ -1,7 +1,7 @@
-var CanvasMousemoveListener=function() {
+var Listener=function(){
 	this.entries=[];
 };
-CanvasMousemoveListener.prototype.enter=function(){
+Listener.prototype.enter=function(){
 	var entry={
 		state: [],
 		pre: [],
@@ -26,7 +26,7 @@ CanvasMousemoveListener.prototype.enter=function(){
 	};
 	return proxy;
 };
-CanvasMousemoveListener.prototype.write=function(haveToUpdateCanvas,haveToLogInput){
+Listener.prototype.write=function(haveToUpdateCanvas,haveToLogInput){
 	function indent(line) {
 		return "\t"+line;
 	}
@@ -61,7 +61,9 @@ CanvasMousemoveListener.prototype.write=function(haveToUpdateCanvas,haveToLogInp
 		innerLinesPrev=line;
 	}
 	function closeEntryInnerLines() {
-		innerLinesRoot.push(innerLinesPrev);
+		if (innerLinesPrev!==null) {
+			innerLinesRoot.push(innerLinesPrev);
+		}
 		innerLinesPrev=null;
 	}
 	function writeInnerLines() {
@@ -126,15 +128,49 @@ CanvasMousemoveListener.prototype.write=function(haveToUpdateCanvas,haveToLogInp
 	});
 	var innerLines=writeInnerLines();
 	if (innerLines.length) {
-		return outerLines.concat([
-			"canvas.addEventListener('mousemove',function(ev){",
-			"	var rect=this.getBoundingClientRect();"
-		],innerLines.map(indent),[
-			"});"
-		]);
+		return outerLines.concat(
+			this.writeListenerStart(),
+			innerLines.map(indent),
+			this.writeListenerEnd()
+		);
 	} else {
 		return outerLines;
 	}
 };
 
+var SliderListener=function(id){
+	Listener.call(this);
+	this.id=id;
+};
+SliderListener.prototype=Object.create(Listener.prototype);
+SliderListener.prototype.constructor=SliderListener;
+SliderListener.prototype.writeListenerStart=function(){
+	return [
+		"document.getElementById('"+this.id+"').addEventListener('change',function(){",
+	];
+};
+SliderListener.prototype.writeListenerEnd=function(){
+	return [
+		"});",
+	];
+};
+
+var CanvasMousemoveListener=function(){
+	Listener.call(this);
+};
+CanvasMousemoveListener.prototype=Object.create(Listener.prototype);
+CanvasMousemoveListener.prototype.constructor=CanvasMousemoveListener;
+CanvasMousemoveListener.prototype.writeListenerStart=function(){
+	return [
+		"canvas.addEventListener('mousemove',function(ev){",
+		"	var rect=this.getBoundingClientRect();",
+	];
+};
+CanvasMousemoveListener.prototype.writeListenerEnd=function(){
+	return [
+		"});",
+	];
+};
+
+exports.SliderListener=SliderListener;
 exports.CanvasMousemoveListener=CanvasMousemoveListener;

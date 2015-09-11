@@ -2,6 +2,15 @@ var assert=require('assert');
 
 var listeners=require('../src/listeners.js');
 
+describe('SliderListener',function(){
+	it('is empty',function(){
+		var listener=new listeners.CanvasMousemoveListener();
+		var entry=listener.enter();
+		var lines=listener.write(false,false);
+		assert.deepEqual(lines,[]);
+	});
+});
+
 describe('CanvasMousemoveListener',function(){
 	it('should only have preAction()',function(){
 		var listener=new listeners.CanvasMousemoveListener();

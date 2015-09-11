@@ -529,12 +529,11 @@ module.exports=function(options,i18n){
 				"gl.bufferData(gl.ARRAY_BUFFER,vertices,gl.STATIC_DRAW);"
 			);
 		}
-		if (options['animation.rotation.speed.input']=='slider' && options.debugInputs) {
-			// listener is only for logging
-			lines.push(
-				"document.getElementById('animation.rotation.speed').addEventListener('change',function(){",
-				"	console.log(this.id,'input value:',parseFloat(this.value));",
-				"});"
+		if (options['animation.rotation.speed.input']=='slider') {
+			var listener=new listeners.SliderListener('animation.rotation.speed');
+			listener.enter().log("console.log(this.id,'input value:',parseFloat(this.value));");
+			lines=lines.concat(
+				listener.write(options.animation!='rotation',options.debugInputs)
 			);
 		} else if (isMousemoveInput('animation.rotation.speed')) {
 			var entry=canvasMousemoveListener.enter();
