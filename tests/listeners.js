@@ -53,6 +53,11 @@ describe('MultipleSliderListener',function(){
 });
 
 describe('CanvasMousemoveListener',function(){
+	it('is empty',function(){
+		var listener=new listeners.CanvasMousemoveListener();
+		var lines=listener.write(false,false);
+		assert.deepEqual(lines,[]);
+	});
 	it('should only have preAction()',function(){
 		var listener=new listeners.CanvasMousemoveListener();
 		var entry=listener.enter();

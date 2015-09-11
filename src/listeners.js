@@ -140,7 +140,10 @@ Listener.prototype.write=function(haveToUpdateCanvas,haveToLogInput){
 		closeEntryInnerLines();
 	});
 	var br=this.bracketListener();
-	var innerLines=this.innerPrependedLines().concat(writeInnerLines());
+	var innerLines=writeInnerLines();
+	if (innerLines.length) {
+		innerLines=this.innerPrependedLines().concat(innerLines);
+	}
 	if (innerLines.length==1) {
 		var match=/^(\w+)\(\);$/.exec(innerLines[0]);
 		if (match) {
