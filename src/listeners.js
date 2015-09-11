@@ -15,12 +15,16 @@ Listener.prototype.enter=function(){
 			for (var i=0;i<arguments.length;i++) {
 				where.push(arguments[i]);
 			}
+			return proxy;
 		};
 	}
 	var proxy={
 		state: makePushArgs(entry.state),
 		pre: makePushArgs(entry.pre),
-		cond: function(cond){ entry.cond=cond; },
+		cond: function(cond){
+			entry.cond=cond;
+			return proxy;
+		},
 		log: makePushArgs(entry.log),
 		post: makePushArgs(entry.post),
 	};

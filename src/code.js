@@ -489,25 +489,13 @@ module.exports=function(options,i18n){
 			);
 		}
 		if (options['shape.gasket.depth.input']=='slider') {
-			lines.push(
-				"document.getElementById('shape.gasket.depth').addEventListener('change',function(){"
-			);
-			if (options.debugInputs) {
-				lines.push(
-					"	console.log(this.id,'input value:',parseInt(this.value));"
-				);
-			}
-			lines.push(
-				"	storeGasketVertices(parseInt(this.value));",
-				"	gl.bufferData(gl.ARRAY_BUFFER,vertices,gl.STATIC_DRAW);"
-			);
-			if (options.animation!='rotation') {
-				lines.push(
-					"	updateCanvas();"
-				);
-			}
-			lines.push(
-				"});"
+			var listener=new listeners.SliderListener('shape.gasket.depth');
+			listener.enter()
+				.log("console.log(this.id,'input value:',parseInt(this.value));")
+				.post("storeGasketVertices(parseInt(this.value));")
+				.post("gl.bufferData(gl.ARRAY_BUFFER,vertices,gl.STATIC_DRAW);");
+			lines=lines.concat(
+				listener.write(options.animation!='rotation',options.debugInputs)
 			);
 		} else if (isMousemoveInput('shape.gasket.depth')) {
 			var entry=canvasMousemoveListener.enter();

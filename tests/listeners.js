@@ -4,10 +4,23 @@ var listeners=require('../src/listeners.js');
 
 describe('SliderListener',function(){
 	it('is empty',function(){
-		var listener=new listeners.CanvasMousemoveListener();
+		var listener=new listeners.SliderListener('mySlider');
 		var entry=listener.enter();
 		var lines=listener.write(false,false);
 		assert.deepEqual(lines,[]);
+	});
+	it('supports chained calls to entry',function(){
+		var listener=new listeners.SliderListener('mySlider');
+		listener.enter()
+			.pre("preAction();")
+			.post("postAction();");
+		var lines=listener.write(false,false);
+		assert.deepEqual(lines,[
+			"document.getElementById('mySlider').addEventListener('change',function(){",
+			"	preAction();",
+			"	postAction();",
+			"});",
+		]);
 	});
 });
 
