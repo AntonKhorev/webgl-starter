@@ -517,7 +517,7 @@ module.exports=function(options,i18n){
 				);
 			} else if (options['shape.gasket.depth.input']=='mousemovey') {
 				entry.pre(
-					"var newGasketDepth=Math.floor((gasketMaxDepth+1)*(ev.clientX-rect.left)/rect.width);"
+					"var newGasketDepth=Math.floor((gasketMaxDepth+1)*(rect.bottom-1-ev.clientY)/rect.height);"
 				);
 			}
 			entry.cond("newGasketDepth!=gasketDepth");
