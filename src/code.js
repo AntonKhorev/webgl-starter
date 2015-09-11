@@ -321,6 +321,7 @@ module.exports=function(options,i18n){
 	}
 	function generateInputHandlerLines() {
 		var lines=[];
+		var canvasMousemoveListener=new listeners.CanvasMousemoveListener();
 		function colorStates(optionPrefix,updateFnName,stateVarPrefix) {
 			['r','g','b','a'].forEach(function(c){
 				var name=optionPrefix+'.'+c;
@@ -431,34 +432,21 @@ module.exports=function(options,i18n){
 						"});"
 					);
 				} else if (isMousemoveInput(name)) {
-					lines.push(
-						"canvas.addEventListener('mousemove',function(ev){",
-						"	var rect=this.getBoundingClientRect();"
-					);
+					var entry=canvasMousemoveListener.enter();
 					if (options[name+'.input']=='mousemovex') {
-						lines.push(
-							"	"+varName+"=(ev.clientX-rect.left)/(rect.width-1);"
+						entry.pre(
+							varName+"=(ev.clientX-rect.left)/(rect.width-1);"
 						);
 					} else if (options[name+'.input']=='mousemovey') {
-						lines.push(
-							"	"+varName+"=(rect.bottom-1-ev.clientY)/(rect.height-1);"
+						entry.pre(
+							varName+"=(rect.bottom-1-ev.clientY)/(rect.height-1);"
 						);
 					}
-					if (options.debugInputs) {
-						lines.push(
-							"	console.log('"+name+" input value:',"+varName+");"
-						);
-					}
-					lines.push(
-						"	"+updateFnName+"();"
+					entry.log(
+						"console.log('"+name+" input value:',"+varName+");"
 					);
-					if (options.animation!='rotation') {
-						lines.push(
-							"	updateCanvas();"
-						);
-					}
-					lines.push(
-						"});"
+					entry.post(
+						updateFnName+"();"
 					);
 				}
 			});
@@ -500,7 +488,6 @@ module.exports=function(options,i18n){
 				'gl.uniform4fv(colorLoc,[',']);'
 			);
 		}
-		var canvasMousemoveListener=new listeners.CanvasMousemoveListener();
 		if (options['shape.gasket.depth.input']=='slider') {
 			lines.push(
 				"document.getElementById('shape.gasket.depth').addEventListener('change',function(){"
