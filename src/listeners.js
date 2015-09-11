@@ -1,4 +1,3 @@
-// var PRELINE=0;
 var CanvasMousemoveListener=function() {
 	this.entries=[];
 };
@@ -6,7 +5,7 @@ CanvasMousemoveListener.prototype.enter=function(){
 	var entry={
 		state: [],
 		pre: [],
-		cond: null,
+		cond: undefined,
 		log: [],
 		post: [],
 	};
@@ -32,30 +31,66 @@ CanvasMousemoveListener.prototype.write=function(haveToUpdateCanvas,haveToLogInp
 		return "\t"+line;
 	}
 	var outerLines=[];
-	var innerLines=[];
-	this.entries.forEach(function(entry){
-		outerLines=outerLines.concat(entry.state);
-		innerLines=innerLines.concat(entry.pre);
-		var condLines=[];
-		if (haveToLogInput) {
-			condLines=condLines.concat(entry.log);
-		}
-		condLines=condLines.concat(entry.post);
-		if (haveToUpdateCanvas) {
-			condLines.push("updateCanvas();"); // TODO do it once for all entries
-		}
-		if (entry.cond!==null) {
-			if (condLines.length) {
-				innerLines=innerLines.concat(
-					["if ("+entry.cond+") {"],
-					condLines.map(indent),
-					["}"]
-				);
+	// TODO have to topologically sort inner lines - then can avoid (*)
+	var innerLinesOrder=[];
+	var innerLinesConds={};
+	function addInnerLine(line,cond) {
+		if (line in innerLinesConds) {
+			// TODO move line to back? (*)
+			if (cond===undefined) {
+				innerLinesConds[line]=undefined;
+			} else if (innerLinesConds[line]!==undefined) {
+				innerLinesConds[line].push(cond);
 			}
 		} else {
-			innerLines=innerLines.concat(condLines);
+			innerLinesOrder.push(line);
+			innerLinesConds[line]=(cond===undefined ? [] : [cond]);
+		}
+	}
+	function writeInnerLines() {
+		var lines=[];
+		var currentCond=undefined;
+		innerLinesOrder.forEach(function(line){
+			var newCond=undefined;
+			if (innerLinesConds[line]!==undefined) {
+				newCond=innerLinesConds[line].join(' || ');
+			}
+			if (newCond!=currentCond) {
+				if (currentCond!==undefined) {
+					lines.push("}");
+				}
+				currentCond=newCond;
+				if (currentCond!==undefined) {
+					lines.push("if ("+currentCond+") {");
+				}
+			}
+			if (currentCond!==undefined) {
+				lines.push(indent(line));
+			} else {
+				lines.push(line);
+			}
+		});
+		if (currentCond!==undefined) {
+			lines.push("}");
+		}
+		return lines;
+	}
+	this.entries.forEach(function(entry){
+		outerLines=outerLines.concat(entry.state);
+		entry.pre.forEach(addInnerLine);
+		if (haveToLogInput) {
+			entry.log.forEach(function(line){
+				addInnerLine(line,entry.cond);
+			});
+		}
+		entry.post.forEach(function(line){
+			addInnerLine(line,entry.cond);
+		});
+		if (haveToUpdateCanvas) {
+			addInnerLine("updateCanvas();",entry.cond);
 		}
 	});
+	var innerLines=writeInnerLines();
 	if (innerLines.length) {
 		return outerLines.concat([
 			"canvas.addEventListener('mousemove',function(ev){",

@@ -8,6 +8,7 @@ var uglify=require('gulp-uglify');
 var less=require('gulp-less');
 var autoprefixer=require('gulp-autoprefixer');
 var minifyCss=require('gulp-minify-css');
+var mocha=require('gulp-mocha');
 
 var destination='public_html/en/base';
 
@@ -49,6 +50,11 @@ gulp.task('css',function(){
 			sourceRoot: '.'
 		}))
 		.pipe(gulp.dest(destination));
+});
+
+gulp.task('test',function(){
+	gulp.src('tests/listeners.js')
+		.pipe(mocha());
 });
 
 gulp.task('default',['html','js','css']);
