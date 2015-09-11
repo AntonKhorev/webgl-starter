@@ -164,6 +164,18 @@ var CanvasMousemoveListener=function(){
 };
 CanvasMousemoveListener.prototype=Object.create(Listener.prototype);
 CanvasMousemoveListener.prototype.constructor=CanvasMousemoveListener;
+CanvasMousemoveListener.prototype.enter=function(){
+	var proxy=Listener.prototype.enter.call(this);
+	proxy.prexy=function(inputType,xLine,yLine){
+		if (inputType=='mousemovex') {
+			return proxy.pre(xLine);
+		} else if (inputType=='mousemovey') {
+			return proxy.pre(yLine);
+		}
+		return proxy;
+	};
+	return proxy;
+};
 CanvasMousemoveListener.prototype.writeListenerStart=function(){
 	return [
 		"canvas.addEventListener('mousemove',function(ev){",

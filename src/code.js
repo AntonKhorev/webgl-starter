@@ -437,22 +437,14 @@ module.exports=function(options,i18n){
 						"});"
 					);
 				} else if (isMousemoveInput(name)) {
-					var entry=canvasMousemoveListener.enter();
-					if (options[name+'.input']=='mousemovex') {
-						entry.pre(
-							varName+"=(ev.clientX-rect.left)/(rect.width-1);"
-						);
-					} else if (options[name+'.input']=='mousemovey') {
-						entry.pre(
+					canvasMousemoveListener.enter()
+						.prexy(
+							options[name+'.input'],
+							varName+"=(ev.clientX-rect.left)/(rect.width-1);",
 							varName+"=(rect.bottom-1-ev.clientY)/(rect.height-1);"
-						);
-					}
-					entry.log(
-						"console.log('"+name+" input value:',"+varName+");"
-					);
-					entry.post(
-						updateFnName+"();"
-					);
+						)
+						.log("console.log('"+name+" input value:',"+varName+");")
+						.post(updateFnName+"();");
 				}
 			});
 		}
@@ -501,24 +493,16 @@ module.exports=function(options,i18n){
 				.post("gl.bufferData(gl.ARRAY_BUFFER,vertices,gl.STATIC_DRAW);");
 			writeListener(listener);
 		} else if (isMousemoveInput('shape.gasket.depth')) {
-			var entry=canvasMousemoveListener.enter();
-			if (options['shape.gasket.depth.input']=='mousemovex') {
-				entry.pre(
-					"var newGasketDepth=Math.floor((gasketMaxDepth+1)*(ev.clientX-rect.left)/rect.width);"
-				);
-			} else if (options['shape.gasket.depth.input']=='mousemovey') {
-				entry.pre(
+			canvasMousemoveListener.enter()
+				.prexy(
+					options['shape.gasket.depth.input'],
+					"var newGasketDepth=Math.floor((gasketMaxDepth+1)*(ev.clientX-rect.left)/rect.width);",
 					"var newGasketDepth=Math.floor((gasketMaxDepth+1)*(rect.bottom-1-ev.clientY)/rect.height);"
-				);
-			}
-			entry.cond("newGasketDepth!=gasketDepth");
-			entry.log(
-				"console.log('shape.gasket.depth input value:',newGasketDepth);"
-			);
-			entry.post(
-				"storeGasketVertices(newGasketDepth);",
-				"gl.bufferData(gl.ARRAY_BUFFER,vertices,gl.STATIC_DRAW);"
-			);
+				)
+				.cond("newGasketDepth!=gasketDepth")
+				.log("console.log('shape.gasket.depth input value:',newGasketDepth);")
+				.post("storeGasketVertices(newGasketDepth);")
+				.post("gl.bufferData(gl.ARRAY_BUFFER,vertices,gl.STATIC_DRAW);");
 		}
 		if (options['animation.rotation.speed.input']=='slider') {
 			var listener=new listeners.SliderListener('animation.rotation.speed');
@@ -526,22 +510,14 @@ module.exports=function(options,i18n){
 				.log("console.log(this.id,'input value:',parseFloat(this.value));");
 			writeListener(listener);
 		} else if (isMousemoveInput('animation.rotation.speed')) {
-			var entry=canvasMousemoveListener.enter();
-			entry.state(
-				"var rotationSpeed="+floatOptionValue('animation.rotation.speed')+";"
-			);
-			if (options['animation.rotation.speed.input']=='mousemovex') {
-				entry.pre(
-					"rotationSpeed=-1+2*(ev.clientX-rect.left)/(rect.width-1);"
-				);
-			} else if (options['animation.rotation.speed.input']=='mousemovey') {
-				entry.pre(
+			canvasMousemoveListener.enter()
+				.state("var rotationSpeed="+floatOptionValue('animation.rotation.speed')+";")
+				.prexy(
+					options['animation.rotation.speed.input'],
+					"rotationSpeed=-1+2*(ev.clientX-rect.left)/(rect.width-1);",
 					"rotationSpeed=-1+2*(rect.bottom-1-ev.clientY)/(rect.height-1);"
-				);
-			}
-			entry.log(
-				"console.log('animation.rotation.speed input value:',rotationSpeed);"
-			);
+				)
+				.log("console.log('animation.rotation.speed input value:',rotationSpeed);");
 		}
 		writeListener(canvasMousemoveListener);
 		if (lines.length) lines.push("	");
