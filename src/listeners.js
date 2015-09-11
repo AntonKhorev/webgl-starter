@@ -30,6 +30,9 @@ Listener.prototype.enter=function(){
 	};
 	return proxy;
 };
+Listener.prototype.innerIndent=function(line){
+	return "\t"+line;
+};
 Listener.prototype.write=function(haveToUpdateCanvas,haveToLogInput){
 	function indent(line) {
 		return "\t"+line;
@@ -134,7 +137,7 @@ Listener.prototype.write=function(haveToUpdateCanvas,haveToLogInput){
 	if (innerLines.length) {
 		return outerLines.concat(
 			this.writeListenerStart(),
-			innerLines.map(indent),
+			innerLines.map(this.innerIndent),
 			this.writeListenerEnd()
 		);
 	} else {
@@ -155,6 +158,28 @@ SliderListener.prototype.writeListenerStart=function(){
 };
 SliderListener.prototype.writeListenerEnd=function(){
 	return [
+		"});",
+	];
+};
+
+var MultipleSliderListener=function(query){
+	Listener.call(this);
+	this.query=query;
+};
+MultipleSliderListener.prototype=Object.create(Listener.prototype);
+MultipleSliderListener.prototype.constructor=MultipleSliderListener;
+MultipleSliderListener.prototype.writeListenerStart=function(){
+	return [
+		"[].forEach.call(document.querySelectorAll('"+this.query+"'),function(el){",
+		"	el.addEventListener('change',function(){",
+	];
+};
+MultipleSliderListener.prototype.innerIndent=function(line){
+	return "\t\t"+line;
+};
+MultipleSliderListener.prototype.writeListenerEnd=function(){
+	return [
+		"	});",
 		"});",
 	];
 };
@@ -189,4 +214,5 @@ CanvasMousemoveListener.prototype.writeListenerEnd=function(){
 };
 
 exports.SliderListener=SliderListener;
+exports.MultipleSliderListener=MultipleSliderListener;
 exports.CanvasMousemoveListener=CanvasMousemoveListener;

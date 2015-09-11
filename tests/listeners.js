@@ -24,6 +24,23 @@ describe('SliderListener',function(){
 	});
 });
 
+describe('MultipleSliderListener',function(){
+	it('is doubly-indented inside',function(){
+		var listener=new listeners.MultipleSliderListener('.mySliders');
+		listener.enter()
+			.post("postAction();");
+		var lines=listener.write(true,false);
+		assert.deepEqual(lines,[
+			"[].forEach.call(document.querySelectorAll('.mySliders'),function(el){",
+			"	el.addEventListener('change',function(){",
+			"		postAction();",
+			"		updateCanvas();",
+			"	});",
+			"});",
+		]);
+	});
+});
+
 describe('CanvasMousemoveListener',function(){
 	it('should only have preAction()',function(){
 		var listener=new listeners.CanvasMousemoveListener();

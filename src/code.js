@@ -369,6 +369,18 @@ module.exports=function(options,i18n){
 		}
 		function colorSingleListener(optionPrefix,updateFnName,stateVarPrefix) {
 			var onlyInput=options.getOnlyInputFor(optionPrefix);
+			var listener;
+			if (onlyInput===null) {
+				listener=new listeners.MultipleSliderListener("[id^=\""+optionPrefix+".\"]");
+			} else {
+				listener=new listeners.SliderListener(onlyInput.name);
+			}
+			listener.enter()
+				.log("console.log(this.id,'input value:',parseFloat(this.value));")
+				.post(updateFnName+"();");
+			writeListener(listener);
+			/*
+			////
 			if (onlyInput===null) {
 				lines.push(
 					"[].forEach.call(document.querySelectorAll('[id^=\""+optionPrefix+".\"]'),function(el){",
@@ -411,6 +423,7 @@ module.exports=function(options,i18n){
 					"});"
 				);
 			}
+			*/
 		}
 		function colorMultipleListeners(optionPrefix,updateFnName,stateVarPrefix) {
 			['r','g','b','a'].forEach(function(c){
