@@ -1,4 +1,4 @@
-Option=function(name,availableValues,defaultValue){
+var Option=function(name,availableValues,defaultValue){
 	this.name=name;
 	this.availableValues=availableValues; // for range its [min,max,step]
 	if (defaultValue===undefined) {
@@ -14,7 +14,7 @@ Option.prototype.doesValueHideOption=function(value,option){
 	return optionStartsWith(this.name+'.') && !optionStartsWith(this.name+'.'+value+'.');
 };
 
-InputOption=function(name,rangeOfValues,defaultValue){
+var InputOption=function(name,rangeOfValues,defaultValue){
 	Option.call(this,name,rangeOfValues,defaultValue);
 }
 InputOption.prototype=Object.create(Option.prototype);
@@ -40,7 +40,7 @@ InputOption.prototype.getMaxLabel=function(){
 	return this.getMax().toString().replace('-','−');
 };
 
-DebugOption=function(name,defaultValue){
+var DebugOption=function(name,defaultValue){
 	Option.call(this,name,[false,true],defaultValue);
 };
 DebugOption.prototype=Object.create(Option.prototype);

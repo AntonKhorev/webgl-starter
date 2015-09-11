@@ -1,3 +1,5 @@
+var listeners=require('./listeners.js');
+
 module.exports=function(options,i18n){
 	function intOptionValue(name) {
 		return parseInt(options[name]);
@@ -520,39 +522,29 @@ module.exports=function(options,i18n){
 				"});"
 			);
 		} else if (isMousemoveInput('shape.gasket.depth')) {
-			lines.push(
-				"canvas.addEventListener('mousemove',function(ev){",
-				"	var rect=this.getBoundingClientRect();"
-			);
+			var canvasMousemoveListener=new listeners.CanvasMousemoveListener();
+
+			var entry=canvasMousemoveListener.enter();
 			if (options['shape.gasket.depth.input']=='mousemovex') {
-				lines.push(
-					"	var newGasketDepth=Math.floor((gasketMaxDepth+1)*(ev.clientX-rect.left)/rect.width);"
+				entry.pre(
+					"var newGasketDepth=Math.floor((gasketMaxDepth+1)*(ev.clientX-rect.left)/rect.width);"
 				);
 			} else if (options['shape.gasket.depth.input']=='mousemovey') {
-				lines.push(
-					"	var newGasketDepth=Math.floor((gasketMaxDepth+1)*(rect.bottom-1-ev.clientY)/rect.height);"
+				entry.pre(
+					"var newGasketDepth=Math.floor((gasketMaxDepth+1)*(ev.clientX-rect.left)/rect.width);"
 				);
 			}
-			lines.push(
-				"	if (newGasketDepth!=gasketDepth) {"
+			entry.cond("newGasketDepth!=gasketDepth");
+			entry.log(
+				"console.log('shape.gasket.depth input value:',newGasketDepth);"
 			);
-			if (options.debugInputs) {
-				lines.push(
-					"		console.log('shape.gasket.depth input value:',newGasketDepth);"
-				);
-			}
-			lines.push(
-				"		storeGasketVertices(newGasketDepth);",
-				"		gl.bufferData(gl.ARRAY_BUFFER,vertices,gl.STATIC_DRAW);"
+			entry.post(
+				"storeGasketVertices(newGasketDepth);",
+				"gl.bufferData(gl.ARRAY_BUFFER,vertices,gl.STATIC_DRAW);"
 			);
-			if (options.animation!='rotation') {
-				lines.push(
-					"		updateCanvas();"
-				);
-			}
-			lines.push(
-				"	}",
-				"});"
+
+			lines=lines.concat(
+				canvasMousemoveListener.write(options.animation!='rotation',options.debugInputs)
 			);
 		}
 		if (options['animation.rotation.speed.input']=='slider' && options.debugInputs) {
