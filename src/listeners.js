@@ -44,7 +44,7 @@ CanvasMousemoveListener.prototype.write=function(haveToUpdateCanvas,haveToLogInp
 			}
 		} else {
 			innerLinesOrder.push(line);
-			innerLinesConds[line]=(cond===undefined ? [] : [cond]);
+			innerLinesConds[line]=(cond===undefined ? undefined : [cond]);
 		}
 	}
 	function writeInnerLines() {
@@ -77,7 +77,9 @@ CanvasMousemoveListener.prototype.write=function(haveToUpdateCanvas,haveToLogInp
 	}
 	this.entries.forEach(function(entry){
 		outerLines=outerLines.concat(entry.state);
-		entry.pre.forEach(addInnerLine);
+		entry.pre.forEach(function(line){
+			addInnerLine(line);
+		});
 		if (haveToLogInput) {
 			entry.log.forEach(function(line){
 				addInnerLine(line,entry.cond);

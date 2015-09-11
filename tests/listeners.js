@@ -3,6 +3,18 @@ var assert=require('assert');
 var listeners=require('../src/listeners.js');
 
 describe('CanvasMousemoveListener',function(){
+	it('should only have preAction()',function(){
+		var listener=new listeners.CanvasMousemoveListener();
+		var entry=listener.enter();
+		entry.pre("preAction();");
+		var lines=listener.write(false,false);
+		assert.deepEqual(lines,[
+			"canvas.addEventListener('mousemove',function(ev){",
+			"	var rect=this.getBoundingClientRect();",
+			"	preAction();",
+			"});",
+		]);
+	});
 	it('should call updateCanvas() once if two entries are given',function(){
 		var listener=new listeners.CanvasMousemoveListener();
 		var entry1=listener.enter();
