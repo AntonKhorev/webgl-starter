@@ -500,6 +500,7 @@ module.exports=function(options,i18n){
 				'gl.uniform4fv(colorLoc,[',']);'
 			);
 		}
+		var canvasMousemoveListener=new listeners.CanvasMousemoveListener();
 		if (options['shape.gasket.depth.input']=='slider') {
 			lines.push(
 				"document.getElementById('shape.gasket.depth').addEventListener('change',function(){"
@@ -522,8 +523,6 @@ module.exports=function(options,i18n){
 				"});"
 			);
 		} else if (isMousemoveInput('shape.gasket.depth')) {
-			var canvasMousemoveListener=new listeners.CanvasMousemoveListener();
-
 			var entry=canvasMousemoveListener.enter();
 			if (options['shape.gasket.depth.input']=='mousemovex') {
 				entry.pre(
@@ -542,10 +541,6 @@ module.exports=function(options,i18n){
 				"storeGasketVertices(newGasketDepth);",
 				"gl.bufferData(gl.ARRAY_BUFFER,vertices,gl.STATIC_DRAW);"
 			);
-
-			lines=lines.concat(
-				canvasMousemoveListener.write(options.animation!='rotation',options.debugInputs)
-			);
 		}
 		if (options['animation.rotation.speed.input']=='slider' && options.debugInputs) {
 			// listener is only for logging
@@ -555,29 +550,26 @@ module.exports=function(options,i18n){
 				"});"
 			);
 		} else if (isMousemoveInput('animation.rotation.speed')) {
-			lines.push(
-				"var rotationSpeed="+floatOptionValue('animation.rotation.speed')+";",
-				"canvas.addEventListener('mousemove',function(ev){",
-				"	var rect=this.getBoundingClientRect();"
+			var entry=canvasMousemoveListener.enter();
+			entry.state(
+				"var rotationSpeed="+floatOptionValue('animation.rotation.speed')+";"
 			);
 			if (options['animation.rotation.speed.input']=='mousemovex') {
-				lines.push(
-					"	rotationSpeed=-1+2*(ev.clientX-rect.left)/(rect.width-1);"
+				entry.pre(
+					"rotationSpeed=-1+2*(ev.clientX-rect.left)/(rect.width-1);"
 				);
 			} else if (options['animation.rotation.speed.input']=='mousemovey') {
-				lines.push(
-					"	rotationSpeed=-1+2*(rect.bottom-1-ev.clientY)/(rect.height-1);"
+				entry.pre(
+					"rotationSpeed=-1+2*(rect.bottom-1-ev.clientY)/(rect.height-1);"
 				);
 			}
-			if (options.debugInputs) {
-				lines.push(
-					"	console.log('animation.rotation.speed input value:',rotationSpeed);"
-				);
-			}
-			lines.push(
-				"});"
+			entry.log(
+				"console.log('animation.rotation.speed input value:',rotationSpeed);"
 			);
 		}
+		lines=lines.concat(
+			canvasMousemoveListener.write(options.animation!='rotation',options.debugInputs)
+		);
 		if (lines.length) lines.push("	");
 		return lines;
 	}

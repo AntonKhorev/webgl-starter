@@ -4,6 +4,7 @@ var CanvasMousemoveListener=function() {
 };
 CanvasMousemoveListener.prototype.enter=function(){
 	var entry={
+		state: [],
 		pre: [],
 		cond: null,
 		log: [],
@@ -18,6 +19,7 @@ CanvasMousemoveListener.prototype.enter=function(){
 		};
 	}
 	var proxy={
+		state: makePushArgs(entry.state),
 		pre: makePushArgs(entry.pre),
 		cond: function(cond){ entry.cond=cond; },
 		log: makePushArgs(entry.log),
@@ -29,8 +31,10 @@ CanvasMousemoveListener.prototype.write=function(haveToUpdateCanvas,haveToLogInp
 	function indent(line) {
 		return "\t"+line;
 	}
+	var outerLines=[];
 	var innerLines=[];
 	this.entries.forEach(function(entry){
+		outerLines=outerLines.concat(entry.state);
 		innerLines=innerLines.concat(entry.pre);
 		var condLines=[];
 		if (haveToLogInput) {
@@ -53,14 +57,14 @@ CanvasMousemoveListener.prototype.write=function(haveToUpdateCanvas,haveToLogInp
 		}
 	});
 	if (innerLines.length) {
-		return [].concat([
+		return outerLines.concat([
 			"canvas.addEventListener('mousemove',function(ev){",
 			"	var rect=this.getBoundingClientRect();"
 		],innerLines.map(indent),[
 			"});"
 		]);
 	} else {
-		return [];
+		return outerLines;
 	}
 };
 
