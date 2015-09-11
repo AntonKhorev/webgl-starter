@@ -417,25 +417,11 @@ module.exports=function(options,i18n){
 				var name=optionPrefix+'.'+c;
 				var varName=stateVarPrefix+c.toUpperCase();
 				if (options[name+'.input']=='slider') {
-					lines.push(
-						"document.getElementById('"+name+"').addEventListener('change',function(){"
-					);
-					if (options.debugInputs) {
-						lines.push(
-							"	console.log(this.id,'input value:',parseFloat(this.value));"
-						);
-					}
-					lines.push(
-						"	"+updateFnName+"();"
-					);
-					if (options.animation!='rotation') {
-						lines.push(
-							"	updateCanvas();"
-						);
-					}
-					lines.push(
-						"});"
-					);
+					var listener=new listeners.SliderListener(name);
+					listener.enter()
+						.log("console.log(this.id,'input value:',parseFloat(this.value));")
+						.post(updateFnName+"();");
+					writeListener(listener);
 				} else if (isMousemoveInput(name)) {
 					canvasMousemoveListener.enter()
 						.prexy(
