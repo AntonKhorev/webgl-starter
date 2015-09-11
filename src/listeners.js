@@ -5,7 +5,7 @@ CanvasMousemoveListener.prototype.enter=function(){
 	var entry={
 		state: [],
 		pre: [],
-		cond: undefined,
+		cond: null,
 		log: [],
 		post: [],
 	};
@@ -31,46 +31,77 @@ CanvasMousemoveListener.prototype.write=function(haveToUpdateCanvas,haveToLogInp
 		return "\t"+line;
 	}
 	var outerLines=[];
-	// TODO have to topologically sort inner lines - then can avoid (*)
-	var innerLinesOrder=[];
-	var innerLinesConds={};
+	var innerLinesGraph={};
+	var innerLinesRoot=[];
+	var innerLinesPrev=null;
+	var WHITE=0;
+	var GRAY=1;
+	var BLACK=2;
 	function addInnerLine(line,cond) {
-		if (line in innerLinesConds) {
-			// TODO move line to back? (*)
-			if (cond===undefined) {
-				innerLinesConds[line]=undefined;
-			} else if (innerLinesConds[line]!==undefined) {
-				innerLinesConds[line].push(cond);
-			}
+		var vertex;
+		if (line in innerLinesGraph) {
+			vertex=innerLinesGraph[line];
 		} else {
-			innerLinesOrder.push(line);
-			innerLinesConds[line]=(cond===undefined ? undefined : [cond]);
+			vertex=innerLinesGraph[line]={
+				prevs: [],
+				conds: [],
+				mark: WHITE,
+			};
 		}
+		if (vertex.conds!==null) {
+			if (cond===null) {
+				vertex.conds=null;
+			} else {
+				vertex.conds.push(cond);
+			}
+		}
+		if (innerLinesPrev!==null) {
+			vertex.prevs.push(innerLinesPrev);
+		}
+		innerLinesPrev=line;
+	}
+	function closeEntryInnerLines() {
+		innerLinesRoot.push(innerLinesPrev);
+		innerLinesPrev=null;
 	}
 	function writeInnerLines() {
 		var lines=[];
-		var currentCond=undefined;
-		innerLinesOrder.forEach(function(line){
-			var newCond=undefined;
-			if (innerLinesConds[line]!==undefined) {
-				newCond=innerLinesConds[line].join(' || ');
+		var currentCond=null;
+		function writeLine(line,vertex) {
+			var newCond=null;
+			if (vertex.conds!==null) {
+				newCond=vertex.conds.join(' || ');
 			}
 			if (newCond!=currentCond) {
-				if (currentCond!==undefined) {
+				if (currentCond!==null) {
 					lines.push("}");
 				}
 				currentCond=newCond;
-				if (currentCond!==undefined) {
+				if (currentCond!==null) {
 					lines.push("if ("+currentCond+") {");
 				}
 			}
-			if (currentCond!==undefined) {
+			if (currentCond!==null) {
 				lines.push(indent(line));
 			} else {
 				lines.push(line);
 			}
-		});
-		if (currentCond!==undefined) {
+		}
+		function recVertex(line,vertex) {
+			vertex.mark=GRAY;
+			recPrevs(vertex.prevs);
+			vertex.mark=BLACK;
+			writeLine(line,vertex);
+		}
+		function recPrevs(prevs) {
+			prevs.forEach(function(line){
+				if (innerLinesGraph[line].mark==WHITE) {
+					recVertex(line,innerLinesGraph[line]);
+				}
+			});
+		}
+		recPrevs(innerLinesRoot);
+		if (currentCond!==null) {
 			lines.push("}");
 		}
 		return lines;
@@ -78,7 +109,7 @@ CanvasMousemoveListener.prototype.write=function(haveToUpdateCanvas,haveToLogInp
 	this.entries.forEach(function(entry){
 		outerLines=outerLines.concat(entry.state);
 		entry.pre.forEach(function(line){
-			addInnerLine(line);
+			addInnerLine(line,null);
 		});
 		if (haveToLogInput) {
 			entry.log.forEach(function(line){
@@ -91,6 +122,7 @@ CanvasMousemoveListener.prototype.write=function(haveToUpdateCanvas,haveToLogInp
 		if (haveToUpdateCanvas) {
 			addInnerLine("updateCanvas();",entry.cond);
 		}
+		closeEntryInnerLines();
 	});
 	var innerLines=writeInnerLines();
 	if (innerLines.length) {

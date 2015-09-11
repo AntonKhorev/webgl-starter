@@ -45,4 +45,22 @@ describe('CanvasMousemoveListener',function(){
 			"});",
 		]);
 	});
+	it('should have preActions before postAction',function(){
+		var listener=new listeners.CanvasMousemoveListener();
+		var entry1=listener.enter();
+		entry1.pre("preAction1();");
+		entry1.post("postAction();");
+		var entry2=listener.enter();
+		entry2.pre("preAction2();");
+		entry2.post("postAction();");
+		var lines=listener.write(false,false);
+		assert.deepEqual(lines,[
+			"canvas.addEventListener('mousemove',function(ev){",
+			"	var rect=this.getBoundingClientRect();",
+			"	preAction1();",
+			"	preAction2();",
+			"	postAction();",
+			"});",
+		]);
+	});
 });
