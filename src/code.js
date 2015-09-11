@@ -321,6 +321,11 @@ module.exports=function(options,i18n){
 	}
 	function generateInputHandlerLines() {
 		var lines=[];
+		function writeListener(listener) {
+			lines=lines.concat(
+				listener.write(options.animation!='rotation',options.debugInputs)
+			);
+		}
 		var canvasMousemoveListener=new listeners.CanvasMousemoveListener();
 		function colorStates(optionPrefix,updateFnName,stateVarPrefix) {
 			['r','g','b','a'].forEach(function(c){
@@ -494,9 +499,7 @@ module.exports=function(options,i18n){
 				.log("console.log(this.id,'input value:',parseInt(this.value));")
 				.post("storeGasketVertices(parseInt(this.value));")
 				.post("gl.bufferData(gl.ARRAY_BUFFER,vertices,gl.STATIC_DRAW);");
-			lines=lines.concat(
-				listener.write(options.animation!='rotation',options.debugInputs)
-			);
+			writeListener(listener);
 		} else if (isMousemoveInput('shape.gasket.depth')) {
 			var entry=canvasMousemoveListener.enter();
 			if (options['shape.gasket.depth.input']=='mousemovex') {
@@ -519,10 +522,9 @@ module.exports=function(options,i18n){
 		}
 		if (options['animation.rotation.speed.input']=='slider') {
 			var listener=new listeners.SliderListener('animation.rotation.speed');
-			listener.enter().log("console.log(this.id,'input value:',parseFloat(this.value));");
-			lines=lines.concat(
-				listener.write(options.animation!='rotation',options.debugInputs)
-			);
+			listener.enter()
+				.log("console.log(this.id,'input value:',parseFloat(this.value));");
+			writeListener(listener);
 		} else if (isMousemoveInput('animation.rotation.speed')) {
 			var entry=canvasMousemoveListener.enter();
 			entry.state(
@@ -541,9 +543,7 @@ module.exports=function(options,i18n){
 				"console.log('animation.rotation.speed input value:',rotationSpeed);"
 			);
 		}
-		lines=lines.concat(
-			canvasMousemoveListener.write(options.animation!='rotation',options.debugInputs)
-		);
+		writeListener(canvasMousemoveListener);
 		if (lines.length) lines.push("	");
 		return lines;
 	}
