@@ -1,4 +1,5 @@
 var gulp=require('gulp');
+var notify=require("gulp-notify");
 var jade=require('gulp-jade');
 var browserify=require('browserify');
 var source=require('vinyl-source-stream');
@@ -11,6 +12,16 @@ var minifyCss=require('gulp-minify-css');
 var mocha=require('gulp-mocha');
 
 var destination='public_html/en/base';
+
+// https://github.com/greypants/gulp-starter/blob/master/gulp/util/handleErrors.js
+function handleErrors() {
+	var args=Array.prototype.slice.call(arguments);
+	notify.onError({
+		title: "Compile Error",
+		message: "<%= error %>"
+	}).apply(this,args);
+	this.emit('end');
+}
 
 gulp.task('html',function(){
 	gulp.src('src/index.jade')
@@ -28,6 +39,7 @@ gulp.task('js',function(){
 		debug: true
 	})
 		.bundle()
+		.on('error',handleErrors)
 		.pipe(source('index.js'))
 		.pipe(buffer())
 		.pipe(sourcemaps.init({
@@ -44,6 +56,7 @@ gulp.task('css',function(){
 	gulp.src('src/index.less')
 		.pipe(sourcemaps.init())
 		.pipe(less())
+		.on('error',handleErrors)
 		.pipe(autoprefixer())
 		.pipe(minifyCss())
 		.pipe(sourcemaps.write('.',{
@@ -53,7 +66,7 @@ gulp.task('css',function(){
 });
 
 gulp.task('watch',function(){
-	// TODO html, error handling
+	// TODO html - will have to reload navbar.js
 	gulp.watch(['src/main.js','src/options.js','src/code.js','src/listeners.js'],['js']);
 	gulp.watch(['src/index.less'],['css']);
 });
