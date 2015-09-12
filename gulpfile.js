@@ -52,6 +52,12 @@ gulp.task('css',function(){
 		.pipe(gulp.dest(destination));
 });
 
+gulp.task('watch',function(){
+	// TODO html, error handling
+	gulp.watch(['src/main.js','src/options.js','src/code.js','src/listeners.js'],['js']);
+	gulp.watch(['src/index.less'],['css']);
+});
+
 gulp.task('test',function(){
 	gulp.src('tests/listeners.js')
 		.pipe(mocha());
