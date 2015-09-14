@@ -524,7 +524,8 @@ module.exports=function(options,i18n){
 			if (options['rotate.z.speed']!=0 || options['rotate.z.speed.input']!='constant') {
 				if (options['rotate.z.speed.input']=='constant') {
 					lines.push(
-						"gl.uniform1f(rotateZLoc,"+floatOptionValue('rotate.z.speed')+"*(time-startTime)/1000);"
+						"var rotateZ="+(options['rotate.z.position']?floatOptionValue('rotate.z.position')+"+":"")+floatOptionValue('rotate.z.speed')+"*(time-startTime)/1000;",
+						"gl.uniform1f(rotateZLoc,rotateZ);"
 					);
 				} else {
 					if (options['rotate.z.speed.input']=='slider') {
