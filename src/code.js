@@ -485,29 +485,29 @@ module.exports=function(options,i18n){
 			}
 			writeListener(listener);
 		} else if (isMousemoveInput('rotate.z')) {
-			lines.push(
-				"var rotateZLoc=gl.getUniformLocation(program,'rotateZ');",
-				"gl.uniform1f(rotateZLoc,"+floatOptionValue('rotate.z')+");"
-			);
-			canvasMousemoveListener.enter()
-				.prexy(
-					options['rotate.z.input'],
-					"var rotateZ=180*(-1+2*(ev.clientX-rect.left)/(rect.width-1));",
-					"var rotateZ=180*(-1+2*(rect.bottom-1-ev.clientY)/(rect.height-1));"
-				)
-				.log("console.log('rotate.z input value:',rotateZ);")
-				.post("gl.uniform1f(rotateZLoc,rotateZ);");
-			/*
-			// TODO animated
-			canvasMousemoveListener.enter()
-				.state("var rotateZ="+floatOptionValue('rotate.z')+";")
-				.prexy(
-					options['rotate.z.input'],
-					"rotateZ=180*(-1+2*(ev.clientX-rect.left)/(rect.width-1));",
-					"rotateZ=180*(-1+2*(rect.bottom-1-ev.clientY)/(rect.height-1));"
-				)
-				.log("console.log('rotate.z input value:',rotateZ);");
-			*/
+			if (options['rotate.z.speed']==0 && options['rotate.z.speed.input']=='constant') {
+				lines.push(
+					"var rotateZLoc=gl.getUniformLocation(program,'rotateZ');",
+					"gl.uniform1f(rotateZLoc,"+floatOptionValue('rotate.z')+");"
+				);
+				canvasMousemoveListener.enter()
+					.prexy(
+						options['rotate.z.input'],
+						"var rotateZ=180*(-1+2*(ev.clientX-rect.left)/(rect.width-1));",
+						"var rotateZ=180*(-1+2*(rect.bottom-1-ev.clientY)/(rect.height-1));"
+					)
+					.log("console.log('rotate.z input value:',rotateZ);")
+					.post("gl.uniform1f(rotateZLoc,rotateZ);");
+			} else {
+				canvasMousemoveListener.enter()
+					.state("var rotateZ="+floatOptionValue('rotate.z')+";")
+					.prexy(
+						options['rotate.z.input'],
+						"rotateZ=180*(-1+2*(ev.clientX-rect.left)/(rect.width-1));",
+						"rotateZ=180*(-1+2*(rect.bottom-1-ev.clientY)/(rect.height-1));"
+					)
+					.log("console.log('rotate.z input value:',rotateZ);");
+			}
 		}
 		if (options['rotate.z.speed.input']=='slider') {
 			var listener=new listeners.SliderListener('rotate.z.speed');
@@ -537,7 +537,7 @@ module.exports=function(options,i18n){
 				);
 			}
 			if (options['rotate.z.speed']!=0 || options['rotate.z.speed.input']!='constant') {
-				if (options['rotate.z.input']!='constant') { // TODO =='slider'
+				if (options['rotate.z.input']=='slider') {
 					lines.push(
 						"function wrap(x,maxAbsX) {",
 						"	x%=maxAbsX*2;",
@@ -556,7 +556,7 @@ module.exports=function(options,i18n){
 					);
 				} else {
 					// rotation state branch
-					if (options['rotate.z.input']!='constant') {
+					if (options['rotate.z.input']=='slider') {
 						lines.push(
 							"var rotateZInput=document.getElementById('rotate.z');",
 							"var rotateZ=parseFloat(rotateZInput.value);"
@@ -574,7 +574,7 @@ module.exports=function(options,i18n){
 							: "rotateZSpeed"
 						)+"*(time-prevTime)/1000;"
 					);
-					if (options['rotate.z.input']!='constant') {
+					if (options['rotate.z.input']=='slider') {
 						lines.push(
 							"rotateZ=wrap(rotateZ,180);",
 							"rotateZInput.value=rotateZ;"
