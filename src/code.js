@@ -529,9 +529,16 @@ module.exports=function(options,i18n){
 					);
 				} else if (options['rotate.z.speed.input']=='constant' && options['rotate.z.input']!='constant') {
 					lines.push(
+						"function wrap(x,maxAbsX) {",
+						"	if (Math.abs(x)<=maxAbsX) return x;",
+						"	x%=maxAbsX*2;",
+						"	if (Math.abs(x)<=maxAbsX) return x;",
+						"	return x-(x>0?1:-1)*maxAbsX*2;",
+						"}",
 						"var rotateZInput=document.getElementById('rotate.z');",
 						"var rotateZ=parseFloat(rotateZInput.value);",
 						"rotateZ+="+floatOptionValue('rotate.z.speed')+"*(time-prevTime)/1000;",
+						"rotateZ=wrap(rotateZ,180);",
 						"rotateZInput.value=rotateZ;",
 						"gl.uniform1f(rotateZLoc,rotateZ);"
 					);
