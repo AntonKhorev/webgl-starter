@@ -109,11 +109,18 @@ module.exports=function(options,i18n){
 		}
 	}
 	function generateControlMessageLines() {
-		var lines=options.inputOptions.filter(function(option){
-			return isMousemoveInput(option.name);
-		}).map(function(option){
-			return "	<li>"+i18n('controls.type.'+options[option.name+'.input'])+" "+i18n('controls.to')+" <strong>"+i18n('options.'+option.name)+"</strong></li>";
-		});
+		var lines=[];
+		function writeOptionGroup(group) {
+			group.filter(function(option){
+				return isMousemoveInput(option.name);
+			}).forEach(function(option){
+				lines.push(
+					"	<li>"+i18n('controls.type.'+options[option.name+'.input'])+" "+i18n('controls.to')+" <strong>"+i18n('options.'+option.name)+"</strong></li>"
+				);
+			});
+		}
+		writeOptionGroup(options.inputOptions);
+		writeOptionGroup(options.transformOptions);
 		if (lines.length) {
 			return ["<ul>"].concat(lines,["</ul>"]);
 		} else {
