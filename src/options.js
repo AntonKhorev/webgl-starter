@@ -76,7 +76,7 @@ Options.prototype.inputOptions=[
 	new InputOption('shape.gasket.depth',[0,10,1],6),
 ];
 Options.prototype.transformOptions=[
-	new InputOption('rotate.z.position',[-180,180],0), // TODO 'position' conflicts with vertex position, make up a better name (value?)
+	new InputOption('rotate.z',[-180,180],0),
 	new InputOption('rotate.z.speed',[-360,360],0), // TODO make it default to 0.2*360 when able to add/delete transforms
 ];
 Options.prototype.debugOptions=[
@@ -149,12 +149,12 @@ Options.prototype.isAnimated=function(){
 };
 Options.prototype.needsUniform=function(prefix){
 	return (
-		this[prefix+'.position.input']!='constant' ||
+		this[prefix+'.input']!='constant' ||
 		this[prefix+'.speed']!=0 || this[prefix+'.speed.input']!='constant'
 	);
 };
 Options.prototype.needsTransform=function(prefix){
-	return this.needsUniform(prefix) || this[prefix+'.position']!=0;
+	return this.needsUniform(prefix) || this[prefix]!=0;
 };
 
 Options.prototype.cloneWithoutHidden=function(){

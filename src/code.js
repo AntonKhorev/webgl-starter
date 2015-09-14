@@ -60,8 +60,8 @@ module.exports=function(options,i18n){
 				);
 			} else {
 				lines.push(
-					"	float c=cos(radians("+floatOptionValue('rotate.z.position')+"));",
-					"	float s=sin(radians("+floatOptionValue('rotate.z.position')+"));"
+					"	float c=cos(radians("+floatOptionValue('rotate.z')+"));",
+					"	float s=sin(radians("+floatOptionValue('rotate.z')+"));"
 				);
 			}
 			lines.push(
@@ -469,26 +469,26 @@ module.exports=function(options,i18n){
 				.post("storeGasketVertices(newGasketDepth);")
 				.post("gl.bufferData(gl.ARRAY_BUFFER,vertices,gl.STATIC_DRAW);");
 		}
-		if (options['rotate.z.position.input']=='slider') {
-			var listener=new listeners.SliderListener('rotate.z.position');
+		if (options['rotate.z.input']=='slider') {
+			var listener=new listeners.SliderListener('rotate.z');
 			var entry=listener.enter()
 				.log("console.log(this.id,'input value:',parseFloat(this.value));");
 			if (options['rotate.z.speed']==0 && options['rotate.z.speed.input']=='constant') {
 				lines.push(
 					"var rotateZLoc=gl.getUniformLocation(program,'rotateZ');",
 					"function updateRotateZ() {",
-					"	gl.uniform1f(rotateZLoc,parseFloat(document.getElementById('rotate.z.position').value));",
+					"	gl.uniform1f(rotateZLoc,parseFloat(document.getElementById('rotate.z').value));",
 					"};",
 					"updateRotateZ();"
 				);
 				entry.post("updateRotateZ();");
 			}
 			writeListener(listener);
-		} /* TODO else if (isMousemoveInput('rotate.z.position')) {
+		} /* TODO else if (isMousemoveInput('rotate.z')) {
 			canvasMousemoveListener.enter()
-				.state("var rotateZPosition="+floatOptionValue('rotate.z.position')+";")
+				.state("var rotateZPosition="+floatOptionValue('rotate.z')+";")
 				.prexy(
-					options['rotate.z.position.input'],
+					options['rotate.z.input'],
 					"rotationSpeed=-1+2*(ev.clientX-rect.left)/(rect.width-1);",
 					"rotationSpeed=-1+2*(rect.bottom-1-ev.clientY)/(rect.height-1);"
 				)
@@ -524,7 +524,7 @@ module.exports=function(options,i18n){
 			if (options['rotate.z.speed']!=0 || options['rotate.z.speed.input']!='constant') {
 				if (options['rotate.z.speed.input']=='constant') {
 					lines.push(
-						"var rotateZ="+(options['rotate.z.position']?floatOptionValue('rotate.z.position')+"+":"")+floatOptionValue('rotate.z.speed')+"*(time-startTime)/1000;",
+						"var rotateZ="+(options['rotate.z']?floatOptionValue('rotate.z')+"+":"")+floatOptionValue('rotate.z.speed')+"*(time-startTime)/1000;",
 						"gl.uniform1f(rotateZLoc,rotateZ);"
 					);
 				} else {

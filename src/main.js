@@ -48,7 +48,7 @@ var i18n=function(id){ // fake temporary i18n
 		'options.*.input.animated': 'animated',
 
 		'options.transform': 'Transforms',
-		'options.rotate.z.position': 'Angle of rotation around z axis',
+		'options.rotate.z': 'Angle of rotation around z axis',
 		'options.rotate.z.speed': 'Speed of rotation around z axis',
 
 		'options.debug': 'Debug options',
