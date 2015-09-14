@@ -110,11 +110,12 @@ $(function(){
 		function writeInputOption(option) {
 			var id=generateId();
 			var inputId=generateId();
+			var input;
 			return $("<div data-option='"+option.name+"'>")
 				.append("<label for='"+id+"'>"+i18n('options.'+option.name)+":</label>")
 				.append(" <span class='min'>"+option.getMinLabel()+"</span> ")
 				.append(
-					$("<input type='range' id='"+id+"'>")
+					input=$("<input type='range' id='"+id+"'>")
 						.attr('min',option.getMin())
 						.attr('max',option.getMax())
 						.attr('step',option.getStep())
@@ -125,6 +126,12 @@ $(function(){
 						})
 				)
 				.append(" <span class='max'>"+option.getMaxLabel()+"</span> ")
+				.append(
+					$("<button type='button'>Reset</button>").click(function(){
+						input.val(option.defaultValue).change();
+					})
+				)
+				.append(" ")
 				.append("<label for='"+inputId+"'>"+i18n('options.*.input')+"</label> ")
 				.append(
 					$("<select id='"+inputId+"'>").append(
