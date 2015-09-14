@@ -522,7 +522,7 @@ module.exports=function(options,i18n){
 				);
 			}
 			if (options['rotate.z.speed']!=0 || options['rotate.z.speed.input']!='constant') {
-				if (options['rotate.z.speed.input']!='constant' || options['rotate.z.input']!='constant') {
+				if (options['rotate.z.input']!='constant') { // TODO =='slider'
 					lines.push(
 						"function wrap(x,maxAbsX) {",
 						"	if (Math.abs(x)<=maxAbsX) return x;",
@@ -533,34 +533,39 @@ module.exports=function(options,i18n){
 					);
 				}
 				if (options['rotate.z.speed.input']=='constant' && options['rotate.z.input']=='constant') {
+					// no rotation state branch
 					lines.push(
-						"var rotateZ="+(options['rotate.z']?floatOptionValue('rotate.z')+"+":"")+floatOptionValue('rotate.z.speed')+"*(time-startTime)/1000;"
+						"var rotateZ="+(options['rotate.z']
+							? floatOptionValue('rotate.z')+"+"
+							: ""
+						)+floatOptionValue('rotate.z.speed')+"*(time-startTime)/1000;"
 					);
-				} else if (options['rotate.z.speed.input']=='constant' && options['rotate.z.input']!='constant') {
+				} else {
+					// rotation state branch
+					if (options['rotate.z.input']!='constant') {
+						lines.push(
+							"var rotateZInput=document.getElementById('rotate.z');",
+							"var rotateZ=parseFloat(rotateZInput.value);"
+						);
+					}
+					if (options['rotate.z.speed.input']!='constant') {
+						lines.push(
+							"var rotateZSpeedInput=document.getElementById('rotate.z.speed');",
+							"var rotateZSpeed=parseFloat(rotateZSpeedInput.value);"
+						);
+					}
 					lines.push(
-						"var rotateZInput=document.getElementById('rotate.z');",
-						"var rotateZ=parseFloat(rotateZInput.value);",
-						"rotateZ+="+floatOptionValue('rotate.z.speed')+"*(time-prevTime)/1000;",
-						"rotateZ=wrap(rotateZ,180);",
-						"rotateZInput.value=rotateZ;"
+						"rotateZ+="+(options['rotate.z.speed.input']=='constant'
+							? floatOptionValue('rotate.z.speed')
+							: "rotateZSpeed"
+						)+"*(time-prevTime)/1000;"
 					);
-				} else if (options['rotate.z.speed.input']!='constant' && options['rotate.z.input']=='constant') {
-					lines.push(
-						"var rotateZSpeedInput=document.getElementById('rotate.z.speed');",
-						"var rotateZSpeed=parseFloat(rotateZSpeedInput.value);",
-						"rotateZ+=rotateZSpeed*(time-prevTime)/1000;",
-						"rotateZ=wrap(rotateZ,180);"
-					);
-				} else if (options['rotate.z.speed.input']!='constant' && options['rotate.z.input']!='constant') {
-					lines.push(
-						"var rotateZInput=document.getElementById('rotate.z');",
-						"var rotateZ=parseFloat(rotateZInput.value);",
-						"var rotateZSpeedInput=document.getElementById('rotate.z.speed');",
-						"var rotateZSpeed=parseFloat(rotateZSpeedInput.value);",
-						"rotateZ+=rotateZSpeed*(time-prevTime)/1000;",
-						"rotateZ=wrap(rotateZ,180);",
-						"rotateZInput.value=rotateZ;"
-					);
+					if (options['rotate.z.input']!='constant') {
+						lines.push(
+							"rotateZ=wrap(rotateZ,180);",
+							"rotateZInput.value=rotateZ;"
+						);
+					}
 				}
 				lines.push(
 					"gl.uniform1f(rotateZLoc,rotateZ);"
