@@ -525,7 +525,6 @@ module.exports=function(options,i18n){
 				if (options['rotate.z.input']!='constant') { // TODO =='slider'
 					lines.push(
 						"function wrap(x,maxAbsX) {",
-						"	if (Math.abs(x)<=maxAbsX) return x;",
 						"	x%=maxAbsX*2;",
 						"	if (Math.abs(x)<=maxAbsX) return x;",
 						"	return x-(x>0?1:-1)*maxAbsX*2;",
