@@ -514,16 +514,16 @@ module.exports=function(options,i18n){
 			listener.enter()
 				.log("console.log(this.id,'input value:',parseFloat(this.value));");
 			writeListener(listener);
-		} /* TODO else if (isMousemoveInput('rotate.z.speed')) {
+		} else if (isMousemoveInput('rotate.z.speed')) {
 			canvasMousemoveListener.enter()
-				.state("var rotationSpeed="+floatOptionValue('rotate.z.speed')+";")
+				.state("var rotateZSpeed="+floatOptionValue('rotate.z.speed')+";")
 				.prexy(
 					options['rotate.z.speed.input'],
-					"rotationSpeed=-1+2*(ev.clientX-rect.left)/(rect.width-1);",
-					"rotationSpeed=-1+2*(rect.bottom-1-ev.clientY)/(rect.height-1);"
+					"rotateZSpeed=360*(-1+2*(ev.clientX-rect.left)/(rect.width-1));",
+					"rotateZSpeed=360*(-1+2*(rect.bottom-1-ev.clientY)/(rect.height-1));"
 				)
-				.log("console.log('rotate.z.speed input value:',rotationSpeed);");
-		} */
+				.log("console.log('rotate.z.speed input value:',rotateZSpeed);");
+		}
 		writeListener(canvasMousemoveListener);
 		if (lines.length) lines.push("	");
 		return lines;
@@ -562,7 +562,7 @@ module.exports=function(options,i18n){
 							"var rotateZ=parseFloat(rotateZInput.value);"
 						);
 					}
-					if (options['rotate.z.speed.input']!='constant') {
+					if (options['rotate.z.speed.input']=='slider') {
 						lines.push(
 							"var rotateZSpeedInput=document.getElementById('rotate.z.speed');",
 							"var rotateZSpeed=parseFloat(rotateZSpeedInput.value);"
