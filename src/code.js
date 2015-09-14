@@ -522,12 +522,21 @@ module.exports=function(options,i18n){
 				);
 			}
 			if (options['rotate.z.speed']!=0 || options['rotate.z.speed.input']!='constant') {
-				if (options['rotate.z.speed.input']=='constant') {
+				if (options['rotate.z.speed.input']=='constant' && options['rotate.z.input']=='constant') {
 					lines.push(
 						"var rotateZ="+(options['rotate.z']?floatOptionValue('rotate.z')+"+":"")+floatOptionValue('rotate.z.speed')+"*(time-startTime)/1000;",
 						"gl.uniform1f(rotateZLoc,rotateZ);"
 					);
-				} else {
+				} else if (options['rotate.z.speed.input']=='constant' && options['rotate.z.input']!='constant') {
+					lines.push(
+						"var rotateZInput=document.getElementById('rotate.z');",
+						"var rotateZ=parseFloat(rotateZInput.value);",
+						"rotateZ+="+floatOptionValue('rotate.z.speed')+"*(time-prevTime)/1000;",
+						"rotateZInput.value=rotateZ;",
+						"gl.uniform1f(rotateZLoc,rotateZ);"
+					);
+				}
+				/* else {
 					if (options['rotate.z.speed.input']=='slider') {
 						lines.push(
 							"var rotateZSpeed=parseFloat(document.getElementById('rotate.z.speed').value);"
@@ -537,7 +546,7 @@ module.exports=function(options,i18n){
 						"rotateZ+=rotateZSpeed*(time-prevTime)/1000;",
 						"gl.uniform1f(rotateZLoc,rotateZ);"
 					);
-				}
+				}*/
 			}
 			if (options.shape=='square') {
 				lines.push(
@@ -555,6 +564,16 @@ module.exports=function(options,i18n){
 			lines.push(
 				"var rotateZLoc=gl.getUniformLocation(program,'rotateZ');"
 			);
+			if (options['rotate.z.speed.input']=='constant' && options['rotate.z.input']=='constant') {
+				lines.push(
+					"var startTime=performance.now();"
+				);
+			} else if (options['rotate.z.speed.input']=='constant' && options['rotate.z.input']!='constant') {
+				lines.push(
+					"var prevTime=performance.now();"
+				);
+			}
+			/*
 			if (options['rotate.z.speed.input']!='constant') {
 				// angle needs to be a state only if speed is controllable
 				lines.push(
@@ -566,6 +585,7 @@ module.exports=function(options,i18n){
 					"var startTime=performance.now();"
 				);
 			}
+			*/
 		}
 		var needUpdateCanvasFunction=options.isAnimated()||options.hasInputs();
 		if (needUpdateCanvasFunction) {
@@ -576,11 +596,18 @@ module.exports=function(options,i18n){
 				indentLines(1,renderInner())
 			);
 			if (options.isAnimated()) {
+				if (options['rotate.z.speed.input']=='constant' && options['rotate.z.input']!='constant') {
+					lines.push(
+						"	prevTime=time;"
+					);
+				}
+				/*
 				if (options['rotate.z.speed.input']!='constant') {
 					lines.push(
 						"	prevTime=time;"
 					);
 				}
+				*/
 				lines.push(
 					"	requestAnimationFrame(updateCanvas);"
 				);
