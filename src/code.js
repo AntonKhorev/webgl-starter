@@ -522,58 +522,49 @@ module.exports=function(options,i18n){
 				);
 			}
 			if (options['rotate.z.speed']!=0 || options['rotate.z.speed.input']!='constant') {
-				if (options['rotate.z.speed.input']=='constant' && options['rotate.z.input']=='constant') {
-					lines.push(
-						"var rotateZ="+(options['rotate.z']?floatOptionValue('rotate.z')+"+":"")+floatOptionValue('rotate.z.speed')+"*(time-startTime)/1000;",
-						"gl.uniform1f(rotateZLoc,rotateZ);"
-					);
-				} else if (options['rotate.z.speed.input']=='constant' && options['rotate.z.input']!='constant') {
+				if (options['rotate.z.speed.input']!='constant' || options['rotate.z.input']!='constant') {
 					lines.push(
 						"function wrap(x,maxAbsX) {",
 						"	if (Math.abs(x)<=maxAbsX) return x;",
 						"	x%=maxAbsX*2;",
 						"	if (Math.abs(x)<=maxAbsX) return x;",
 						"	return x-(x>0?1:-1)*maxAbsX*2;",
-						"}",
+						"}"
+					);
+				}
+				if (options['rotate.z.speed.input']=='constant' && options['rotate.z.input']=='constant') {
+					lines.push(
+						"var rotateZ="+(options['rotate.z']?floatOptionValue('rotate.z')+"+":"")+floatOptionValue('rotate.z.speed')+"*(time-startTime)/1000;"
+					);
+				} else if (options['rotate.z.speed.input']=='constant' && options['rotate.z.input']!='constant') {
+					lines.push(
 						"var rotateZInput=document.getElementById('rotate.z');",
 						"var rotateZ=parseFloat(rotateZInput.value);",
 						"rotateZ+="+floatOptionValue('rotate.z.speed')+"*(time-prevTime)/1000;",
 						"rotateZ=wrap(rotateZ,180);",
-						"rotateZInput.value=rotateZ;",
-						"gl.uniform1f(rotateZLoc,rotateZ);"
+						"rotateZInput.value=rotateZ;"
 					);
 				} else if (options['rotate.z.speed.input']!='constant' && options['rotate.z.input']=='constant') {
 					lines.push(
-						"function wrap(x,maxAbsX) {", // TODO remove copypaste
-						"	if (Math.abs(x)<=maxAbsX) return x;",
-						"	x%=maxAbsX*2;",
-						"	if (Math.abs(x)<=maxAbsX) return x;",
-						"	return x-(x>0?1:-1)*maxAbsX*2;",
-						"}",
 						"var rotateZSpeedInput=document.getElementById('rotate.z.speed');",
 						"var rotateZSpeed=parseFloat(rotateZSpeedInput.value);",
 						"rotateZ+=rotateZSpeed*(time-prevTime)/1000;",
-						"rotateZ=wrap(rotateZ,180);",
-						"gl.uniform1f(rotateZLoc,rotateZ);"
+						"rotateZ=wrap(rotateZ,180);"
 					);
 				} else if (options['rotate.z.speed.input']!='constant' && options['rotate.z.input']!='constant') {
 					lines.push(
-						"function wrap(x,maxAbsX) {", // TODO remove copypaste
-						"	if (Math.abs(x)<=maxAbsX) return x;",
-						"	x%=maxAbsX*2;",
-						"	if (Math.abs(x)<=maxAbsX) return x;",
-						"	return x-(x>0?1:-1)*maxAbsX*2;",
-						"}",
 						"var rotateZInput=document.getElementById('rotate.z');",
 						"var rotateZ=parseFloat(rotateZInput.value);",
 						"var rotateZSpeedInput=document.getElementById('rotate.z.speed');",
 						"var rotateZSpeed=parseFloat(rotateZSpeedInput.value);",
 						"rotateZ+=rotateZSpeed*(time-prevTime)/1000;",
 						"rotateZ=wrap(rotateZ,180);",
-						"rotateZInput.value=rotateZ;",
-						"gl.uniform1f(rotateZLoc,rotateZ);"
+						"rotateZInput.value=rotateZ;"
 					);
 				}
+				lines.push(
+					"gl.uniform1f(rotateZLoc,rotateZ);"
+				);
 			}
 			if (options.shape=='square') {
 				lines.push(
