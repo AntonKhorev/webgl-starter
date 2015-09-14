@@ -28,9 +28,6 @@ var i18n=function(id){ // fake temporary i18n
 		'options.shape.square': 'Square',
 		'options.shape.triangle': 'Triangle',
 		'options.shape.gasket': 'Sierpinski gasket', // wp: Sierpinski triangle
-		'options.animation': 'Animation',
-		'options.animation.none': 'None',
-		'options.animation.rotation': 'Rotation around z axis',
 
 		'options.input': 'Input options',
 		'options.background.solid.color.r': 'Background color red component',
@@ -48,7 +45,11 @@ var i18n=function(id){ // fake temporary i18n
 		'options.*.input.slider': 'updated with a slider',
 		'options.*.input.mousemovex': 'updated by moving the mouse horizontally',
 		'options.*.input.mousemovey': 'updated by moving the mouse vertically',
-		//'options.*.input.animated': 'animated',
+		'options.*.input.animated': 'animated',
+
+		'options.transform': 'Transforms',
+		'options.rotate.z.position': 'Angle of rotation around z axis',
+		'options.rotate.z.speed': 'Speed of rotation around z axis',
 
 		'options.debug': 'Debug options',
 		'options.debugShader': 'Log shader compilation errors',
@@ -157,6 +158,10 @@ $(function(){
 			).append(
 				$("<fieldset>").append("<legend>"+i18n('options.input')+"</legend>").append(
 					options.inputOptions.map(writeInputOption)
+				)
+			).append(
+				$("<fieldset>").append("<legend>"+i18n('options.transform')+"</legend>").append(
+					options.transformOptions.map(writeInputOption)
 				)
 			).append(
 				$("<fieldset>").append("<legend>"+i18n('options.debug')+"</legend>").append(

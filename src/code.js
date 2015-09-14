@@ -35,15 +35,13 @@ module.exports=function(options,i18n){
 
 	function generateVertexShaderLines() {
 		lines=[];
-		if (options.animation=='rotation') {
-			lines.push(
-				"uniform float rotationAngle;",
-				"attribute vec2 position;"
-			);
+		if (options.needsUniform('rotate.z')) {
+			lines.push("uniform float rotateZ;");
+		}
+		if (options.needsTransform('rotate.z')) {
+			lines.push("attribute vec2 position;");
 		} else {
-			lines.push(
-				"attribute vec4 position;"
-			);
+			lines.push("attribute vec4 position;");
 		}
 		if (options.shader=='vertex') {
 			lines.push(
@@ -54,10 +52,19 @@ module.exports=function(options,i18n){
 		lines.push(
 			"void main() {"
 		);
-		if (options.animation=='rotation') {
+		if (options.needsTransform('rotate.z')) {
+			if (options.needsUniform('rotate.z')) {
+				lines.push(
+					"	float c=cos(radians(rotateZ));",
+					"	float s=sin(radians(rotateZ));"
+				);
+			} else {
+				lines.push(
+					"	float c=cos(radians("+floatOptionValue('rotate.z.position')+"));",
+					"	float s=sin(radians("+floatOptionValue('rotate.z.position')+"));"
+				);
+			}
 			lines.push(
-				"	float c=cos(radians(rotationAngle));",
-				"	float s=sin(radians(rotationAngle));",
 				"	gl_Position=vec4(mat2(",
 				"		 c, s,",
 				"		-s, c",
@@ -323,7 +330,7 @@ module.exports=function(options,i18n){
 		var lines=[];
 		function writeListener(listener) {
 			lines=lines.concat(
-				listener.write(options.animation!='rotation',options.debugInputs)
+				listener.write(options.isAnimated(),options.debugInputs)
 			);
 		}
 		var canvasMousemoveListener=new listeners.CanvasMousemoveListener();
@@ -458,21 +465,45 @@ module.exports=function(options,i18n){
 				.post("storeGasketVertices(newGasketDepth);")
 				.post("gl.bufferData(gl.ARRAY_BUFFER,vertices,gl.STATIC_DRAW);");
 		}
-		if (options['animation.rotation.speed.input']=='slider') {
-			var listener=new listeners.SliderListener('animation.rotation.speed');
-			listener.enter()
+		if (options['rotate.z.position']=='slider') {
+			var listener=new listeners.SliderListener('rotate.z.position');
+			var entry=listener.enter()
 				.log("console.log(this.id,'input value:',parseFloat(this.value));");
+			if (options['rotate.z.speed']==0 && options['rotate.z.speed.input']=='const') {
+				lines.push(
+					"function updateRotateZ() {",
+					"	gl.uniform1f(rotateZLoc,parseFloat(document.getElementById('rotate.z.position').value));",
+					"};",
+					"updateRotateZ();"
+				);
+				entry.post("updateRotateZ();");
+			}
 			writeListener(listener);
-		} else if (isMousemoveInput('animation.rotation.speed')) {
+		} /* TODO else if (isMousemoveInput('rotate.z.position')) {
 			canvasMousemoveListener.enter()
-				.state("var rotationSpeed="+floatOptionValue('animation.rotation.speed')+";")
+				.state("var rotateZPosition="+floatOptionValue('rotate.z.position')+";")
 				.prexy(
-					options['animation.rotation.speed.input'],
+					options['rotate.z.position.input'],
 					"rotationSpeed=-1+2*(ev.clientX-rect.left)/(rect.width-1);",
 					"rotationSpeed=-1+2*(rect.bottom-1-ev.clientY)/(rect.height-1);"
 				)
-				.log("console.log('animation.rotation.speed input value:',rotationSpeed);");
-		}
+				.log("console.log('rotate.z.speed input value:',rotationSpeed);");
+		} */
+		if (options['rotate.z.speed']=='slider') {
+			var listener=new listeners.SliderListener('rotate.z.speed');
+			listener.enter()
+				.log("console.log(this.id,'input value:',parseFloat(this.value));");
+			writeListener(listener);
+		} /* TODO else if (isMousemoveInput('rotate.z.speed')) {
+			canvasMousemoveListener.enter()
+				.state("var rotationSpeed="+floatOptionValue('rotate.z.speed')+";")
+				.prexy(
+					options['rotate.z.speed.input'],
+					"rotationSpeed=-1+2*(ev.clientX-rect.left)/(rect.width-1);",
+					"rotationSpeed=-1+2*(rect.bottom-1-ev.clientY)/(rect.height-1);"
+				)
+				.log("console.log('rotate.z.speed input value:',rotationSpeed);");
+		} */
 		writeListener(canvasMousemoveListener);
 		if (lines.length) lines.push("	");
 		return lines;
@@ -621,7 +652,7 @@ module.exports=function(options,i18n){
 		"	",
 	],indentLines(1,generateBufferLines()),[
 		"	",
-	],indentLines(1,generateInputHandlerLines()),options.animation=='rotation'?[
+	],indentLines(1,generateInputHandlerLines()),options.isAnimated()?[
 		"	var rotationAngleLoc=gl.getUniformLocation(program,'rotationAngle');",
 		"	",
 	]:[],indentLines(1,generateRenderLines()),[

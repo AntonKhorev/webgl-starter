@@ -16,29 +16,38 @@ Option.prototype.doesValueHideOption=function(value,option){
 
 var InputOption=function(name,rangeOfValues,defaultValue){
 	Option.call(this,name,rangeOfValues,defaultValue);
-}
+};
 InputOption.prototype=Object.create(Option.prototype);
 InputOption.prototype.constructor=InputOption;
 InputOption.prototype.availableInputTypes=['constant','slider','mousemovex','mousemovey'];
 InputOption.prototype.getMin=function(){
 	return this.availableValues[0];
-}
+};
 InputOption.prototype.getMax=function(){
 	return this.availableValues[1];
-}
+};
 InputOption.prototype.getStep=function(){
 	if (this.availableValues.length>=3) {
 		return this.availableValues[2];
 	} else {
 		return 'any';
 	}
-}
+};
 InputOption.prototype.getMinLabel=function(){
 	return this.getMin().toString().replace('-','−');
 };
 InputOption.prototype.getMaxLabel=function(){
 	return this.getMax().toString().replace('-','−');
 };
+
+/*
+var TransformOption=function(name,rangeOfValues,defaultValue){
+	InputOption.call(this,name,rangeOfValues,defaultValue);
+};
+TransformOption.prototype=Object.create(InputOption.prototype);
+TransformOption.prototype.constructor=TransformOption;
+TransformOption.prototype.availableInputTypes=InputOption.prototype.availableInputTypes.concat(['animated']);
+*/
 
 var DebugOption=function(name,defaultValue){
 	Option.call(this,name,[false,true],defaultValue);
@@ -53,7 +62,7 @@ Options.prototype.generalOptions=[
 	new Option('background',['none','solid']),
 	new Option('shader',['single','vertex']),
 	new Option('shape',['square','triangle','gasket']),
-	new Option('animation',['none','rotation']),
+	//new Option('animation',['none','rotation']),
 ];
 Options.prototype.inputOptions=[
 	new InputOption('background.solid.color.r',[0,1],1),
@@ -65,7 +74,10 @@ Options.prototype.inputOptions=[
 	new InputOption('shader.single.color.b',[0,1]),
 	new InputOption('shader.single.color.a',[0,1],1),
 	new InputOption('shape.gasket.depth',[0,10,1],6),
-	new InputOption('animation.rotation.speed',[-1,1],0.2),
+];
+Options.prototype.transformOptions=[
+	new InputOption('rotate.z.position',[-180,180],0), // TODO 'position' conflicts with vertex position, make up a better name (value?)
+	new InputOption('rotate.z.speed',[-1,1],0), // TODO make it default to 0.2 when able to add/delete transforms
 ];
 Options.prototype.debugOptions=[
 	new DebugOption('debugShader',true),
@@ -79,6 +91,10 @@ Options.prototype.reset=function(){
 		this[option.name]=option.defaultValue;
 		this[option.name+'.input']='constant';
 	},this);
+	this.transformOptions.forEach(function(option){
+		this[option.name]=option.defaultValue;
+		this[option.name+'.input']='constant';
+	},this);
 	this.debugOptions.forEach(function(option){
 		this[option.name]=option.defaultValue;
 	},this);
@@ -88,10 +104,14 @@ Options.prototype.reset=function(){
 Options.prototype.hasInputs=function(){
 	return this.inputOptions.some(function(option){
 		return this[option.name+'.input']!='constant';
+	},this) || this.transformOptions.some(function(option){
+		return this[option.name+'.input']!='constant';
 	},this);
 };
 Options.prototype.hasSliderInputs=function(){
 	return this.inputOptions.some(function(option){
+		return this[option.name+'.input']=='slider';
+	},this) || this.transformOptions.some(function(option){
 		return this[option.name+'.input']=='slider';
 	},this);
 };
@@ -119,6 +139,23 @@ Options.prototype.getOnlyInputFor=function(prefix){
 		return null;
 	}
 };
+Options.prototype.isAnimated=function(){
+	function endsWith(name,suffix) {
+		return name.indexOf(suffix,name.length-suffix.length)!==-1;
+	};
+	return this.transformOptions.some(function(option){
+		return endsWith(option.name,'.speed') && (this[option.name]!=0 || this[option.name+'.input']!='constant');
+	},this);
+};
+Options.prototype.needsUniform=function(prefix){
+	return (
+		this[prefix+'.position.input']!='constant' ||
+		this[prefix+'.speed']!=0 || this[prefix+'.speed.input']!='constant'
+	);
+};
+Options.prototype.needsTransform=function(prefix){
+	return this.needsUniform(prefix) || this[prefix+'.position']!=0;
+};
 
 Options.prototype.cloneWithoutHidden=function(){
 	// clone and set .input=constant for hidden sections
@@ -126,17 +163,19 @@ Options.prototype.cloneWithoutHidden=function(){
 	this.generalOptions.forEach(function(option){
 		newOptions[option.name]=this[option.name];
 	},this);
-	this.inputOptions.forEach(function(option){
-		newOptions[option.name]=this[option.name];
-		if (
-			this.generalOptions.some(function(generalOption){
-				return generalOption.doesValueHideOption(this[generalOption.name],option);
-			},this)
-		) {
-			newOptions[option.name+'.input']='constant';
-		} else {
-			newOptions[option.name+'.input']=this[option.name+'.input'];
-		}
+	[this.inputOptions,this.transformOptions].forEach(function(section){
+		section.forEach(function(option){
+			newOptions[option.name]=this[option.name];
+			if (
+				this.generalOptions.some(function(generalOption){
+					return generalOption.doesValueHideOption(this[generalOption.name],option);
+				},this)
+			) {
+				newOptions[option.name+'.input']='constant';
+			} else {
+				newOptions[option.name+'.input']=this[option.name+'.input'];
+			}
+		},this);
 	},this);
 	this.debugOptions.forEach(function(option){
 		newOptions[option.name]=this[option.name];
