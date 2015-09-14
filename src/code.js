@@ -542,18 +542,21 @@ module.exports=function(options,i18n){
 						"rotateZInput.value=rotateZ;",
 						"gl.uniform1f(rotateZLoc,rotateZ);"
 					);
-				}
-				/* else {
-					if (options['rotate.z.speed.input']=='slider') {
-						lines.push(
-							"var rotateZSpeed=parseFloat(document.getElementById('rotate.z.speed').value);"
-						);
-					}
+				} else if (options['rotate.z.speed.input']!='constant' && options['rotate.z.input']=='constant') {
 					lines.push(
+						"function wrap(x,maxAbsX) {", // TODO remove copypaste
+						"	if (Math.abs(x)<=maxAbsX) return x;",
+						"	x%=maxAbsX*2;",
+						"	if (Math.abs(x)<=maxAbsX) return x;",
+						"	return x-(x>0?1:-1)*maxAbsX*2;",
+						"}",
+						"var rotateZSpeedInput=document.getElementById('rotate.z.speed');",
+						"var rotateZSpeed=parseFloat(rotateZSpeedInput.value);",
 						"rotateZ+=rotateZSpeed*(time-prevTime)/1000;",
+						"rotateZ=wrap(rotateZ,180);",
 						"gl.uniform1f(rotateZLoc,rotateZ);"
 					);
-				}*/
+				}
 			}
 			if (options.shape=='square') {
 				lines.push(
@@ -579,20 +582,12 @@ module.exports=function(options,i18n){
 				lines.push(
 					"var prevTime=performance.now();"
 				);
-			}
-			/*
-			if (options['rotate.z.speed.input']!='constant') {
-				// angle needs to be a state only if speed is controllable
+			} else if (options['rotate.z.speed.input']!='constant' && options['rotate.z.input']=='constant') {
 				lines.push(
-					"var rotateZ=0;",
+					"var rotateZ="+floatOptionValue('rotate.z')+";",
 					"var prevTime=performance.now();"
 				);
-			} else {
-				lines.push(
-					"var startTime=performance.now();"
-				);
 			}
-			*/
 		}
 		var needUpdateCanvasFunction=options.isAnimated()||options.hasInputs();
 		if (needUpdateCanvasFunction) {
@@ -607,14 +602,11 @@ module.exports=function(options,i18n){
 					lines.push(
 						"	prevTime=time;"
 					);
-				}
-				/*
-				if (options['rotate.z.speed.input']!='constant') {
+				} else if (options['rotate.z.speed.input']!='constant' && options['rotate.z.input']=='constant') {
 					lines.push(
 						"	prevTime=time;"
 					);
 				}
-				*/
 				lines.push(
 					"	requestAnimationFrame(updateCanvas);"
 				);
