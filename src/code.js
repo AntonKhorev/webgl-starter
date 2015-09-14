@@ -521,20 +521,20 @@ module.exports=function(options,i18n){
 					"gl.clear(gl.COLOR_BUFFER_BIT);"
 				);
 			}
-			if (options.animation=='rotation') {
-				if (options['animation.rotation.speed.input']=='constant') {
+			if (options['rotate.z.speed']!=0 || options['rotate.z.speed.input']!='constant') {
+				if (options['rotate.z.speed.input']=='constant') {
 					lines.push(
-						"gl.uniform1f(rotationAngleLoc,"+floatOptionValue('animation.rotation.speed')+"*360*(time-startTime)/1000);"
+						"gl.uniform1f(rotateZLoc,"+floatOptionValue('rotate.z.speed')+"*(time-startTime)/1000);"
 					);
 				} else {
-					if (options['animation.rotation.speed.input']=='slider') {
+					if (options['rotate.z.speed.input']=='slider') {
 						lines.push(
-							"var rotationSpeed=parseFloat(document.getElementById('animation.rotation.speed').value);"
+							"var rotateZSpeed=parseFloat(document.getElementById('rotate.z.speed').value);"
 						);
 					}
 					lines.push(
-						"rotationAngle+=rotationSpeed*360*(time-prevTime)/1000;",
-						"gl.uniform1f(rotationAngleLoc,rotationAngle);"
+						"rotateZ+=rotateZSpeed*(time-prevTime)/1000;",
+						"gl.uniform1f(rotateZLoc,rotateZ);"
 					);
 				}
 			}
@@ -550,11 +550,14 @@ module.exports=function(options,i18n){
 			return lines;
 		}
 		var lines=[];
-		if (options.animation=='rotation') {
-			if (options['animation.rotation.speed.input']!='constant') {
+		if (options.isAnimated()) {
+			lines.push(
+				"var rotateZLoc=gl.getUniformLocation(program,'rotateZ');"
+			);
+			if (options['rotate.z.speed.input']!='constant') {
 				// angle needs to be a state only if speed is controllable
 				lines.push(
-					"var rotationAngle=0;",
+					"var rotateZ=0;",
 					"var prevTime=performance.now();"
 				);
 			} else {
@@ -563,7 +566,7 @@ module.exports=function(options,i18n){
 				);
 			}
 		}
-		var needUpdateCanvasFunction=options.animation=='rotation'||options.hasInputs();
+		var needUpdateCanvasFunction=options.isAnimated()||options.hasInputs();
 		if (needUpdateCanvasFunction) {
 			lines.push(
 				"function updateCanvas(time) {"
@@ -571,8 +574,8 @@ module.exports=function(options,i18n){
 			lines=lines.concat(
 				indentLines(1,renderInner())
 			);
-			if (options.animation=='rotation') {
-				if (options['animation.rotation.speed.input']!='constant') {
+			if (options.isAnimated()) {
+				if (options['rotate.z.speed.input']!='constant') {
 					lines.push(
 						"	prevTime=time;"
 					);
@@ -584,7 +587,7 @@ module.exports=function(options,i18n){
 			lines.push(
 				"}"
 			);
-			if (options.animation=='rotation') {
+			if (options.isAnimated()) {
 				lines.push(
 					"requestAnimationFrame(updateCanvas);"
 				);
@@ -657,10 +660,7 @@ module.exports=function(options,i18n){
 		"	",
 	],indentLines(1,generateBufferLines()),[
 		"	",
-	],indentLines(1,generateInputHandlerLines()),options.isAnimated()?[
-		"	var rotationAngleLoc=gl.getUniformLocation(program,'rotationAngle');",
-		"	",
-	]:[],indentLines(1,generateRenderLines()),[
+	],indentLines(1,generateInputHandlerLines()),indentLines(1,generateRenderLines()),[
 		"</script>",
 		"</body>",
 		"</html>",

@@ -77,7 +77,7 @@ Options.prototype.inputOptions=[
 ];
 Options.prototype.transformOptions=[
 	new InputOption('rotate.z.position',[-180,180],0), // TODO 'position' conflicts with vertex position, make up a better name (value?)
-	new InputOption('rotate.z.speed',[-1,1],0), // TODO make it default to 0.2 when able to add/delete transforms
+	new InputOption('rotate.z.speed',[-360,360],0), // TODO make it default to 0.2*360 when able to add/delete transforms
 ];
 Options.prototype.debugOptions=[
 	new DebugOption('debugShader',true),
