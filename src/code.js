@@ -595,18 +595,14 @@ module.exports=function(options,i18n){
 				lines.push(
 					"var startTime=performance.now();"
 				);
-			} else if (options['rotate.z.speed.input']=='constant' && options['rotate.z.input']!='constant') {
+			} else {
 				lines.push(
 					"var prevTime=performance.now();"
 				);
-			} else if (options['rotate.z.speed.input']!='constant' && options['rotate.z.input']=='constant') {
+			}
+			if (options['rotate.z.speed.input']!='constant' && options['rotate.z.input']=='constant') {
 				lines.push(
-					"var rotateZ="+floatOptionValue('rotate.z')+";",
-					"var prevTime=performance.now();"
-				);
-			} else if (options['rotate.z.speed.input']!='constant' && options['rotate.z.input']!='constant') {
-				lines.push(
-					"var prevTime=performance.now();"
+					"var rotateZ="+floatOptionValue('rotate.z')+";"
 				);
 			}
 		}
@@ -619,15 +615,7 @@ module.exports=function(options,i18n){
 				indentLines(1,renderInner())
 			);
 			if (options.isAnimated()) {
-				if (options['rotate.z.speed.input']=='constant' && options['rotate.z.input']!='constant') {
-					lines.push(
-						"	prevTime=time;"
-					);
-				} else if (options['rotate.z.speed.input']!='constant' && options['rotate.z.input']=='constant') {
-					lines.push(
-						"	prevTime=time;"
-					);
-				} else if (options['rotate.z.speed.input']!='constant' && options['rotate.z.input']!='constant') {
+				if (options['rotate.z.speed.input']!='constant' || options['rotate.z.input']!='constant') {
 					lines.push(
 						"	prevTime=time;"
 					);
