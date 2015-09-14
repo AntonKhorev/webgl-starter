@@ -121,11 +121,12 @@ module.exports=function(options,i18n){
 		}
 	}
 	function generateInputLines() {
-		return [].concat.apply([],
-			options.inputOptions.filter(function(option){
+		var lines=[];
+		function writeOptionGroup(group) {
+			group.filter(function(option){
 				return options[option.name+'.input']=='slider';
-			}).map(function(option){
-				return [
+			}).forEach(function(option){
+				lines.push(
 					"<div>",
 					"	<label for='"+option.name+"'>"+i18n('options.'+option.name)+":</label>",
 					"	<span class='min'>"+option.getMinLabel()+"</span> "+
@@ -134,10 +135,13 @@ module.exports=function(options,i18n){
 							: "<input type='range' id='"+option.name+"' min='"+option.getMin()+"' max='"+option.getMax()+"' step='"+option.getStep()+"' value='"+floatOptionValue(option.name)+"' />"
 						)+
 						" <span class='max'>"+option.getMaxLabel()+"</span>",
-					"</div>",
-				];
-			})
-		);
+					"</div>"
+				);
+			});
+		}
+		writeOptionGroup(options.inputOptions);
+		writeOptionGroup(options.transformOptions);
+		return lines;
 	}
 	function generateMakeProgramLines() {
 		lines=[
@@ -330,7 +334,7 @@ module.exports=function(options,i18n){
 		var lines=[];
 		function writeListener(listener) {
 			lines=lines.concat(
-				listener.write(options.isAnimated(),options.debugInputs)
+				listener.write(!options.isAnimated(),options.debugInputs)
 			);
 		}
 		var canvasMousemoveListener=new listeners.CanvasMousemoveListener();
@@ -465,12 +469,13 @@ module.exports=function(options,i18n){
 				.post("storeGasketVertices(newGasketDepth);")
 				.post("gl.bufferData(gl.ARRAY_BUFFER,vertices,gl.STATIC_DRAW);");
 		}
-		if (options['rotate.z.position']=='slider') {
+		if (options['rotate.z.position.input']=='slider') {
 			var listener=new listeners.SliderListener('rotate.z.position');
 			var entry=listener.enter()
 				.log("console.log(this.id,'input value:',parseFloat(this.value));");
-			if (options['rotate.z.speed']==0 && options['rotate.z.speed.input']=='const') {
+			if (options['rotate.z.speed']==0 && options['rotate.z.speed.input']=='constant') {
 				lines.push(
+					"var rotateZLoc=gl.getUniformLocation(program,'rotateZ');",
 					"function updateRotateZ() {",
 					"	gl.uniform1f(rotateZLoc,parseFloat(document.getElementById('rotate.z.position').value));",
 					"};",
@@ -489,7 +494,7 @@ module.exports=function(options,i18n){
 				)
 				.log("console.log('rotate.z.speed input value:',rotationSpeed);");
 		} */
-		if (options['rotate.z.speed']=='slider') {
+		if (options['rotate.z.speed.input']=='slider') {
 			var listener=new listeners.SliderListener('rotate.z.speed');
 			listener.enter()
 				.log("console.log(this.id,'input value:',parseFloat(this.value));");
