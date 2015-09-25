@@ -678,11 +678,13 @@ module.exports=function(options,i18n){
 				var D=d.toUpperCase();
 				var optName='rotate.'+d;
 				var varName='rotate'+D;
-				if (!(
-					(options[optName+'.input']=='slider' || isMousemoveInput(optName)) &&
-					options[optName+'.speed']==0 && options[optName+'.speed.input']=='constant'
-				)) {
-					// no Loc was generated in generateInputHandlerLines()
+				if (
+					options.needsUniform(optName) && !(
+						// no Loc was generated in generateInputHandlerLines()
+						(options[optName+'.input']=='slider' || isMousemoveInput(optName)) &&
+						options[optName+'.speed']==0 && options[optName+'.speed.input']=='constant'
+					)
+				) {
 					lines.push(
 						"var "+varName+"Loc=gl.getUniformLocation(program,'"+varName+"');"
 					);
@@ -693,7 +695,7 @@ module.exports=function(options,i18n){
 					);
 				}
 			});
-			needStartTime=(
+			needStartTime=( // TODO need to check if uniforms are used
 				(options['rotate.x.speed.input']=='constant' && options['rotate.x.input']=='constant') ||
 				(options['rotate.y.speed.input']=='constant' && options['rotate.y.input']=='constant') ||
 				(options['rotate.z.speed.input']=='constant' && options['rotate.z.input']=='constant')
