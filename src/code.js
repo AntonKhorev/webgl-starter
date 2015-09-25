@@ -82,7 +82,7 @@ module.exports=function(options,i18n){
 				"		1,   0,   0,   0,",
 				"		0,  cx,  sx,   0,",
 				"		0, -sx,  cx,   0,",
-				"		0,   0,   0,   0",
+				"		0,   0,   0,   1",
 				"	)*position;"
 			);
 		} else if (!options.needsTransform('rotate.x') && options.needsTransform('rotate.z')) {
@@ -508,61 +508,67 @@ module.exports=function(options,i18n){
 				.post("storeGasketVertices(newGasketDepth);")
 				.post("gl.bufferData(gl.ARRAY_BUFFER,vertices,gl.STATIC_DRAW);");
 		}
-		if (options['rotate.z.input']=='slider') {
-			var listener=new listeners.SliderListener('rotate.z');
-			var entry=listener.enter()
-				.log("console.log(this.id,'input value:',parseFloat(this.value));");
-			if (options['rotate.z.speed']==0 && options['rotate.z.speed.input']=='constant') {
-				lines.push(
-					"var rotateZLoc=gl.getUniformLocation(program,'rotateZ');",
-					"function updateRotateZ() {",
-					"	gl.uniform1f(rotateZLoc,parseFloat(document.getElementById('rotate.z').value));",
-					"};",
-					"updateRotateZ();"
-				);
-				entry.post("updateRotateZ();");
+		['x','z'].forEach(function(d){
+			var D=d.toUpperCase();
+			var optName='rotate.'+d;
+			var varName='rotate'+D;
+			var updateName='updateRotate'+D;
+			if (options[optName+'.input']=='slider') {
+				var listener=new listeners.SliderListener(optName);
+				var entry=listener.enter()
+					.log("console.log(this.id,'input value:',parseFloat(this.value));");
+				if (options[optName+'.speed']==0 && options[optName+'.speed.input']=='constant') {
+					lines.push(
+						"var "+varName+"Loc=gl.getUniformLocation(program,'"+varName+"');",
+						"function "+updateName+"() {",
+						"	gl.uniform1f("+varName+"Loc,parseFloat(document.getElementById('"+optName+"').value));",
+						"};",
+						updateName+"();"
+					);
+					entry.post(updateName+"();");
+				}
+				writeListener(listener);
+			} else if (isMousemoveInput(optName)) {
+				if (options[optName+'.speed']==0 && options[optName+'.speed.input']=='constant') {
+					lines.push(
+						"var "+varName+"Loc=gl.getUniformLocation(program,'"+varName+"');",
+						"gl.uniform1f("+varName+"Loc,"+floatOptionValue(optName)+");"
+					);
+					canvasMousemoveListener.enter()
+						.prexy(
+							options[optName+'.input'],
+							"var "+varName+"=180*(-1+2*(ev.clientX-rect.left)/(rect.width-1));",
+							"var "+varName+"=180*(-1+2*(rect.bottom-1-ev.clientY)/(rect.height-1));"
+						)
+						.log("console.log('"+optName+" input value:',"+varName+");")
+						.post("gl.uniform1f("+varName+"Loc,"+varName+");");
+				} else {
+					canvasMousemoveListener.enter()
+						.state("var "+varName+"="+floatOptionValue(optName)+";")
+						.prexy(
+							options[optName+'.input'],
+							varName+"=180*(-1+2*(ev.clientX-rect.left)/(rect.width-1));",
+							varName+"=180*(-1+2*(rect.bottom-1-ev.clientY)/(rect.height-1));"
+						)
+						.log("console.log('"+optName+" input value:',"+varName+");");
+				}
 			}
-			writeListener(listener);
-		} else if (isMousemoveInput('rotate.z')) {
-			if (options['rotate.z.speed']==0 && options['rotate.z.speed.input']=='constant') {
-				lines.push(
-					"var rotateZLoc=gl.getUniformLocation(program,'rotateZ');",
-					"gl.uniform1f(rotateZLoc,"+floatOptionValue('rotate.z')+");"
-				);
+			if (options[optName+'.speed.input']=='slider') {
+				var listener=new listeners.SliderListener(optName+'.speed');
+				listener.enter()
+					.log("console.log(this.id,'input value:',parseFloat(this.value));");
+				writeListener(listener);
+			} else if (isMousemoveInput(optName+'.speed')) {
 				canvasMousemoveListener.enter()
+					.state("var "+varName+"Speed="+floatOptionValue(optName+'.speed')+";")
 					.prexy(
-						options['rotate.z.input'],
-						"var rotateZ=180*(-1+2*(ev.clientX-rect.left)/(rect.width-1));",
-						"var rotateZ=180*(-1+2*(rect.bottom-1-ev.clientY)/(rect.height-1));"
+						options[optName+'.speed.input'],
+						varName+"Speed=360*(-1+2*(ev.clientX-rect.left)/(rect.width-1));",
+						varName+"Speed=360*(-1+2*(rect.bottom-1-ev.clientY)/(rect.height-1));"
 					)
-					.log("console.log('rotate.z input value:',rotateZ);")
-					.post("gl.uniform1f(rotateZLoc,rotateZ);");
-			} else {
-				canvasMousemoveListener.enter()
-					.state("var rotateZ="+floatOptionValue('rotate.z')+";")
-					.prexy(
-						options['rotate.z.input'],
-						"rotateZ=180*(-1+2*(ev.clientX-rect.left)/(rect.width-1));",
-						"rotateZ=180*(-1+2*(rect.bottom-1-ev.clientY)/(rect.height-1));"
-					)
-					.log("console.log('rotate.z input value:',rotateZ);");
+					.log("console.log('"+optName+".speed input value:',"+varName+"Speed);");
 			}
-		}
-		if (options['rotate.z.speed.input']=='slider') {
-			var listener=new listeners.SliderListener('rotate.z.speed');
-			listener.enter()
-				.log("console.log(this.id,'input value:',parseFloat(this.value));");
-			writeListener(listener);
-		} else if (isMousemoveInput('rotate.z.speed')) {
-			canvasMousemoveListener.enter()
-				.state("var rotateZSpeed="+floatOptionValue('rotate.z.speed')+";")
-				.prexy(
-					options['rotate.z.speed.input'],
-					"rotateZSpeed=360*(-1+2*(ev.clientX-rect.left)/(rect.width-1));",
-					"rotateZSpeed=360*(-1+2*(rect.bottom-1-ev.clientY)/(rect.height-1));"
-				)
-				.log("console.log('rotate.z.speed input value:',rotateZSpeed);");
-		}
+		});
 		writeListener(canvasMousemoveListener);
 		if (lines.length) lines.push("	");
 		return lines;
