@@ -48,6 +48,10 @@ var i18n=function(id){ // fake temporary i18n
 		'options.*.input.animated': 'animated',
 
 		'options.transform': 'Transforms',
+		'options.rotate.x': 'Angle of rotation around x axis',
+		'options.rotate.x.speed': 'Speed of rotation around x axis',
+		'options.rotate.y': 'Angle of rotation around y axis',
+		'options.rotate.y.speed': 'Speed of rotation around y axis',
 		'options.rotate.z': 'Angle of rotation around z axis',
 		'options.rotate.z.speed': 'Speed of rotation around z axis',
 

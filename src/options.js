@@ -76,8 +76,13 @@ Options.prototype.inputOptions=[
 	new InputOption('shape.gasket.depth',[0,10,1],6),
 ];
 Options.prototype.transformOptions=[
+	// TODO make default angle/speed something like 0.2*360 when able to add/delete transforms
+	new InputOption('rotate.x',[-180,180],0),
+	new InputOption('rotate.x.speed',[-360,360],0),
+	//new InputOption('rotate.y',[-180,180],0),
+	//new InputOption('rotate.y.speed',[-360,360],0),
 	new InputOption('rotate.z',[-180,180],0),
-	new InputOption('rotate.z.speed',[-360,360],0), // TODO make it default to 0.2*360 when able to add/delete transforms
+	new InputOption('rotate.z.speed',[-360,360],0),
 ];
 Options.prototype.debugOptions=[
 	new DebugOption('debugShader',true),

@@ -35,10 +35,13 @@ module.exports=function(options,i18n){
 
 	function generateVertexShaderLines() {
 		lines=[];
+		if (options.needsUniform('rotate.x')) {
+			lines.push("uniform float rotateX;");
+		}
 		if (options.needsUniform('rotate.z')) {
 			lines.push("uniform float rotateZ;");
 		}
-		if (options.needsTransform('rotate.z')) {
+		if (options.needsTransform('rotate.z') && !options.needsTransform('rotate.x')) {
 			lines.push("attribute vec2 position;");
 		} else {
 			lines.push("attribute vec4 position;");
@@ -52,27 +55,56 @@ module.exports=function(options,i18n){
 		lines.push(
 			"void main() {"
 		);
-		if (options.needsTransform('rotate.z')) {
-			if (options.needsUniform('rotate.z')) {
-				lines.push(
-					"	float c=cos(radians(rotateZ));",
-					"	float s=sin(radians(rotateZ));"
-				);
-			} else {
-				lines.push(
-					"	float c=cos(radians("+floatOptionValue('rotate.z')+"));",
-					"	float s=sin(radians("+floatOptionValue('rotate.z')+"));"
-				);
+		['x','z'].forEach(function(d){
+			var D=d.toUpperCase();
+			var optName='rotate.'+d;
+			if (options.needsTransform(optName)) {
+				if (options.needsUniform('rotate.'+d)) {
+					lines.push(
+						"	float c"+d+"=cos(radians(rotate"+D+"));",
+						"	float s"+d+"=sin(radians(rotate"+D+"));"
+					);
+				} else {
+					lines.push(
+						"	float c"+d+"=cos(radians("+floatOptionValue(optName)+"));",
+						"	float s"+d+"=sin(radians("+floatOptionValue(optName)+"));"
+					);
+				}
 			}
-			lines.push(
-				"	gl_Position=vec4(mat2(",
-				"		 c, s,",
-				"		-s, c",
-				"	)*position,0,1);"
-			);
-		} else {
+		});
+		if (!options.needsTransform('rotate.x') && !options.needsTransform('rotate.z')) {
 			lines.push(
 				"	gl_Position=position;"
+			);
+		} else if (options.needsTransform('rotate.x') && !options.needsTransform('rotate.z')) {
+			lines.push(
+				"	gl_Position=mat4(",
+				"		1,   0,   0,   0,",
+				"		0,  cx,  sx,   0,",
+				"		0, -sx,  cx,   0,",
+				"		0,   0,   0,   0",
+				"	)*position;"
+			);
+		} else if (!options.needsTransform('rotate.x') && options.needsTransform('rotate.z')) {
+			lines.push(
+				"	gl_Position=vec4(mat2(",
+				"		 cz, sz,",
+				"		-sz, cz",
+				"	)*position,0,1);"
+			);
+		} else if (options.needsTransform('rotate.x') && options.needsTransform('rotate.z')) {
+			lines.push(
+				"	gl_Position=mat4(",
+				"		  1,   0,   0,   0,",
+				"		  0,  cx,  sx,   0,",
+				"		  0, -sx,  cx,   0,",
+				"		  0,   0,   0,   1",
+				"	)*mat4(",
+				"		 cz,  sz,   0,   0,",
+				"		-sz,  cz,   0,   0,",
+				"		  0,   0,   1,   0,",
+				"		  0,   0,   0,   1",
+				"	)*position;"
 			);
 		}
 		if (options.shader=='vertex') {
