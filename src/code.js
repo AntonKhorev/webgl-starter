@@ -595,6 +595,8 @@ module.exports=function(options,i18n){
 		return lines;
 	}
 	function generateRenderLines() {
+		var needStartTime=false; // set by renderInner()
+		var needPrevTime=false; // set by renderInner()
 		function renderInner() {
 			var lines=[];
 			if (options.background=='solid') {
@@ -622,6 +624,7 @@ module.exports=function(options,i18n){
 				if (options[optName+'.speed']!=0 || options[optName+'.speed.input']!='constant') {
 					if (options[optName+'.speed.input']=='constant' && options[optName+'.input']=='constant') {
 						// no rotation state branch
+						needStartTime=true;
 						lines.push(
 							"var "+varName+"="+(options[optName]
 								? floatOptionValue(optName)+"+"
@@ -630,6 +633,7 @@ module.exports=function(options,i18n){
 						);
 					} else {
 						// rotation state branch
+						needPrevTime=true;
 						if (options[optName+'.input']=='slider') {
 							lines.push(
 								"var "+varName+"Input=document.getElementById('"+optName+"');",
@@ -672,7 +676,7 @@ module.exports=function(options,i18n){
 			return lines;
 		}
 		var lines=[];
-		var needStartTime=needPrevTime=false;
+		var innerLines=renderInner();
 		if (options.isAnimated()) {
 			['x','y','z'].forEach(function(d){
 				var D=d.toUpperCase();
@@ -695,22 +699,16 @@ module.exports=function(options,i18n){
 					);
 				}
 			});
-			needStartTime=( // TODO need to check if uniforms are used
-				(options['rotate.x.speed.input']=='constant' && options['rotate.x.input']=='constant') ||
-				(options['rotate.y.speed.input']=='constant' && options['rotate.y.input']=='constant') ||
-				(options['rotate.z.speed.input']=='constant' && options['rotate.z.input']=='constant')
-			);
-			if (needStartTime) {
+			if (needStartTime && needPrevTime) {
+				lines.push(
+					"var startTime=performance.now();",
+					"var prevTime=startTime;"
+				);
+			} else if (needStartTime) {
 				lines.push(
 					"var startTime=performance.now();"
 				);
-			}
-			needPrevTime=(
-				!(options['rotate.x.speed.input']=='constant' && options['rotate.x.input']=='constant') ||
-				!(options['rotate.y.speed.input']=='constant' && options['rotate.y.input']=='constant') ||
-				!(options['rotate.z.speed.input']=='constant' && options['rotate.z.input']=='constant')
-			);
-			if (needPrevTime) {
+			} else if (needPrevTime) {
 				lines.push(
 					"var prevTime=performance.now();"
 				);
@@ -721,9 +719,7 @@ module.exports=function(options,i18n){
 			lines.push(
 				"function updateCanvas(time) {"
 			);
-			lines=lines.concat(
-				indentLines(1,renderInner())
-			);
+			lines=lines.concat(indentLines(1,innerLines));
 			if (options.isAnimated()) {
 				if (needPrevTime) {
 					lines.push(
@@ -747,9 +743,7 @@ module.exports=function(options,i18n){
 				);
 			}
 		} else {
-			lines=lines.concat(
-				renderInner()
-			);
+			lines=lines.concat(innerLines);
 		}
 		return lines;
 	}
