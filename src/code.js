@@ -34,7 +34,13 @@ module.exports=function(options,i18n){
 	}
 
 	function generateVertexShaderLines() {
-		lines=[];
+		var use2dTransform=(
+			options.shape!='cube' &&
+			!options.needsTransform('rotate.x') &&
+			!options.needsTransform('rotate.y') &&
+			 options.needsTransform('rotate.z')
+		);
+		var lines=[];
 		['x','y','z'].forEach(function(d){
 			var D=d.toUpperCase();
 			var optName='rotate.'+d;
@@ -43,11 +49,7 @@ module.exports=function(options,i18n){
 				lines.push("uniform float "+varName+";");
 			}
 		});
-		if (
-			!options.needsTransform('rotate.x') &&
-			!options.needsTransform('rotate.y') &&
-			 options.needsTransform('rotate.z')
-		) {
+		if (use2dTransform) {
 			lines.push("attribute vec2 position;");
 		} else {
 			lines.push("attribute vec4 position;");
@@ -79,11 +81,7 @@ module.exports=function(options,i18n){
 				}
 			}
 		});
-		if (
-			!options.needsTransform('rotate.x') &&
-			!options.needsTransform('rotate.y') &&
-			 options.needsTransform('rotate.z')
-		) {
+		if (use2dTransform) {
 			lines.push(
 				"	gl_Position=vec4(mat2(",
 				"		 cz, sz,",
