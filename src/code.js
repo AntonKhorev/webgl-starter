@@ -598,17 +598,62 @@ module.exports=function(options,i18n){
 		var needStartTime=false; // set by renderInner()
 		var needPrevTime=false; // set by renderInner()
 		function renderInner() {
-			var lines=[];
-			if (options.background=='solid') {
-				lines.push(
-					"gl.clear(gl.COLOR_BUFFER_BIT);"
-				);
+			var needWrap=false; // set by renderInnerTransforms()
+			function renderInnerTransforms() {
+				var lines=[];
+				['x','y','z'].forEach(function(d){
+					var D=d.toUpperCase();
+					var optName='rotate.'+d;
+					var varName='rotate'+D;
+					if (options[optName+'.speed']!=0 || options[optName+'.speed.input']!='constant') {
+						if (options[optName+'.speed.input']=='constant' && options[optName+'.input']=='constant') {
+							// no rotation state branch
+							needStartTime=true;
+							lines.push(
+								"var "+varName+"="+(options[optName]
+									? floatOptionValue(optName)+"+"
+									: ""
+								)+floatOptionValue(optName+'.speed')+"*(time-startTime)/1000;"
+							);
+						} else {
+							// rotation state branch
+							needPrevTime=true;
+							if (options[optName+'.input']=='slider') {
+								lines.push(
+									"var "+varName+"Input=document.getElementById('"+optName+"');",
+									"var "+varName+"=parseFloat("+varName+"Input.value);"
+								);
+							}
+							if (options[optName+'.speed.input']=='slider') {
+								lines.push(
+									"var "+varName+"SpeedInput=document.getElementById('"+optName+".speed');",
+									"var "+varName+"Speed=parseFloat("+varName+"SpeedInput.value);"
+								);
+							}
+							lines.push(
+								varName+"+="+(options[optName+'.speed.input']=='constant'
+									? floatOptionValue(optName+'.speed')
+									: varName+"Speed"
+								)+"*(time-prevTime)/1000;"
+							);
+							if (options[optName+'.input']=='slider') {
+								needWrap=true;
+								lines.push(
+									varName+"=wrap("+varName+",180);",
+									varName+"Input.value="+varName+";"
+								);
+							}
+						}
+						lines.push(
+							"gl.uniform1f("+varName+"Loc,"+varName+");"
+						);
+					}
+				});
+				return lines;
 			}
-			if (
-				((options['rotate.x.speed']!=0 || options['rotate.x.speed.input']!='constant') && options['rotate.x.input']=='slider') ||
-				((options['rotate.y.speed']!=0 || options['rotate.y.speed.input']!='constant') && options['rotate.y.input']=='slider') ||
-				((options['rotate.z.speed']!=0 || options['rotate.z.speed.input']!='constant') && options['rotate.z.input']=='slider')
-			) {
+			var innerTransformsLines=renderInnerTransforms();
+			var lines=[];
+			if (needWrap) {
 				lines.push(
 					"function wrap(v,maxAbsV) {",
 					"	v%=maxAbsV*2;",
@@ -617,53 +662,12 @@ module.exports=function(options,i18n){
 					"}"
 				);
 			}
-			['x','y','z'].forEach(function(d){
-				var D=d.toUpperCase();
-				var optName='rotate.'+d;
-				var varName='rotate'+D;
-				if (options[optName+'.speed']!=0 || options[optName+'.speed.input']!='constant') {
-					if (options[optName+'.speed.input']=='constant' && options[optName+'.input']=='constant') {
-						// no rotation state branch
-						needStartTime=true;
-						lines.push(
-							"var "+varName+"="+(options[optName]
-								? floatOptionValue(optName)+"+"
-								: ""
-							)+floatOptionValue(optName+'.speed')+"*(time-startTime)/1000;"
-						);
-					} else {
-						// rotation state branch
-						needPrevTime=true;
-						if (options[optName+'.input']=='slider') {
-							lines.push(
-								"var "+varName+"Input=document.getElementById('"+optName+"');",
-								"var "+varName+"=parseFloat("+varName+"Input.value);"
-							);
-						}
-						if (options[optName+'.speed.input']=='slider') {
-							lines.push(
-								"var "+varName+"SpeedInput=document.getElementById('"+optName+".speed');",
-								"var "+varName+"Speed=parseFloat("+varName+"SpeedInput.value);"
-							);
-						}
-						lines.push(
-							varName+"+="+(options[optName+'.speed.input']=='constant'
-								? floatOptionValue(optName+'.speed')
-								: varName+"Speed"
-							)+"*(time-prevTime)/1000;"
-						);
-						if (options[optName+'.input']=='slider') {
-							lines.push(
-								varName+"=wrap("+varName+",180);",
-								varName+"Input.value="+varName+";"
-							);
-						}
-					}
-					lines.push(
-						"gl.uniform1f("+varName+"Loc,"+varName+");"
-					);
-				}
-			});
+			if (options.background=='solid') {
+				lines.push(
+					"gl.clear(gl.COLOR_BUFFER_BIT);"
+				);
+			}
+			lines=lines.concat(innerTransformsLines);
 			if (options.shape=='square') {
 				lines.push(
 					"gl.drawArrays(gl.TRIANGLE_FAN,0,nVertices);"
