@@ -60,7 +60,7 @@ var Options=function(){
 };
 Options.prototype.generalOptions=[
 	new Option('background',['none','solid']),
-	new Option('shader',['single','vertex']),
+	new Option('shader',['single','vertex','face']),
 	new Option('shape',['square','triangle','gasket','cube']),
 ];
 Options.prototype.inputOptions=[

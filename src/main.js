@@ -24,6 +24,7 @@ var i18n=function(id){ // fake temporary i18n
 		'options.shader': 'Shader',
 		'options.shader.single': 'Single color',
 		'options.shader.vertex': 'One color per vertex',
+		'options.shader.face': 'One color per face',
 		'options.shape': 'Shape to draw',
 		'options.shape.square': 'Square',
 		'options.shape.triangle': 'Triangle',

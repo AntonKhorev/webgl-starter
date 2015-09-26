@@ -54,10 +54,10 @@ module.exports=function(options,i18n){
 		} else {
 			lines.push("attribute vec4 position;");
 		}
-		if (options.shader=='vertex') {
+		if (options.shader=='vertex' || options.shader=='face') {
 			lines.push(
 				"attribute vec4 color;",
-				"varying vec4 interpolatedColor;"
+				"varying vec4 interpolatedColor;" // TODO don't interpolate for shader=='face'
 			);
 		}
 		lines.push(
@@ -126,7 +126,7 @@ module.exports=function(options,i18n){
 				"position;"
 			]);
 		}
-		if (options.shader=='vertex') {
+		if (options.shader=='vertex' || options.shader=='face') {
 			lines.push(
 				"	interpolatedColor=color;"
 			);
@@ -137,7 +137,7 @@ module.exports=function(options,i18n){
 		return lines;
 	}
 	function generateFragmentShaderLines() {
-		if (options.shader=='vertex') {
+		if (options.shader=='vertex' || options.shader=='face') {
 			return [
 				"varying vec4 interpolatedColor;",
 				"void main() {",
@@ -234,16 +234,17 @@ module.exports=function(options,i18n){
 		return lines;
 	}
 	function generateShapeLines() {
-		var c=options.shader=='vertex';
+		var c=(options.shader=='vertex' || options.shader=='face');
+		var cv=options.shader=='vertex';
 		function generateSquare() {
 			return [
 				"var nVertices=4;",
 				"var vertices=new Float32Array([",
-				"	// x    y"+(c?"    r    g    b":""),
-				"	-0.5,-0.5,"+(c?" 1.0, 0.0, 0.0,":""),
-				"	+0.5,-0.5,"+(c?" 0.0, 1.0, 0.0,":""),
-				"	+0.5,+0.5,"+(c?" 0.0, 0.0, 1.0,":""),
-				"	-0.5,+0.5,"+(c?" 1.0, 1.0, 0.0,":""),
+				"	// x    y"+(c?   "    r    g    b":""),
+				"	-0.5,-0.5,"+(c?cv?" 1.0, 0.0, 0.0,":" 1.0, 0.0, 0.0,":""),
+				"	+0.5,-0.5,"+(c?cv?" 0.0, 1.0, 0.0,":" 1.0, 0.0, 0.0,":""),
+				"	+0.5,+0.5,"+(c?cv?" 0.0, 0.0, 1.0,":" 1.0, 0.0, 0.0,":""),
+				"	-0.5,+0.5,"+(c?cv?" 1.0, 1.0, 0.0,":" 1.0, 0.0, 0.0,":""),
 				"]);",
 			];
 		}
@@ -252,9 +253,9 @@ module.exports=function(options,i18n){
 				"var nVertices=3;",
 				"var vertices=new Float32Array([",
 				"	//                   x                      y"+(c?"    r    g    b":""),
-				"	-Math.sin(0/3*Math.PI), Math.cos(0/3*Math.PI),"+(c?" 1.0, 0.0, 0.0,":""),
-				"	-Math.sin(2/3*Math.PI), Math.cos(2/3*Math.PI),"+(c?" 0.0, 1.0, 0.0,":""),
-				"	-Math.sin(4/3*Math.PI), Math.cos(4/3*Math.PI),"+(c?" 0.0, 0.0, 1.0,":""),
+				"	-Math.sin(0/3*Math.PI), Math.cos(0/3*Math.PI),"+(c?cv?" 1.0, 0.0, 0.0,":" 1.0, 0.0, 0.0,":""),
+				"	-Math.sin(2/3*Math.PI), Math.cos(2/3*Math.PI),"+(c?cv?" 0.0, 1.0, 0.0,":" 1.0, 0.0, 0.0,":""),
+				"	-Math.sin(4/3*Math.PI), Math.cos(4/3*Math.PI),"+(c?cv?" 0.0, 0.0, 1.0,":" 1.0, 0.0, 0.0,":""),
 				"]);",
 			];
 		}
@@ -281,11 +282,29 @@ module.exports=function(options,i18n){
 			lines.push(
 				"	var iv=0;"
 			);
-			if (c) {
+			if (options.shader=='face') {
+				lines.push(
+					"	var ic=0;",
+					"	var colors=[",
+					"		[1.0, 0.0, 0.0],",
+					"		[0.0, 1.0, 0.0],",
+					"		[0.0, 0.0, 1.0],",
+					"		[1.0, 1.0, 0.0],",
+					"	];"
+				);
+			}
+			if (options.shader=='vertex') {
 				lines.push(
 					"	function pushVertex(v,r,g,b) {",
 					"		vertices[iv++]=v[0]; vertices[iv++]=v[1];",
 					"		vertices[iv++]=r; vertices[iv++]=g; vertices[iv++]=b;",
+					"	}"
+				);
+			} else if (options.shader=='face') {
+				lines.push(
+					"	function pushVertex(v,c) {",
+					"		vertices[iv++]=v[0]; vertices[iv++]=v[1];",
+					"		vertices[iv++]=c[0]; vertices[iv++]=c[1]; vertices[iv++]=c[2];",
 					"	}"
 				);
 			} else {
@@ -305,11 +324,18 @@ module.exports=function(options,i18n){
 				"	function triangle(depth,a,b,c) {",
 				"		if (depth<=0) {"
 			);
-			if (c) {
+			if (options.shader=='vertex') {
 				lines.push(
 					"			pushVertex(a,1.0,0.0,0.0);",
 					"			pushVertex(b,0.0,1.0,0.0);",
 					"			pushVertex(c,0.0,0.0,1.0);"
+				);
+			} else if (options.shader=='face') {
+				lines.push(
+					"			pushVertex(a,colors[ic]);",
+					"			pushVertex(b,colors[ic]);",
+					"			pushVertex(c,colors[ic]);",
+					"			ic=(ic+1)%colors.length;"
 				);
 			} else {
 				lines.push(
@@ -399,7 +425,7 @@ module.exports=function(options,i18n){
 			"var positionLoc=gl.getAttribLocation(program,'position');"
 		);
 		var dim=(options.shape=='cube' ? 3 : 2);
-		if (options.shader=='vertex') {
+		if (options.shader=='vertex' || options.shader=='face') {
 			lines.push(
 				"gl.vertexAttribPointer(",
 				"	positionLoc,"+dim+",gl.FLOAT,false,",
