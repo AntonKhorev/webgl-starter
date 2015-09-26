@@ -350,15 +350,15 @@ module.exports=function(options,i18n){
 		function generateCube() {
 			return [
 				"var vertices=new Float32Array([",
-				"	// x,   y,   z",
-				"	-0.5,-0.5,-0.5,",
-				"	+0.5,-0.5,-0.5,",
-				"	-0.5,+0.5,-0.5,",
-				"	+0.5,+0.5,-0.5,",
-				"	-0.5,-0.5,+0.5,",
-				"	+0.5,-0.5,+0.5,",
-				"	-0.5,+0.5,+0.5,",
-				"	+0.5,+0.5,+0.5,",
+				"	// x,   y,   z"+(c?"    r    g    b":""),
+				"	-0.5,-0.5,-0.5,"+(c?" 0.0, 0.0, 0.0,":""),
+				"	+0.5,-0.5,-0.5,"+(c?" 1.0, 0.0, 0.0,":""),
+				"	-0.5,+0.5,-0.5,"+(c?" 0.0, 1.0, 0.0,":""),
+				"	+0.5,+0.5,-0.5,"+(c?" 1.0, 1.0, 0.0,":""),
+				"	-0.5,-0.5,+0.5,"+(c?" 0.0, 0.0, 1.0,":""),
+				"	+0.5,-0.5,+0.5,"+(c?" 1.0, 0.0, 1.0,":""),
+				"	-0.5,+0.5,+0.5,"+(c?" 0.0, 1.0, 1.0,":""),
+				"	+0.5,+0.5,+0.5,"+(c?" 1.0, 1.0, 1.0,":""),
 				"]);",
 				"var nElements=36;",
 				"var elements=new Uint16Array([", // TODO warn that coords are left-handed or make an option
@@ -835,6 +835,8 @@ module.exports=function(options,i18n){
 		"	var gl=canvas.getContext('webgl')||canvas.getContext('experimental-webgl');",
 	],(options.background=='solid' && !options.hasInputsFor('background.solid.color'))?[
 		"	gl.clearColor("+colorValue('background.solid.color')+");",
+	]:[],options.shape=='cube'?[
+		"	gl.enable(gl.DEPTH_TEST);"
 	]:[],[
 		"	var program=makeProgram(",
 		"		document.getElementById('myVertexShader').text,",
