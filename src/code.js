@@ -237,7 +237,7 @@ module.exports=function(options,i18n){
 	}
 	function generateShapeLines() {
 		var c=options.shader=='vertex';
-		function square() {
+		function generateSquare() {
 			return [
 				"var nVertices=4;",
 				"var vertices=new Float32Array([",
@@ -249,7 +249,7 @@ module.exports=function(options,i18n){
 				"]);",
 			];
 		}
-		function triangle() {
+		function generateTriangle() {
 			return [
 				"var nVertices=3;",
 				"var vertices=new Float32Array([",
@@ -260,7 +260,7 @@ module.exports=function(options,i18n){
 				"]);",
 			];
 		}
-		function gasket() {
+		function generateGasket() {
 			lines=[];
 			if (options['shape.gasket.depth.input']!='constant') {
 				lines.push(
@@ -349,27 +349,63 @@ module.exports=function(options,i18n){
 			}
 			return lines;
 		}
+		function generateCube() {
+			return [
+				"var vertices=new Float32Array([",
+				"	// x,   y,   z",
+				"	-0.5,-0.5,-0.5,",
+				"	+0.5,-0.5,-0.5,",
+				"	-0.5,+0.5,-0.5,",
+				"	+0.5,+0.5,-0.5,",
+				"	-0.5,-0.5,+0.5,",
+				"	+0.5,-0.5,+0.5,",
+				"	-0.5,+0.5,+0.5,",
+				"	+0.5,+0.5,+0.5,",
+				"]);",
+				"var nElements=36;",
+				"var elements=new Uint16Array([", // TODO warn that coords are left-handed or make an option
+				"	4, 6, 0, 0, 6, 2, // left face (in right-handed coords)",
+				"	1, 3, 5, 5, 3, 7, // right face",
+				"	0, 1, 4, 4, 1, 5, // bottom face",
+				"	2, 6, 3, 3, 6, 7, // top face",
+				"	0, 2, 1, 1, 2, 3, // back face",
+				"	5, 7, 4, 4, 7, 6, // front face",
+				"]);",
+			];
+		}
 		if (options.shape=='square') {
-			return square();
+			return generateSquare();
 		} else if (options.shape=='triangle') {
-			return triangle();
+			return generateTriangle();
 		} else if (options.shape=='gasket') {
-			return gasket();
+			return generateGasket();
+		} else if (options.shape=='cube') {
+			return generateCube();
 		}
 	}
 	function generateBufferLines() {
-		var lines=[
-			"var buffer=gl.createBuffer();",
-			"gl.bindBuffer(gl.ARRAY_BUFFER,buffer);",
+		var lines=[];
+		lines.push(
+			"gl.bindBuffer(gl.ARRAY_BUFFER,gl.createBuffer());",
 			"gl.bufferData(gl.ARRAY_BUFFER,vertices,gl.STATIC_DRAW);",
-			"",
-			"var positionLoc=gl.getAttribLocation(program,'position');",
-		];
+			""
+		);
+		if (options.shape=='cube') {
+			lines.push(
+				"gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,gl.createBuffer());",
+				"gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,elements,gl.STATIC_DRAW);",
+				""
+			);
+		}
+		lines.push(
+			"var positionLoc=gl.getAttribLocation(program,'position');"
+		);
+		var dim=(options.shape=='cube' ? 3 : 2);
 		if (options.shader=='vertex') {
 			lines.push(
 				"gl.vertexAttribPointer(",
-				"	positionLoc,2,gl.FLOAT,false,",
-				"	Float32Array.BYTES_PER_ELEMENT*5,",
+				"	positionLoc,"+dim+",gl.FLOAT,false,",
+				"	Float32Array.BYTES_PER_ELEMENT*"+(dim+3)+",",
 				"	Float32Array.BYTES_PER_ELEMENT*0",
 				");",
 				"gl.enableVertexAttribArray(positionLoc);",
@@ -377,14 +413,14 @@ module.exports=function(options,i18n){
 				"var colorLoc=gl.getAttribLocation(program,'color');",
 				"gl.vertexAttribPointer(",
 				"	colorLoc,3,gl.FLOAT,false,",
-				"	Float32Array.BYTES_PER_ELEMENT*5,",
-				"	Float32Array.BYTES_PER_ELEMENT*2",
+				"	Float32Array.BYTES_PER_ELEMENT*"+(dim+3)+",",
+				"	Float32Array.BYTES_PER_ELEMENT*"+dim,
 				");",
 				"gl.enableVertexAttribArray(colorLoc);"
 			);
 		} else {
 			lines.push(
-				"gl.vertexAttribPointer(positionLoc,2,gl.FLOAT,false,0,0);",
+				"gl.vertexAttribPointer(positionLoc,"+dim+",gl.FLOAT,false,0,0);",
 				"gl.enableVertexAttribArray(positionLoc);"
 			);
 		}
@@ -671,6 +707,10 @@ module.exports=function(options,i18n){
 			if (options.shape=='square') {
 				lines.push(
 					"gl.drawArrays(gl.TRIANGLE_FAN,0,nVertices);"
+				);
+			} else if (options.shape=='cube') {
+				lines.push(
+					"gl.drawElements(gl.TRIANGLES,nElements,gl.UNSIGNED_SHORT,0);"
 				);
 			} else {
 				lines.push(

@@ -28,6 +28,7 @@ var i18n=function(id){ // fake temporary i18n
 		'options.shape.square': 'Square',
 		'options.shape.triangle': 'Triangle',
 		'options.shape.gasket': 'Sierpinski gasket', // wp: Sierpinski triangle
+		'options.shape.cube': 'Cube',
 
 		'options.input': 'Input options',
 		'options.background.solid.color.r': 'Background color red component',

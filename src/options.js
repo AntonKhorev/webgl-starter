@@ -61,8 +61,7 @@ var Options=function(){
 Options.prototype.generalOptions=[
 	new Option('background',['none','solid']),
 	new Option('shader',['single','vertex']),
-	new Option('shape',['square','triangle','gasket']),
-	//new Option('animation',['none','rotation']),
+	new Option('shape',['square','triangle','gasket','cube']),
 ];
 Options.prototype.inputOptions=[
 	new InputOption('background.solid.color.r',[0,1],1),
