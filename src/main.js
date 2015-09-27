@@ -116,25 +116,39 @@ $(function(){
 		function writeInputOption(option) {
 			var id=generateId();
 			var inputId=generateId();
-			var input;
+			var sliderInput,numberInput;
 			return $("<div data-option='"+option.name+"'>")
 				.append("<label for='"+id+"'>"+i18n('options.'+option.name)+":</label>")
 				.append(" <span class='min'>"+option.getMinLabel()+"</span> ")
 				.append(
-					input=$("<input type='range' id='"+id+"'>")
+					sliderInput=$("<input type='range' id='"+id+"'>")
 						.attr('min',option.getMin())
 						.attr('max',option.getMax())
 						.attr('step',option.getStep())
 						.val(options[option.name])
 						.change(function(){
+							numberInput.val(this.value);
 							options[option.name]=parseFloat(this.value);
 							updateCode();
 						})
 				)
 				.append(" <span class='max'>"+option.getMaxLabel()+"</span> ")
 				.append(
+					numberInput=$("<input type='number' required>")
+						.attr('min',option.getMin())
+						.attr('max',option.getMax())
+						.attr('step',option.getStep())
+						.val(options[option.name])
+						.on('input',function(){
+							sliderInput.val(this.value);
+							options[option.name]=parseFloat(this.value);
+							updateCode();
+						})
+				)
+				.append(" ")
+				.append(
 					$("<button type='button'>Reset</button>").click(function(){
-						input.val(option.defaultValue).change();
+						sliderInput.val(option.defaultValue).change();
 					})
 				)
 				.append(" ")
