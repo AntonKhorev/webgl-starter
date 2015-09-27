@@ -14,6 +14,17 @@ module.exports=function(options,i18n){
 		       floatOptionValue(prefix+'.b')+","+
 		       floatOptionValue(prefix+'.a');
 	}
+	function glslColorValue(prefix) {
+		var r=floatOptionValue(prefix+'.r');
+		var g=floatOptionValue(prefix+'.g');
+		var b=floatOptionValue(prefix+'.b');
+		var a=floatOptionValue(prefix+'.a');
+		if (r==a && g==a && b==a) {
+			return a; // see OpenGL ES SL section 5.4.2
+		} else {
+			return r+","+g+","+b+","+a;
+		}
+	}
 	function isMousemoveInput(name) {
 		return ['mousemovex','mousemovey'].indexOf(options[name+'.input'])>=0;
 	}
@@ -168,7 +179,7 @@ module.exports=function(options,i18n){
 		} else {
 			return [
 				"void main() {",
-				"	gl_FragColor=vec4("+colorValue('shader.single.color')+");",
+				"	gl_FragColor=vec4("+glslColorValue('shader.single.color')+");",
 				"}",
 			];
 		}
