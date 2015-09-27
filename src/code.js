@@ -648,7 +648,7 @@ module.exports=function(options,i18n){
 		"	var gl=canvas.getContext('webgl')||canvas.getContext('experimental-webgl');",
 	],(options.background=='solid' && !options.hasInputsFor('background.solid.color'))?[
 		"	gl.clearColor("+colorValue('background.solid.color')+");",
-	]:[],options.shape=='cube'?[
+	]:[],shape.dim>2?[
 		"	gl.enable(gl.DEPTH_TEST);"
 	]:[],[
 		"	var program=makeProgram(",
