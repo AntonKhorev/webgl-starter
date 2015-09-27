@@ -122,6 +122,13 @@ $(function(){
 			var id=generateId();
 			var inputId=generateId();
 			var sliderInput,numberInput;
+			function inputListener(that) {
+				if (this.checkValidity()) {
+					that.val(this.value);
+					options[option.name]=parseFloat(this.value);
+					updateCode();
+				}
+			}
 			return $("<div data-option='"+option.name+"'>")
 				.append("<label for='"+id+"'>"+i18n('options.'+option.name)+":</label>")
 				.append(" <span class='min'>"+option.getMinLabel()+"</span> ")
@@ -132,9 +139,7 @@ $(function(){
 						.attr('step',option.getSetupStep())
 						.val(options[option.name])
 						.on('input change',function(){
-							numberInput.val(this.value);
-							options[option.name]=parseFloat(this.value);
-							updateCode();
+							inputListener.call(this,numberInput);
 						})
 				)
 				.append(" <span class='max'>"+option.getMaxLabel()+"</span> ")
@@ -144,10 +149,8 @@ $(function(){
 						.attr('max',option.getMax())
 						.attr('step',option.getSetupStep())
 						.val(options[option.name])
-						.on('input',function(){
-							sliderInput.val(this.value);
-							options[option.name]=parseFloat(this.value);
-							updateCode();
+						.on('input change',function(){
+							inputListener.call(this,sliderInput);
 						})
 				)
 				.append(" ")
