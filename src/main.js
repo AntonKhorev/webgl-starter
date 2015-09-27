@@ -86,6 +86,8 @@ $(function(){
 		var optionsNode;
 		var codeNode;
 		var options=new Options();
+		var codeUpdateTimeoutId=null;
+		var codeUpdateDelay=200;
 
 		function showHideSuboptionInputs(optionName,optionValue) {
 			// TODO sub-sub option support?
@@ -127,11 +129,10 @@ $(function(){
 						.attr('step',option.getSetupStep())
 						.val(options[option.name])
 						.on('input change',function(){
-							// TODO delay code generation
-						//.on('input',function(){
+							clearTimeout(codeUpdateTimeoutId);
 							numberInput.val(this.value);
 							options[option.name]=parseFloat(this.value);
-							updateCode();
+							codeUpdateTimeoutId=setTimeout(updateCode,codeUpdateDelay);
 						})
 				)
 				.append(" <span class='max'>"+option.getMaxLabel()+"</span> ")
@@ -142,9 +143,10 @@ $(function(){
 						.attr('step',option.getSetupStep())
 						.val(options[option.name])
 						.on('input',function(){
+							clearTimeout(codeUpdateTimeoutId);
 							sliderInput.val(this.value);
 							options[option.name]=parseFloat(this.value);
-							updateCode();
+							codeUpdateTimeoutId=setTimeout(updateCode,codeUpdateDelay);
 						})
 				)
 				.append(" ")
