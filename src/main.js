@@ -124,9 +124,11 @@ $(function(){
 					sliderInput=$("<input type='range' id='"+id+"'>")
 						.attr('min',option.getMin())
 						.attr('max',option.getMax())
-						.attr('step',option.getStep())
+						.attr('step',option.getSetupStep())
 						.val(options[option.name])
-						.change(function(){
+						.on('input change',function(){
+							// TODO delay code generation
+						//.on('input',function(){
 							numberInput.val(this.value);
 							options[option.name]=parseFloat(this.value);
 							updateCode();
@@ -137,7 +139,7 @@ $(function(){
 					numberInput=$("<input type='number' required>")
 						.attr('min',option.getMin())
 						.attr('max',option.getMax())
-						.attr('step',option.getStep())
+						.attr('step',option.getSetupStep())
 						.val(options[option.name])
 						.on('input',function(){
 							sliderInput.val(this.value);

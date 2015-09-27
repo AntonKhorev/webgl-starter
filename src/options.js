@@ -26,18 +26,41 @@ InputOption.prototype.getMin=function(){
 InputOption.prototype.getMax=function(){
 	return this.availableValues[1];
 };
-InputOption.prototype.getStep=function(){
-	if (this.availableValues.length>=3) {
-		return this.availableValues[2];
-	} else {
-		return 'any';
-	}
-};
 InputOption.prototype.getMinLabel=function(){
 	return this.getMin().toString().replace('-','−');
 };
 InputOption.prototype.getMaxLabel=function(){
 	return this.getMax().toString().replace('-','−');
+};
+
+var FloatInputOption=function(name,rangeOfValues,defaultValue){
+	InputOption.call(this,name,rangeOfValues,defaultValue);
+};
+FloatInputOption.prototype=Object.create(InputOption.prototype);
+FloatInputOption.prototype.constructor=FloatInputOption;
+FloatInputOption.prototype.getStep=function(){
+	return 'any';
+};
+FloatInputOption.prototype.getSetupStep=function(){
+	if (this.getMax()>=100) {
+		return '0.1';
+	} else if (this.getMax()>=10) {
+		return '0.01';
+	} else {
+		return '0.001';
+	}
+};
+
+var IntInputOption=function(name,rangeOfValues,defaultValue){
+	InputOption.call(this,name,rangeOfValues,defaultValue);
+};
+IntInputOption.prototype=Object.create(InputOption.prototype);
+IntInputOption.prototype.constructor=IntInputOption;
+IntInputOption.prototype.getStep=function(){
+	return 1;
+};
+IntInputOption.prototype.getSetupStep=function(){
+	return 1;
 };
 
 /*
@@ -64,24 +87,24 @@ Options.prototype.generalOptions=[
 	new Option('shape',['square','triangle','gasket','cube']),
 ];
 Options.prototype.inputOptions=[
-	new InputOption('background.solid.color.r',[0,1],1),
-	new InputOption('background.solid.color.g',[0,1],1),
-	new InputOption('background.solid.color.b',[0,1],1),
-	new InputOption('background.solid.color.a',[0,1],1),
-	new InputOption('shader.single.color.r',[0,1],1),
-	new InputOption('shader.single.color.g',[0,1]),
-	new InputOption('shader.single.color.b',[0,1]),
-	new InputOption('shader.single.color.a',[0,1],1),
-	new InputOption('shape.gasket.depth',[0,10,1],6),
+	new FloatInputOption('background.solid.color.r',[0,1],1),
+	new FloatInputOption('background.solid.color.g',[0,1],1),
+	new FloatInputOption('background.solid.color.b',[0,1],1),
+	new FloatInputOption('background.solid.color.a',[0,1],1),
+	new FloatInputOption('shader.single.color.r',[0,1],1),
+	new FloatInputOption('shader.single.color.g',[0,1]),
+	new FloatInputOption('shader.single.color.b',[0,1]),
+	new FloatInputOption('shader.single.color.a',[0,1],1),
+	new IntInputOption('shape.gasket.depth',[0,10],6),
 ];
 Options.prototype.transformOptions=[
 	// TODO make default angle/speed something like 0.2*360 when able to add/delete transforms
-	new InputOption('rotate.x',[-180,180],0),
-	new InputOption('rotate.x.speed',[-360,360],0),
-	new InputOption('rotate.y',[-180,180],0),
-	new InputOption('rotate.y.speed',[-360,360],0),
-	new InputOption('rotate.z',[-180,180],0),
-	new InputOption('rotate.z.speed',[-360,360],0),
+	new FloatInputOption('rotate.x',[-180,180],0),
+	new FloatInputOption('rotate.x.speed',[-360,360],0),
+	new FloatInputOption('rotate.y',[-180,180],0),
+	new FloatInputOption('rotate.y.speed',[-360,360],0),
+	new FloatInputOption('rotate.z',[-180,180],0),
+	new FloatInputOption('rotate.z.speed',[-360,360],0),
 ];
 Options.prototype.debugOptions=[
 	new DebugOption('debugShader',true),
