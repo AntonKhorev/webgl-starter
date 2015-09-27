@@ -95,8 +95,11 @@ $(function(){
 				.not("[data-option^='"+optionName+"."+optionValue+".']").hide();
 		}
 		function updateCode() {
-			codeNode.text(generateCode(options.cloneWithoutHidden(),i18n));
-			if (window.hljs) hljs.highlightBlock(codeNode[0]);
+			clearTimeout(codeUpdateTimeoutId);
+			codeUpdateTimeoutId=setTimeout(function(){
+				codeNode.text(generateCode(options.cloneWithoutHidden(),i18n));
+				if (window.hljs) hljs.highlightBlock(codeNode[0]);
+			},codeUpdateDelay);
 		}
 		function writeGeneralOption(option) {
 			var id=generateId();
@@ -129,10 +132,9 @@ $(function(){
 						.attr('step',option.getSetupStep())
 						.val(options[option.name])
 						.on('input change',function(){
-							clearTimeout(codeUpdateTimeoutId);
 							numberInput.val(this.value);
 							options[option.name]=parseFloat(this.value);
-							codeUpdateTimeoutId=setTimeout(updateCode,codeUpdateDelay);
+							updateCode();
 						})
 				)
 				.append(" <span class='max'>"+option.getMaxLabel()+"</span> ")
@@ -143,10 +145,9 @@ $(function(){
 						.attr('step',option.getSetupStep())
 						.val(options[option.name])
 						.on('input',function(){
-							clearTimeout(codeUpdateTimeoutId);
 							sliderInput.val(this.value);
 							options[option.name]=parseFloat(this.value);
-							codeUpdateTimeoutId=setTimeout(updateCode,codeUpdateDelay);
+							updateCode();
 						})
 				)
 				.append(" ")
