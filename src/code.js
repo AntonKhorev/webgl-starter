@@ -245,49 +245,6 @@ module.exports=function(options,i18n){
 			return (new shapes.Cube(options.shader)).writeInit();
 		}
 	}
-	function generateBufferLines() {
-		var lines=[];
-		lines.push(
-			"gl.bindBuffer(gl.ARRAY_BUFFER,gl.createBuffer());",
-			"gl.bufferData(gl.ARRAY_BUFFER,vertices,gl.STATIC_DRAW);",
-			""
-		);
-		if (options.shape=='cube') {
-			lines.push(
-				"gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,gl.createBuffer());",
-				"gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,elements,gl.STATIC_DRAW);",
-				""
-			);
-		}
-		lines.push(
-			"var positionLoc=gl.getAttribLocation(program,'position');"
-		);
-		var dim=(options.shape=='cube' ? 3 : 2);
-		if (options.shader=='vertex' || options.shader=='face') {
-			lines.push(
-				"gl.vertexAttribPointer(",
-				"	positionLoc,"+dim+",gl.FLOAT,false,",
-				"	Float32Array.BYTES_PER_ELEMENT*"+(dim+3)+",",
-				"	Float32Array.BYTES_PER_ELEMENT*0",
-				");",
-				"gl.enableVertexAttribArray(positionLoc);",
-				"",
-				"var colorLoc=gl.getAttribLocation(program,'color');",
-				"gl.vertexAttribPointer(",
-				"	colorLoc,3,gl.FLOAT,false,",
-				"	Float32Array.BYTES_PER_ELEMENT*"+(dim+3)+",",
-				"	Float32Array.BYTES_PER_ELEMENT*"+dim,
-				");",
-				"gl.enableVertexAttribArray(colorLoc);"
-			);
-		} else {
-			lines.push(
-				"gl.vertexAttribPointer(positionLoc,"+dim+",gl.FLOAT,false,0,0);",
-				"gl.enableVertexAttribArray(positionLoc);"
-			);
-		}
-		return lines;
-	}
 	function generateInputHandlerLines() {
 		var lines=[];
 		function writeListener(listener) {
@@ -709,8 +666,6 @@ module.exports=function(options,i18n){
 		"	gl.useProgram(program);",
 		"	",
 	],indentLines(1,generateShapeLines()),[
-		"	",
-	],indentLines(1,generateBufferLines()),[
 		"	",
 	],indentLines(1,generateInputHandlerLines()),indentLines(1,generateRenderLines()),[
 		"</script>",

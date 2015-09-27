@@ -1,10 +1,52 @@
 var Shape=function(shaderType){
 	this.shaderType=shaderType; // 'vertex' or 'face' for colors, anything else for no colors
 };
+Shape.prototype.usesElements=false;
+Shape.prototype.dim=2;
 Shape.prototype.writeInit=function(){
 	var c=(this.shaderType=='vertex' || this.shaderType=='face');
 	var cv=this.shaderType=='vertex';
-	return this.writeArrays(c,cv);
+	var lines=this.writeArrays(c,cv);
+	lines.push(
+		"",
+		"gl.bindBuffer(gl.ARRAY_BUFFER,gl.createBuffer());",
+		"gl.bufferData(gl.ARRAY_BUFFER,vertices,gl.STATIC_DRAW);",
+		""
+	);
+	if (this.usesElements) {
+		lines.push(
+			"gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,gl.createBuffer());",
+			"gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,elements,gl.STATIC_DRAW);",
+			""
+		);
+	}
+	lines.push(
+		"var positionLoc=gl.getAttribLocation(program,'position');"
+	);
+	if (c) {
+		lines.push(
+			"gl.vertexAttribPointer(",
+			"	positionLoc,"+this.dim+",gl.FLOAT,false,",
+			"	Float32Array.BYTES_PER_ELEMENT*"+(this.dim+3)+",",
+			"	Float32Array.BYTES_PER_ELEMENT*0",
+			");",
+			"gl.enableVertexAttribArray(positionLoc);",
+			"",
+			"var colorLoc=gl.getAttribLocation(program,'color');",
+			"gl.vertexAttribPointer(",
+			"	colorLoc,3,gl.FLOAT,false,",
+			"	Float32Array.BYTES_PER_ELEMENT*"+(this.dim+3)+",",
+			"	Float32Array.BYTES_PER_ELEMENT*"+this.dim,
+			");",
+			"gl.enableVertexAttribArray(colorLoc);"
+		);
+	} else {
+		lines.push(
+			"gl.vertexAttribPointer(positionLoc,"+this.dim+",gl.FLOAT,false,0,0);",
+			"gl.enableVertexAttribArray(positionLoc);"
+		);
+	}
+	return lines;
 };
 
 var Square=function(shaderType){
@@ -169,6 +211,8 @@ var Cube=function(shaderType){
 };
 Cube.prototype=Object.create(Shape.prototype);
 Cube.prototype.constructor=Cube;
+Cube.prototype.usesElements=true;
+Cube.prototype.dim=3;
 Cube.prototype.writeArrays=function(c,cv){
 	if (this.shaderType=='face') {
 		return [
