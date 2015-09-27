@@ -1,2 +1,2 @@
-.webgl-starter label:first-child{display:inline-block;width:15em;text-align:right}.webgl-starter .min{display:inline-block;width:3em;text-align:right}.webgl-starter .max{display:inline-block;width:3em;text-align:left}.webgl-starter pre{border:1px solid #000}
+.webgl-starter label:first-child{display:inline-block;width:15em;text-align:right}.webgl-starter .min{display:inline-block;width:3em;text-align:right}.webgl-starter .max{display:inline-block;width:3em;text-align:left}.webgl-starter input[type=number]{width:4.5em}.webgl-starter input:invalid{background:#F8A}.webgl-starter pre{border:1px solid #000}
 /*# sourceMappingURL=index.css.map */
