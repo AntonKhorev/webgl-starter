@@ -524,20 +524,10 @@ module.exports=function(options,i18n){
 					"gl.clear(gl.COLOR_BUFFER_BIT);"
 				);
 			}
-			lines=lines.concat(innerTransformsLines);
-			if (options.shape=='square') {
-				lines.push(
-					"gl.drawArrays(gl.TRIANGLE_FAN,0,nVertices);"
-				);
-			} else if (options.shape=='cube') {
-				lines.push(
-					"gl.drawElements(gl.TRIANGLES,nElements,gl.UNSIGNED_SHORT,0);"
-				);
-			} else {
-				lines.push(
-					"gl.drawArrays(gl.TRIANGLES,0,nVertices);"
-				);
-			}
+			lines=lines.concat(
+				innerTransformsLines,
+				shape.writeDraw()
+			);
 			return lines;
 		}
 		var lines=[];

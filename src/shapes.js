@@ -1,8 +1,9 @@
 var Shape=function(shaderType){
 	this.shaderType=shaderType; // 'vertex' or 'face' for colors, anything else for no colors
 };
-Shape.prototype.usesElements=false;
 Shape.prototype.dim=2;
+Shape.prototype.usesElements=false;
+Shape.prototype.glPrimitive='TRIANGLES';
 Shape.prototype.writeInit=function(){
 	var c=(this.shaderType=='vertex' || this.shaderType=='face');
 	var cv=this.shaderType=='vertex';
@@ -48,12 +49,20 @@ Shape.prototype.writeInit=function(){
 	}
 	return lines;
 };
+Shape.prototype.writeDraw=function(){
+	if (this.usesElements) {
+		return ["gl.drawElements(gl."+this.glPrimitive+",nElements,gl.UNSIGNED_SHORT,0);"];
+	} else {
+		return ["gl.drawArrays(gl."+this.glPrimitive+",0,nVertices);"];
+	}
+};
 
 var Square=function(shaderType){
 	Shape.call(this,shaderType);
 };
 Square.prototype=Object.create(Shape.prototype);
 Square.prototype.constructor=Square;
+Square.prototype.glPrimitive='TRIANGLE_FAN';
 Square.prototype.writeArrays=function(c,cv){
 	return [
 		"var nVertices=4;",
@@ -211,8 +220,8 @@ var Cube=function(shaderType){
 };
 Cube.prototype=Object.create(Shape.prototype);
 Cube.prototype.constructor=Cube;
-Cube.prototype.usesElements=true;
 Cube.prototype.dim=3;
+Cube.prototype.usesElements=true;
 Cube.prototype.writeArrays=function(c,cv){
 	if (this.shaderType=='face') {
 		return [
