@@ -412,7 +412,7 @@ module.exports=function(options,i18n){
 						"function "+updateName+"() {",
 						"	gl.uniform1f("+varName+"Loc,parseFloat(document.getElementById('"+optName+"').value));",
 						"};",
-						updateName+"();"
+						updateName+"();" // have to initialize the uniform even if default value is zero because the browser may keep prev value of slider on page reload
 					);
 					entry.post(updateName+"();");
 				}
@@ -657,7 +657,15 @@ module.exports=function(options,i18n){
 		"	",
 		"	var canvas=document.getElementById('myCanvas');",
 		"	var gl=canvas.getContext('webgl')||canvas.getContext('experimental-webgl');",
-	],(options.background=='solid' && !options.hasInputsFor('background.solid.color'))?[
+	],(
+		options.background=='solid' && !options.hasInputsFor('background.solid.color') && !(
+			// default clear color in OpenGL
+			options['background.solid.color.r']==0 &&
+			options['background.solid.color.g']==0 &&
+			options['background.solid.color.b']==0 &&
+			options['background.solid.color.a']==0
+		)
+	)?[
 		"	gl.clearColor("+colorValue('background.solid.color')+");",
 	]:[],shape.dim>2?[
 		"	gl.enable(gl.DEPTH_TEST);"
