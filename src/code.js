@@ -34,9 +34,22 @@ module.exports=function(options,i18n){
 		});
 	}
 
+	function makeShape() {
+		if (options.shape=='square') {
+			return new shapes.Square(options.shader);
+		} else if (options.shape=='triangle') {
+			return new shapes.Triangle(options.shader);
+		} else if (options.shape=='gasket') {
+			return new shapes.Gasket(options.shader,intOptionValue('shape.gasket.depth'),options['shape.gasket.depth.input']!='constant');
+		} else if (options.shape=='cube') {
+			return new shapes.Cube(options.shader);
+		}
+	}
+	var shape=makeShape();
+
 	function generateVertexShaderLines() {
 		var use2dTransform=(
-			options.shape!='cube' &&
+			shape.dim==2 &&
 			!options.needsTransform('rotate.x') &&
 			!options.needsTransform('rotate.y') &&
 			 options.needsTransform('rotate.z')
@@ -233,17 +246,6 @@ module.exports=function(options,i18n){
 			"}"
 		);
 		return lines;
-	}
-	function generateShapeLines() {
-		if (options.shape=='square') {
-			return (new shapes.Square(options.shader)).writeInit();
-		} else if (options.shape=='triangle') {
-			return (new shapes.Triangle(options.shader)).writeInit();
-		} else if (options.shape=='gasket') {
-			return (new shapes.Gasket(options.shader,intOptionValue('shape.gasket.depth'),options['shape.gasket.depth.input']!='constant')).writeInit();
-		} else if (options.shape=='cube') {
-			return (new shapes.Cube(options.shader)).writeInit();
-		}
 	}
 	function generateInputHandlerLines() {
 		var lines=[];
@@ -665,7 +667,7 @@ module.exports=function(options,i18n){
 		"	);",
 		"	gl.useProgram(program);",
 		"	",
-	],indentLines(1,generateShapeLines()),[
+	],indentLines(1,shape.writeInit()),[
 		"	",
 	],indentLines(1,generateInputHandlerLines()),indentLines(1,generateRenderLines()),[
 		"</script>",
