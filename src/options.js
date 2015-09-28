@@ -68,7 +68,7 @@ var CanvasIntInputOption=function(name,rangeOfValues,defaultValue){
 };
 CanvasIntInputOption.prototype=Object.create(IntInputOption.prototype);
 CanvasIntInputOption.prototype.constructor=CanvasIntInputOption;
-CanvasIntInputOption.prototype.availableInputTypes=['constant'/*,'slider'*/]; // can't change canvas size by moving mouse over canvas
+CanvasIntInputOption.prototype.availableInputTypes=['constant','slider']; // can't change canvas size by moving mouse over canvas
 
 /*
 var TransformOption=function(name,rangeOfValues,defaultValue){

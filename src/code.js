@@ -65,7 +65,12 @@ module.exports=function(options,i18n){
 			!options.needsTransform('rotate.y') &&
 			 options.needsTransform('rotate.z')
 		);
+		var needAspectUniform=options.hasInputsFor('canvas');
+		var needAspectConstant=!needAspectUniform && options['canvas.width']!=options['canvas.height'];
 		var lines=[];
+		if (needAspectUniform) {
+			lines.push("uniform float aspect;");
+		}
 		['x','y','z'].forEach(function(d){
 			var D=d.toUpperCase();
 			var optName='rotate.'+d;
@@ -106,7 +111,7 @@ module.exports=function(options,i18n){
 				}
 			}
 		});
-		if (options['canvas.width']!=options['canvas.height']) {
+		if (needAspectConstant) {
 			lines.push(
 				"	float aspect="+intOptionValue('canvas.height')+".0/"+intOptionValue('canvas.width')+".0;"
 			);
@@ -114,7 +119,7 @@ module.exports=function(options,i18n){
 		lines.push(
 			"	gl_Position="
 		);
-		if (options['canvas.width']!=options['canvas.height']) {
+		if (needAspectUniform || needAspectConstant) {
 			appendLinesToLastLine(lines,[
 				"vec4(aspect,1.0,1.0,1.0)*"
 			]);
@@ -276,6 +281,26 @@ module.exports=function(options,i18n){
 			);
 		}
 		var canvasMousemoveListener=new listeners.CanvasMousemoveListener();
+		function canvasUpdater() {
+			lines.push(
+				"function updateAspect() {",
+				"	gl.viewport(0,0,canvas.width,canvas.height);",
+				"	gl.uniform1f(aspectLoc,canvas.height/canvas.width);",
+				"}",
+				"updateAspect();"
+			);
+		}
+		function canvasListener(wh) {
+			var optName='canvas.'+wh;
+			if (options[optName+'.input']=='slider') {
+				var listener=new listeners.SliderListener(optName);
+				listener.enter()
+					.log("console.log(this.id,'input value:',parseInt(this.value));")
+					.post("canvas."+wh+"=parseInt(this.value);")
+					.post("updateAspect();");
+				writeListener(listener);
+			}
+		}
 		function colorStates(optionPrefix,updateFnName,stateVarPrefix) {
 			['r','g','b','a'].forEach(function(c){
 				var name=optionPrefix+'.'+c;
@@ -370,6 +395,14 @@ module.exports=function(options,i18n){
 			colorStates(optionPrefix,updateFnName,stateVarPrefix);
 			colorUpdater(optionPrefix,updateFnName,stateVarPrefix,allInputsPre,allInputsPost,someInputsPre,someInputsPost);
 			colorListeners(optionPrefix,updateFnName,stateVarPrefix);
+		}
+		if (options.hasInputsFor('canvas')) {
+			lines.push(
+				"var aspectLoc=gl.getUniformLocation(program,'aspect');"
+			);
+			canvasUpdater();
+			canvasListener('width');
+			canvasListener('height');
 		}
 		if (options.hasInputsFor('background.solid.color')) {
 			colorStatesAndUpdaterAndListeners(
