@@ -106,17 +106,27 @@ module.exports=function(options,i18n){
 				}
 			}
 		});
+		if (options['canvas.width']!=options['canvas.height']) {
+			lines.push(
+				"	float aspect="+intOptionValue('canvas.height')+".0/"+intOptionValue('canvas.width')+".0;"
+			);
+		}
+		lines.push(
+			"	gl_Position="
+		);
+		if (options['canvas.width']!=options['canvas.height']) {
+			appendLinesToLastLine(lines,[
+				"vec4(aspect,1.0,1.0,1.0)*"
+			]);
+		}
 		if (use2dTransform) {
-			lines.push(
-				"	gl_Position=vec4(mat2(",
-				"		 cz, sz,",
-				"		-sz, cz",
-				"	)*position,0,1);"
-			);
+			appendLinesToLastLine(lines,[
+				"vec4(mat2(",
+				"	 cz, sz,",
+				"	-sz, cz",
+				")*position,0,1);"
+			]);
 		} else {
-			lines.push(
-				"	gl_Position="
-			);
 			if (options.needsTransform('rotate.z')) {
 				appendLinesToLastLine(lines,[
 					"mat4(",
