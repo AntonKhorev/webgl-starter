@@ -32,6 +32,8 @@ var i18n=function(id){ // fake temporary i18n
 		'options.shape.cube': 'Cube',
 
 		'options.input': 'Input options',
+		'options.canvas.width': 'Canvas width',
+		'options.canvas.height': 'Canvas height',
 		'options.background.solid.color.r': 'Background color red component',
 		'options.background.solid.color.g': 'Background color green component',
 		'options.background.solid.color.b': 'Background color blue component',

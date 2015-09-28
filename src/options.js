@@ -63,6 +63,13 @@ IntInputOption.prototype.getSetupStep=function(){
 	return 1;
 };
 
+var CanvasIntInputOption=function(name,rangeOfValues,defaultValue){
+	IntInputOption.call(this,name,rangeOfValues,defaultValue);
+};
+CanvasIntInputOption.prototype=Object.create(IntInputOption.prototype);
+CanvasIntInputOption.prototype.constructor=CanvasIntInputOption;
+CanvasIntInputOption.prototype.availableInputTypes=['constant'/*,'slider'*/]; // can't change canvas size by moving mouse over canvas
+
 /*
 var TransformOption=function(name,rangeOfValues,defaultValue){
 	InputOption.call(this,name,rangeOfValues,defaultValue);
@@ -87,6 +94,8 @@ Options.prototype.generalOptions=[
 	new Option('shape',['square','triangle','gasket','cube']),
 ];
 Options.prototype.inputOptions=[
+	new CanvasIntInputOption('canvas.width',[1,1024],512),
+	new CanvasIntInputOption('canvas.height',[1,1024],512),
 	new FloatInputOption('background.solid.color.r',[0,1],1),
 	new FloatInputOption('background.solid.color.g',[0,1],1),
 	new FloatInputOption('background.solid.color.b',[0,1],1),

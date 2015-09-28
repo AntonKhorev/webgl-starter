@@ -649,7 +649,7 @@ module.exports=function(options,i18n){
 		"</head>",
 		"<body>",
 		"<div>",
-		"	<canvas id='myCanvas' width='512' height='512'></canvas>",
+		"	<canvas id='myCanvas' width='"+intOptionValue('canvas.width')+"' height='"+intOptionValue('canvas.height')+"'></canvas>",
 		"</div>",
 	],generateControlMessageLines(),generateInputLines(),[
 		"<script>",
