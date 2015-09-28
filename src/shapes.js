@@ -253,7 +253,7 @@ Cube.prototype.writeArrays=function(c,cv){
 			"	+0.5,+0.5,+0.5, 0.0, 1.0, 1.0,",
 			"]);",
 			"var nElements=36;",
-			"var elements=new Uint16Array([", // TODO warn that coords are left-handed or make an option
+			"var elements=new Uint16Array([",
 			"	 0,  1,  2,  2,  1,  3, // left face",
 			"	 4,  5,  6,  6,  5,  7, // right face",
 			"	 8,  9, 10, 10,  9, 11, // bottom face",
@@ -276,8 +276,8 @@ Cube.prototype.writeArrays=function(c,cv){
 			"	+0.5,+0.5,+0.5,"+(c?" 1.0, 1.0, 1.0,":""),
 			"]);",
 			"var nElements=36;",
-			"var elements=new Uint16Array([", // TODO warn that coords are left-handed or make an option
-			"	4, 6, 0, 0, 6, 2, // left face (in right-handed coords)",
+			"var elements=new Uint16Array([",
+			"	4, 6, 0, 0, 6, 2, // left face",
 			"	1, 3, 5, 5, 3, 7, // right face",
 			"	0, 1, 4, 4, 1, 5, // bottom face",
 			"	2, 6, 3, 3, 6, 7, // top face",

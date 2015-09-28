@@ -163,7 +163,11 @@ module.exports=function(options,i18n){
 		}
 		if (needAspectUniform || needAspectConstant) {
 			appendLinesToLastLine(lines,[
-				"*vec4(aspect,1.0,1.0,1.0)"
+				"*vec4(aspect,1.0,-1.0,1.0)" // correct aspect ratio and make coords right-handed
+			]);
+		} else if (shape.dim>2) {
+			appendLinesToLastLine(lines,[
+				"*vec4(1.0,1.0,-1.0,1.0)" // make coords right-handed for 3d shapes
 			]);
 		}
 		appendLinesToLastLine(lines,[
