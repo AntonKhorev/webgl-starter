@@ -119,53 +119,56 @@ module.exports=function(options,i18n){
 		lines.push(
 			"	gl_Position="
 		);
-		if (needAspectUniform || needAspectConstant) {
-			appendLinesToLastLine(lines,[
-				"vec4(aspect,1.0,1.0,1.0)*"
-			]);
-		}
 		if (use2dTransform) {
 			appendLinesToLastLine(lines,[
-				"vec4(mat2(",
-				"	 cz, sz,",
-				"	-sz, cz",
-				")*position,0,1);"
+				"vec4(position*mat2(",
+				"	cz, -sz,",
+				"	sz,  cz",
+				"),0,1)"
 			]);
 		} else {
-			if (options.needsTransform('rotate.z')) {
+			appendLinesToLastLine(lines,[
+				"position"
+			]);
+			if (options.needsTransform('rotate.x')) {
 				appendLinesToLastLine(lines,[
-					"mat4(",
-					"	 cz,  sz, 0.0, 0.0,",
-					"	-sz,  cz, 0.0, 0.0,",
-					"	0.0, 0.0, 1.0, 0.0,",
+					"*mat4(",
+					"	1.0, 0.0, 0.0, 0.0,",
+					"	0.0,  cx, -sx, 0.0,",
+					"	0.0,  sx,  cx, 0.0,",
 					"	0.0, 0.0, 0.0, 1.0",
-					")*"
+					")"
 				]);
 			}
 			if (options.needsTransform('rotate.y')) {
 				appendLinesToLastLine(lines,[
-					"mat4(",
-					"	 cy, 0.0, -sy, 0.0,",
+					"*mat4(",
+					"	 cy, 0.0,  sy, 0.0,",
 					"	0.0, 1.0, 0.0, 0.0,",
-					"	 sy, 0.0,  cy, 0.0,",
+					"	-sy, 0.0,  cy, 0.0,",
 					"	0.0, 0.0, 0.0, 1.0",
-					")*"
+					")"
 				]);
 			}
-			if (options.needsTransform('rotate.x')) {
+			if (options.needsTransform('rotate.z')) {
 				appendLinesToLastLine(lines,[
-					"mat4(",
-					"	1.0, 0.0, 0.0, 0.0,",
-					"	0.0,  cx,  sx, 0.0,",
-					"	0.0, -sx,  cx, 0.0,",
+					"*mat4(",
+					"	 cz, -sz, 0.0, 0.0,",
+					"	 sz,  cz, 0.0, 0.0,",
+					"	0.0, 0.0, 1.0, 0.0,",
 					"	0.0, 0.0, 0.0, 1.0",
-					")*"
+					")"
 				]);
 			}
+		}
+		if (needAspectUniform || needAspectConstant) {
 			appendLinesToLastLine(lines,[
-				"position;"
+				"*vec4(aspect,1.0,1.0,1.0)"
 			]);
 		}
+		appendLinesToLastLine(lines,[
+			";"
+		]);
 		if (options.shader=='vertex' || options.shader=='face') {
 			lines.push(
 				"	interpolatedColor=color;"
