@@ -92,6 +92,7 @@ Options.prototype.generalOptions=[
 	new Option('background',['none','solid']),
 	new Option('shader',['single','vertex','face']),
 	new Option('shape',['square','triangle','gasket','cube']),
+	new Option('projection',['ortho','perspective']),
 ];
 Options.prototype.inputOptions=[
 	new CanvasIntInputOption('canvas.width',[1,1024],512),

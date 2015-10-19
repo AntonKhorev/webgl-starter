@@ -113,7 +113,14 @@ module.exports=function(options,i18n){
 		});
 		if (needAspectConstant) {
 			lines.push(
-				"	float aspect="+intOptionValue('canvas.height')+".0/"+intOptionValue('canvas.width')+".0;"
+				"	float aspect="+intOptionValue('canvas.width')+".0/"+intOptionValue('canvas.height')+".0;"
+			);
+		}
+		if (options.projection=='perspective') {
+			lines.push(
+				"	float fovy=45.0;",
+				"	float near=1.0/tan(radians(fovy)/2.0);",
+				"	float far=near+2.0;"
 			);
 		}
 		lines.push(
@@ -161,14 +168,44 @@ module.exports=function(options,i18n){
 				]);
 			}
 		}
-		if (needAspectUniform || needAspectConstant) {
+		if (options.projection=='ortho') {
+			if (needAspectUniform || needAspectConstant) {
+				appendLinesToLastLine(lines,[
+					"*vec4(1.0/aspect,1.0,-1.0,1.0)" // correct aspect ratio and make coords right-handed
+				]);
+			} else if (shape.dim>2) {
+				appendLinesToLastLine(lines,[
+					"*vec4(1.0,1.0,-1.0,1.0)" // make coords right-handed for 3d shapes
+				]);
+			}
+		} else if (options.projection=='perspective') {
 			appendLinesToLastLine(lines,[
-				"*vec4(aspect,1.0,-1.0,1.0)" // correct aspect ratio and make coords right-handed
+				"*mat4( // move center of coords inside view",
+				"	1.0, 0.0, 0.0, 0.0,",
+				"	0.0, 1.0, 0.0, 0.0,",
+				"	0.0, 0.0, 1.0, -(near+far)/2.0,",
+				"	0.0, 0.0, 0.0, 1.0",
+				")"
 			]);
-		} else if (shape.dim>2) {
-			appendLinesToLastLine(lines,[
-				"*vec4(1.0,1.0,-1.0,1.0)" // make coords right-handed for 3d shapes
-			]);
+			if (needAspectUniform || needAspectConstant) {
+				appendLinesToLastLine(lines,[
+					"*mat4(",
+					"	near/aspect, 0.0,  0.0,                   0.0,",
+					"	0.0,         near, 0.0,                   0.0,",
+					"	0.0,         0.0,  (near+far)/(near-far), 2.0*near*far/(near-far),",
+					"	0.0,         0.0,  -1.0,                  0.0",
+					")"
+				]);
+			} else {
+				appendLinesToLastLine(lines,[
+					"*mat4(",
+					"	near, 0.0,  0.0,                   0.0,",
+					"	0.0,  near, 0.0,                   0.0,",
+					"	0.0,  0.0,  (near+far)/(near-far), 2.0*near*far/(near-far),",
+					"	0.0,  0.0,  -1.0,                  0.0",
+					")"
+				]);
+			}
 		}
 		appendLinesToLastLine(lines,[
 			";"
@@ -292,7 +329,7 @@ module.exports=function(options,i18n){
 			lines.push(
 				"function updateAspect() {",
 				"	gl.viewport(0,0,canvas.width,canvas.height);",
-				"	gl.uniform1f(aspectLoc,canvas.height/canvas.width);",
+				"	gl.uniform1f(aspectLoc,canvas.width/canvas.height);",
 				"}",
 				"updateAspect();"
 			);

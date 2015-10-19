@@ -30,6 +30,9 @@ var i18n=function(id){ // fake temporary i18n
 		'options.shape.triangle': 'Triangle',
 		'options.shape.gasket': 'Sierpinski gasket', // wp: Sierpinski triangle
 		'options.shape.cube': 'Cube',
+		'options.projection': 'Projection',
+		'options.projection.ortho': 'Orthogonal',
+		'options.projection.perspective': 'Perspective',
 
 		'options.input': 'Input options',
 		'options.canvas.width': 'Canvas width',
