@@ -192,14 +192,17 @@ $(function(){
 		}
 		function makeSortable($sortableRoot,callback) {
 			// have to make drag handler 'draggable', not the whole item
+			// because inputs and labels don't like to be inside 'draggable'
 			// http://stackoverflow.com/questions/13017177/selection-disabled-while-using-html5-drag-and-drop
 			var $dragged=null;
 			$sortableRoot.children().prepend(
-				$("<div draggable='true' tabindex='0'>").on('dragstart',function(ev){
+				$("<div draggable='true' tabindex='0' title='Drag or press up/down while in focus to reorder transforms'>").on('dragstart',function(ev){
 					$dragged=$(this).parent();
 					ev.originalEvent.dataTransfer.effectAllowed='move';
 					ev.originalEvent.dataTransfer.setData('Text',name);
-					ev.originalEvent.dataTransfer.setDragImage($dragged[0],0,0);
+					if (ev.originalEvent.dataTransfer.setDragImage) { // doesn't work in IE
+						ev.originalEvent.dataTransfer.setDragImage($dragged[0],0,0);
+					}
 					setTimeout(function(){
 						$dragged.addClass('ghost');
 					},0);
