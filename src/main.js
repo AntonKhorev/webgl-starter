@@ -218,10 +218,12 @@ $(function(){
 							ev.originalEvent.dataTransfer.dropEffect='move';
 							var $target=$(this);
 							console.log('drag over '+name);
-							if ($dragged && !$target.is($dragged)) {
-								//console.log('gotta reorder',$dragged);
-								//$target.before($dragged);
-								$dragged.detach().insertBefore($target);
+							if ($dragged) {
+								if ($target.nextAll($dragged).length>0) {
+									$target.before($dragged);
+								} else if ($target.prevAll($dragged).length>0) {
+									$target.after($dragged);
+								}
 							}
 						}).on('dragend',function(ev){
 							console.log('drag end '+name);
