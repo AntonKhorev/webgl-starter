@@ -87,23 +87,23 @@ var i18n=function(id){ // fake temporary i18n
 
 $(function(){
 	$('.webgl-starter').each(function(){
-		var containerNode=$(this);
-		var optionsNode;
-		var codeNode;
+		var $container=$(this);
+		var $options;
+		var $code;
 		var options=new Options();
 		var codeUpdateTimeoutId=null;
 		var codeUpdateDelay=200;
 
 		function showHideSuboptionInputs(optionName,optionValue) {
 			// TODO sub-sub option support?
-			optionsNode.find("[data-option^='"+optionName+".']").show()
+			$options.find("[data-option^='"+optionName+".']").show()
 				.not("[data-option^='"+optionName+"."+optionValue+".']").hide();
 		}
 		function updateCode() {
 			clearTimeout(codeUpdateTimeoutId);
 			codeUpdateTimeoutId=setTimeout(function(){
-				codeNode.text(generateCode(options.cloneWithoutHidden(),i18n));
-				if (window.hljs) hljs.highlightBlock(codeNode[0]);
+				$code.text(generateCode(options.cloneWithoutHidden(),i18n));
+				if (window.hljs) hljs.highlightBlock($code[0]);
 			},codeUpdateDelay);
 		}
 		function writeGeneralOption(option) {
@@ -288,29 +288,29 @@ $(function(){
 			return $("<div>").append(
 				$("<a download='source.html'><button type='button'>Save source code</button></a>").click(function(){
 					// yes I want a button, but download attr is only available for links
-					$(this).attr('href',getHtmlDataUri(codeNode.text()));
+					$(this).attr('href',getHtmlDataUri($code.text()));
 				})
 			).append(
 				" "
 			).append(
 				$("<button type='button'>Run in new window</button>").click(function(){
-					window.open(getHtmlDataUri(codeNode.text()),"generatedCode");
+					window.open(getHtmlDataUri($code.text()),"generatedCode");
 				})
 			).append(
 				" these buttons don't work in Internet Explorer, copy-paste the code manually"
 			)
 		}
 
-		containerNode.empty().append(optionsNode=writeOptions());
+		$container.empty().append($options=writeOptions());
 		hideSuboptionInputs();
-		containerNode.append(writeButtons()).append(
-			$("<pre>").append(codeNode=$("<code>").text(generateCode(options.cloneWithoutHidden(),i18n)))
+		$container.append(writeButtons()).append(
+			$("<pre>").append($code=$("<code>").text(generateCode(options.cloneWithoutHidden(),i18n)))
 		);
 		if (window.hljs) {
-			hljs.highlightBlock(codeNode[0]);
+			hljs.highlightBlock($code[0]);
 		} else {
-			containerNode.append("<p>"+i18n('message.hljs')+"</p>");
+			$container.append("<p>"+i18n('message.hljs')+"</p>");
 		}
-		containerNode.append(writeButtons());
+		$container.append(writeButtons());
 	});
 });
