@@ -255,11 +255,9 @@ $(function(){
 			).append(
 				$("<fieldset>").append("<legend>"+i18n('options.transform')+"</legend>").append(
 					$transforms=$("<div>").append(
-						['rotate.x','rotate.y','rotate.z'].map(function(name,i){
+						options.transforms.map(function(transform){
 							return $("<div class='transform'>").append(
-								writeInputOption(options.transformOptions[i*2])
-							).append(
-								writeInputOption(options.transformOptions[i*2+1])
+								transform.options.map(writeInputOption)
 							);
 						})
 					)

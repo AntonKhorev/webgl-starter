@@ -70,15 +70,6 @@ CanvasIntInputOption.prototype=Object.create(IntInputOption.prototype);
 CanvasIntInputOption.prototype.constructor=CanvasIntInputOption;
 CanvasIntInputOption.prototype.availableInputTypes=['constant','slider']; // can't change canvas size by moving mouse over canvas
 
-/*
-var TransformOption=function(name,rangeOfValues,defaultValue){
-	InputOption.call(this,name,rangeOfValues,defaultValue);
-};
-TransformOption.prototype=Object.create(InputOption.prototype);
-TransformOption.prototype.constructor=TransformOption;
-TransformOption.prototype.availableInputTypes=InputOption.prototype.availableInputTypes.concat(['animated']);
-*/
-
 var DebugOption=function(name,defaultValue){
 	Option.call(this,name,[false,true],defaultValue);
 };
@@ -107,15 +98,19 @@ Options.prototype.inputOptions=[
 	new FloatInputOption('shader.single.color.a',[0,1],1),
 	new IntInputOption('shape.gasket.depth',[0,10],6),
 ];
-Options.prototype.transformOptions=[
+Options.prototype.transformOptions=[];
+Options.prototype.transforms=[];
+['rotate.x','rotate.y','rotate.z'].forEach(function(name){
 	// TODO make default angle/speed something like 0.2*360 when able to add/delete transforms
-	new FloatInputOption('rotate.x',[-180,180],0),
-	new FloatInputOption('rotate.x.speed',[-360,360],0),
-	new FloatInputOption('rotate.y',[-180,180],0),
-	new FloatInputOption('rotate.y.speed',[-360,360],0),
-	new FloatInputOption('rotate.z',[-180,180],0),
-	new FloatInputOption('rotate.z.speed',[-360,360],0),
-];
+	var valueOption=new FloatInputOption(name,[-180,180],0);
+	var speedOption=new FloatInputOption(name+'.speed',[-360,360],0);
+	Options.prototype.transformOptions.push(valueOption);
+	Options.prototype.transformOptions.push(speedOption);
+	Options.prototype.transforms.push({
+		name:name,
+		options:[valueOption,speedOption]
+	});
+});
 Options.prototype.debugOptions=[
 	new DebugOption('debugShader',true),
 	new DebugOption('debugInputs'), // TODO hide if no inputs?
