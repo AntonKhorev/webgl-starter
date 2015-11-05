@@ -137,36 +137,37 @@ module.exports=function(options,i18n){
 			appendLinesToLastLine(lines,[
 				"position"
 			]);
-			if (options.needsTransform('rotate.x')) {
-				appendLinesToLastLine(lines,[
-					"*mat4(",
-					"	1.0, 0.0, 0.0, 0.0,",
-					"	0.0,  cx, -sx, 0.0,",
-					"	0.0,  sx,  cx, 0.0,",
-					"	0.0, 0.0, 0.0, 1.0",
-					")"
-				]);
-			}
-			if (options.needsTransform('rotate.y')) {
-				appendLinesToLastLine(lines,[
-					"*mat4(",
-					"	 cy, 0.0,  sy, 0.0,",
-					"	0.0, 1.0, 0.0, 0.0,",
-					"	-sy, 0.0,  cy, 0.0,",
-					"	0.0, 0.0, 0.0, 1.0",
-					")"
-				]);
-			}
-			if (options.needsTransform('rotate.z')) {
-				appendLinesToLastLine(lines,[
-					"*mat4(",
-					"	 cz, -sz, 0.0, 0.0,",
-					"	 sz,  cz, 0.0, 0.0,",
-					"	0.0, 0.0, 1.0, 0.0,",
-					"	0.0, 0.0, 0.0, 1.0",
-					")"
-				]);
-			}
+			options.transformOrder.forEach(function(transformName){
+				if (!options.needsTransform(transformName)) {
+					return;
+				}
+				appendLinesToLastLine(lines,{
+					'rotate.x': [
+						"*mat4(",
+						"	1.0, 0.0, 0.0, 0.0,",
+						"	0.0,  cx, -sx, 0.0,",
+						"	0.0,  sx,  cx, 0.0,",
+						"	0.0, 0.0, 0.0, 1.0",
+						")"
+					],
+					'rotate.y': [
+						"*mat4(",
+						"	 cy, 0.0,  sy, 0.0,",
+						"	0.0, 1.0, 0.0, 0.0,",
+						"	-sy, 0.0,  cy, 0.0,",
+						"	0.0, 0.0, 0.0, 1.0",
+						")"
+					],
+					'rotate.z': [
+						"*mat4(",
+						"	 cz, -sz, 0.0, 0.0,",
+						"	 sz,  cz, 0.0, 0.0,",
+						"	0.0, 0.0, 1.0, 0.0,",
+						"	0.0, 0.0, 0.0, 1.0",
+						")"
+					]
+				}[transformName]);
+			});
 		}
 		if (options.projection=='ortho') {
 			if (needAspectUniform || needAspectConstant) {

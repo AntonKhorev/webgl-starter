@@ -130,6 +130,9 @@ Options.prototype.reset=function(){
 	this.debugOptions.forEach(function(option){
 		this[option.name]=option.defaultValue;
 	},this);
+	this.transformOrder=Options.prototype.transforms.map(function(transform){
+		return transform.name;
+	});
 };
 
 // TODO check what .has*() fns are in use
@@ -189,6 +192,7 @@ Options.prototype.needsTransform=function(prefix){
 	return this.needsUniform(prefix) || this[prefix]!=0;
 };
 
+// TODO create a different class for fixed options; put needsTransform() and like into it
 Options.prototype.cloneWithoutHidden=function(){
 	// clone and set .input=constant for hidden sections
 	var newOptions=new Options();
@@ -212,6 +216,7 @@ Options.prototype.cloneWithoutHidden=function(){
 	this.debugOptions.forEach(function(option){
 		newOptions[option.name]=this[option.name];
 	},this);
+	newOptions.transformOrder=this.transformOrder;
 	return newOptions;
 };
 

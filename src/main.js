@@ -256,7 +256,7 @@ $(function(){
 				$("<fieldset>").append("<legend>"+i18n('options.transform')+"</legend>").append(
 					$transforms=$("<div>").append(
 						options.transforms.map(function(transform){
-							return $("<div class='transform'>").append(
+							return $("<div class='transform' data-transform='"+transform.name+"'>").append(
 								transform.options.map(writeInputOption)
 							);
 						})
@@ -268,7 +268,10 @@ $(function(){
 				)
 			);
 			makeSortable($transforms,function(){
-				console.log('TODO pass transforms order to options');
+				options.transformOrder=$transforms.children().map(function(){
+					return $(this).attr('data-transform');
+				}).get();
+				updateCode();
 			});
 			return $options;
 		}
