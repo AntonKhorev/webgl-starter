@@ -190,10 +190,66 @@ $(function(){
 				)
 				.append(" <label for='"+id+"'>"+i18n('options.'+option.name)+"</label>");
 		}
-		function writeOptions() {
+		function makeSortable($sortableRoot,callback) {
 			var $dragged=null;
 			var isHandle=false; // https://github.com/farhadi/html5sortable/blob/master/jquery.sortable.js
-			return $("<div>").append(
+			$sortableRoot.children().prop('draggable',true).prepend(
+				$("<div class='handle' tabindex='0'>").mousedown(function(){
+					isHandle=true;
+				}).mouseup(function(){
+					isHandle=false;
+				}).keydown(function(ev){
+					var $handle=$(this);
+					var $sorted=$handle.closest('[draggable]');
+					if (ev.keyCode==38) {
+						$sorted.prev().before($sorted);
+						$handle.focus();
+						callback();
+						return false;
+					} else if (ev.keyCode==40) {
+						$sorted.next().after($sorted);
+						$handle.focus();
+						callback();
+						return false;
+					}
+				})
+			).on('dragstart',function(ev){
+				if (!isHandle) {
+					return false;
+				}
+				isHandle=false;
+				$dragged=$(this);
+				ev.originalEvent.dataTransfer.effectAllowed='move';
+				ev.originalEvent.dataTransfer.setData('Text',name);
+				setTimeout(function(){
+					$dragged.addClass('ghost');
+				},0);
+			}).on('dragover',function(ev){
+				ev.preventDefault();
+				ev.originalEvent.dataTransfer.dropEffect='move';
+				var $target=$(this);
+				if ($dragged) {
+					if ($target.nextAll().is($dragged)) {
+						$target.before($dragged);
+						callback();
+					} else if ($target.prevAll().is($dragged)) {
+						$target.after($dragged);
+						callback();
+					}
+				}
+			}).on('dragend',function(ev){
+				ev.preventDefault();
+				if ($dragged) {
+					$dragged.removeClass('ghost');
+					$dragged=null;
+				}
+			}).on('drop',function(ev){
+				ev.preventDefault();
+			});
+		}
+		function writeOptions() {
+			var $transforms;
+			var $options=$("<div>").append(
 				$("<fieldset>").append("<legend>"+i18n('options.general')+"</legend>").append(
 					options.generalOptions.map(writeGeneralOption)
 				)
@@ -203,57 +259,9 @@ $(function(){
 				)
 			).append(
 				$("<fieldset>").append("<legend>"+i18n('options.transform')+"</legend>").append(
-					$("<div>").append(
+					$transforms=$("<div>").append(
 						['rotate.x','rotate.y','rotate.z'].map(function(name,i){
-							return $("<div draggable='true'>").append(
-								$("<div class='handle' tabindex='0'>").mousedown(function(){
-									isHandle=true;
-								}).mouseup(function(){
-									isHandle=false;
-								}).keydown(function(ev){
-									var $handle=$(this);
-									var $sorted=$handle.closest('[draggable]');
-									if (ev.keyCode==38) {
-										$sorted.prev().before($sorted);
-										$handle.focus();
-										return false;
-									} else if (ev.keyCode==40) {
-										$sorted.next().after($sorted);
-										$handle.focus();
-										return false;
-									}
-								})
-							).on('dragstart',function(ev){
-								if (!isHandle) {
-									return false;
-								}
-								isHandle=false;
-								$dragged=$(this);
-								ev.originalEvent.dataTransfer.effectAllowed='move'; // http://stackoverflow.com/a/8286657
-								ev.originalEvent.dataTransfer.setData('Text',name);
-								setTimeout(function(){
-									$dragged.addClass('ghost');
-								},0);
-							}).on('dragover',function(ev){
-								ev.preventDefault();
-								ev.originalEvent.dataTransfer.dropEffect='move';
-								var $target=$(this);
-								if ($dragged) {
-									if ($target.nextAll().is($dragged)) {
-										$target.before($dragged);
-									} else if ($target.prevAll().is($dragged)) {
-										$target.after($dragged);
-									}
-								}
-							}).on('dragend',function(ev){
-								ev.preventDefault();
-								if ($dragged) {
-									$dragged.removeClass('ghost');
-									$dragged=null;
-								}
-							}).on('drop',function(ev){
-								ev.preventDefault();
-							}).append(
+							return $("<div>").append(
 								writeInputOption(options.transformOptions[i*2])
 							).append(
 								writeInputOption(options.transformOptions[i*2+1])
@@ -266,6 +274,10 @@ $(function(){
 					options.debugOptions.map(writeDebugOption)
 				)
 			);
+			makeSortable($transforms,function(){
+				console.log('TODO pass transforms order to options');
+			});
+			return $options;
 		}
 		function hideSuboptionInputs() {
 			options.generalOptions.forEach(function(option){
