@@ -1,7 +1,15 @@
 .webgl-starter {
 	[draggable] {
-		border: outset 1px black;
-		cursor: move;
+		position: relative;
+		.handle {
+			position: absolute;
+			top: 0.5em;
+			bottom: 0.5em;
+			width: 1em;
+			cursor: move;
+			// http://www.patternify.com/
+			background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAJCAYAAAAPU20uAAAAE0lEQVQYlWNgoAb4T4AeGibgBQD2hwv1o+raLAAAAABJRU5ErkJggg==) center repeat;
+		}
 	}
 	.ghost {
 		opacity: .4;

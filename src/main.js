@@ -192,6 +192,7 @@ $(function(){
 		}
 		function writeOptions() {
 			var $dragged=null;
+			var isHandle=false; // https://github.com/farhadi/html5sortable/blob/master/jquery.sortable.js
 			return $("<div>").append(
 				$("<fieldset>").append("<legend>"+i18n('options.general')+"</legend>").append(
 					options.generalOptions.map(writeGeneralOption)
@@ -203,7 +204,17 @@ $(function(){
 			).append(
 				$("<fieldset>").append("<legend>"+i18n('options.transform')+"</legend>").append(
 					['rotate.x','rotate.y','rotate.z'].map(function(name,i){
-						return $("<div draggable='true'>").on('dragstart',function(ev){
+						return $("<div draggable='true'>").append(
+							$("<div class='handle'>").mousedown(function(){
+								isHandle=true;
+							}).mouseup(function(){
+								isHandle=false;
+							})
+						).on('dragstart',function(ev){
+							if (!isHandle) {
+								return false;
+							}
+							isHandle=false;
 							$dragged=$(this);
 							ev.originalEvent.dataTransfer.effectAllowed='move'; // http://stackoverflow.com/a/8286657
 							ev.originalEvent.dataTransfer.setData('Text',name);
