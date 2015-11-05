@@ -203,49 +203,63 @@ $(function(){
 				)
 			).append(
 				$("<fieldset>").append("<legend>"+i18n('options.transform')+"</legend>").append(
-					['rotate.x','rotate.y','rotate.z'].map(function(name,i){
-						return $("<div draggable='true'>").append(
-							$("<div class='handle'>").mousedown(function(){
-								isHandle=true;
-							}).mouseup(function(){
-								isHandle=false;
-							})
-						).on('dragstart',function(ev){
-							if (!isHandle) {
-								return false;
-							}
-							isHandle=false;
-							$dragged=$(this);
-							ev.originalEvent.dataTransfer.effectAllowed='move'; // http://stackoverflow.com/a/8286657
-							ev.originalEvent.dataTransfer.setData('Text',name);
-							setTimeout(function(){
-								$dragged.addClass('ghost');
-							},0);
-						}).on('dragover',function(ev){
-							ev.preventDefault();
-							ev.originalEvent.dataTransfer.dropEffect='move';
-							var $target=$(this);
-							if ($dragged) {
-								if ($target.nextAll().is($dragged)) {
-									$target.before($dragged);
-								} else if ($target.prevAll().is($dragged)) {
-									$target.after($dragged);
+					$("<div>").append(
+						['rotate.x','rotate.y','rotate.z'].map(function(name,i){
+							return $("<div draggable='true'>").append(
+								$("<div class='handle' tabindex='0'>").mousedown(function(){
+									isHandle=true;
+								}).mouseup(function(){
+									isHandle=false;
+								}).keydown(function(ev){
+									var $handle=$(this);
+									var $sorted=$handle.closest('[draggable]');
+									if (ev.keyCode==38) {
+										$sorted.prev().before($sorted);
+										$handle.focus();
+										return false;
+									} else if (ev.keyCode==40) {
+										$sorted.next().after($sorted);
+										$handle.focus();
+										return false;
+									}
+								})
+							).on('dragstart',function(ev){
+								if (!isHandle) {
+									return false;
 								}
-							}
-						}).on('dragend',function(ev){
-							ev.preventDefault();
-							if ($dragged) {
-								$dragged.removeClass('ghost');
-								$dragged=null;
-							}
-						}).on('drop',function(ev){
-							ev.preventDefault();
-						}).append(
-							writeInputOption(options.transformOptions[i*2])
-						).append(
-							writeInputOption(options.transformOptions[i*2+1])
-						);
-					})
+								isHandle=false;
+								$dragged=$(this);
+								ev.originalEvent.dataTransfer.effectAllowed='move'; // http://stackoverflow.com/a/8286657
+								ev.originalEvent.dataTransfer.setData('Text',name);
+								setTimeout(function(){
+									$dragged.addClass('ghost');
+								},0);
+							}).on('dragover',function(ev){
+								ev.preventDefault();
+								ev.originalEvent.dataTransfer.dropEffect='move';
+								var $target=$(this);
+								if ($dragged) {
+									if ($target.nextAll().is($dragged)) {
+										$target.before($dragged);
+									} else if ($target.prevAll().is($dragged)) {
+										$target.after($dragged);
+									}
+								}
+							}).on('dragend',function(ev){
+								ev.preventDefault();
+								if ($dragged) {
+									$dragged.removeClass('ghost');
+									$dragged=null;
+								}
+							}).on('drop',function(ev){
+								ev.preventDefault();
+							}).append(
+								writeInputOption(options.transformOptions[i*2])
+							).append(
+								writeInputOption(options.transformOptions[i*2+1])
+							);
+						})
+					)
 				)
 			).append(
 				$("<fieldset>").append("<legend>"+i18n('options.debug')+"</legend>").append(
