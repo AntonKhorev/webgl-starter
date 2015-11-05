@@ -191,16 +191,22 @@ $(function(){
 				.append(" <label for='"+id+"'>"+i18n('options.'+option.name)+"</label>");
 		}
 		function makeSortable($sortableRoot,callback) {
+			// have to make drag handler 'draggable', not the whole item
+			// http://stackoverflow.com/questions/13017177/selection-disabled-while-using-html5-drag-and-drop
 			var $dragged=null;
-			var isHandle=false; // https://github.com/farhadi/html5sortable/blob/master/jquery.sortable.js
-			$sortableRoot.children().prop('draggable',true).prepend(
-				$("<div class='handle' tabindex='0'>").mousedown(function(){
-					isHandle=true;
-				}).mouseup(function(){
-					isHandle=false;
-				}).keydown(function(ev){
+			$sortableRoot.children().prepend(
+				$("<div draggable='true' tabindex='0'>").on('dragstart',function(ev){
+					$dragged=$(this).parent();
+					ev.originalEvent.dataTransfer.effectAllowed='move';
+					ev.originalEvent.dataTransfer.setData('Text',name);
+					ev.originalEvent.dataTransfer.setDragImage($dragged[0],0,0);
+					setTimeout(function(){
+						$dragged.addClass('ghost');
+					},0);
+				})
+				.keydown(function(ev){
 					var $handle=$(this);
-					var $sorted=$handle.closest('[draggable]');
+					var $sorted=$handle.parent();
 					if (ev.keyCode==38) {
 						$sorted.prev().before($sorted);
 						$handle.focus();
@@ -213,18 +219,7 @@ $(function(){
 						return false;
 					}
 				})
-			).on('dragstart',function(ev){
-				if (!isHandle) {
-					return false;
-				}
-				isHandle=false;
-				$dragged=$(this);
-				ev.originalEvent.dataTransfer.effectAllowed='move';
-				ev.originalEvent.dataTransfer.setData('Text',name);
-				setTimeout(function(){
-					$dragged.addClass('ghost');
-				},0);
-			}).on('dragover',function(ev){
+			).on('dragover',function(ev){
 				ev.preventDefault();
 				ev.originalEvent.dataTransfer.dropEffect='move';
 				var $target=$(this);
@@ -237,14 +232,14 @@ $(function(){
 						callback();
 					}
 				}
+			}).on('drop',function(ev){
+				ev.preventDefault();
 			}).on('dragend',function(ev){
 				ev.preventDefault();
 				if ($dragged) {
 					$dragged.removeClass('ghost');
 					$dragged=null;
 				}
-			}).on('drop',function(ev){
-				ev.preventDefault();
 			});
 		}
 		function writeOptions() {
@@ -261,7 +256,7 @@ $(function(){
 				$("<fieldset>").append("<legend>"+i18n('options.transform')+"</legend>").append(
 					$transforms=$("<div>").append(
 						['rotate.x','rotate.y','rotate.z'].map(function(name,i){
-							return $("<div>").append(
+							return $("<div class='transform'>").append(
 								writeInputOption(options.transformOptions[i*2])
 							).append(
 								writeInputOption(options.transformOptions[i*2+1])
