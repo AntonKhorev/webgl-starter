@@ -204,11 +204,8 @@ $(function(){
 				$("<fieldset>").append("<legend>"+i18n('options.transform')+"</legend>").append(
 					['rotate.x','rotate.y','rotate.z'].map(function(name,i){
 						return $("<div draggable='true'>").on('dragstart',function(ev){
-							console.log('drag started in '+name);
-							// ev.dataTransfer.setData('text/plain','dragged '+name);
-							// ev.originalEvent.dataTransfer.setData('text/plain','dragged '+name); // http://stackoverflow.com/a/8286657
 							$dragged=$(this);
-							ev.originalEvent.dataTransfer.effectAllowed='move';
+							ev.originalEvent.dataTransfer.effectAllowed='move'; // http://stackoverflow.com/a/8286657
 							ev.originalEvent.dataTransfer.setData('Text',name);
 							setTimeout(function(){
 								$dragged.addClass('ghost');
@@ -217,16 +214,14 @@ $(function(){
 							ev.preventDefault();
 							ev.originalEvent.dataTransfer.dropEffect='move';
 							var $target=$(this);
-							console.log('drag over '+name);
 							if ($dragged) {
-								if ($target.nextAll($dragged).length>0) {
+								if ($target.nextAll().is($dragged)) {
 									$target.before($dragged);
-								} else if ($target.prevAll($dragged).length>0) {
+								} else if ($target.prevAll().is($dragged)) {
 									$target.after($dragged);
 								}
 							}
 						}).on('dragend',function(ev){
-							console.log('drag end '+name);
 							ev.preventDefault();
 							if ($dragged) {
 								$dragged.removeClass('ghost');
