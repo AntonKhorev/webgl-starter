@@ -191,6 +191,7 @@ $(function(){
 				.append(" <label for='"+id+"'>"+i18n('options.'+option.name)+"</label>");
 		}
 		function writeOptions() {
+			var $dragged=null;
 			return $("<div>").append(
 				$("<fieldset>").append("<legend>"+i18n('options.general')+"</legend>").append(
 					options.generalOptions.map(writeGeneralOption)
@@ -201,7 +202,42 @@ $(function(){
 				)
 			).append(
 				$("<fieldset>").append("<legend>"+i18n('options.transform')+"</legend>").append(
-					options.transformOptions.map(writeInputOption)
+					['rotate.x','rotate.y','rotate.z'].map(function(name,i){
+						return $("<div draggable='true'>").on('dragstart',function(ev){
+							console.log('drag started in '+name);
+							// ev.dataTransfer.setData('text/plain','dragged '+name);
+							// ev.originalEvent.dataTransfer.setData('text/plain','dragged '+name); // http://stackoverflow.com/a/8286657
+							$dragged=$(this);
+							ev.originalEvent.dataTransfer.effectAllowed='move';
+							ev.originalEvent.dataTransfer.setData('Text',name);
+							setTimeout(function(){
+								$dragged.addClass('ghost');
+							},0);
+						}).on('dragover',function(ev){
+							ev.preventDefault();
+							ev.originalEvent.dataTransfer.dropEffect='move';
+							var $target=$(this);
+							console.log('drag over '+name);
+							if ($dragged && !$target.is($dragged)) {
+								//console.log('gotta reorder',$dragged);
+								//$target.before($dragged);
+								$dragged.detach().insertBefore($target);
+							}
+						}).on('dragend',function(ev){
+							console.log('drag end '+name);
+							ev.preventDefault();
+							if ($dragged) {
+								$dragged.removeClass('ghost');
+								$dragged=null;
+							}
+						}).on('drop',function(ev){
+							ev.preventDefault();
+						}).append(
+							writeInputOption(options.transformOptions[i*2])
+						).append(
+							writeInputOption(options.transformOptions[i*2+1])
+						);
+					})
 				)
 			).append(
 				$("<fieldset>").append("<legend>"+i18n('options.debug')+"</legend>").append(
