@@ -76,16 +76,16 @@ var DebugOption=function(name,defaultValue){
 DebugOption.prototype=Object.create(Option.prototype);
 DebugOption.prototype.constructor=DebugOption;
 
-var Options=function(){
+var OptionsBlueprint=function(){
 	this.reset();
 };
-Options.prototype.generalOptions=[
+OptionsBlueprint.prototype.generalOptions=[
 	new Option('background',['none','solid']),
 	new Option('shader',['single','vertex','face']),
 	new Option('shape',['square','triangle','gasket','cube']),
 	new Option('projection',['ortho','perspective']),
 ];
-Options.prototype.inputOptions=[
+OptionsBlueprint.prototype.inputOptions=[
 	new CanvasIntInputOption('canvas.width',[1,1024],512),
 	new CanvasIntInputOption('canvas.height',[1,1024],512),
 	new FloatInputOption('background.solid.color.r',[0,1],1),
@@ -98,24 +98,24 @@ Options.prototype.inputOptions=[
 	new FloatInputOption('shader.single.color.a',[0,1],1),
 	new IntInputOption('shape.gasket.depth',[0,10],6),
 ];
-Options.prototype.transformOptions=[];
-Options.prototype.transforms=[];
+OptionsBlueprint.prototype.transformOptions=[];
+OptionsBlueprint.prototype.transforms=[];
 ['rotate.x','rotate.y','rotate.z'].forEach(function(name){
 	// TODO make default angle/speed something like 0.2*360 when able to add/delete transforms
 	var valueOption=new FloatInputOption(name,[-180,180],0);
 	var speedOption=new FloatInputOption(name+'.speed',[-360,360],0);
-	Options.prototype.transformOptions.push(valueOption);
-	Options.prototype.transformOptions.push(speedOption);
-	Options.prototype.transforms.push({
+	OptionsBlueprint.prototype.transformOptions.push(valueOption);
+	OptionsBlueprint.prototype.transformOptions.push(speedOption);
+	OptionsBlueprint.prototype.transforms.push({
 		name:name,
 		options:[valueOption,speedOption]
 	});
 });
-Options.prototype.debugOptions=[
+OptionsBlueprint.prototype.debugOptions=[
 	new DebugOption('debugShader',true),
 	new DebugOption('debugInputs'), // TODO hide if no inputs?
 ];
-Options.prototype.reset=function(){
+OptionsBlueprint.prototype.reset=function(){
 	this.generalOptions.forEach(function(option){
 		this[option.name]=option.defaultValue;
 	},this);
@@ -130,41 +130,61 @@ Options.prototype.reset=function(){
 	this.debugOptions.forEach(function(option){
 		this[option.name]=option.defaultValue;
 	},this);
-	this.transformOrder=Options.prototype.transforms.map(function(transform){
+	this.transformOrder=this.transforms.map(function(transform){
 		return transform.name;
 	});
 };
+OptionsBlueprint.prototype.fix=function(){
+	return new OptionsInstance(this);
+};
 
-// TODO check what .has*() fns are in use
-Options.prototype.hasInputs=function(){
+var OptionsInstance=function(blueprint){
+	['generalOptions','inputOptions','transformOptions','debugOptions'].forEach(function(groupName){
+		this[groupName]=[];
+		blueprint[groupName].forEach(function(option){
+			var isHidden=blueprint.generalOptions.some(function(generalOption){
+				return generalOption.doesValueHideOption(blueprint[generalOption.name],option);
+			});
+			if (!isHidden) {
+				this[groupName].push(option);
+				this[option.name]=blueprint[option.name];
+				if (groupName=='inputOptions' || groupName=='transformOptions') {
+					this[option.name+'.input']=blueprint[option.name+'.input'];
+				}
+			}
+		},this);
+	},this);
+	this.transformOrder=blueprint.transformOrder;
+};
+OptionsInstance.prototype.hasInputs=function(){
 	return this.inputOptions.some(function(option){
 		return this[option.name+'.input']!='constant';
 	},this) || this.transformOptions.some(function(option){
 		return this[option.name+'.input']!='constant';
 	},this);
 };
-Options.prototype.hasSliderInputs=function(){
+OptionsInstance.prototype.hasSliderInputs=function(){
 	return this.inputOptions.some(function(option){
 		return this[option.name+'.input']=='slider';
 	},this) || this.transformOptions.some(function(option){
 		return this[option.name+'.input']=='slider';
 	},this);
 };
-Options.prototype.hasInputsFor=function(prefix){
+OptionsInstance.prototype.hasInputsFor=function(prefix){
 	return this.inputOptions.filter(function(option){
 		return option.name.indexOf(prefix+'.')===0;
 	},this).some(function(option){
 		return this[option.name+'.input']!='constant';
 	},this);
 };
-Options.prototype.hasAllSliderInputsFor=function(prefix){
+OptionsInstance.prototype.hasAllSliderInputsFor=function(prefix){
 	return this.inputOptions.filter(function(option){
 		return option.name.indexOf(prefix+'.')===0;
 	},this).every(function(option){
 		return this[option.name+'.input']=='slider';
 	},this);
 };
-Options.prototype.getOnlyInputFor=function(prefix){
+OptionsInstance.prototype.getOnlyInputFor=function(prefix){
 	var matchedOptions=this.inputOptions.filter(function(option){
 		return option.name.indexOf(prefix+'.')===0 && this[option.name+'.input']!='constant';
 	},this);
@@ -174,7 +194,7 @@ Options.prototype.getOnlyInputFor=function(prefix){
 		return null;
 	}
 };
-Options.prototype.isAnimated=function(){
+OptionsInstance.prototype.isAnimated=function(){
 	function endsWith(name,suffix) {
 		return name.indexOf(suffix,name.length-suffix.length)!==-1;
 	};
@@ -182,42 +202,14 @@ Options.prototype.isAnimated=function(){
 		return endsWith(option.name,'.speed') && (this[option.name]!=0 || this[option.name+'.input']!='constant');
 	},this);
 };
-Options.prototype.needsUniform=function(prefix){
+OptionsInstance.prototype.needsUniform=function(prefix){
 	return (
 		this[prefix+'.input']!='constant' ||
 		this[prefix+'.speed']!=0 || this[prefix+'.speed.input']!='constant'
 	);
 };
-Options.prototype.needsTransform=function(prefix){
+OptionsInstance.prototype.needsTransform=function(prefix){
 	return this.needsUniform(prefix) || this[prefix]!=0;
 };
 
-// TODO create a different class for fixed options; put needsTransform() and like into it
-Options.prototype.cloneWithoutHidden=function(){
-	// clone and set .input=constant for hidden sections
-	var newOptions=new Options();
-	this.generalOptions.forEach(function(option){
-		newOptions[option.name]=this[option.name];
-	},this);
-	[this.inputOptions,this.transformOptions].forEach(function(section){
-		section.forEach(function(option){
-			newOptions[option.name]=this[option.name];
-			if (
-				this.generalOptions.some(function(generalOption){
-					return generalOption.doesValueHideOption(this[generalOption.name],option);
-				},this)
-			) {
-				newOptions[option.name+'.input']='constant';
-			} else {
-				newOptions[option.name+'.input']=this[option.name+'.input'];
-			}
-		},this);
-	},this);
-	this.debugOptions.forEach(function(option){
-		newOptions[option.name]=this[option.name];
-	},this);
-	newOptions.transformOrder=this.transformOrder;
-	return newOptions;
-};
-
-module.exports=Options;
+module.exports=OptionsBlueprint;

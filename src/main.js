@@ -102,7 +102,7 @@ $(function(){
 		function updateCode() {
 			clearTimeout(codeUpdateTimeoutId);
 			codeUpdateTimeoutId=setTimeout(function(){
-				$code.text(generateCode(options.cloneWithoutHidden(),i18n));
+				$code.text(generateCode(options.fix(),i18n));
 				if (window.hljs) hljs.highlightBlock($code[0]);
 			},codeUpdateDelay);
 		}
@@ -303,7 +303,7 @@ $(function(){
 		$container.empty().append($options=writeOptions());
 		hideSuboptionInputs();
 		$container.append(writeButtons()).append(
-			$("<pre>").append($code=$("<code>").text(generateCode(options.cloneWithoutHidden(),i18n)))
+			$("<pre>").append($code=$("<code>").text(generateCode(options.fix(),i18n)))
 		);
 		if (window.hljs) {
 			hljs.highlightBlock($code[0]);
