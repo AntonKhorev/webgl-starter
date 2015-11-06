@@ -84,6 +84,12 @@ module.exports=function(options,i18n){
 		} else {
 			lines.push("attribute vec4 position;");
 		}
+		if (options.shader=='light') {
+			if (shape.dim>2) {
+				lines.push("attribute vec3 normal;");
+			}
+			lines.push("varying vec3 interpolatedNormal;");
+		}
 		if (options.shader=='vertex' || options.shader=='face') {
 			lines.push(
 				"attribute vec4 color;",
@@ -211,6 +217,48 @@ module.exports=function(options,i18n){
 		appendLinesToLastLine(lines,[
 			";"
 		]);
+		if (options.shader=='light') {
+			if (shape.dim>2) {
+				lines.push(
+					"	interpolatedNormal=normal"
+				);
+			} else {
+				lines.push(
+					"	interpolatedNormal=vec3(0.0,0.0,1.0)"
+				);
+			}
+			options.transformOrder.forEach(function(transformName){
+				if (!options.needsTransform(transformName)) {
+					return;
+				}
+				appendLinesToLastLine(lines,{
+					'rotate.x': [
+						"*mat3(",
+						"	1.0, 0.0, 0.0,",
+						"	0.0,  cx, -sx,",
+						"	0.0,  sx,  cx",
+						")"
+					],
+					'rotate.y': [
+						"*mat3(",
+						"	 cy, 0.0,  sy,",
+						"	0.0, 1.0, 0.0,",
+						"	-sy, 0.0,  cy",
+						")"
+					],
+					'rotate.z': [
+						"*mat3(",
+						"	 cz, -sz, 0.0,",
+						"	 sz,  cz, 0.0,",
+						"	0.0, 0.0, 1.0",
+						")"
+					]
+				}[transformName]);
+			});
+			appendLinesToLastLine(lines,[
+				";"
+			]);
+		}
 		if (options.shader=='vertex' || options.shader=='face') {
 			lines.push(
 				"	interpolatedColor=color;"
@@ -222,24 +270,45 @@ module.exports=function(options,i18n){
 		return lines;
 	}
 	function generateFragmentShaderLines() {
-		if (options.shader=='vertex' || options.shader=='face') {
+		if (options.shader=='single') {
+			if (options.hasInputsFor('shader.single.color')) {
+				return [
+					"uniform vec4 color;",
+					"void main() {",
+					"	gl_FragColor=color;",
+					"}",
+				];
+			} else {
+				return [
+					"void main() {",
+					"	gl_FragColor=vec4("+glslColorValue('shader.single.color')+");",
+					"}",
+				];
+			}
+		} else if (options.shader=='vertex' || options.shader=='face') {
 			return [
 				"varying vec4 interpolatedColor;",
 				"void main() {",
 				"	gl_FragColor=interpolatedColor;",
 				"}",
 			];
-		} else if (options.hasInputsFor('shader.single.color')) {
+		} else if (options.shader=='light') {
 			return [
-				"uniform vec4 color;",
+				"varying vec3 interpolatedNormal;",
 				"void main() {",
-				"	gl_FragColor=color;",
-				"}",
-			];
-		} else {
-			return [
-				"void main() {",
-				"	gl_FragColor=vec4("+glslColorValue('shader.single.color')+");",
+				"	vec3 ambientColor=vec3(0.2,0.2,0.2);",
+				"	vec3 diffuseColor=vec3(0.5,0.5,0.5);",
+				"	vec3 specularColor=vec3(1.0,1.0,1.0);",
+				"	float shininess=100.0;",
+				"	vec3 V=vec3( 0.0, 0.0,+1.0);", // TODO this is true only for ortho projection
+				"	vec3 N=normalize(interpolatedNormal);",
+				"	vec3 L=normalize(vec3(-1.0,+1.0,+1.0));",
+				"	vec3 H=normalize(L+V);",
+				"	gl_FragColor=vec4(",
+				"		ambientColor",
+				"		+diffuseColor*max(0.0,dot(L,N))",
+				"		+specularColor*pow(max(0.0,dot(H,N)),shininess)",
+				"	,1.0);",
 				"}",
 			];
 		}

@@ -1,5 +1,5 @@
 var Shape=function(shaderType){
-	this.shaderType=shaderType; // 'vertex' or 'face' for colors, anything else for no colors
+	this.shaderType=shaderType; // 'vertex' or 'face' for colors, 'light' for normals, anything else for no colors/normals
 };
 Shape.prototype.dim=2;
 Shape.prototype.usesElements=false;
@@ -40,6 +40,23 @@ Shape.prototype.writeInit=function(){
 			"	Float32Array.BYTES_PER_ELEMENT*"+this.dim,
 			");",
 			"gl.enableVertexAttribArray(colorLoc);"
+		);
+	} else if (this.dim>2 && this.shaderType=='light') {
+		lines.push(
+			"gl.vertexAttribPointer(",
+			"	positionLoc,"+this.dim+",gl.FLOAT,false,",
+			"	Float32Array.BYTES_PER_ELEMENT*"+(this.dim+3)+",",
+			"	Float32Array.BYTES_PER_ELEMENT*0",
+			");",
+			"gl.enableVertexAttribArray(positionLoc);",
+			"",
+			"var normalLoc=gl.getAttribLocation(program,'normal');",
+			"gl.vertexAttribPointer(",
+			"	normalLoc,3,gl.FLOAT,false,",
+			"	Float32Array.BYTES_PER_ELEMENT*"+(this.dim+3)+",",
+			"	Float32Array.BYTES_PER_ELEMENT*"+this.dim,
+			");",
+			"gl.enableVertexAttribArray(normalLoc);"
 		);
 	} else {
 		lines.push(
@@ -223,34 +240,35 @@ Cube.prototype.constructor=Cube;
 Cube.prototype.dim=3;
 Cube.prototype.usesElements=true;
 Cube.prototype.writeArrays=function(c,cv){
-	if (this.shaderType=='face') {
+	if (this.shaderType=='face' || this.shaderType=='light') {
+		var n=this.shaderType=='light';
 		return [
 			"var vertices=new Float32Array([",
-			"	// x    y    z    r    g    b",
-			"	-0.5,-0.5,-0.5, 1.0, 0.0, 0.0, // left face",
-			"	-0.5,-0.5,+0.5, 1.0, 0.0, 0.0,",
-			"	-0.5,+0.5,-0.5, 1.0, 0.0, 0.0,",
-			"	-0.5,+0.5,+0.5, 1.0, 0.0, 0.0,",
-			"	+0.5,-0.5,-0.5, 0.0, 1.0, 0.0, // right face",
-			"	+0.5,+0.5,-0.5, 0.0, 1.0, 0.0,",
-			"	+0.5,-0.5,+0.5, 0.0, 1.0, 0.0,",
-			"	+0.5,+0.5,+0.5, 0.0, 1.0, 0.0,",
-			"	-0.5,-0.5,-0.5, 1.0, 1.0, 0.0, // bottom face",
-			"	+0.5,-0.5,-0.5, 1.0, 1.0, 0.0,",
-			"	-0.5,-0.5,+0.5, 1.0, 1.0, 0.0,",
-			"	+0.5,-0.5,+0.5, 1.0, 1.0, 0.0,",
-			"	-0.5,+0.5,-0.5, 0.0, 0.0, 1.0, // top face",
-			"	-0.5,+0.5,+0.5, 0.0, 0.0, 1.0,",
-			"	+0.5,+0.5,-0.5, 0.0, 0.0, 1.0,",
-			"	+0.5,+0.5,+0.5, 0.0, 0.0, 1.0,",
-			"	-0.5,-0.5,-0.5, 1.0, 0.0, 1.0, // back face",
-			"	-0.5,+0.5,-0.5, 1.0, 0.0, 1.0,",
-			"	+0.5,-0.5,-0.5, 1.0, 0.0, 1.0,",
-			"	+0.5,+0.5,-0.5, 1.0, 0.0, 1.0,",
-			"	-0.5,-0.5,+0.5, 0.0, 1.0, 1.0, // front face",
-			"	+0.5,-0.5,+0.5, 0.0, 1.0, 1.0,",
-			"	-0.5,+0.5,+0.5, 0.0, 1.0, 1.0,",
-			"	+0.5,+0.5,+0.5, 0.0, 1.0, 1.0,",
+			"	// x    y    z "+(n?" n.x  n.y  n.z ":"   r    g    b"),
+			"	-0.5,-0.5,-0.5,"+(n?"-1.0, 0.0, 0.0,":" 1.0, 0.0, 0.0,")+" // left face",
+			"	-0.5,-0.5,+0.5,"+(n?"-1.0, 0.0, 0.0,":" 1.0, 0.0, 0.0,"),
+			"	-0.5,+0.5,-0.5,"+(n?"-1.0, 0.0, 0.0,":" 1.0, 0.0, 0.0,"),
+			"	-0.5,+0.5,+0.5,"+(n?"-1.0, 0.0, 0.0,":" 1.0, 0.0, 0.0,"),
+			"	+0.5,-0.5,-0.5,"+(n?"+1.0, 0.0, 0.0,":" 0.0, 1.0, 0.0,")+" // right face",
+			"	+0.5,+0.5,-0.5,"+(n?"+1.0, 0.0, 0.0,":" 0.0, 1.0, 0.0,"),
+			"	+0.5,-0.5,+0.5,"+(n?"+1.0, 0.0, 0.0,":" 0.0, 1.0, 0.0,"),
+			"	+0.5,+0.5,+0.5,"+(n?"+1.0, 0.0, 0.0,":" 0.0, 1.0, 0.0,"),
+			"	-0.5,-0.5,-0.5,"+(n?" 0.0,-1.0, 0.0,":" 1.0, 1.0, 0.0,")+" // bottom face",
+			"	+0.5,-0.5,-0.5,"+(n?" 0.0,-1.0, 0.0,":" 1.0, 1.0, 0.0,"),
+			"	-0.5,-0.5,+0.5,"+(n?" 0.0,-1.0, 0.0,":" 1.0, 1.0, 0.0,"),
+			"	+0.5,-0.5,+0.5,"+(n?" 0.0,-1.0, 0.0,":" 1.0, 1.0, 0.0,"),
+			"	-0.5,+0.5,-0.5,"+(n?" 0.0,+1.0, 0.0,":" 0.0, 0.0, 1.0,")+" // top face",
+			"	-0.5,+0.5,+0.5,"+(n?" 0.0,+1.0, 0.0,":" 0.0, 0.0, 1.0,"),
+			"	+0.5,+0.5,-0.5,"+(n?" 0.0,+1.0, 0.0,":" 0.0, 0.0, 1.0,"),
+			"	+0.5,+0.5,+0.5,"+(n?" 0.0,+1.0, 0.0,":" 0.0, 0.0, 1.0,"),
+			"	-0.5,-0.5,-0.5,"+(n?" 0.0, 0.0,-1.0,":" 1.0, 0.0, 1.0,")+" // back face",
+			"	-0.5,+0.5,-0.5,"+(n?" 0.0, 0.0,-1.0,":" 1.0, 0.0, 1.0,"),
+			"	+0.5,-0.5,-0.5,"+(n?" 0.0, 0.0,-1.0,":" 1.0, 0.0, 1.0,"),
+			"	+0.5,+0.5,-0.5,"+(n?" 0.0, 0.0,-1.0,":" 1.0, 0.0, 1.0,"),
+			"	-0.5,-0.5,+0.5,"+(n?" 0.0, 0.0,+1.0,":" 0.0, 1.0, 1.0,")+" // front face",
+			"	+0.5,-0.5,+0.5,"+(n?" 0.0, 0.0,+1.0,":" 0.0, 1.0, 1.0,"),
+			"	-0.5,+0.5,+0.5,"+(n?" 0.0, 0.0,+1.0,":" 0.0, 1.0, 1.0,"),
+			"	+0.5,+0.5,+0.5,"+(n?" 0.0, 0.0,+1.0,":" 0.0, 1.0, 1.0,"),
 			"]);",
 			"var nElements=36;",
 			"var elements=new Uint16Array([",
