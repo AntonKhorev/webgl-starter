@@ -67,6 +67,7 @@ module.exports=function(options,i18n){
 		);
 		var needAspectUniform=options.hasInputsFor('canvas');
 		var needAspectConstant=!needAspectUniform && options['canvas.width']!=options['canvas.height'];
+		var needTransformedPosition=options.shader=='light' && options.projection=='perspective';
 		var lines=[];
 		if (needAspectUniform) {
 			lines.push("uniform float aspect;");
@@ -85,6 +86,9 @@ module.exports=function(options,i18n){
 			lines.push("attribute vec4 position;");
 		}
 		if (options.shader=='light') {
+			if (options.projection=='perspective') {
+				lines.push("varying vec3 interpolatedView;");
+			}
 			if (shape.dim>2) {
 				lines.push("attribute vec3 normal;");
 			}
@@ -129,9 +133,15 @@ module.exports=function(options,i18n){
 				"	float far=near+2.0;"
 			);
 		}
-		lines.push(
-			"	gl_Position="
-		);
+		if (needTransformedPosition) {
+			lines.push(
+				"	vec4 transformedPosition="
+			);
+		} else {
+			lines.push(
+				"	gl_Position="
+			);
+		}
 		if (use2dTransform) {
 			appendLinesToLastLine(lines,[
 				"vec4(position*mat2(",
@@ -174,6 +184,14 @@ module.exports=function(options,i18n){
 					]
 				}[transformName]);
 			});
+		}
+		if (needTransformedPosition) {
+			appendLinesToLastLine(lines,[
+				";"
+			]);
+			lines.push(
+				"	gl_Position=transformedPosition"
+			);
 		}
 		if (options.projection=='ortho') {
 			if (needAspectUniform || needAspectConstant) {
@@ -218,6 +236,11 @@ module.exports=function(options,i18n){
 			";"
 		]);
 		if (options.shader=='light') {
+			if (options.projection=='perspective') {
+				lines.push(
+					"	interpolatedView=-vec3(transformedPosition);"
+				);
+			}
 			if (shape.dim>2) {
 				lines.push(
 					"	interpolatedNormal=normal"
@@ -293,14 +316,28 @@ module.exports=function(options,i18n){
 				"}",
 			];
 		} else if (options.shader=='light') {
-			return [
+			var lines=[];
+			if (options.projection=='perspective') {
+				lines.push("varying vec3 interpolatedView;");
+			}
+			lines.push(
 				"varying vec3 interpolatedNormal;",
 				"void main() {",
 				"	vec3 ambientColor=vec3(0.2,0.2,0.2);",
 				"	vec3 diffuseColor=vec3(0.5,0.5,0.5);",
 				"	vec3 specularColor=vec3(1.0,1.0,1.0);",
-				"	float shininess=100.0;",
-				"	vec3 V=vec3( 0.0, 0.0,+1.0);", // TODO this is true only for ortho projection
+				"	float shininess=100.0;"
+			);
+			if (options.projection=='ortho') {
+				lines.push(
+					"	vec3 V=vec3( 0.0, 0.0,+1.0);"
+				);
+			} else if (options.projection=='perspective') {
+				lines.push(
+					"	vec3 V=normalize(interpolatedView);"
+				);
+			}
+			lines.push(
 				"	vec3 N=normalize(interpolatedNormal);",
 				"	vec3 L=normalize(vec3(-1.0,+1.0,+1.0));",
 				"	vec3 H=normalize(L+V);",
@@ -309,8 +346,9 @@ module.exports=function(options,i18n){
 				"		+diffuseColor*max(0.0,dot(L,N))",
 				"		+specularColor*pow(max(0.0,dot(H,N)),shininess)",
 				"	,1.0);",
-				"}",
-			];
+				"}"
+			);
+			return lines;
 		}
 	}
 	function generateControlMessageLines() {
