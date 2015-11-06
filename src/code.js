@@ -326,8 +326,8 @@ module.exports=function(options,i18n){
 				"varying vec3 interpolatedNormal;",
 				"void main() {",
 				"	vec3 ambientColor=vec3(0.2,0.2,0.2);",
-				"	vec3 diffuseColor=vec3(0.5,0.5,0.5);",
-				"	vec3 specularColor=vec3(1.0,1.0,1.0);",
+				"	vec3 diffuseColor=vec3(0.4,0.4,0.4);",
+				"	vec3 specularColor=vec3(0.4,0.4,0.4);",
 				"	float shininess=100.0;"
 			);
 			if (options.projection=='ortho') {
