@@ -34,7 +34,7 @@ describe('MultipleSliderListener',function(){
 			"[].forEach.call(document.querySelectorAll('.mySliders'),function(el){",
 			"	el.addEventListener('change',function(){",
 			"		postAction();",
-			"		updateCanvas();",
+			"		scheduleFrame();",
 			"	});",
 			"});",
 		]);
@@ -70,7 +70,7 @@ describe('CanvasMousemoveListener',function(){
 			"});",
 		]);
 	});
-	it('should call updateCanvas() once if two entries are given',function(){
+	it('should call scheduleFrame() once if two entries are given',function(){
 		var listener=new listeners.CanvasMousemoveListener();
 		var entry1=listener.enter();
 		var entry2=listener.enter();
@@ -78,7 +78,7 @@ describe('CanvasMousemoveListener',function(){
 		assert.deepEqual(lines,[
 			"canvas.addEventListener('mousemove',function(ev){",
 			"	var rect=this.getBoundingClientRect();",
-			"	updateCanvas();",
+			"	scheduleFrame();",
 			"});",
 		]);
 	});

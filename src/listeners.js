@@ -135,7 +135,7 @@ Listener.prototype.write=function(haveToUpdateCanvas,haveToLogInput){
 			addInnerLine(line,entry.cond);
 		});
 		if (haveToUpdateCanvas) {
-			addInnerLine("updateCanvas();",entry.cond);
+			addInnerLine("scheduleFrame();",entry.cond);
 		}
 		closeEntryInnerLines();
 	});

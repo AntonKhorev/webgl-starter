@@ -784,34 +784,36 @@ module.exports=function(options,i18n){
 				);
 			}
 		}
-		var needUpdateCanvasFunction=options.isAnimated()||options.hasInputs();
-		if (needUpdateCanvasFunction) {
+		// wrap inner render lines in function if needed
+		if (options.isAnimated()) {
 			lines.push(
-				"function updateCanvas(time) {"
+				"function renderFrame(time) {"
 			);
 			lines=lines.concat(indentLines(1,innerLines));
-			if (options.isAnimated()) {
-				if (needPrevTime) {
-					lines.push(
-						"	prevTime=time;"
-					);
-				}
+			if (needPrevTime) {
 				lines.push(
-					"	requestAnimationFrame(updateCanvas);"
+					"	prevTime=time;"
 				);
 			}
 			lines.push(
-				"}"
+				"	requestAnimationFrame(renderFrame);",
+				"}",
+				"requestAnimationFrame(renderFrame);"
 			);
-			if (options.isAnimated()) {
-				lines.push(
-					"requestAnimationFrame(updateCanvas);"
-				);
-			} else {
-				lines.push(
-					"updateCanvas();"
-				);
-			}
+		} else if (options.hasInputs()) {
+			lines.push(
+				"var frameId=null;",
+				"function scheduleFrame() {",
+				"	if (frameId!==null) return;",
+				"	frameId=requestAnimationFrame(function(){"
+			);
+			lines=lines.concat(indentLines(2,innerLines));
+			lines.push(
+				"		frameId=null;",
+				"	});",
+				"}",
+				"scheduleFrame();"
+			);
 		} else {
 			lines=lines.concat(innerLines);
 		}
