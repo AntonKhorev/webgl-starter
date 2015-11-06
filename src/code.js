@@ -184,6 +184,16 @@ module.exports=function(options,i18n){
 					]
 				}[transformName]);
 			});
+			if (options.projection=='perspective') {
+				appendLinesToLastLine(lines,[
+					"*mat4( // move center of coords inside view",
+					"	1.0, 0.0, 0.0, 0.0,",
+					"	0.0, 1.0, 0.0, 0.0,",
+					"	0.0, 0.0, 1.0, -(near+far)/2.0,",
+					"	0.0, 0.0, 0.0, 1.0",
+					")"
+				]);
+			}
 		}
 		if (needTransformedPosition) {
 			appendLinesToLastLine(lines,[
@@ -204,14 +214,6 @@ module.exports=function(options,i18n){
 				]);
 			}
 		} else if (options.projection=='perspective') {
-			appendLinesToLastLine(lines,[
-				"*mat4( // move center of coords inside view",
-				"	1.0, 0.0, 0.0, 0.0,",
-				"	0.0, 1.0, 0.0, 0.0,",
-				"	0.0, 0.0, 1.0, -(near+far)/2.0,",
-				"	0.0, 0.0, 0.0, 1.0",
-				")"
-			]);
 			if (needAspectUniform || needAspectConstant) {
 				appendLinesToLastLine(lines,[
 					"*mat4(",
@@ -338,7 +340,14 @@ module.exports=function(options,i18n){
 				);
 			}
 			lines.push(
-				"	vec3 N=normalize(interpolatedNormal);",
+				"	vec3 N=normalize(interpolatedNormal);"
+			);
+			if (shape.dim==2) {
+				lines.push(
+					"	N*=sign(dot(V,N));"
+				);
+			}
+			lines.push(
 				"	vec3 L=normalize(vec3(-1.0,+1.0,+1.0));",
 				"	vec3 H=normalize(L+V);",
 				"	gl_FragColor=vec4(",
