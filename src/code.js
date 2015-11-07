@@ -803,14 +803,16 @@ module.exports=function(options,i18n){
 		} else if (options.hasInputs()) {
 			lines.push(
 				"var frameId=null;",
-				"function scheduleFrame() {",
-				"	if (frameId!==null) return;",
-				"	frameId=requestAnimationFrame(function(){"
+				"function renderFrame() {"
 			);
-			lines=lines.concat(indentLines(2,innerLines));
+			lines=lines.concat(indentLines(1,innerLines));
 			lines.push(
-				"		frameId=null;",
-				"	});",
+				"	frameId=null;",
+				"}",
+				"function scheduleFrame() {",
+				"	if (frameId===null) {",
+				"		frameId=requestAnimationFrame(renderFrame);",
+				"	}",
 				"}",
 				"scheduleFrame();"
 			);
