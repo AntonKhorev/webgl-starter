@@ -54,6 +54,8 @@ module.exports=function(options,i18n){
 			return new shapes.Gasket(options.shader,intOptionValue('shape.gasket.depth'),options['shape.gasket.depth.input']!='constant');
 		} else if (options.shape=='cube') {
 			return new shapes.Cube(options.shader);
+		} else if (options.shape=='hat') {
+			return new shapes.Hat(options.shader);
 		}
 	}
 	var shape=makeShape();

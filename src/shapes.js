@@ -4,6 +4,18 @@ var Shape=function(shaderType){
 Shape.prototype.dim=2;
 Shape.prototype.usesElements=false;
 Shape.prototype.glPrimitive='TRIANGLES';
+Shape.prototype.getNumbersPerPosition=function(){
+	return this.dim;
+};
+Shape.prototype.getNumbersPerNormal=function(){
+	return (this.shaderType=='light' && this.dim==3) ? 3 : 0;
+};
+Shape.prototype.getNumbersPerColor=function(){
+	return (this.shaderType=='vertex' || this.shaderType=='face') ? 3 : 0;
+};
+Shape.prototype.getNumbersPerVertex=function(){
+	return this.getNumbersPerPosition()+this.getNumbersPerNormal()+this.getNumbersPerColor();
+};
 Shape.prototype.writeInit=function(){
 	var c=(this.shaderType=='vertex' || this.shaderType=='face');
 	var cv=this.shaderType=='vertex';
@@ -123,7 +135,7 @@ Gasket.prototype.writeArrays=function(c,cv){
 		lines.push(
 			"var gasketMaxDepth=10;",
 			"var nMaxVertices=Math.pow(3,gasketMaxDepth)*3;",
-			"var vertices=new Float32Array(nMaxVertices*"+(c?5:2)+");",
+			"var vertices=new Float32Array(nMaxVertices*"+this.getNumbersPerVertex()+");",
 			"var gasketDepth,nVertices;",
 			"function storeGasketVertices(newGasketDepth) {",
 			"	gasketDepth=newGasketDepth",
@@ -133,7 +145,7 @@ Gasket.prototype.writeArrays=function(c,cv){
 		lines.push(
 			"var gasketDepth="+this.depth+";",
 			"var nVertices=Math.pow(3,gasketDepth)*3;",
-			"var vertices=new Float32Array(nVertices*"+(c?5:2)+");",
+			"var vertices=new Float32Array(nVertices*"+this.getNumbersPerVertex()+");",
 			"function storeGasketVertices() {"
 		);
 	}
@@ -306,7 +318,109 @@ Cube.prototype.writeArrays=function(c,cv){
 	}
 };
 
+var Hat=function(shaderType){
+	Shape.call(this,shaderType);
+	this.depth=32; // TODO rename depth to subdivisions... or detail level
+	this.isDepthChanges=false;
+};
+Hat.prototype=Object.create(Shape.prototype);
+Hat.prototype.constructor=Hat;
+Hat.prototype.dim=3;
+Hat.prototype.usesElements=true;
+Hat.prototype.writeArrays=function(c,cv){
+	lines=[];
+	if (this.isDepthChanges) {
+		// TODO
+	} else {
+		lines.push(
+			"var hatDepth="+this.depth+";",
+			"var nVertices=(hatDepth+1)*(hatDepth+1);",
+			"var vertices=new Float32Array(nVertices*"+this.getNumbersPerVertex()+");",
+			"var nElements=hatDepth*hatDepth*6;",
+			"var elements=new Uint16Array(nElements);",
+			"function storeHatVerticesAndElements() {"
+		);
+	}
+	lines.push(
+		"	function vertexElement(i,j) {",
+		"		return i*(hatDepth+1)+j;",
+		"	}"
+	);
+	// if (this.shaderType=='face') { //TODO
+	if (c) {
+		lines.push(
+			"	var ic=0;",
+			"	var colors=[",
+			"		[1.0, 0.0, 0.0],",
+			"		[0.0, 1.0, 0.0],",
+			"		[0.0, 0.0, 1.0],",
+			"		[1.0, 1.0, 0.0],",
+			"	];"
+		);
+	}
+	lines.push(
+		"	var i,j;",
+		"	for (i=0;i<=hatDepth;i++) {",
+		"		var y=i/hatDepth*8-4;",
+		"		for (j=0;j<=hatDepth;j++) {",
+		"			var x=j/hatDepth*8-4;",
+		"			var vertexOffset=vertexElement(i,j)*"+this.getNumbersPerVertex()+";",
+		"			var r2=(x*x+y*y)/2;",
+		"			var A=Math.exp(-r2)/Math.PI;",
+		"			var z=A*(1-r2);",
+		"			vertices[vertexOffset+0]=x/4;",
+		"			vertices[vertexOffset+1]=y/4;",
+		"			vertices[vertexOffset+2]=z;"
+	);
+	if (this.getNumbersPerNormal()) {
+		lines.push(
+			// TODO normalize, rescale x,y (multiply by 4)
+			"			var normal=normalize([(z+A)*x,(z+A)*y,1]);",
+			"			vertices[vertexOffset+3]=normal[0];",
+			"			vertices[vertexOffset+4]=normal[1];",
+			"			vertices[vertexOffset+5]=normal[2];"
+		);
+	} else if (c) {
+		lines.push(
+			"			ic=(ic+1)%colors.length;",
+			"			vertices[vertexOffset+3]=colors[ic][0];",
+			"			vertices[vertexOffset+4]=colors[ic][1];",
+			"			vertices[vertexOffset+5]=colors[ic][2];"
+		);
+	}
+	lines.push(
+		"		}",
+		"	}",
+		"	for (i=0;i<hatDepth;i++) {",
+		"		for (j=0;j<hatDepth;j++) {",
+		"			var elementOffset=(i*hatDepth+j)*6;",
+		"			elements[elementOffset+0]=vertexElement(i+0,j+0);",
+		"			elements[elementOffset+1]=vertexElement(i+0,j+1);",
+		"			elements[elementOffset+2]=vertexElement(i+1,j+0);",
+		"			elements[elementOffset+3]=vertexElement(i+1,j+0);",
+		"			elements[elementOffset+4]=vertexElement(i+0,j+1);",
+		"			elements[elementOffset+5]=vertexElement(i+1,j+1);",
+		"		}",
+		"	}",
+		"}"
+	);
+	if (this.isDepthChanges) {
+		// TODO
+		/*
+		lines.push(
+			"storeHatVerticesAndElements("+this.depth+");"
+		);
+		*/
+	} else {
+		lines.push(
+			"storeHatVerticesAndElements();"
+		);
+	}
+	return lines;
+};
+
 exports.Square=Square;
 exports.Triangle=Triangle;
 exports.Gasket=Gasket;
 exports.Cube=Cube;
+exports.Hat=Hat;

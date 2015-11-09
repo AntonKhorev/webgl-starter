@@ -31,6 +31,7 @@ var i18n=function(id){ // fake temporary i18n
 		'options.shape.triangle': 'Triangle',
 		'options.shape.gasket': 'Sierpinski gasket', // wp: Sierpinski triangle
 		'options.shape.cube': 'Cube',
+		'options.shape.hat': 'Mexican hat function', // wp: Mexican hat wavelet
 		'options.projection': 'Projection',
 		'options.projection.ortho': 'Orthogonal',
 		'options.projection.perspective': 'Perspective',

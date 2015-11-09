@@ -82,7 +82,7 @@ var OptionsBlueprint=function(){
 OptionsBlueprint.prototype.generalOptions=[
 	new Option('background',['none','solid']),
 	new Option('shader',['single','vertex','face','light']),
-	new Option('shape',['square','triangle','gasket','cube']),
+	new Option('shape',['square','triangle','gasket','cube','hat']),
 	new Option('projection',['ortho','perspective']),
 ];
 OptionsBlueprint.prototype.inputOptions=[
