@@ -342,11 +342,21 @@ Hat.prototype.writeArrays=function(c,cv){
 		);
 	}
 	lines.push(
+		"	var xyRange=4;",
+		"	var xyScale=1/(4*Math.sqrt(2));",
 		"	function vertexElement(i,j) {",
 		"		return i*(hatDepth+1)+j;",
 		"	}"
 	);
-	// if (this.shaderType=='face') { //TODO
+	if (this.getNumbersPerNormal()) {
+		lines.push(
+			"	function normalize(v) {",
+			"		var l=Math.sqrt(v[0]*v[0]+v[1]*v[1]+v[2]*v[2]);",
+			"		return [v[0]/l,v[1]/l,v[2]/l];",
+			"	}"
+		);
+	}
+	// if (this.shaderType=='face') { // TODO separate vertex entries for different quads (don't need elements?)
 	if (c) {
 		lines.push(
 			"	var ic=0;",
@@ -361,21 +371,20 @@ Hat.prototype.writeArrays=function(c,cv){
 	lines.push(
 		"	var i,j;",
 		"	for (i=0;i<=hatDepth;i++) {",
-		"		var y=i/hatDepth*8-4;",
+		"		var y=i/hatDepth*xyRange*2-xyRange;",
 		"		for (j=0;j<=hatDepth;j++) {",
-		"			var x=j/hatDepth*8-4;",
+		"			var x=j/hatDepth*xyRange*2-xyRange;",
 		"			var vertexOffset=vertexElement(i,j)*"+this.getNumbersPerVertex()+";",
 		"			var r2=(x*x+y*y)/2;",
 		"			var A=Math.exp(-r2)/Math.PI;",
 		"			var z=A*(1-r2);",
-		"			vertices[vertexOffset+0]=x/4;",
-		"			vertices[vertexOffset+1]=y/4;",
+		"			vertices[vertexOffset+0]=x*xyScale;",
+		"			vertices[vertexOffset+1]=y*xyScale;",
 		"			vertices[vertexOffset+2]=z;"
 	);
 	if (this.getNumbersPerNormal()) {
 		lines.push(
-			// TODO normalize, rescale x,y (multiply by 4)
-			"			var normal=normalize([(z+A)*x,(z+A)*y,1]);",
+			"			var normal=normalize([(z+A)*x/xyScale,(z+A)*y/xyScale,1]);",
 			"			vertices[vertexOffset+3]=normal[0];",
 			"			vertices[vertexOffset+4]=normal[1];",
 			"			vertices[vertexOffset+5]=normal[2];"
