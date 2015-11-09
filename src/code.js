@@ -344,9 +344,10 @@ module.exports=function(options,i18n){
 			lines.push(
 				"	vec3 N=normalize(interpolatedNormal);"
 			);
-			if (shape.dim==2) {
+			if (shape.twoSided) {
+				// FIXME can be a little buggy right at the outline
 				lines.push(
-					"	N*=sign(dot(V,N));"
+					"	N*=sign(dot(V,N)); // flip normal towards viewer"
 				);
 			}
 			lines.push(

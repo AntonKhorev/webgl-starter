@@ -2,6 +2,7 @@ var Shape=function(shaderType){
 	this.shaderType=shaderType; // 'vertex' or 'face' for colors, 'light' for normals, anything else for no colors/normals
 };
 Shape.prototype.dim=2;
+Shape.prototype.twoSided=true; // triangles can be viewed from both sides
 Shape.prototype.usesElements=false;
 Shape.prototype.glPrimitive='TRIANGLES';
 Shape.prototype.getNumbersPerPosition=function(){
@@ -250,6 +251,7 @@ var Cube=function(shaderType){
 Cube.prototype=Object.create(Shape.prototype);
 Cube.prototype.constructor=Cube;
 Cube.prototype.dim=3;
+Cube.prototype.twoSided=false;
 Cube.prototype.usesElements=true;
 Cube.prototype.writeArrays=function(c,cv){
 	if (this.shaderType=='face' || this.shaderType=='light') {
