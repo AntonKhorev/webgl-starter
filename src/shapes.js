@@ -374,12 +374,11 @@ Hat.prototype.writeArrays=function(c,cv){
 	// if (this.shaderType=='face') { // TODO separate vertex entries for different quads (don't need elements?)
 	if (c) {
 		lines.push(
-			"	var ic=0;",
 			"	var colors=[",
+			"		[1.0, 1.0, 0.0],",
 			"		[1.0, 0.0, 0.0],",
 			"		[0.0, 1.0, 0.0],",
 			"		[0.0, 0.0, 1.0],",
-			"		[1.0, 1.0, 0.0],",
 			"	];"
 		);
 	}
@@ -406,7 +405,7 @@ Hat.prototype.writeArrays=function(c,cv){
 		);
 	} else if (c) {
 		lines.push(
-			"			ic=(ic+1)%colors.length;",
+			"			var ic=(i&1)*2+(j&1);",
 			"			vertices[vertexOffset+3]=colors[ic][0];",
 			"			vertices[vertexOffset+4]=colors[ic][1];",
 			"			vertices[vertexOffset+5]=colors[ic][2];"
