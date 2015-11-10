@@ -46,17 +46,24 @@ module.exports=function(options,i18n){
 	}
 
 	function makeShape() {
-		if (options.shape=='square') {
-			return new shapes.Square(options.shader);
-		} else if (options.shape=='triangle') {
-			return new shapes.Triangle(options.shader);
-		} else if (options.shape=='gasket') {
-			return new shapes.Gasket(options.shader,intOptionValue('shape.gasket.depth'),options['shape.gasket.depth.input']!='constant');
-		} else if (options.shape=='cube') {
-			return new shapes.Cube(options.shader);
-		} else if (options.shape=='hat') {
-			return new shapes.Hat(options.shader);
-		}
+		var className=options.shape.charAt(0).toUpperCase()+options.shape.slice(1);
+		var shapeParams=options.getInputOptionsFor('shape').map(function(option){
+			if (options[option.name+'.input']=='constant') {
+				return {
+					value: intOptionValue(option.name),
+					changes: false
+				};
+			} else {
+				return {
+					value: intOptionValue(option.name),
+					changes: true,
+					min: option.getMin(),
+					max: option.getMax()
+				};
+			}
+		});
+		var shapeCtorArgs=[null,options.shader].concat(shapeParams);
+		return new (Function.prototype.bind.apply(shapes[className],shapeCtorArgs));
 	}
 	var shape=makeShape();
 
@@ -585,25 +592,47 @@ module.exports=function(options,i18n){
 				'gl.uniform4fv(colorLoc,[',']);'
 			);
 		}
-		if (options['shape.gasket.depth.input']=='slider') {
-			var listener=new listeners.SliderListener('shape.gasket.depth');
-			listener.enter()
-				.log("console.log(this.id,'input value:',parseInt(this.value));")
-				.post("storeGasketVertices(parseInt(this.value));")
-				.post("gl.bufferData(gl.ARRAY_BUFFER,vertices,gl.STATIC_DRAW);");
-			writeListener(listener);
-		} else if (isMousemoveInput('shape.gasket.depth')) {
-			canvasMousemoveListener.enter()
-				.prexy(
-					options['shape.gasket.depth.input'],
-					"var newGasketDepth=Math.floor((gasketMaxDepth+1)*(ev.clientX-rect.left)/rect.width);",
-					"var newGasketDepth=Math.floor((gasketMaxDepth+1)*(rect.bottom-1-ev.clientY)/rect.height);"
-				)
-				.cond("newGasketDepth!=gasketDepth")
-				.log("console.log('shape.gasket.depth input value:',newGasketDepth);")
-				.post("storeGasketVertices(newGasketDepth);")
-				.post("gl.bufferData(gl.ARRAY_BUFFER,vertices,gl.STATIC_DRAW);");
-		}
+		options.getInputsFor('shape').forEach(function(option){
+			function varNameWithPrefixReplace(optionPrefix,newOptionPrefix) {
+				var s;
+				if (option.name.indexOf(optionPrefix+'.')===0) {
+					if (newOptionPrefix!==undefined) {
+						s=option.name.replace(optionPrefix,newOptionPrefix);
+					} else {
+						s=option.name.replace(optionPrefix+'.','');
+					}
+				} else {
+					// TODO throw
+					s=option.name;
+				}
+				return s.replace(/\.[a-z]/g,function(match){
+					return match.charAt(1).toUpperCase();
+				});
+			}
+			if (options[option.name+'.input']=='slider') {
+				var listener=new listeners.SliderListener(option.name);
+				listener.enter()
+					.log("console.log(this.id,'input value:',parseInt(this.value));")
+					.post(shape.storeFn+"(parseInt(this.value));")
+					.post("gl.bufferData(gl.ARRAY_BUFFER,vertices,gl.STATIC_DRAW);");
+				writeListener(listener);
+			} else if (isMousemoveInput(option.name)) {
+				var varName=varNameWithPrefixReplace('shape');
+				var newVarName=varNameWithPrefixReplace('shape','new');
+				var minVarName=varNameWithPrefixReplace('shape','min');
+				var maxVarName=varNameWithPrefixReplace('shape','max');
+				canvasMousemoveListener.enter()
+					.prexy(
+						options[option.name+'.input'],
+						"var "+newVarName+"=Math.floor("+minVarName+"+("+maxVarName+"-"+minVarName+"+1)*(ev.clientX-rect.left)/rect.width);",
+						"var "+newVarName+"=Math.floor("+minVarName+"+("+maxVarName+"-"+minVarName+"+1)*(rect.bottom-1-ev.clientY)/rect.height);"
+					)
+					.cond(newVarName+"!="+varName)
+					.log("console.log('"+option.name+" input value:',"+newVarName+");")
+					.post(shape.storeFn+"("+newVarName+");")
+					.post("gl.bufferData(gl.ARRAY_BUFFER,vertices,gl.STATIC_DRAW);");
+			}
+		});
 		['x','y','z'].forEach(function(d){
 			var D=d.toUpperCase();
 			var optName='rotate.'+d;

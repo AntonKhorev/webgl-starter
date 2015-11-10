@@ -123,28 +123,29 @@ Triangle.prototype.writeArrays=function(c,cv){
 	];
 };
 
-var Gasket=function(shaderType,depth,isDepthChanges){
+var Gasket=function(shaderType,depth){
 	Shape.call(this,shaderType);
-	this.depth=depth; // integer >= 0
-	this.isDepthChanges=isDepthChanges; // bool, true when depth can change
+	this.depth=depth;
 };
 Gasket.prototype=Object.create(Shape.prototype);
 Gasket.prototype.constructor=Gasket;
+Gasket.prototype.storeFn='storeGasketVertices';
 Gasket.prototype.writeArrays=function(c,cv){
 	lines=[];
-	if (this.isDepthChanges) {
+	if (this.depth.changes) {
 		lines.push(
-			"var gasketMaxDepth=10;",
-			"var nMaxVertices=Math.pow(3,gasketMaxDepth)*3;",
+			"var minGasketDepth="+this.depth.min+";",
+			"var maxGasketDepth="+this.depth.max+";",
+			"var nMaxVertices=Math.pow(3,maxGasketDepth)*3;",
 			"var vertices=new Float32Array(nMaxVertices*"+this.getNumbersPerVertex()+");",
 			"var gasketDepth,nVertices;",
-			"function storeGasketVertices(newGasketDepth) {",
-			"	gasketDepth=newGasketDepth",
+			"function "+this.storeFn+"(newGasketDepth) {",
+			"	gasketDepth=newGasketDepth;",
 			"	nVertices=Math.pow(3,gasketDepth)*3;"
 		);
 	} else {
 		lines.push(
-			"var gasketDepth="+this.depth+";",
+			"var gasketDepth="+this.depth.value+";",
 			"var nVertices=Math.pow(3,gasketDepth)*3;",
 			"var vertices=new Float32Array(nVertices*"+this.getNumbersPerVertex()+");",
 			"function storeGasketVertices() {"
@@ -233,13 +234,13 @@ Gasket.prototype.writeArrays=function(c,cv){
 		"	);",
 		"}"
 	);
-	if (this.isDepthChanges) {
+	if (this.depth.changes) {
 		lines.push(
-			"storeGasketVertices("+this.depth+");"
+			this.storeFn+"("+this.depth.value+");"
 		);
 	} else {
 		lines.push(
-			"storeGasketVertices();"
+			this.storeFn+"();"
 		);
 	}
 	return lines;
@@ -320,34 +321,34 @@ Cube.prototype.writeArrays=function(c,cv){
 	}
 };
 
-var Hat=function(shaderType){
+var Hat=function(shaderType,resolution){
 	Shape.call(this,shaderType);
-	this.depth=32; // TODO rename depth to subdivisions... or detail level
-	this.isDepthChanges=false;
+	this.resolution=resolution;
 };
 Hat.prototype=Object.create(Shape.prototype);
 Hat.prototype.constructor=Hat;
 Hat.prototype.dim=3;
 Hat.prototype.usesElements=true;
+Hat.prototype.storeFn="storeHatVerticesAndElements";
 Hat.prototype.writeArrays=function(c,cv){
 	lines=[];
-	if (this.isDepthChanges) {
+	if (this.resolution.changes) {
 		// TODO
 	} else {
 		lines.push(
-			"var hatDepth="+this.depth+";",
-			"var nVertices=(hatDepth+1)*(hatDepth+1);",
+			"var hatResolution="+this.resolution.value+";",
+			"var nVertices=(hatResolution+1)*(hatResolution+1);",
 			"var vertices=new Float32Array(nVertices*"+this.getNumbersPerVertex()+");",
-			"var nElements=hatDepth*hatDepth*6;",
+			"var nElements=hatResolution*hatResolution*6;",
 			"var elements=new Uint16Array(nElements);",
-			"function storeHatVerticesAndElements() {"
+			"function "+this.storeFn+"() {"
 		);
 	}
 	lines.push(
 		"	var xyRange=4;",
 		"	var xyScale=1/(4*Math.sqrt(2));",
 		"	function vertexElement(i,j) {",
-		"		return i*(hatDepth+1)+j;",
+		"		return i*(hatResolution+1)+j;",
 		"	}"
 	);
 	if (this.getNumbersPerNormal()) {
@@ -372,10 +373,10 @@ Hat.prototype.writeArrays=function(c,cv){
 	}
 	lines.push(
 		"	var i,j;",
-		"	for (i=0;i<=hatDepth;i++) {",
-		"		var y=i/hatDepth*xyRange*2-xyRange;",
-		"		for (j=0;j<=hatDepth;j++) {",
-		"			var x=j/hatDepth*xyRange*2-xyRange;",
+		"	for (i=0;i<=hatResolution;i++) {",
+		"		var y=i/hatResolution*xyRange*2-xyRange;",
+		"		for (j=0;j<=hatResolution;j++) {",
+		"			var x=j/hatResolution*xyRange*2-xyRange;",
 		"			var vertexOffset=vertexElement(i,j)*"+this.getNumbersPerVertex()+";",
 		"			var r2=(x*x+y*y)/2;",
 		"			var A=Math.exp(-r2)/Math.PI;",
@@ -402,9 +403,9 @@ Hat.prototype.writeArrays=function(c,cv){
 	lines.push(
 		"		}",
 		"	}",
-		"	for (i=0;i<hatDepth;i++) {",
-		"		for (j=0;j<hatDepth;j++) {",
-		"			var elementOffset=(i*hatDepth+j)*6;",
+		"	for (i=0;i<hatResolution;i++) {",
+		"		for (j=0;j<hatResolution;j++) {",
+		"			var elementOffset=(i*hatResolution+j)*6;",
 		"			elements[elementOffset+0]=vertexElement(i+0,j+0);",
 		"			elements[elementOffset+1]=vertexElement(i+0,j+1);",
 		"			elements[elementOffset+2]=vertexElement(i+1,j+0);",
@@ -415,16 +416,16 @@ Hat.prototype.writeArrays=function(c,cv){
 		"	}",
 		"}"
 	);
-	if (this.isDepthChanges) {
+	if (this.resolution.changes) {
 		// TODO
 		/*
 		lines.push(
-			"storeHatVerticesAndElements("+this.depth+");"
+			""+this.storeFn+"("+this.depth+");"
 		);
 		*/
 	} else {
 		lines.push(
-			"storeHatVerticesAndElements();"
+			this.storeFn+"();"
 		);
 	}
 	return lines;

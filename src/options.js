@@ -97,6 +97,7 @@ OptionsBlueprint.prototype.inputOptions=[
 	new FloatInputOption('shader.single.color.b',[0,1]),
 	new FloatInputOption('shader.single.color.a',[0,1],1),
 	new IntInputOption('shape.gasket.depth',[0,10],6),
+	new IntInputOption('shape.hat.resolution',[1,256],32),
 ];
 OptionsBlueprint.prototype.transformOptions=[];
 OptionsBlueprint.prototype.transforms=[];
@@ -156,6 +157,24 @@ var OptionsInstance=function(blueprint){
 	},this);
 	this.transformOrder=blueprint.transformOrder;
 };
+OptionsInstance.prototype.getInputOptionsFor=function(prefix){
+	return this.inputOptions.filter(function(option){
+		return option.name.indexOf(prefix+'.')===0;
+	},this);
+};
+OptionsInstance.prototype.getInputsFor=function(prefix){
+	return this.inputOptions.filter(function(option){
+		return option.name.indexOf(prefix+'.')===0 && this[option.name+'.input']!='constant';
+	},this);
+};
+OptionsInstance.prototype.getOnlyInputFor=function(prefix){
+	var matchedOptions=this.getInputsFor(prefix);
+	if (matchedOptions.length==1) {
+		return matchedOptions[0];
+	} else {
+		return null;
+	}
+};
 OptionsInstance.prototype.hasInputs=function(){
 	return this.inputOptions.some(function(option){
 		return this[option.name+'.input']!='constant';
@@ -171,28 +190,12 @@ OptionsInstance.prototype.hasSliderInputs=function(){
 	},this);
 };
 OptionsInstance.prototype.hasInputsFor=function(prefix){
-	return this.inputOptions.filter(function(option){
-		return option.name.indexOf(prefix+'.')===0;
-	},this).some(function(option){
-		return this[option.name+'.input']!='constant';
-	},this);
+	return this.getInputsFor(prefix).length>0;
 };
 OptionsInstance.prototype.hasAllSliderInputsFor=function(prefix){
-	return this.inputOptions.filter(function(option){
-		return option.name.indexOf(prefix+'.')===0;
-	},this).every(function(option){
+	return this.getInputOptionsFor(prefix).every(function(option){
 		return this[option.name+'.input']=='slider';
 	},this);
-};
-OptionsInstance.prototype.getOnlyInputFor=function(prefix){
-	var matchedOptions=this.inputOptions.filter(function(option){
-		return option.name.indexOf(prefix+'.')===0 && this[option.name+'.input']!='constant';
-	},this);
-	if (matchedOptions.length==1) {
-		return matchedOptions[0];
-	} else {
-		return null;
-	}
 };
 OptionsInstance.prototype.isAnimated=function(){
 	function endsWith(name,suffix) {

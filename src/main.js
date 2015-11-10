@@ -48,7 +48,7 @@ var i18n=function(id){ // fake temporary i18n
 		'options.shader.single.color.b': 'Fragment color blue component',
 		'options.shader.single.color.a': 'Fragment color alpha component',
 		'options.shape.gasket.depth': 'Sierpinski gasket recursion depth',
-		'options.animation.rotation.speed': 'Z axis rotation speed',
+		'options.shape.hat.resolution': 'Mexican hat mesh resolution',
 		'options.*.input': 'This value is',
 		'options.*.input.constant': 'kept constant',
 		'options.*.input.slider': 'updated with a slider',
