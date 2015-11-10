@@ -97,7 +97,7 @@ OptionsBlueprint.prototype.inputOptions=[
 	new FloatInputOption('shader.single.color.b',[0,1]),
 	new FloatInputOption('shader.single.color.a',[0,1],1),
 	new IntInputOption('shape.gasket.depth',[0,10],6),
-	new IntInputOption('shape.hat.resolution',[1,256],32),
+	new IntInputOption('shape.hat.resolution',[1,255],32), // max resolution limited by number of vertices <= 2^16
 ];
 OptionsBlueprint.prototype.transformOptions=[];
 OptionsBlueprint.prototype.transforms=[];

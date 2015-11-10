@@ -333,7 +333,19 @@ Hat.prototype.storeFn="storeHatVerticesAndElements";
 Hat.prototype.writeArrays=function(c,cv){
 	lines=[];
 	if (this.resolution.changes) {
-		// TODO
+		lines.push(
+			"var minHatResolution="+this.resolution.min+";",
+			"var maxHatResolution="+this.resolution.max+";",
+			"var nMaxVertices=(maxHatResolution+1)*(maxHatResolution+1);",
+			"var vertices=new Float32Array(nMaxVertices*"+this.getNumbersPerVertex()+");",
+			"var nMaxElements=maxHatResolution*maxHatResolution*6;",
+			"var elements=new Uint16Array(nMaxElements);",
+			"var hatResolution,nVertices,nElements;",
+			"function "+this.storeFn+"(newHatResolution) {",
+			"	hatResolution=newHatResolution;",
+			"	nVertices=(hatResolution+1)*(hatResolution+1);",
+			"	nElements=hatResolution*hatResolution*6;"
+		);
 	} else {
 		lines.push(
 			"var hatResolution="+this.resolution.value+";",
@@ -417,12 +429,9 @@ Hat.prototype.writeArrays=function(c,cv){
 		"}"
 	);
 	if (this.resolution.changes) {
-		// TODO
-		/*
 		lines.push(
-			""+this.storeFn+"("+this.depth+");"
+			""+this.storeFn+"("+this.resolution.value+");"
 		);
-		*/
 	} else {
 		lines.push(
 			this.storeFn+"();"

@@ -609,19 +609,23 @@ module.exports=function(options,i18n){
 					return match.charAt(1).toUpperCase();
 				});
 			}
+			var entry;
 			if (options[option.name+'.input']=='slider') {
 				var listener=new listeners.SliderListener(option.name);
-				listener.enter()
+				entry=listener.enter()
 					.log("console.log(this.id,'input value:',parseInt(this.value));")
 					.post(shape.storeFn+"(parseInt(this.value));")
 					.post("gl.bufferData(gl.ARRAY_BUFFER,vertices,gl.STATIC_DRAW);");
+				if (shape.usesElements) {
+					entry.post("gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,elements,gl.STATIC_DRAW);");
+				}
 				writeListener(listener);
 			} else if (isMousemoveInput(option.name)) {
 				var varName=varNameWithPrefixReplace('shape');
 				var newVarName=varNameWithPrefixReplace('shape','new');
 				var minVarName=varNameWithPrefixReplace('shape','min');
 				var maxVarName=varNameWithPrefixReplace('shape','max');
-				canvasMousemoveListener.enter()
+				entry=canvasMousemoveListener.enter()
 					.prexy(
 						options[option.name+'.input'],
 						"var "+newVarName+"=Math.floor("+minVarName+"+("+maxVarName+"-"+minVarName+"+1)*(ev.clientX-rect.left)/rect.width);",
@@ -631,6 +635,9 @@ module.exports=function(options,i18n){
 					.log("console.log('"+option.name+" input value:',"+newVarName+");")
 					.post(shape.storeFn+"("+newVarName+");")
 					.post("gl.bufferData(gl.ARRAY_BUFFER,vertices,gl.STATIC_DRAW);");
+				if (shape.usesElements) {
+					entry.post("gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,elements,gl.STATIC_DRAW);");
+				}
 			}
 		});
 		['x','y','z'].forEach(function(d){
