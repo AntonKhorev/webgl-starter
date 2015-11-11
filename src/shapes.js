@@ -3,8 +3,10 @@ var Shape=function(shaderType){
 };
 Shape.prototype.dim=2;
 Shape.prototype.twoSided=true; // triangles can be viewed from both sides
-Shape.prototype.usesElements=false;
 Shape.prototype.glPrimitive='TRIANGLES';
+Shape.prototype.usesElements=function(){
+	return false;
+};
 Shape.prototype.getNumbersPerPosition=function(){
 	return this.dim;
 };
@@ -27,7 +29,7 @@ Shape.prototype.writeInit=function(){
 		"gl.bufferData(gl.ARRAY_BUFFER,vertices,gl.STATIC_DRAW);",
 		""
 	);
-	if (this.usesElements) {
+	if (this.usesElements()) {
 		lines.push(
 			"gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,gl.createBuffer());",
 			"gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,elements,gl.STATIC_DRAW);",
@@ -80,7 +82,7 @@ Shape.prototype.writeInit=function(){
 	return lines;
 };
 Shape.prototype.writeDraw=function(){
-	if (this.usesElements) {
+	if (this.usesElements()) {
 		return ["gl.drawElements(gl."+this.glPrimitive+",nElements,gl.UNSIGNED_SHORT,0);"];
 	} else {
 		return ["gl.drawArrays(gl."+this.glPrimitive+",0,nVertices);"];
@@ -253,7 +255,9 @@ Cube.prototype=Object.create(Shape.prototype);
 Cube.prototype.constructor=Cube;
 Cube.prototype.dim=3;
 Cube.prototype.twoSided=false;
-Cube.prototype.usesElements=true;
+Cube.prototype.usesElements=function(){
+	return true;
+};
 Cube.prototype.writeArrays=function(c,cv){
 	if (this.shaderType=='face' || this.shaderType=='light') {
 		var n=this.shaderType=='light';
@@ -328,41 +332,76 @@ var Hat=function(shaderType,resolution){
 Hat.prototype=Object.create(Shape.prototype);
 Hat.prototype.constructor=Hat;
 Hat.prototype.dim=3;
-Hat.prototype.usesElements=true;
 Hat.prototype.storeFn="storeHatVerticesAndElements";
+Hat.prototype.usesElements=function(){
+	return this.shaderType!='face';
+};
 Hat.prototype.writeArrays=function(c,cv){
 	lines=[];
 	if (this.resolution.changes) {
 		lines.push(
 			"var minHatResolution="+this.resolution.min+";",
-			"var maxHatResolution="+this.resolution.max+";",
-			"var nMaxVertices=(maxHatResolution+1)*(maxHatResolution+1);",
-			"var vertices=new Float32Array(nMaxVertices*"+this.getNumbersPerVertex()+");",
-			"var nMaxElements=maxHatResolution*maxHatResolution*6;",
-			"var elements=new Uint16Array(nMaxElements);",
-			"var hatResolution,nVertices,nElements;",
-			"function "+this.storeFn+"(newHatResolution) {",
-			"	hatResolution=newHatResolution;",
-			"	nVertices=(hatResolution+1)*(hatResolution+1);",
-			"	nElements=hatResolution*hatResolution*6;"
+			"var maxHatResolution="+this.resolution.max+";"
 		);
+		if (this.shaderType!='face') {
+			lines.push(
+				"var nMaxVertices=(maxHatResolution+1)*(maxHatResolution+1);",
+				"var vertices=new Float32Array(nMaxVertices*"+this.getNumbersPerVertex()+");",
+				"var nMaxElements=maxHatResolution*maxHatResolution*6;",
+				"var elements=new Uint16Array(nMaxElements);",
+				"var hatResolution,nVertices,nElements;",
+				"function "+this.storeFn+"(newHatResolution) {",
+				"	hatResolution=newHatResolution;",
+				"	nVertices=(hatResolution+1)*(hatResolution+1);",
+				"	nElements=hatResolution*hatResolution*6;"
+			);
+		} else {
+			lines.push(
+				"var nMaxVertices=maxHatResolution*maxHatResolution*6;",
+				"var vertices=new Float32Array(nMaxVertices*"+this.getNumbersPerVertex()+");",
+				"var hatResolution,nVertices;",
+				"function "+this.storeFn+"(newHatResolution) {",
+				"	hatResolution=newHatResolution;",
+				"	nVertices=hatResolution*hatResolution*6;"
+			);
+		}
 	} else {
 		lines.push(
-			"var hatResolution="+this.resolution.value+";",
-			"var nVertices=(hatResolution+1)*(hatResolution+1);",
-			"var vertices=new Float32Array(nVertices*"+this.getNumbersPerVertex()+");",
-			"var nElements=hatResolution*hatResolution*6;",
-			"var elements=new Uint16Array(nElements);",
-			"function "+this.storeFn+"() {"
+			"var hatResolution="+this.resolution.value+";"
 		);
+		if (this.shaderType!='face') {
+			lines.push(
+				"var nVertices=(hatResolution+1)*(hatResolution+1);",
+				"var vertices=new Float32Array(nVertices*"+this.getNumbersPerVertex()+");",
+				"var nElements=hatResolution*hatResolution*6;",
+				"var elements=new Uint16Array(nElements);",
+				"function "+this.storeFn+"() {"
+			);
+		} else {
+			lines.push(
+				"var nVertices=hatResolution*hatResolution*6;",
+				"var vertices=new Float32Array(nVertices*"+this.getNumbersPerVertex()+");",
+				"function "+this.storeFn+"() {"
+			);
+		}
 	}
 	lines.push(
 		"	var xyRange=4;",
-		"	var xyScale=1/(4*Math.sqrt(2));",
-		"	function vertexElement(i,j) {",
-		"		return i*(hatResolution+1)+j;",
-		"	}"
+		"	var xyScale=1/(4*Math.sqrt(2));"
 	);
+	if (this.shaderType!='face') {
+		lines.push(
+			"	function vertexElement(i,j) {",
+			"		return i*(hatResolution+1)+j;",
+			"	}"
+		);
+	} else {
+		lines.push(
+			"	function vertexElement(i,j,k) {",
+			"		return (i*hatResolution+j)*6+k;",
+			"	}"
+		);
+	}
 	if (this.getNumbersPerNormal()) {
 		lines.push(
 			"	function normalize(v) {",
@@ -371,7 +410,6 @@ Hat.prototype.writeArrays=function(c,cv){
 			"	}"
 		);
 	}
-	// if (this.shaderType=='face') { // TODO separate vertex entries for different quads (don't need elements?)
 	if (c) {
 		lines.push(
 			"	var colors=[",
@@ -382,51 +420,83 @@ Hat.prototype.writeArrays=function(c,cv){
 			"	];"
 		);
 	}
-	lines.push(
-		"	var i,j;",
-		"	for (i=0;i<=hatResolution;i++) {",
-		"		var y=i/hatResolution*xyRange*2-xyRange;",
-		"		for (j=0;j<=hatResolution;j++) {",
-		"			var x=j/hatResolution*xyRange*2-xyRange;",
-		"			var vertexOffset=vertexElement(i,j)*"+this.getNumbersPerVertex()+";",
-		"			var r2=(x*x+y*y)/2;",
-		"			var A=Math.exp(-r2)/Math.PI;",
-		"			var z=A*(1-r2);",
-		"			vertices[vertexOffset+0]=x*xyScale;",
-		"			vertices[vertexOffset+1]=y*xyScale;",
-		"			vertices[vertexOffset+2]=z;"
+	var innerLines=[];
+	innerLines.push(
+		"var r2=(x*x+y*y)/2;",
+		"var A=Math.exp(-r2)/Math.PI;",
+		"var z=A*(1-r2);",
+		"vertices[vertexOffset+0]=x*xyScale;",
+		"vertices[vertexOffset+1]=y*xyScale;",
+		"vertices[vertexOffset+2]=z;"
 	);
 	if (this.getNumbersPerNormal()) {
-		lines.push(
-			"			var normal=normalize([(z+A)*x/xyScale,(z+A)*y/xyScale,1]);",
-			"			vertices[vertexOffset+3]=normal[0];",
-			"			vertices[vertexOffset+4]=normal[1];",
-			"			vertices[vertexOffset+5]=normal[2];"
+		innerLines.push(
+			"var normal=normalize([(z+A)*x/xyScale,(z+A)*y/xyScale,1]);",
+			"vertices[vertexOffset+3]=normal[0];",
+			"vertices[vertexOffset+4]=normal[1];",
+			"vertices[vertexOffset+5]=normal[2];"
 		);
 	} else if (c) {
-		lines.push(
-			"			var ic=(i&1)*2+(j&1);",
-			"			vertices[vertexOffset+3]=colors[ic][0];",
-			"			vertices[vertexOffset+4]=colors[ic][1];",
-			"			vertices[vertexOffset+5]=colors[ic][2];"
+		innerLines.push(
+			"var ic=(i&1)*2+(j&1);",
+			"vertices[vertexOffset+3]=colors[ic][0];",
+			"vertices[vertexOffset+4]=colors[ic][1];",
+			"vertices[vertexOffset+5]=colors[ic][2];"
 		);
 	}
-	lines.push(
-		"		}",
-		"	}",
-		"	for (i=0;i<hatResolution;i++) {",
-		"		for (j=0;j<hatResolution;j++) {",
-		"			var elementOffset=(i*hatResolution+j)*6;",
-		"			elements[elementOffset+0]=vertexElement(i+0,j+0);",
-		"			elements[elementOffset+1]=vertexElement(i+0,j+1);",
-		"			elements[elementOffset+2]=vertexElement(i+1,j+0);",
-		"			elements[elementOffset+3]=vertexElement(i+1,j+0);",
-		"			elements[elementOffset+4]=vertexElement(i+0,j+1);",
-		"			elements[elementOffset+5]=vertexElement(i+1,j+1);",
-		"		}",
-		"	}",
-		"}"
-	);
+	if (this.shaderType!='face') {
+		lines.push(
+			"	var i,j;",
+			"	for (i=0;i<=hatResolution;i++) {",
+			"		var y=i/hatResolution*xyRange*2-xyRange;",
+			"		for (j=0;j<=hatResolution;j++) {",
+			"			var x=j/hatResolution*xyRange*2-xyRange;",
+			"			var vertexOffset=vertexElement(i,j)*"+this.getNumbersPerVertex()+";"
+		);
+		innerLines.forEach(function(innerLine){
+			lines.push(
+				"			"+innerLine
+			);
+		});
+		lines.push(
+			"		}",
+			"	}",
+			"	for (i=0;i<hatResolution;i++) {",
+			"		for (j=0;j<hatResolution;j++) {",
+			"			var elementOffset=(i*hatResolution+j)*6;",
+			"			elements[elementOffset+0]=vertexElement(i+0,j+0);",
+			"			elements[elementOffset+1]=vertexElement(i+0,j+1);",
+			"			elements[elementOffset+2]=vertexElement(i+1,j+0);",
+			"			elements[elementOffset+3]=vertexElement(i+1,j+0);",
+			"			elements[elementOffset+4]=vertexElement(i+0,j+1);",
+			"			elements[elementOffset+5]=vertexElement(i+1,j+1);",
+			"		}",
+			"	}",
+			"}"
+		);
+	} else {
+		lines.push(
+			"	for (var i=0;i<=hatResolution;i++) {",
+			"		for (var j=0;j<=hatResolution;j++) {",
+			"			for (var k=0;k<6;k++) {",
+			"				var di=[0,0,1,1,0,1][k];",
+			"				var dj=[0,1,0,0,1,1][k];",
+			"				var y=(i+di)/hatResolution*xyRange*2-xyRange;",
+			"				var x=(j+dj)/hatResolution*xyRange*2-xyRange;",
+			"				var vertexOffset=vertexElement(i,j,k)*"+this.getNumbersPerVertex()+";"
+		);
+		innerLines.forEach(function(innerLine){
+			lines.push(
+				"				"+innerLine
+			);
+		});
+		lines.push(
+			"			}",
+			"		}",
+			"	}",
+			"}"
+		);
+	}
 	if (this.resolution.changes) {
 		lines.push(
 			""+this.storeFn+"("+this.resolution.value+");"

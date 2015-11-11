@@ -615,7 +615,7 @@ module.exports=function(options,i18n){
 					.log("console.log(this.id,'input value:',parseInt(this.value));")
 					.post(shape.storeFn+"(parseInt(this.value));")
 					.post("gl.bufferData(gl.ARRAY_BUFFER,vertices,gl.STATIC_DRAW);");
-				if (shape.usesElements) {
+				if (shape.usesElements()) {
 					entry.post("gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,elements,gl.STATIC_DRAW);");
 				}
 				writeListener(listener);
@@ -634,7 +634,7 @@ module.exports=function(options,i18n){
 					.log("console.log('"+option.name+" input value:',"+newVarName+");")
 					.post(shape.storeFn+"("+newVarName+");")
 					.post("gl.bufferData(gl.ARRAY_BUFFER,vertices,gl.STATIC_DRAW);");
-				if (shape.usesElements) {
+				if (shape.usesElements()) {
 					entry.post("gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,elements,gl.STATIC_DRAW);");
 				}
 			}
