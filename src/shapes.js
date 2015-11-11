@@ -540,17 +540,14 @@ Terrain.prototype.writeArrays=function(c,cv){
 				"	nElements=Math.pow((1<<terrainDepth),2)*6;"
 			);
 		} else {
-			// TODO
-			/*
 			lines.push(
-				"var nMaxVertices=maxHatResolution*maxHatResolution*6;",
+				"var nMaxVertices=Math.pow((1<<maxTerrainDepth),2)*6;",
 				"var vertices=new Float32Array(nMaxVertices*"+this.getNumbersPerVertex()+");",
-				"var hatResolution,nVertices;",
-				"function "+this.storeFn+"(newHatResolution) {",
-				"	hatResolution=newHatResolution;",
-				"	nVertices=hatResolution*hatResolution*6;"
+				"var terrainDepth,nVertices;",
+				"function "+this.storeFn+"(newTerrainDepth) {",
+				"	terrainDepth=newTerrainDepth;",
+				"	nVertices=Math.pow((1<<terrainDepth),2)*6;"
 			);
-			*/
 		}
 	} else {
 		lines.push(
@@ -565,35 +562,31 @@ Terrain.prototype.writeArrays=function(c,cv){
 				"function "+this.storeFn+"() {"
 			);
 		} else {
-			// TODO
-			/*
 			lines.push(
-				"var nVertices=hatResolution*hatResolution*6;",
+				"var nVertices=Math.pow((1<<terrainDepth),2)*6;",
 				"var vertices=new Float32Array(nVertices*"+this.getNumbersPerVertex()+");",
 				"function "+this.storeFn+"() {"
 			);
-			*/
 		}
 	}
 	lines.push(
 		"	var xyRange=1/Math.sqrt(2);",
-		"	var zRange=xyRange;"
+		"	var zRange=xyRange;",
+		"	var res=1<<terrainDepth;",
+		"	var mask=res-1;"
 	);
 	if (this.shaderType!='face') {
 		lines.push(
 			"	function vertexElement(i,j) {",
-			"		return i*((1<<terrainDepth)+1)+j;",
+			"		return i*(res+1)+j;",
 			"	}"
 		);
 	} else {
-		// TODO
-		/*
 		lines.push(
 			"	function vertexElement(i,j,k) {",
-			"		return (i*hatResolution+j)*6+k;",
+			"		return (i*res+j)*6+k;",
 			"	}"
 		);
-		*/
 	}
 	if (this.getNumbersPerNormal()) {
 		lines.push(
@@ -615,17 +608,25 @@ Terrain.prototype.writeArrays=function(c,cv){
 	}
 	var innerLines=[];
 	innerLines.push(
-		"var r2=(x*x+y*y)/2;",
 		"vertices[vertexOffset+0]=x;",
 		"vertices[vertexOffset+1]=y;",
-		"// vertices[vertexOffset+2] already written;"
+		(this.shaderType!='face'
+			?"// vertices[vertexOffset+2] already written"
+			:"vertices[vertexOffset+2]=vertices[zOffset((i+di)&mask,(j+dj)&mask)];"
+		)
 	);
 	if (this.getNumbersPerNormal()) {
 		innerLines.push(
 			"var d=4*xyRange/res;",
 			"var normal=normalize([",
-			"	(vertices[zOffset(i,(j-1)&mask)]-vertices[zOffset(i,(j+1)&mask)])/d,",
-			"	(vertices[zOffset((i-1)&mask,j)]-vertices[zOffset((i+1)&mask,j)])/d,",
+			(this.shaderType!='face'
+				?"	(vertices[zOffset(i,(j-1)&mask)]-vertices[zOffset(i,(j+1)&mask)])/d,"
+				:"	(vertices[zOffset((i+di)&mask,(j+dj-1)&mask)]-vertices[zOffset((i+di)&mask,(j+dj+1)&mask)])/d,"
+			),
+			(this.shaderType!='face'
+				?"	(vertices[zOffset((i-1)&mask,j)]-vertices[zOffset((i+1)&mask,j)])/d,"
+				:"	(vertices[zOffset((i+di-1)&mask,(j+dj)&mask)]-vertices[zOffset((i+di+1)&mask,(j+dj)&mask)])/d,"
+			),
 			"1]);",
 			"vertices[vertexOffset+3]=normal[0];",
 			"vertices[vertexOffset+4]=normal[1];",
@@ -641,15 +642,13 @@ Terrain.prototype.writeArrays=function(c,cv){
 	}
 	lines.push(
 		"	function zOffset(i,j) {",
-		"		return vertexElement(i,j)*"+this.getNumbersPerVertex()+"+2;",
+		"		return vertexElement(i,j"+(this.shaderType!='face'?"":",0")+")*"+this.getNumbersPerVertex()+"+2;",
 		"	}",
 		"	function noise(depth) {",
 		"		var r=zRange/Math.pow(2,terrainDepth-depth-1);",
 		"		return Math.random()*2*r-r;",
 		"	}",
 		"	vertices[2]=0.0;",
-		"	var res=1<<terrainDepth;",
-		"	var mask=res-1;",
 		"	var i1,i2,i3,i4;",
 		"	var j1,j2,j3,j4;",
 		"	for (var depth=terrainDepth-1;depth>=0;depth--) {",
@@ -686,13 +685,15 @@ Terrain.prototype.writeArrays=function(c,cv){
 		"				)/4+noise(depth);",
 		"			}",
 		"		}",
-		"	}",
-		"	var i,j;",
-		"	for (i=0;i<res;i++) vertices[zOffset(i,res)]=vertices[zOffset(i,0)];",
-		"	for (j=0;j<res;j++) vertices[zOffset(res,j)]=vertices[zOffset(0,j)];",
-		"	vertices[zOffset(res,res)]=vertices[zOffset(0,0)];"
+		"	}"
 	);
 	if (this.shaderType!='face') {
+		lines.push(
+			"	var i,j;",
+			"	for (i=0;i<res;i++) vertices[zOffset(i,res)]=vertices[zOffset(i,0)];",
+			"	for (j=0;j<res;j++) vertices[zOffset(res,j)]=vertices[zOffset(0,j)];",
+			"	vertices[zOffset(res,res)]=vertices[zOffset(0,0)];"
+		);
 		lines.push(
 			"	for (i=0;i<=res;i++) {",
 			"		var y=i/res*xyRange*2-xyRange;",
@@ -724,16 +725,14 @@ Terrain.prototype.writeArrays=function(c,cv){
 			"}"
 		);
 	} else {
-		// TODO
-		/*
 		lines.push(
-			"	for (var i=0;i<=hatResolution;i++) {",
-			"		for (var j=0;j<=hatResolution;j++) {",
+			"	for (var i=0;i<=res;i++) {",
+			"		for (var j=0;j<=res;j++) {",
 			"			for (var k=0;k<6;k++) {",
 			"				var di=[0,0,1,1,0,1][k];",
 			"				var dj=[0,1,0,0,1,1][k];",
-			"				var y=(i+di)/hatResolution*xyRange*2-xyRange;",
-			"				var x=(j+dj)/hatResolution*xyRange*2-xyRange;",
+			"				var y=(i+di)/res*xyRange*2-xyRange;",
+			"				var x=(j+dj)/res*xyRange*2-xyRange;",
 			"				var vertexOffset=vertexElement(i,j,k)*"+this.getNumbersPerVertex()+";"
 		);
 		innerLines.forEach(function(innerLine){
@@ -747,7 +746,6 @@ Terrain.prototype.writeArrays=function(c,cv){
 			"	}",
 			"}"
 		);
-		*/
 	}
 	if (this.depth.changes) {
 		lines.push(
