@@ -476,8 +476,8 @@ Hat.prototype.writeArrays=function(c,cv){
 		);
 	} else {
 		lines.push(
-			"	for (var i=0;i<=hatResolution;i++) {",
-			"		for (var j=0;j<=hatResolution;j++) {",
+			"	for (var i=0;i<hatResolution;i++) {",
+			"		for (var j=0;j<hatResolution;j++) {",
 			"			for (var k=0;k<6;k++) {",
 			"				var di=[0,0,1,1,0,1][k];",
 			"				var dj=[0,1,0,0,1,1][k];",
@@ -726,8 +726,8 @@ Terrain.prototype.writeArrays=function(c,cv){
 		);
 	} else {
 		lines.push(
-			"	for (var i=0;i<=res;i++) {",
-			"		for (var j=0;j<=res;j++) {",
+			"	for (var i=0;i<res;i++) {",
+			"		for (var j=0;j<res;j++) {",
 			"			for (var k=0;k<6;k++) {",
 			"				var di=[0,0,1,1,0,1][k];",
 			"				var dj=[0,1,0,0,1,1][k];",
