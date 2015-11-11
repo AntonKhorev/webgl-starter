@@ -332,7 +332,7 @@ var Hat=function(shaderType,resolution){
 Hat.prototype=Object.create(Shape.prototype);
 Hat.prototype.constructor=Hat;
 Hat.prototype.dim=3;
-Hat.prototype.storeFn="storeHatVerticesAndElements";
+Hat.prototype.storeFn="storeHatVerticesAndElements"; // TODO elements are not always used
 Hat.prototype.usesElements=function(){
 	return this.shaderType!='face';
 };
@@ -509,8 +509,261 @@ Hat.prototype.writeArrays=function(c,cv){
 	return lines;
 };
 
+var Terrain=function(shaderType,depth){
+	Shape.call(this,shaderType);
+	this.depth=depth;
+};
+Terrain.prototype=Object.create(Shape.prototype);
+Terrain.prototype.constructor=Terrain;
+Terrain.prototype.dim=3;
+Terrain.prototype.storeFn="storeTerrainVerticesAndElements"; // TODO elements are not always used
+Terrain.prototype.usesElements=function(){
+	return this.shaderType!='face';
+};
+Terrain.prototype.writeArrays=function(c,cv){
+	lines=[];
+	if (this.depth.changes) {
+		lines.push(
+			"var minTerrainDepth="+this.depth.min+";",
+			"var maxTerrainDepth="+this.depth.max+";"
+		);
+		if (this.shaderType!='face') {
+			lines.push(
+				"var nMaxVertices=Math.pow((1<<maxTerrainDepth)+1,2);",
+				"var vertices=new Float32Array(nMaxVertices*"+this.getNumbersPerVertex()+");",
+				"var nMaxElements=Math.pow((1<<maxTerrainDepth),2)*6;",
+				"var elements=new Uint16Array(nMaxElements);",
+				"var terrainDepth,nVertices,nElements;",
+				"function "+this.storeFn+"(newTerrainDepth) {",
+				"	terrainDepth=newTerrainDepth;",
+				"	nVertices=Math.pow((1<<terrainDepth)+1,2);",
+				"	nElements=Math.pow((1<<terrainDepth),2)*6;"
+			);
+		} else {
+			// TODO
+			/*
+			lines.push(
+				"var nMaxVertices=maxHatResolution*maxHatResolution*6;",
+				"var vertices=new Float32Array(nMaxVertices*"+this.getNumbersPerVertex()+");",
+				"var hatResolution,nVertices;",
+				"function "+this.storeFn+"(newHatResolution) {",
+				"	hatResolution=newHatResolution;",
+				"	nVertices=hatResolution*hatResolution*6;"
+			);
+			*/
+		}
+	} else {
+		lines.push(
+			"var terrainDepth="+this.depth.value+";"
+		);
+		if (this.shaderType!='face') {
+			lines.push(
+				"var nVertices=Math.pow((1<<terrainDepth)+1,2);",
+				"var vertices=new Float32Array(nVertices*"+this.getNumbersPerVertex()+");",
+				"var nElements=Math.pow((1<<terrainDepth),2)*6;",
+				"var elements=new Uint16Array(nElements);",
+				"function "+this.storeFn+"() {"
+			);
+		} else {
+			// TODO
+			/*
+			lines.push(
+				"var nVertices=hatResolution*hatResolution*6;",
+				"var vertices=new Float32Array(nVertices*"+this.getNumbersPerVertex()+");",
+				"function "+this.storeFn+"() {"
+			);
+			*/
+		}
+	}
+	lines.push(
+		"	var xyRange=1/Math.sqrt(2);",
+		"	var zRange=xyRange;"
+	);
+	if (this.shaderType!='face') {
+		lines.push(
+			"	function vertexElement(i,j) {",
+			"		return i*((1<<terrainDepth)+1)+j;",
+			"	}"
+		);
+	} else {
+		// TODO
+		/*
+		lines.push(
+			"	function vertexElement(i,j,k) {",
+			"		return (i*hatResolution+j)*6+k;",
+			"	}"
+		);
+		*/
+	}
+	if (this.getNumbersPerNormal()) {
+		lines.push(
+			"	function normalize(v) {",
+			"		var l=Math.sqrt(v[0]*v[0]+v[1]*v[1]+v[2]*v[2]);",
+			"		return [v[0]/l,v[1]/l,v[2]/l];",
+			"	}"
+		);
+	}
+	if (c) {
+		lines.push(
+			"	var colors=[",
+			"		[1.0, 1.0, 0.0],",
+			"		[1.0, 0.0, 0.0],",
+			"		[0.0, 1.0, 0.0],",
+			"		[0.0, 0.0, 1.0],",
+			"	];"
+		);
+	}
+	var innerLines=[];
+	innerLines.push(
+		"var r2=(x*x+y*y)/2;",
+		"vertices[vertexOffset+0]=x;",
+		"vertices[vertexOffset+1]=y;",
+		"// vertices[vertexOffset+2] already written;"
+	);
+	if (this.getNumbersPerNormal()) {
+		innerLines.push(
+			"var d=4*xyRange/res;",
+			"var normal=normalize([",
+			"	(vertices[zOffset(i,(j-1)&mask)]-vertices[zOffset(i,(j+1)&mask)])/d,",
+			"	(vertices[zOffset((i-1)&mask,j)]-vertices[zOffset((i+1)&mask,j)])/d,",
+			"1]);",
+			"vertices[vertexOffset+3]=normal[0];",
+			"vertices[vertexOffset+4]=normal[1];",
+			"vertices[vertexOffset+5]=normal[2];"
+		);
+	} else if (c) {
+		innerLines.push(
+			"var ic=(i&1)*2+(j&1);",
+			"vertices[vertexOffset+3]=colors[ic][0];",
+			"vertices[vertexOffset+4]=colors[ic][1];",
+			"vertices[vertexOffset+5]=colors[ic][2];"
+		);
+	}
+	lines.push(
+		"	function zOffset(i,j) {",
+		"		return vertexElement(i,j)*"+this.getNumbersPerVertex()+"+2;",
+		"	}",
+		"	function noise(depth) {",
+		"		var r=zRange/Math.pow(2,terrainDepth-depth-1);",
+		"		return Math.random()*2*r-r;",
+		"	}",
+		"	vertices[2]=0.0;",
+		"	var res=1<<terrainDepth;",
+		"	var mask=res-1;",
+		"	var i1,i2,i3,i4;",
+		"	var j1,j2,j3,j4;",
+		"	for (var depth=terrainDepth-1;depth>=0;depth--) {",
+		"		var d=1<<depth;",
+		"		// diamond step",
+		"		for (i2=d;i2<res;i2+=2*d) {",
+		"			for (j2=d;j2<res;j2+=2*d) {",
+		"				i1=i2-d;",
+		"				j1=j2-d;",
+		"				i3=(i2+d)&mask;",
+		"				j3=(j2+d)&mask;",
+		"				vertices[zOffset(i2,j2)]=(",
+		"					vertices[zOffset(i1,j1)]+vertices[zOffset(i1,j3)]+",
+		"					vertices[zOffset(i3,j1)]+vertices[zOffset(i3,j3)]",
+		"				)/4+noise(depth);",
+		"			}",
+		"		}",
+		"		// square step",
+		"		for (i2=d;i2<res;i2+=2*d) {",
+		"			for (j2=d;j2<res;j2+=2*d) {",
+		"				i0=(i2-2*d)&mask;",
+		"				j0=(j2-2*d)&mask;",
+		"				i1=(i2-d);",
+		"				j1=(j2-d);",
+		"				i3=(i2+d)&mask;",
+		"				j3=(j2+d)&mask;",
+		"				vertices[zOffset(i2,j1)]=(",
+		"					vertices[zOffset(i2,j0)]+vertices[zOffset(i1,j1)]+",
+		"					vertices[zOffset(i2,j2)]+vertices[zOffset(i3,j1)]",
+		"				)/4+noise(depth);",
+		"				vertices[zOffset(i1,j2)]=(",
+		"					vertices[zOffset(i0,j2)]+vertices[zOffset(i1,j1)]+",
+		"					vertices[zOffset(i2,j2)]+vertices[zOffset(i1,j3)]",
+		"				)/4+noise(depth);",
+		"			}",
+		"		}",
+		"	}",
+		"	var i,j;",
+		"	for (i=0;i<res;i++) vertices[zOffset(i,res)]=vertices[zOffset(i,0)];",
+		"	for (j=0;j<res;j++) vertices[zOffset(res,j)]=vertices[zOffset(0,j)];",
+		"	vertices[zOffset(res,res)]=vertices[zOffset(0,0)];"
+	);
+	if (this.shaderType!='face') {
+		lines.push(
+			"	for (i=0;i<=res;i++) {",
+			"		var y=i/res*xyRange*2-xyRange;",
+			"		for (j=0;j<=res;j++) {",
+			"			var x=j/res*xyRange*2-xyRange;",
+			"			var vertexOffset=vertexElement(i,j)*"+this.getNumbersPerVertex()+";"
+		);
+		innerLines.forEach(function(innerLine){
+			lines.push(
+				"			"+innerLine
+			);
+		});
+		lines.push(
+			"		}",
+			"	}"
+		);
+		lines.push(
+			"	for (i=0;i<res;i++) {",
+			"		for (j=0;j<res;j++) {",
+			"			var elementOffset=(i*res+j)*6;",
+			"			elements[elementOffset+0]=vertexElement(i+0,j+0);",
+			"			elements[elementOffset+1]=vertexElement(i+0,j+1);",
+			"			elements[elementOffset+2]=vertexElement(i+1,j+0);",
+			"			elements[elementOffset+3]=vertexElement(i+1,j+0);",
+			"			elements[elementOffset+4]=vertexElement(i+0,j+1);",
+			"			elements[elementOffset+5]=vertexElement(i+1,j+1);",
+			"		}",
+			"	}",
+			"}"
+		);
+	} else {
+		// TODO
+		/*
+		lines.push(
+			"	for (var i=0;i<=hatResolution;i++) {",
+			"		for (var j=0;j<=hatResolution;j++) {",
+			"			for (var k=0;k<6;k++) {",
+			"				var di=[0,0,1,1,0,1][k];",
+			"				var dj=[0,1,0,0,1,1][k];",
+			"				var y=(i+di)/hatResolution*xyRange*2-xyRange;",
+			"				var x=(j+dj)/hatResolution*xyRange*2-xyRange;",
+			"				var vertexOffset=vertexElement(i,j,k)*"+this.getNumbersPerVertex()+";"
+		);
+		innerLines.forEach(function(innerLine){
+			lines.push(
+				"				"+innerLine
+			);
+		});
+		lines.push(
+			"			}",
+			"		}",
+			"	}",
+			"}"
+		);
+		*/
+	}
+	if (this.depth.changes) {
+		lines.push(
+			""+this.storeFn+"("+this.depth.value+");"
+		);
+	} else {
+		lines.push(
+			this.storeFn+"();"
+		);
+	}
+	return lines;
+};
+
 exports.Square=Square;
 exports.Triangle=Triangle;
 exports.Gasket=Gasket;
 exports.Cube=Cube;
 exports.Hat=Hat;
+exports.Terrain=Terrain;

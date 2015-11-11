@@ -82,7 +82,7 @@ var OptionsBlueprint=function(){
 OptionsBlueprint.prototype.generalOptions=[
 	new Option('background',['none','solid']),
 	new Option('shader',['single','vertex','face','light']),
-	new Option('shape',['square','triangle','gasket','cube','hat']),
+	new Option('shape',['square','triangle','gasket','cube','hat','terrain']),
 	new Option('projection',['ortho','perspective']),
 ];
 OptionsBlueprint.prototype.inputOptions=[
@@ -98,6 +98,7 @@ OptionsBlueprint.prototype.inputOptions=[
 	new FloatInputOption('shader.single.color.a',[0,1],1),
 	new IntInputOption('shape.gasket.depth',[0,10],6),
 	new IntInputOption('shape.hat.resolution',[1,255],32), // max resolution limited by number of vertices <= 2^16
+	new IntInputOption('shape.terrain.depth',[0,7],5),
 ];
 OptionsBlueprint.prototype.transformOptions=[];
 OptionsBlueprint.prototype.transforms=[];

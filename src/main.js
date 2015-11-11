@@ -32,6 +32,7 @@ var i18n=function(id){ // fake temporary i18n
 		'options.shape.gasket': 'Sierpinski gasket', // wp: Sierpinski triangle
 		'options.shape.cube': 'Cube',
 		'options.shape.hat': 'Mexican hat function', // wp: Mexican hat wavelet
+		'options.shape.terrain': 'Diamond-square fractal terrain', // wp: Diamond-square algorithm
 		'options.projection': 'Projection',
 		'options.projection.ortho': 'Orthogonal',
 		'options.projection.perspective': 'Perspective',
@@ -49,6 +50,7 @@ var i18n=function(id){ // fake temporary i18n
 		'options.shader.single.color.a': 'Fragment color alpha component',
 		'options.shape.gasket.depth': 'Sierpinski gasket recursion depth',
 		'options.shape.hat.resolution': 'Mexican hat mesh resolution',
+		'options.shape.terrain.depth': 'Diamond-square recursion depth',
 		'options.*.input': 'This value is',
 		'options.*.input.constant': 'kept constant',
 		'options.*.input.slider': 'updated with a slider',
