@@ -151,19 +151,19 @@ Gasket.prototype.writeArraysAndBufferData=function(c,cv){
 	lines=[];
 	if (this.lod.changes) {
 		lines.push(
-			"var minGasketLod="+this.lod.min+";",
-			"var maxGasketLod="+this.lod.max+";",
-			"var nMaxVertices=Math.pow(3,maxGasketLod)*3;",
+			"var minShapeLod="+this.lod.min+";",
+			"var maxShapeLod="+this.lod.max+";",
+			"var nMaxVertices=Math.pow(3,maxShapeLod)*3;",
 			"var vertices=new Float32Array(nMaxVertices*"+this.getNumbersPerVertex()+");",
-			"var gasketLod,nVertices;",
-			"function storeShape(newGasketLod) {",
-			"	gasketLod=newGasketLod;",
-			"	nVertices=Math.pow(3,gasketLod)*3;"
+			"var shapeLod,nVertices;",
+			"function storeShape(newShapeLod) {",
+			"	shapeLod=newShapeLod;",
+			"	nVertices=Math.pow(3,shapeLod)*3;"
 		);
 	} else {
 		lines.push(
-			"var gasketLod="+this.lod.value+";",
-			"var nVertices=Math.pow(3,gasketLod)*3;",
+			"var shapeLod="+this.lod.value+";",
+			"var nVertices=Math.pow(3,shapeLod)*3;",
 			"var vertices=new Float32Array(nVertices*"+this.getNumbersPerVertex()+");",
 			"function storeShape() {"
 		);
@@ -244,7 +244,7 @@ Gasket.prototype.writeArraysAndBufferData=function(c,cv){
 		"		}",
 		"	}",
 		"	triangle(",
-		"		gasketLod,",
+		"		shapeLod,",
 		"		[-Math.sin(0/3*Math.PI),Math.cos(0/3*Math.PI)],",
 		"		[-Math.sin(2/3*Math.PI),Math.cos(2/3*Math.PI)],",
 		"		[-Math.sin(4/3*Math.PI),Math.cos(4/3*Math.PI)]",
@@ -356,46 +356,46 @@ Hat.prototype.writeArraysAndBufferData=function(c,cv){
 	lines=[];
 	if (this.lod.changes) {
 		lines.push(
-			"var minHatLod="+this.lod.min+";",
-			"var maxHatLod="+this.lod.max+";"
+			"var minShapeLod="+this.lod.min+";",
+			"var maxShapeLod="+this.lod.max+";"
 		);
 		if (this.shaderType!='face') {
 			lines.push(
-				"var nMaxVertices=((1<<maxHatLod)+1)*((1<<maxHatLod)+1);",
+				"var nMaxVertices=((1<<maxShapeLod)+1)*((1<<maxShapeLod)+1);",
 				"var vertices=new Float32Array(nMaxVertices*"+this.getNumbersPerVertex()+");",
-				"var nMaxElements=(1<<maxHatLod)*(1<<maxHatLod)*6;",
+				"var nMaxElements=(1<<maxShapeLod)*(1<<maxShapeLod)*6;",
 				"var elements=new Uint16Array(nMaxElements);",
-				"var hatLod,nVertices,nElements;",
-				"function storeShape(newHatLod) {",
-				"	hatLod=newHatLod;",
-				"	nVertices=((1<<hatLod)+1)*((1<<hatLod)+1);",
-				"	nElements=(1<<hatLod)*(1<<hatLod)*6;"
+				"var shapeLod,nVertices,nElements;",
+				"function storeShape(newShapeLod) {",
+				"	shapeLod=newShapeLod;",
+				"	nVertices=((1<<shapeLod)+1)*((1<<shapeLod)+1);",
+				"	nElements=(1<<shapeLod)*(1<<shapeLod)*6;"
 			);
 		} else {
 			lines.push(
-				"var nMaxVertices=(1<<maxHatLod)*(1<<maxHatLod)*6;",
+				"var nMaxVertices=(1<<maxShapeLod)*(1<<maxShapeLod)*6;",
 				"var vertices=new Float32Array(nMaxVertices*"+this.getNumbersPerVertex()+");",
-				"var hatLod,nVertices;",
-				"function storeShape(newHatLod) {",
-				"	hatLod=newHatLod;",
-				"	nVertices=(1<<hatLod)*(1<<hatLod)*6;"
+				"var shapeLod,nVertices;",
+				"function storeShape(newShapeLod) {",
+				"	shapeLod=newShapeLod;",
+				"	nVertices=(1<<shapeLod)*(1<<shapeLod)*6;"
 			);
 		}
 	} else {
 		lines.push(
-			"var hatLod="+this.lod.value+";"
+			"var shapeLod="+this.lod.value+";"
 		);
 		if (this.shaderType!='face') {
 			lines.push(
-				"var nVertices=((1<<hatLod)+1)*((1<<hatLod)+1);",
+				"var nVertices=((1<<shapeLod)+1)*((1<<shapeLod)+1);",
 				"var vertices=new Float32Array(nVertices*"+this.getNumbersPerVertex()+");",
-				"var nElements=(1<<hatLod)*(1<<hatLod)*6;",
+				"var nElements=(1<<shapeLod)*(1<<shapeLod)*6;",
 				"var elements=new Uint16Array(nElements);",
 				"function storeShape() {"
 			);
 		} else {
 			lines.push(
-				"var nVertices=(1<<hatLod)*(1<<hatLod)*6;",
+				"var nVertices=(1<<shapeLod)*(1<<shapeLod)*6;",
 				"var vertices=new Float32Array(nVertices*"+this.getNumbersPerVertex()+");",
 				"function storeShape() {"
 			);
@@ -404,7 +404,7 @@ Hat.prototype.writeArraysAndBufferData=function(c,cv){
 	lines.push(
 		"	var xyRange=4;",
 		"	var xyScale=1/(4*Math.sqrt(2));",
-		"	var res=(1<<hatLod);"
+		"	var res=(1<<shapeLod);"
 	);
 	if (this.shaderType!='face') {
 		lines.push(
@@ -541,46 +541,46 @@ Terrain.prototype.writeArraysAndBufferData=function(c,cv){
 	lines=[];
 	if (this.lod.changes) {
 		lines.push(
-			"var minTerrainLod="+this.lod.min+";",
-			"var maxTerrainLod="+this.lod.max+";"
+			"var minShapeLod="+this.lod.min+";",
+			"var maxShapeLod="+this.lod.max+";"
 		);
 		if (this.shaderType!='face') {
 			lines.push(
-				"var nMaxVertices=Math.pow((1<<maxTerrainLod)+1,2);",
+				"var nMaxVertices=Math.pow((1<<maxShapeLod)+1,2);",
 				"var vertices=new Float32Array(nMaxVertices*"+this.getNumbersPerVertex()+");",
-				"var nMaxElements=Math.pow((1<<maxTerrainLod),2)*6;",
+				"var nMaxElements=Math.pow((1<<maxShapeLod),2)*6;",
 				"var elements=new Uint16Array(nMaxElements);",
-				"var terrainLod,nVertices,nElements;",
-				"function storeShape(newTerrainLod) {",
-				"	terrainLod=newTerrainLod;",
-				"	nVertices=Math.pow((1<<terrainLod)+1,2);",
-				"	nElements=Math.pow((1<<terrainLod),2)*6;"
+				"var shapeLod,nVertices,nElements;",
+				"function storeShape(newShapeLod) {",
+				"	shapeLod=newShapeLod;",
+				"	nVertices=Math.pow((1<<shapeLod)+1,2);",
+				"	nElements=Math.pow((1<<shapeLod),2)*6;"
 			);
 		} else {
 			lines.push(
-				"var nMaxVertices=Math.pow((1<<maxTerrainLod),2)*6;",
+				"var nMaxVertices=Math.pow((1<<maxShapeLod),2)*6;",
 				"var vertices=new Float32Array(nMaxVertices*"+this.getNumbersPerVertex()+");",
-				"var terrainLod,nVertices;",
-				"function storeShape(newTerrainLod) {",
-				"	terrainLod=newTerrainLod;",
-				"	nVertices=Math.pow((1<<terrainLod),2)*6;"
+				"var shapeLod,nVertices;",
+				"function storeShape(newShapeLod) {",
+				"	shapeLod=newShapeLod;",
+				"	nVertices=Math.pow((1<<shapeLod),2)*6;"
 			);
 		}
 	} else {
 		lines.push(
-			"var terrainLod="+this.lod.value+";"
+			"var shapeLod="+this.lod.value+";"
 		);
 		if (this.shaderType!='face') {
 			lines.push(
-				"var nVertices=Math.pow((1<<terrainLod)+1,2);",
+				"var nVertices=Math.pow((1<<shapeLod)+1,2);",
 				"var vertices=new Float32Array(nVertices*"+this.getNumbersPerVertex()+");",
-				"var nElements=Math.pow((1<<terrainLod),2)*6;",
+				"var nElements=Math.pow((1<<shapeLod),2)*6;",
 				"var elements=new Uint16Array(nElements);",
 				"function storeShape() {"
 			);
 		} else {
 			lines.push(
-				"var nVertices=Math.pow((1<<terrainLod),2)*6;",
+				"var nVertices=Math.pow((1<<shapeLod),2)*6;",
 				"var vertices=new Float32Array(nVertices*"+this.getNumbersPerVertex()+");",
 				"function storeShape() {"
 			);
@@ -589,7 +589,7 @@ Terrain.prototype.writeArraysAndBufferData=function(c,cv){
 	lines.push(
 		"	var xyRange=1/Math.sqrt(2);",
 		"	var zRange=xyRange;",
-		"	var res=1<<terrainLod;",
+		"	var res=1<<shapeLod;",
 		"	var mask=res-1;"
 	);
 	if (this.shaderType!='face') {
@@ -662,13 +662,13 @@ Terrain.prototype.writeArraysAndBufferData=function(c,cv){
 		"		return vertexElement(i,j"+(this.shaderType!='face'?"":",0")+")*"+this.getNumbersPerVertex()+"+2;",
 		"	}",
 		"	function noise(depth) {",
-		"		var r=zRange/Math.pow(2,terrainLod-depth-1);",
+		"		var r=zRange/Math.pow(2,shapeLod-depth-1);",
 		"		return Math.random()*2*r-r;",
 		"	}",
 		"	vertices[2]=0.0;",
 		"	var i1,i2,i3,i4;",
 		"	var j1,j2,j3,j4;",
-		"	for (var depth=terrainLod-1;depth>=0;depth--) {",
+		"	for (var depth=shapeLod-1;depth>=0;depth--) {",
 		"		var d=1<<depth;",
 		"		// diamond step",
 		"		for (i2=d;i2<res;i2+=2*d) {",

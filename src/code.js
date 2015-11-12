@@ -592,21 +592,15 @@ module.exports=function(options,i18n){
 			);
 		}
 		options.getInputsFor('shape').forEach(function(option){
-			function varNameWithPrefixReplace(optionPrefix,newOptionPrefix) {
-				var s;
-				if (option.name.indexOf(optionPrefix+'.')===0) {
-					if (newOptionPrefix!==undefined) {
-						s=option.name.replace(optionPrefix,newOptionPrefix);
-					} else {
-						s=option.name.replace(optionPrefix+'.','');
-					}
+			function varName(prefix) {
+				var i=option.name.lastIndexOf('.');
+				var s=option.name.substring(i+1);
+				var S=s.charAt(0).toUpperCase()+s.slice(1);
+				if (prefix!==undefined) {
+					return prefix+'Shape'+S;
 				} else {
-					// TODO throw
-					s=option.name;
+					return 'shape'+S;
 				}
-				return s.replace(/\.[a-z]/g,function(match){
-					return match.charAt(1).toUpperCase();
-				});
 			}
 			if (options[option.name+'.input']=='slider') {
 				var listener=new listeners.SliderListener(option.name);
@@ -615,19 +609,15 @@ module.exports=function(options,i18n){
 					.post("storeShape(parseInt(this.value));");
 				writeListener(listener);
 			} else if (isMousemoveInput(option.name)) {
-				var varName=varNameWithPrefixReplace('shape');
-				var newVarName=varNameWithPrefixReplace('shape','new');
-				var minVarName=varNameWithPrefixReplace('shape','min');
-				var maxVarName=varNameWithPrefixReplace('shape','max');
 				canvasMousemoveListener.enter()
 					.prexy(
 						options[option.name+'.input'],
-						"var "+newVarName+"=Math.floor("+minVarName+"+("+maxVarName+"-"+minVarName+"+1)*(ev.clientX-rect.left)/rect.width);",
-						"var "+newVarName+"=Math.floor("+minVarName+"+("+maxVarName+"-"+minVarName+"+1)*(rect.bottom-1-ev.clientY)/rect.height);"
+						"var "+varName('new')+"=Math.floor("+varName('min')+"+("+varName('max')+"-"+varName('min')+"+1)*(ev.clientX-rect.left)/rect.width);",
+						"var "+varName('new')+"=Math.floor("+varName('min')+"+("+varName('max')+"-"+varName('min')+"+1)*(rect.bottom-1-ev.clientY)/rect.height);"
 					)
-					.cond(newVarName+"!="+varName)
-					.log("console.log('"+option.name+" input value:',"+newVarName+");")
-					.post("storeShape("+newVarName+");");
+					.cond(varName('new')+"!="+varName())
+					.log("console.log('"+option.name+" input value:',"+varName('new')+");")
+					.post("storeShape("+varName('new')+");");
 			}
 		});
 		['x','y','z'].forEach(function(d){
