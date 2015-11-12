@@ -19,23 +19,34 @@ Shape.prototype.getNumbersPerColor=function(){
 Shape.prototype.getNumbersPerVertex=function(){
 	return this.getNumbersPerPosition()+this.getNumbersPerNormal()+this.getNumbersPerColor();
 };
+Shape.prototype.writeBufferData=function(){
+	lines=[
+		"gl.bufferData(gl.ARRAY_BUFFER,vertices,gl.STATIC_DRAW);"
+	];
+	if (this.usesElements()) {
+		lines.push(
+			"gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,elements,gl.STATIC_DRAW);"
+		);
+	}
+	return lines;
+};
+Shape.prototype.writeArraysAndBufferData=function(c,cv){
+	return this.writeArrays(c,cv).concat(this.writeBufferData());
+};
+// public fn for init
 Shape.prototype.writeInit=function(){
 	var c=(this.shaderType=='vertex' || this.shaderType=='face');
 	var cv=this.shaderType=='vertex';
-	var lines=this.writeArrays(c,cv);
+	var lines=[];
 	lines.push(
-		"",
-		"gl.bindBuffer(gl.ARRAY_BUFFER,gl.createBuffer());",
-		"gl.bufferData(gl.ARRAY_BUFFER,vertices,gl.STATIC_DRAW);",
-		""
+		"gl.bindBuffer(gl.ARRAY_BUFFER,gl.createBuffer());"
 	);
 	if (this.usesElements()) {
 		lines.push(
-			"gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,gl.createBuffer());",
-			"gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,elements,gl.STATIC_DRAW);",
-			""
+			"gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,gl.createBuffer());"
 		);
 	}
+	lines=lines.concat(this.writeArraysAndBufferData(c,cv));
 	lines.push(
 		"var positionLoc=gl.getAttribLocation(program,'position');"
 	);
@@ -47,7 +58,6 @@ Shape.prototype.writeInit=function(){
 			"	Float32Array.BYTES_PER_ELEMENT*0",
 			");",
 			"gl.enableVertexAttribArray(positionLoc);",
-			"",
 			"var colorLoc=gl.getAttribLocation(program,'color');",
 			"gl.vertexAttribPointer(",
 			"	colorLoc,3,gl.FLOAT,false,",
@@ -64,7 +74,6 @@ Shape.prototype.writeInit=function(){
 			"	Float32Array.BYTES_PER_ELEMENT*0",
 			");",
 			"gl.enableVertexAttribArray(positionLoc);",
-			"",
 			"var normalLoc=gl.getAttribLocation(program,'normal');",
 			"gl.vertexAttribPointer(",
 			"	normalLoc,3,gl.FLOAT,false,",
@@ -81,6 +90,7 @@ Shape.prototype.writeInit=function(){
 	}
 	return lines;
 };
+// public fn for render
 Shape.prototype.writeDraw=function(){
 	if (this.usesElements()) {
 		return ["gl.drawElements(gl."+this.glPrimitive+",nElements,gl.UNSIGNED_SHORT,0);"];
@@ -138,7 +148,7 @@ var Gasket=function(shaderType,lod){
 Gasket.prototype=Object.create(LodShape.prototype);
 Gasket.prototype.constructor=Gasket;
 Gasket.prototype.storeFn='storeGasketVertices';
-Gasket.prototype.writeArrays=function(c,cv){
+Gasket.prototype.writeArraysAndBufferData=function(c,cv){
 	lines=[];
 	if (this.lod.changes) {
 		lines.push(
@@ -239,7 +249,10 @@ Gasket.prototype.writeArrays=function(c,cv){
 		"		[-Math.sin(0/3*Math.PI),Math.cos(0/3*Math.PI)],",
 		"		[-Math.sin(2/3*Math.PI),Math.cos(2/3*Math.PI)],",
 		"		[-Math.sin(4/3*Math.PI),Math.cos(4/3*Math.PI)]",
-		"	);",
+		"	);"
+	);
+	lines=lines.concat(this.writeBufferData()); // TODO indent
+	lines.push(
 		"}"
 	);
 	if (this.lod.changes) {
@@ -341,7 +354,7 @@ Hat.prototype.storeFn="storeHatVerticesAndElements"; // TODO elements are not al
 Hat.prototype.usesElements=function(){
 	return this.shaderType!='face';
 };
-Hat.prototype.writeArrays=function(c,cv){
+Hat.prototype.writeArraysAndBufferData=function(c,cv){
 	lines=[];
 	if (this.lod.changes) {
 		lines.push(
@@ -477,8 +490,7 @@ Hat.prototype.writeArrays=function(c,cv){
 			"			elements[elementOffset+4]=vertexElement(i+0,j+1);",
 			"			elements[elementOffset+5]=vertexElement(i+1,j+1);",
 			"		}",
-			"	}",
-			"}"
+			"	}"
 		);
 	} else {
 		lines.push(
@@ -499,10 +511,13 @@ Hat.prototype.writeArrays=function(c,cv){
 		lines.push(
 			"			}",
 			"		}",
-			"	}",
-			"}"
+			"	}"
 		);
 	}
+	lines=lines.concat(this.writeBufferData()); // TODO indent
+	lines.push(
+		"}"
+	);
 	if (this.lod.changes) {
 		lines.push(
 			""+this.storeFn+"("+this.lod.value+");"
@@ -525,7 +540,7 @@ Terrain.prototype.storeFn="storeTerrainVerticesAndElements"; // TODO elements ar
 Terrain.prototype.usesElements=function(){
 	return this.shaderType!='face';
 };
-Terrain.prototype.writeArrays=function(c,cv){
+Terrain.prototype.writeArraysAndBufferData=function(c,cv){
 	lines=[];
 	if (this.lod.changes) {
 		lines.push(
@@ -726,8 +741,7 @@ Terrain.prototype.writeArrays=function(c,cv){
 			"			elements[elementOffset+4]=vertexElement(i+0,j+1);",
 			"			elements[elementOffset+5]=vertexElement(i+1,j+1);",
 			"		}",
-			"	}",
-			"}"
+			"	}"
 		);
 	} else {
 		lines.push(
@@ -748,10 +762,13 @@ Terrain.prototype.writeArrays=function(c,cv){
 		lines.push(
 			"			}",
 			"		}",
-			"	}",
-			"}"
+			"	}"
 		);
 	}
+	lines=lines.concat(this.writeBufferData()); // TODO indent
+	lines.push(
+		"}"
+	);
 	if (this.lod.changes) {
 		lines.push(
 			this.storeFn+"("+this.lod.value+");"
