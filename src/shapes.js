@@ -89,6 +89,13 @@ Shape.prototype.writeDraw=function(){
 	}
 };
 
+var LodShape=function(shaderType,lod){
+	Shape.call(this,shaderType);
+	this.lod=lod;
+};
+LodShape.prototype=Object.create(Shape.prototype);
+LodShape.prototype.constructor=LodShape;
+
 var Square=function(shaderType){
 	Shape.call(this,shaderType);
 };
@@ -125,30 +132,29 @@ Triangle.prototype.writeArrays=function(c,cv){
 	];
 };
 
-var Gasket=function(shaderType,depth){
-	Shape.call(this,shaderType);
-	this.depth=depth;
+var Gasket=function(shaderType,lod){
+	LodShape.call(this,shaderType,lod);
 };
-Gasket.prototype=Object.create(Shape.prototype);
+Gasket.prototype=Object.create(LodShape.prototype);
 Gasket.prototype.constructor=Gasket;
 Gasket.prototype.storeFn='storeGasketVertices';
 Gasket.prototype.writeArrays=function(c,cv){
 	lines=[];
-	if (this.depth.changes) {
+	if (this.lod.changes) {
 		lines.push(
-			"var minGasketDepth="+this.depth.min+";",
-			"var maxGasketDepth="+this.depth.max+";",
-			"var nMaxVertices=Math.pow(3,maxGasketDepth)*3;",
+			"var minGasketLod="+this.lod.min+";",
+			"var maxGasketLod="+this.lod.max+";",
+			"var nMaxVertices=Math.pow(3,maxGasketLod)*3;",
 			"var vertices=new Float32Array(nMaxVertices*"+this.getNumbersPerVertex()+");",
-			"var gasketDepth,nVertices;",
-			"function "+this.storeFn+"(newGasketDepth) {",
-			"	gasketDepth=newGasketDepth;",
-			"	nVertices=Math.pow(3,gasketDepth)*3;"
+			"var gasketLod,nVertices;",
+			"function "+this.storeFn+"(newGasketLod) {",
+			"	gasketLod=newGasketLod;",
+			"	nVertices=Math.pow(3,gasketLod)*3;"
 		);
 	} else {
 		lines.push(
-			"var gasketDepth="+this.depth.value+";",
-			"var nVertices=Math.pow(3,gasketDepth)*3;",
+			"var gasketLod="+this.lod.value+";",
+			"var nVertices=Math.pow(3,gasketLod)*3;",
 			"var vertices=new Float32Array(nVertices*"+this.getNumbersPerVertex()+");",
 			"function storeGasketVertices() {"
 		);
@@ -229,16 +235,16 @@ Gasket.prototype.writeArrays=function(c,cv){
 		"		}",
 		"	}",
 		"	triangle(",
-		"		gasketDepth,",
+		"		gasketLod,",
 		"		[-Math.sin(0/3*Math.PI),Math.cos(0/3*Math.PI)],",
 		"		[-Math.sin(2/3*Math.PI),Math.cos(2/3*Math.PI)],",
 		"		[-Math.sin(4/3*Math.PI),Math.cos(4/3*Math.PI)]",
 		"	);",
 		"}"
 	);
-	if (this.depth.changes) {
+	if (this.lod.changes) {
 		lines.push(
-			this.storeFn+"("+this.depth.value+");"
+			this.storeFn+"("+this.lod.value+");"
 		);
 	} else {
 		lines.push(
@@ -325,11 +331,10 @@ Cube.prototype.writeArrays=function(c,cv){
 	}
 };
 
-var Hat=function(shaderType,resolution){
-	Shape.call(this,shaderType);
-	this.resolution=resolution;
+var Hat=function(shaderType,lod){
+	LodShape.call(this,shaderType,lod);
 };
-Hat.prototype=Object.create(Shape.prototype);
+Hat.prototype=Object.create(LodShape.prototype);
 Hat.prototype.constructor=Hat;
 Hat.prototype.dim=3;
 Hat.prototype.storeFn="storeHatVerticesAndElements"; // TODO elements are not always used
@@ -338,48 +343,48 @@ Hat.prototype.usesElements=function(){
 };
 Hat.prototype.writeArrays=function(c,cv){
 	lines=[];
-	if (this.resolution.changes) {
+	if (this.lod.changes) {
 		lines.push(
-			"var minHatResolution="+this.resolution.min+";",
-			"var maxHatResolution="+this.resolution.max+";"
+			"var minHatLod="+this.lod.min+";",
+			"var maxHatLod="+this.lod.max+";"
 		);
 		if (this.shaderType!='face') {
 			lines.push(
-				"var nMaxVertices=(maxHatResolution+1)*(maxHatResolution+1);",
+				"var nMaxVertices=((1<<maxHatLod)+1)*((1<<maxHatLod)+1);",
 				"var vertices=new Float32Array(nMaxVertices*"+this.getNumbersPerVertex()+");",
-				"var nMaxElements=maxHatResolution*maxHatResolution*6;",
+				"var nMaxElements=(1<<maxHatLod)*(1<<maxHatLod)*6;",
 				"var elements=new Uint16Array(nMaxElements);",
-				"var hatResolution,nVertices,nElements;",
-				"function "+this.storeFn+"(newHatResolution) {",
-				"	hatResolution=newHatResolution;",
-				"	nVertices=(hatResolution+1)*(hatResolution+1);",
-				"	nElements=hatResolution*hatResolution*6;"
+				"var hatLod,nVertices,nElements;",
+				"function "+this.storeFn+"(newHatLod) {",
+				"	hatLod=newHatLod;",
+				"	nVertices=((1<<hatLod)+1)*((1<<hatLod)+1);",
+				"	nElements=(1<<hatLod)*(1<<hatLod)*6;"
 			);
 		} else {
 			lines.push(
-				"var nMaxVertices=maxHatResolution*maxHatResolution*6;",
+				"var nMaxVertices=(1<<maxHatLod)*(1<<maxHatLod)*6;",
 				"var vertices=new Float32Array(nMaxVertices*"+this.getNumbersPerVertex()+");",
-				"var hatResolution,nVertices;",
-				"function "+this.storeFn+"(newHatResolution) {",
-				"	hatResolution=newHatResolution;",
-				"	nVertices=hatResolution*hatResolution*6;"
+				"var hatLod,nVertices;",
+				"function "+this.storeFn+"(newHatLod) {",
+				"	hatLod=newHatLod;",
+				"	nVertices=(1<<hatLod)*(1<<hatLod)*6;"
 			);
 		}
 	} else {
 		lines.push(
-			"var hatResolution="+this.resolution.value+";"
+			"var hatLod="+this.lod.value+";"
 		);
 		if (this.shaderType!='face') {
 			lines.push(
-				"var nVertices=(hatResolution+1)*(hatResolution+1);",
+				"var nVertices=((1<<hatLod)+1)*((1<<hatLod)+1);",
 				"var vertices=new Float32Array(nVertices*"+this.getNumbersPerVertex()+");",
-				"var nElements=hatResolution*hatResolution*6;",
+				"var nElements=(1<<hatLod)*(1<<hatLod)*6;",
 				"var elements=new Uint16Array(nElements);",
 				"function "+this.storeFn+"() {"
 			);
 		} else {
 			lines.push(
-				"var nVertices=hatResolution*hatResolution*6;",
+				"var nVertices=(1<<hatLod)*(1<<hatLod)*6;",
 				"var vertices=new Float32Array(nVertices*"+this.getNumbersPerVertex()+");",
 				"function "+this.storeFn+"() {"
 			);
@@ -387,18 +392,19 @@ Hat.prototype.writeArrays=function(c,cv){
 	}
 	lines.push(
 		"	var xyRange=4;",
-		"	var xyScale=1/(4*Math.sqrt(2));"
+		"	var xyScale=1/(4*Math.sqrt(2));",
+		"	var res=(1<<hatLod);"
 	);
 	if (this.shaderType!='face') {
 		lines.push(
 			"	function vertexElement(i,j) {",
-			"		return i*(hatResolution+1)+j;",
+			"		return i*(res+1)+j;",
 			"	}"
 		);
 	} else {
 		lines.push(
 			"	function vertexElement(i,j,k) {",
-			"		return (i*hatResolution+j)*6+k;",
+			"		return (i*res+j)*6+k;",
 			"	}"
 		);
 	}
@@ -447,10 +453,10 @@ Hat.prototype.writeArrays=function(c,cv){
 	if (this.shaderType!='face') {
 		lines.push(
 			"	var i,j;",
-			"	for (i=0;i<=hatResolution;i++) {",
-			"		var y=i/hatResolution*xyRange*2-xyRange;",
-			"		for (j=0;j<=hatResolution;j++) {",
-			"			var x=j/hatResolution*xyRange*2-xyRange;",
+			"	for (i=0;i<=res;i++) {",
+			"		var y=i/res*xyRange*2-xyRange;",
+			"		for (j=0;j<=res;j++) {",
+			"			var x=j/res*xyRange*2-xyRange;",
 			"			var vertexOffset=vertexElement(i,j)*"+this.getNumbersPerVertex()+";"
 		);
 		innerLines.forEach(function(innerLine){
@@ -461,9 +467,9 @@ Hat.prototype.writeArrays=function(c,cv){
 		lines.push(
 			"		}",
 			"	}",
-			"	for (i=0;i<hatResolution;i++) {",
-			"		for (j=0;j<hatResolution;j++) {",
-			"			var elementOffset=(i*hatResolution+j)*6;",
+			"	for (i=0;i<res;i++) {",
+			"		for (j=0;j<res;j++) {",
+			"			var elementOffset=(i*res+j)*6;",
 			"			elements[elementOffset+0]=vertexElement(i+0,j+0);",
 			"			elements[elementOffset+1]=vertexElement(i+0,j+1);",
 			"			elements[elementOffset+2]=vertexElement(i+1,j+0);",
@@ -476,13 +482,13 @@ Hat.prototype.writeArrays=function(c,cv){
 		);
 	} else {
 		lines.push(
-			"	for (var i=0;i<hatResolution;i++) {",
-			"		for (var j=0;j<hatResolution;j++) {",
+			"	for (var i=0;i<res;i++) {",
+			"		for (var j=0;j<res;j++) {",
 			"			for (var k=0;k<6;k++) {",
 			"				var di=[0,0,1,1,0,1][k];",
 			"				var dj=[0,1,0,0,1,1][k];",
-			"				var y=(i+di)/hatResolution*xyRange*2-xyRange;",
-			"				var x=(j+dj)/hatResolution*xyRange*2-xyRange;",
+			"				var y=(i+di)/res*xyRange*2-xyRange;",
+			"				var x=(j+dj)/res*xyRange*2-xyRange;",
 			"				var vertexOffset=vertexElement(i,j,k)*"+this.getNumbersPerVertex()+";"
 		);
 		innerLines.forEach(function(innerLine){
@@ -497,9 +503,9 @@ Hat.prototype.writeArrays=function(c,cv){
 			"}"
 		);
 	}
-	if (this.resolution.changes) {
+	if (this.lod.changes) {
 		lines.push(
-			""+this.storeFn+"("+this.resolution.value+");"
+			""+this.storeFn+"("+this.lod.value+");"
 		);
 	} else {
 		lines.push(
@@ -509,11 +515,10 @@ Hat.prototype.writeArrays=function(c,cv){
 	return lines;
 };
 
-var Terrain=function(shaderType,depth){
-	Shape.call(this,shaderType);
-	this.depth=depth;
+var Terrain=function(shaderType,lod){
+	LodShape.call(this,shaderType,lod);
 };
-Terrain.prototype=Object.create(Shape.prototype);
+Terrain.prototype=Object.create(LodShape.prototype);
 Terrain.prototype.constructor=Terrain;
 Terrain.prototype.dim=3;
 Terrain.prototype.storeFn="storeTerrainVerticesAndElements"; // TODO elements are not always used
@@ -522,48 +527,48 @@ Terrain.prototype.usesElements=function(){
 };
 Terrain.prototype.writeArrays=function(c,cv){
 	lines=[];
-	if (this.depth.changes) {
+	if (this.lod.changes) {
 		lines.push(
-			"var minTerrainDepth="+this.depth.min+";",
-			"var maxTerrainDepth="+this.depth.max+";"
+			"var minTerrainLod="+this.lod.min+";",
+			"var maxTerrainLod="+this.lod.max+";"
 		);
 		if (this.shaderType!='face') {
 			lines.push(
-				"var nMaxVertices=Math.pow((1<<maxTerrainDepth)+1,2);",
+				"var nMaxVertices=Math.pow((1<<maxTerrainLod)+1,2);",
 				"var vertices=new Float32Array(nMaxVertices*"+this.getNumbersPerVertex()+");",
-				"var nMaxElements=Math.pow((1<<maxTerrainDepth),2)*6;",
+				"var nMaxElements=Math.pow((1<<maxTerrainLod),2)*6;",
 				"var elements=new Uint16Array(nMaxElements);",
-				"var terrainDepth,nVertices,nElements;",
-				"function "+this.storeFn+"(newTerrainDepth) {",
-				"	terrainDepth=newTerrainDepth;",
-				"	nVertices=Math.pow((1<<terrainDepth)+1,2);",
-				"	nElements=Math.pow((1<<terrainDepth),2)*6;"
+				"var terrainLod,nVertices,nElements;",
+				"function "+this.storeFn+"(newTerrainLod) {",
+				"	terrainLod=newTerrainLod;",
+				"	nVertices=Math.pow((1<<terrainLod)+1,2);",
+				"	nElements=Math.pow((1<<terrainLod),2)*6;"
 			);
 		} else {
 			lines.push(
-				"var nMaxVertices=Math.pow((1<<maxTerrainDepth),2)*6;",
+				"var nMaxVertices=Math.pow((1<<maxTerrainLod),2)*6;",
 				"var vertices=new Float32Array(nMaxVertices*"+this.getNumbersPerVertex()+");",
-				"var terrainDepth,nVertices;",
-				"function "+this.storeFn+"(newTerrainDepth) {",
-				"	terrainDepth=newTerrainDepth;",
-				"	nVertices=Math.pow((1<<terrainDepth),2)*6;"
+				"var terrainLod,nVertices;",
+				"function "+this.storeFn+"(newTerrainLod) {",
+				"	terrainLod=newTerrainLod;",
+				"	nVertices=Math.pow((1<<terrainLod),2)*6;"
 			);
 		}
 	} else {
 		lines.push(
-			"var terrainDepth="+this.depth.value+";"
+			"var terrainLod="+this.lod.value+";"
 		);
 		if (this.shaderType!='face') {
 			lines.push(
-				"var nVertices=Math.pow((1<<terrainDepth)+1,2);",
+				"var nVertices=Math.pow((1<<terrainLod)+1,2);",
 				"var vertices=new Float32Array(nVertices*"+this.getNumbersPerVertex()+");",
-				"var nElements=Math.pow((1<<terrainDepth),2)*6;",
+				"var nElements=Math.pow((1<<terrainLod),2)*6;",
 				"var elements=new Uint16Array(nElements);",
 				"function "+this.storeFn+"() {"
 			);
 		} else {
 			lines.push(
-				"var nVertices=Math.pow((1<<terrainDepth),2)*6;",
+				"var nVertices=Math.pow((1<<terrainLod),2)*6;",
 				"var vertices=new Float32Array(nVertices*"+this.getNumbersPerVertex()+");",
 				"function "+this.storeFn+"() {"
 			);
@@ -572,7 +577,7 @@ Terrain.prototype.writeArrays=function(c,cv){
 	lines.push(
 		"	var xyRange=1/Math.sqrt(2);",
 		"	var zRange=xyRange;",
-		"	var res=1<<terrainDepth;",
+		"	var res=1<<terrainLod;",
 		"	var mask=res-1;"
 	);
 	if (this.shaderType!='face') {
@@ -645,13 +650,13 @@ Terrain.prototype.writeArrays=function(c,cv){
 		"		return vertexElement(i,j"+(this.shaderType!='face'?"":",0")+")*"+this.getNumbersPerVertex()+"+2;",
 		"	}",
 		"	function noise(depth) {",
-		"		var r=zRange/Math.pow(2,terrainDepth-depth-1);",
+		"		var r=zRange/Math.pow(2,terrainLod-depth-1);",
 		"		return Math.random()*2*r-r;",
 		"	}",
 		"	vertices[2]=0.0;",
 		"	var i1,i2,i3,i4;",
 		"	var j1,j2,j3,j4;",
-		"	for (var depth=terrainDepth-1;depth>=0;depth--) {",
+		"	for (var depth=terrainLod-1;depth>=0;depth--) {",
 		"		var d=1<<depth;",
 		"		// diamond step",
 		"		for (i2=d;i2<res;i2+=2*d) {",
@@ -747,9 +752,9 @@ Terrain.prototype.writeArrays=function(c,cv){
 			"}"
 		);
 	}
-	if (this.depth.changes) {
+	if (this.lod.changes) {
 		lines.push(
-			""+this.storeFn+"("+this.depth.value+");"
+			this.storeFn+"("+this.lod.value+");"
 		);
 	} else {
 		lines.push(
