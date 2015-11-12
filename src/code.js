@@ -612,7 +612,7 @@ module.exports=function(options,i18n){
 				var listener=new listeners.SliderListener(option.name);
 				listener.enter()
 					.log("console.log(this.id,'input value:',parseInt(this.value));")
-					.post(shape.storeFn+"(parseInt(this.value));");
+					.post("storeShape(parseInt(this.value));");
 				writeListener(listener);
 			} else if (isMousemoveInput(option.name)) {
 				var varName=varNameWithPrefixReplace('shape');
@@ -627,7 +627,7 @@ module.exports=function(options,i18n){
 					)
 					.cond(newVarName+"!="+varName)
 					.log("console.log('"+option.name+" input value:',"+newVarName+");")
-					.post(shape.storeFn+"("+newVarName+");");
+					.post("storeShape("+newVarName+");");
 			}
 		});
 		['x','y','z'].forEach(function(d){
