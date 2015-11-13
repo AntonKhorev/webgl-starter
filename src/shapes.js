@@ -105,6 +105,74 @@ var LodShape=function(shaderType,lod){
 };
 LodShape.prototype=Object.create(Shape.prototype);
 LodShape.prototype.constructor=LodShape;
+// abstract LodShape.prototype.getDistinctVertexCount=function(lodSymbol){}; // # of vertices when usesElements()
+// abstract LodShape.prototype.getTotalVertexCount=function(lodSymbol){}; // # of elements when usesElements(), otherwise # of vertices
+// abstract LodShape.prototype.writeStoreShape=function(c,cv){}; // indented TODO don't require indented
+LodShape.prototype.writeArraysAndBufferData=function(c,cv){
+	var lines=[];
+	if (this.lod.changes) {
+		lines.push(
+			"var minShapeLod="+this.lod.min+";",
+			"var maxShapeLod="+this.lod.max+";"
+		);
+		if (this.usesElements()) {
+			lines.push(
+				"var nMaxVertices="+this.getDistinctVertexCount("maxShapeLod")+";",
+				"var vertices=new Float32Array(nMaxVertices*"+this.getNumbersPerVertex()+");",
+				"var nMaxElements="+this.getTotalVertexCount("maxShapeLod")+";",
+				"var elements=new Uint16Array(nMaxElements);",
+				"var shapeLod,nVertices,nElements;",
+				"function storeShape(newShapeLod) {",
+				"	shapeLod=newShapeLod;",
+				"	nVertices="+this.getDistinctVertexCount("shapeLod")+";",
+				"	nElements="+this.getTotalVertexCount("shapeLod")+";"
+			);
+		} else {
+			lines.push(
+				"var nMaxVertices="+this.getTotalVertexCount("maxShapeLod")+";",
+				"var vertices=new Float32Array(nMaxVertices*"+this.getNumbersPerVertex()+");",
+				"var shapeLod,nVertices;",
+				"function storeShape(newShapeLod) {",
+				"	shapeLod=newShapeLod;",
+				"	nVertices="+this.getTotalVertexCount("shapeLod")+";"
+			);
+		}
+	} else {
+		lines.push(
+			"var shapeLod="+this.lod.value+";"
+		);
+		if (this.usesElements()) {
+			lines.push(
+				"var nVertices="+this.getDistinctVertexCount("shapeLod")+";",
+				"var vertices=new Float32Array(nVertices*"+this.getNumbersPerVertex()+");",
+				"var nElements="+this.getTotalVertexCount("shapeLod")+";",
+				"var elements=new Uint16Array(nElements);",
+				"function storeShape() {"
+			);
+		} else {
+			lines.push(
+				"var nVertices="+this.getTotalVertexCount("shapeLod")+";",
+				"var vertices=new Float32Array(nVertices*"+this.getNumbersPerVertex()+");",
+				"function storeShape() {"
+			);
+		}
+	}
+	lines=lines.concat(this.writeStoreShape(c,cv));
+	lines=lines.concat(this.writeBufferData()); // TODO indent
+	lines.push(
+		"}"
+	);
+	if (this.lod.changes) {
+		lines.push(
+			"storeShape("+this.lod.value+");"
+		);
+	} else {
+		lines.push(
+			"storeShape();"
+		);
+	}
+	return lines;
+};
 
 var Square=function(shaderType){
 	Shape.call(this,shaderType);
@@ -147,27 +215,11 @@ var Gasket=function(shaderType,lod){
 };
 Gasket.prototype=Object.create(LodShape.prototype);
 Gasket.prototype.constructor=Gasket;
-Gasket.prototype.writeArraysAndBufferData=function(c,cv){
-	lines=[];
-	if (this.lod.changes) {
-		lines.push(
-			"var minShapeLod="+this.lod.min+";",
-			"var maxShapeLod="+this.lod.max+";",
-			"var nMaxVertices=Math.pow(3,maxShapeLod)*3;",
-			"var vertices=new Float32Array(nMaxVertices*"+this.getNumbersPerVertex()+");",
-			"var shapeLod,nVertices;",
-			"function storeShape(newShapeLod) {",
-			"	shapeLod=newShapeLod;",
-			"	nVertices=Math.pow(3,shapeLod)*3;"
-		);
-	} else {
-		lines.push(
-			"var shapeLod="+this.lod.value+";",
-			"var nVertices=Math.pow(3,shapeLod)*3;",
-			"var vertices=new Float32Array(nVertices*"+this.getNumbersPerVertex()+");",
-			"function storeShape() {"
-		);
-	}
+Gasket.prototype.getTotalVertexCount=function(lodSymbol){
+	return "Math.pow(3,"+lodSymbol+")*3";
+};
+Gasket.prototype.writeStoreShape=function(c,cv){
+	var lines=[];
 	lines.push(
 		"	var iv=0;"
 	);
@@ -250,19 +302,6 @@ Gasket.prototype.writeArraysAndBufferData=function(c,cv){
 		"		[-Math.sin(4/3*Math.PI),Math.cos(4/3*Math.PI)]",
 		"	);"
 	);
-	lines=lines.concat(this.writeBufferData()); // TODO indent
-	lines.push(
-		"}"
-	);
-	if (this.lod.changes) {
-		lines.push(
-			"storeShape("+this.lod.value+");"
-		);
-	} else {
-		lines.push(
-			"storeShape();"
-		);
-	}
 	return lines;
 };
 
@@ -352,55 +391,14 @@ Hat.prototype.dim=3;
 Hat.prototype.usesElements=function(){
 	return this.shaderType!='face';
 };
-Hat.prototype.writeArraysAndBufferData=function(c,cv){
-	lines=[];
-	if (this.lod.changes) {
-		lines.push(
-			"var minShapeLod="+this.lod.min+";",
-			"var maxShapeLod="+this.lod.max+";"
-		);
-		if (this.shaderType!='face') {
-			lines.push(
-				"var nMaxVertices=((1<<maxShapeLod)+1)*((1<<maxShapeLod)+1);",
-				"var vertices=new Float32Array(nMaxVertices*"+this.getNumbersPerVertex()+");",
-				"var nMaxElements=(1<<maxShapeLod)*(1<<maxShapeLod)*6;",
-				"var elements=new Uint16Array(nMaxElements);",
-				"var shapeLod,nVertices,nElements;",
-				"function storeShape(newShapeLod) {",
-				"	shapeLod=newShapeLod;",
-				"	nVertices=((1<<shapeLod)+1)*((1<<shapeLod)+1);",
-				"	nElements=(1<<shapeLod)*(1<<shapeLod)*6;"
-			);
-		} else {
-			lines.push(
-				"var nMaxVertices=(1<<maxShapeLod)*(1<<maxShapeLod)*6;",
-				"var vertices=new Float32Array(nMaxVertices*"+this.getNumbersPerVertex()+");",
-				"var shapeLod,nVertices;",
-				"function storeShape(newShapeLod) {",
-				"	shapeLod=newShapeLod;",
-				"	nVertices=(1<<shapeLod)*(1<<shapeLod)*6;"
-			);
-		}
-	} else {
-		lines.push(
-			"var shapeLod="+this.lod.value+";"
-		);
-		if (this.shaderType!='face') {
-			lines.push(
-				"var nVertices=((1<<shapeLod)+1)*((1<<shapeLod)+1);",
-				"var vertices=new Float32Array(nVertices*"+this.getNumbersPerVertex()+");",
-				"var nElements=(1<<shapeLod)*(1<<shapeLod)*6;",
-				"var elements=new Uint16Array(nElements);",
-				"function storeShape() {"
-			);
-		} else {
-			lines.push(
-				"var nVertices=(1<<shapeLod)*(1<<shapeLod)*6;",
-				"var vertices=new Float32Array(nVertices*"+this.getNumbersPerVertex()+");",
-				"function storeShape() {"
-			);
-		}
-	}
+Hat.prototype.getDistinctVertexCount=function(lodSymbol){
+	return "Math.pow((1<<"+lodSymbol+")+1,2)";
+};
+Hat.prototype.getTotalVertexCount=function(lodSymbol){
+	return "Math.pow((1<<"+lodSymbol+"),2)*6";
+};
+Hat.prototype.writeStoreShape=function(c,cv){
+	var lines=[];
 	lines.push(
 		"	var xyRange=4;",
 		"	var xyScale=1/(4*Math.sqrt(2));",
@@ -512,19 +510,6 @@ Hat.prototype.writeArraysAndBufferData=function(c,cv){
 			"	}"
 		);
 	}
-	lines=lines.concat(this.writeBufferData()); // TODO indent
-	lines.push(
-		"}"
-	);
-	if (this.lod.changes) {
-		lines.push(
-			"storeShape("+this.lod.value+");"
-		);
-	} else {
-		lines.push(
-			"storeShape();"
-		);
-	}
 	return lines;
 };
 
@@ -537,55 +522,14 @@ Terrain.prototype.dim=3;
 Terrain.prototype.usesElements=function(){
 	return this.shaderType!='face';
 };
-Terrain.prototype.writeArraysAndBufferData=function(c,cv){
-	lines=[];
-	if (this.lod.changes) {
-		lines.push(
-			"var minShapeLod="+this.lod.min+";",
-			"var maxShapeLod="+this.lod.max+";"
-		);
-		if (this.shaderType!='face') {
-			lines.push(
-				"var nMaxVertices=Math.pow((1<<maxShapeLod)+1,2);",
-				"var vertices=new Float32Array(nMaxVertices*"+this.getNumbersPerVertex()+");",
-				"var nMaxElements=Math.pow((1<<maxShapeLod),2)*6;",
-				"var elements=new Uint16Array(nMaxElements);",
-				"var shapeLod,nVertices,nElements;",
-				"function storeShape(newShapeLod) {",
-				"	shapeLod=newShapeLod;",
-				"	nVertices=Math.pow((1<<shapeLod)+1,2);",
-				"	nElements=Math.pow((1<<shapeLod),2)*6;"
-			);
-		} else {
-			lines.push(
-				"var nMaxVertices=Math.pow((1<<maxShapeLod),2)*6;",
-				"var vertices=new Float32Array(nMaxVertices*"+this.getNumbersPerVertex()+");",
-				"var shapeLod,nVertices;",
-				"function storeShape(newShapeLod) {",
-				"	shapeLod=newShapeLod;",
-				"	nVertices=Math.pow((1<<shapeLod),2)*6;"
-			);
-		}
-	} else {
-		lines.push(
-			"var shapeLod="+this.lod.value+";"
-		);
-		if (this.shaderType!='face') {
-			lines.push(
-				"var nVertices=Math.pow((1<<shapeLod)+1,2);",
-				"var vertices=new Float32Array(nVertices*"+this.getNumbersPerVertex()+");",
-				"var nElements=Math.pow((1<<shapeLod),2)*6;",
-				"var elements=new Uint16Array(nElements);",
-				"function storeShape() {"
-			);
-		} else {
-			lines.push(
-				"var nVertices=Math.pow((1<<shapeLod),2)*6;",
-				"var vertices=new Float32Array(nVertices*"+this.getNumbersPerVertex()+");",
-				"function storeShape() {"
-			);
-		}
-	}
+Terrain.prototype.getDistinctVertexCount=function(lodSymbol){
+	return "Math.pow((1<<"+lodSymbol+")+1,2)";
+};
+Terrain.prototype.getTotalVertexCount=function(lodSymbol){
+	return "Math.pow((1<<"+lodSymbol+"),2)*6";
+};
+Terrain.prototype.writeStoreShape=function(c,cv){
+	var lines=[];
 	lines.push(
 		"	var xyRange=1/Math.sqrt(2);",
 		"	var zRange=xyRange;",
@@ -760,19 +704,6 @@ Terrain.prototype.writeArraysAndBufferData=function(c,cv){
 			"			}",
 			"		}",
 			"	}"
-		);
-	}
-	lines=lines.concat(this.writeBufferData()); // TODO indent
-	lines.push(
-		"}"
-	);
-	if (this.lod.changes) {
-		lines.push(
-			"storeShape("+this.lod.value+");"
-		);
-	} else {
-		lines.push(
-			"storeShape();"
 		);
 	}
 	return lines;
