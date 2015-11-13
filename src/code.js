@@ -2,6 +2,9 @@ var listeners=require('./listeners.js');
 var shapes=require('./shapes.js');
 
 module.exports=function(options,i18n){
+	var Lines=require('./lines.js')(
+		options.indent=='tab' ? '\t' : Array(parseInt(options.indent)+1).join(' ')
+	);
 	function intOptionValue(name) {
 		return parseInt(options[name]);
 	}
@@ -28,6 +31,8 @@ module.exports=function(options,i18n){
 	function isMousemoveInput(name) {
 		return ['mousemovex','mousemovey'].indexOf(options[name+'.input'])>=0;
 	}
+
+	// { move to Lines class
 	function indentLines(level,lines) {
 		return lines.map(function(line){
 			return Array(level+1).join("	")+line;
@@ -44,6 +49,7 @@ module.exports=function(options,i18n){
 			}
 		});
 	}
+	// }
 
 	function makeShape() {
 		var className=options.shape.charAt(0).toUpperCase()+options.shape.slice(1);
@@ -77,231 +83,237 @@ module.exports=function(options,i18n){
 		var needAspectUniform=options.hasInputsFor('canvas');
 		var needAspectConstant=!needAspectUniform && options['canvas.width']!=options['canvas.height'];
 		var needTransformedPosition=options.shader=='light' && options.projection=='perspective';
-		var lines=[];
+
+		function generateMain() {
+			lines=new Lines();
+			['x','y','z'].forEach(function(d){
+				var D=d.toUpperCase();
+				var optName='rotate.'+d;
+				var varName='rotate'+D;
+				if (options.needsTransform(optName)) {
+					if (options.needsUniform('rotate.'+d)) {
+						lines.a(
+							"float c"+d+"=cos(radians("+varName+"));",
+							"float s"+d+"=sin(radians("+varName+"));"
+						);
+					} else {
+						lines.a(
+							"float c"+d+"=cos(radians("+floatOptionValue(optName)+"));",
+							"float s"+d+"=sin(radians("+floatOptionValue(optName)+"));"
+						);
+					}
+				}
+			});
+			if (needAspectConstant) {
+				lines.a(
+					"float aspect="+intOptionValue('canvas.width')+".0/"+intOptionValue('canvas.height')+".0;"
+				);
+			}
+			if (options.projection=='perspective') {
+				lines.a(
+					"float fovy=45.0;",
+					"float near=1.0/tan(radians(fovy)/2.0);",
+					"float far=near+2.0;"
+				);
+			}
+			if (needTransformedPosition) {
+				lines.a(
+					"vec4 transformedPosition="
+				);
+			} else {
+				lines.a(
+					"gl_Position="
+				);
+			}
+			if (use2dTransform) {
+				lines.t(
+					"vec4(position*mat2(",
+					"	cz, -sz,",
+					"	sz,  cz",
+					"),0,1)"
+				);
+			} else {
+				lines.t(
+					"position"
+				);
+				options.transformOrder.forEach(function(transformName){
+					if (!options.needsTransform(transformName)) {
+						return;
+					}
+					lines.t({
+						'rotate.x': [
+							"*mat4(",
+							"	1.0, 0.0, 0.0, 0.0,",
+							"	0.0,  cx, -sx, 0.0,",
+							"	0.0,  sx,  cx, 0.0,",
+							"	0.0, 0.0, 0.0, 1.0",
+							")"
+						],
+						'rotate.y': [
+							"*mat4(",
+							"	 cy, 0.0,  sy, 0.0,",
+							"	0.0, 1.0, 0.0, 0.0,",
+							"	-sy, 0.0,  cy, 0.0,",
+							"	0.0, 0.0, 0.0, 1.0",
+							")"
+						],
+						'rotate.z': [
+							"*mat4(",
+							"	 cz, -sz, 0.0, 0.0,",
+							"	 sz,  cz, 0.0, 0.0,",
+							"	0.0, 0.0, 1.0, 0.0,",
+							"	0.0, 0.0, 0.0, 1.0",
+							")"
+						]
+					}[transformName]);
+				});
+				if (options.projection=='perspective') {
+					lines.t(
+						"*mat4( // move center of coords inside view",
+						"	1.0, 0.0, 0.0, 0.0,",
+						"	0.0, 1.0, 0.0, 0.0,",
+						"	0.0, 0.0, 1.0, -(near+far)/2.0,",
+						"	0.0, 0.0, 0.0, 1.0",
+						")"
+					);
+				}
+			}
+			if (needTransformedPosition) {
+				lines.t(
+					";"
+				);
+				lines.a(
+					"gl_Position=transformedPosition"
+				);
+			}
+			if (options.projection=='ortho') {
+				if (needAspectUniform || needAspectConstant) {
+					lines.t(
+						"*vec4(1.0/aspect,1.0,-1.0,1.0)" // correct aspect ratio and make coords right-handed
+					);
+				} else if (shape.dim>2) {
+					lines.t(
+						"*vec4(1.0,1.0,-1.0,1.0)" // make coords right-handed for 3d shapes
+					);
+				}
+			} else if (options.projection=='perspective') {
+				if (needAspectUniform || needAspectConstant) {
+					lines.t(
+						"*mat4(",
+						"	near/aspect, 0.0,  0.0,                   0.0,",
+						"	0.0,         near, 0.0,                   0.0,",
+						"	0.0,         0.0,  (near+far)/(near-far), 2.0*near*far/(near-far),",
+						"	0.0,         0.0,  -1.0,                  0.0",
+						")"
+					);
+				} else {
+					lines.t(
+						"*mat4(",
+						"	near, 0.0,  0.0,                   0.0,",
+						"	0.0,  near, 0.0,                   0.0,",
+						"	0.0,  0.0,  (near+far)/(near-far), 2.0*near*far/(near-far),",
+						"	0.0,  0.0,  -1.0,                  0.0",
+						")"
+					);
+				}
+			}
+			lines.t(
+				";"
+			);
+			if (options.shader=='light') {
+				if (options.projection=='perspective') {
+					lines.a(
+						"interpolatedView=-vec3(transformedPosition);"
+					);
+				}
+				if (shape.dim>2) {
+					lines.a(
+						"interpolatedNormal=normal"
+					);
+				} else {
+					lines.a(
+						"interpolatedNormal=vec3(0.0,0.0,1.0)"
+					);
+				}
+				options.transformOrder.forEach(function(transformName){
+					if (!options.needsTransform(transformName)) {
+						return;
+					}
+					lines.t({
+						'rotate.x': [
+							"*mat3(",
+							"	1.0, 0.0, 0.0,",
+							"	0.0,  cx, -sx,",
+							"	0.0,  sx,  cx",
+							")"
+						],
+						'rotate.y': [
+							"*mat3(",
+							"	 cy, 0.0,  sy,",
+							"	0.0, 1.0, 0.0,",
+							"	-sy, 0.0,  cy",
+							")"
+						],
+						'rotate.z': [
+							"*mat3(",
+							"	 cz, -sz, 0.0,",
+							"	 sz,  cz, 0.0,",
+							"	0.0, 0.0, 1.0",
+							")"
+						]
+					}[transformName]);
+				});
+				lines.t(
+					";"
+				);
+			}
+			if (options.shader=='vertex' || options.shader=='face') {
+				lines.a(
+					"interpolatedColor=color;"
+				);
+			}
+			return lines;
+		}
+
+		var lines=new Lines();
 		if (needAspectUniform) {
-			lines.push("uniform float aspect;");
+			lines.a("uniform float aspect;");
 		}
 		['x','y','z'].forEach(function(d){
 			var D=d.toUpperCase();
 			var optName='rotate.'+d;
 			var varName='rotate'+D;
 			if (options.needsUniform(optName)) {
-				lines.push("uniform float "+varName+";");
+				lines.a("uniform float "+varName+";");
 			}
 		});
 		if (use2dTransform) {
-			lines.push("attribute vec2 position;");
+			lines.a("attribute vec2 position;");
 		} else {
-			lines.push("attribute vec4 position;");
+			lines.a("attribute vec4 position;");
 		}
 		if (options.shader=='light') {
 			if (options.projection=='perspective') {
-				lines.push("varying vec3 interpolatedView;");
+				lines.a("varying vec3 interpolatedView;");
 			}
 			if (shape.dim>2) {
-				lines.push("attribute vec3 normal;");
+				lines.a("attribute vec3 normal;");
 			}
-			lines.push("varying vec3 interpolatedNormal;");
+			lines.a("varying vec3 interpolatedNormal;");
 		}
 		if (options.shader=='vertex' || options.shader=='face') {
-			lines.push(
+			lines.a(
 				"attribute vec4 color;",
-				"varying vec4 interpolatedColor;" // TODO don't interpolate for shader=='face'
+				"varying vec4 interpolatedColor;"
 			);
 		}
-		lines.push(
-			"void main() {"
-		);
-		['x','y','z'].forEach(function(d){
-			var D=d.toUpperCase();
-			var optName='rotate.'+d;
-			var varName='rotate'+D;
-			if (options.needsTransform(optName)) {
-				if (options.needsUniform('rotate.'+d)) {
-					lines.push(
-						"	float c"+d+"=cos(radians("+varName+"));",
-						"	float s"+d+"=sin(radians("+varName+"));"
-					);
-				} else {
-					lines.push(
-						"	float c"+d+"=cos(radians("+floatOptionValue(optName)+"));",
-						"	float s"+d+"=sin(radians("+floatOptionValue(optName)+"));"
-					);
-				}
-			}
-		});
-		if (needAspectConstant) {
-			lines.push(
-				"	float aspect="+intOptionValue('canvas.width')+".0/"+intOptionValue('canvas.height')+".0;"
-			);
-		}
-		if (options.projection=='perspective') {
-			lines.push(
-				"	float fovy=45.0;",
-				"	float near=1.0/tan(radians(fovy)/2.0);",
-				"	float far=near+2.0;"
-			);
-		}
-		if (needTransformedPosition) {
-			lines.push(
-				"	vec4 transformedPosition="
-			);
-		} else {
-			lines.push(
-				"	gl_Position="
-			);
-		}
-		if (use2dTransform) {
-			appendLinesToLastLine(lines,[
-				"vec4(position*mat2(",
-				"	cz, -sz,",
-				"	sz,  cz",
-				"),0,1)"
-			]);
-		} else {
-			appendLinesToLastLine(lines,[
-				"position"
-			]);
-			options.transformOrder.forEach(function(transformName){
-				if (!options.needsTransform(transformName)) {
-					return;
-				}
-				appendLinesToLastLine(lines,{
-					'rotate.x': [
-						"*mat4(",
-						"	1.0, 0.0, 0.0, 0.0,",
-						"	0.0,  cx, -sx, 0.0,",
-						"	0.0,  sx,  cx, 0.0,",
-						"	0.0, 0.0, 0.0, 1.0",
-						")"
-					],
-					'rotate.y': [
-						"*mat4(",
-						"	 cy, 0.0,  sy, 0.0,",
-						"	0.0, 1.0, 0.0, 0.0,",
-						"	-sy, 0.0,  cy, 0.0,",
-						"	0.0, 0.0, 0.0, 1.0",
-						")"
-					],
-					'rotate.z': [
-						"*mat4(",
-						"	 cz, -sz, 0.0, 0.0,",
-						"	 sz,  cz, 0.0, 0.0,",
-						"	0.0, 0.0, 1.0, 0.0,",
-						"	0.0, 0.0, 0.0, 1.0",
-						")"
-					]
-				}[transformName]);
-			});
-			if (options.projection=='perspective') {
-				appendLinesToLastLine(lines,[
-					"*mat4( // move center of coords inside view",
-					"	1.0, 0.0, 0.0, 0.0,",
-					"	0.0, 1.0, 0.0, 0.0,",
-					"	0.0, 0.0, 1.0, -(near+far)/2.0,",
-					"	0.0, 0.0, 0.0, 1.0",
-					")"
-				]);
-			}
-		}
-		if (needTransformedPosition) {
-			appendLinesToLastLine(lines,[
-				";"
-			]);
-			lines.push(
-				"	gl_Position=transformedPosition"
-			);
-		}
-		if (options.projection=='ortho') {
-			if (needAspectUniform || needAspectConstant) {
-				appendLinesToLastLine(lines,[
-					"*vec4(1.0/aspect,1.0,-1.0,1.0)" // correct aspect ratio and make coords right-handed
-				]);
-			} else if (shape.dim>2) {
-				appendLinesToLastLine(lines,[
-					"*vec4(1.0,1.0,-1.0,1.0)" // make coords right-handed for 3d shapes
-				]);
-			}
-		} else if (options.projection=='perspective') {
-			if (needAspectUniform || needAspectConstant) {
-				appendLinesToLastLine(lines,[
-					"*mat4(",
-					"	near/aspect, 0.0,  0.0,                   0.0,",
-					"	0.0,         near, 0.0,                   0.0,",
-					"	0.0,         0.0,  (near+far)/(near-far), 2.0*near*far/(near-far),",
-					"	0.0,         0.0,  -1.0,                  0.0",
-					")"
-				]);
-			} else {
-				appendLinesToLastLine(lines,[
-					"*mat4(",
-					"	near, 0.0,  0.0,                   0.0,",
-					"	0.0,  near, 0.0,                   0.0,",
-					"	0.0,  0.0,  (near+far)/(near-far), 2.0*near*far/(near-far),",
-					"	0.0,  0.0,  -1.0,                  0.0",
-					")"
-				]);
-			}
-		}
-		appendLinesToLastLine(lines,[
-			";"
-		]);
-		if (options.shader=='light') {
-			if (options.projection=='perspective') {
-				lines.push(
-					"	interpolatedView=-vec3(transformedPosition);"
-				);
-			}
-			if (shape.dim>2) {
-				lines.push(
-					"	interpolatedNormal=normal"
-				);
-			} else {
-				lines.push(
-					"	interpolatedNormal=vec3(0.0,0.0,1.0)"
-				);
-			}
-			options.transformOrder.forEach(function(transformName){
-				if (!options.needsTransform(transformName)) {
-					return;
-				}
-				appendLinesToLastLine(lines,{
-					'rotate.x': [
-						"*mat3(",
-						"	1.0, 0.0, 0.0,",
-						"	0.0,  cx, -sx,",
-						"	0.0,  sx,  cx",
-						")"
-					],
-					'rotate.y': [
-						"*mat3(",
-						"	 cy, 0.0,  sy,",
-						"	0.0, 1.0, 0.0,",
-						"	-sy, 0.0,  cy",
-						")"
-					],
-					'rotate.z': [
-						"*mat3(",
-						"	 cz, -sz, 0.0,",
-						"	 sz,  cz, 0.0,",
-						"	0.0, 0.0, 1.0",
-						")"
-					]
-				}[transformName]);
-			});
-			appendLinesToLastLine(lines,[
-				";"
-			]);
-		}
-		if (options.shader=='vertex' || options.shader=='face') {
-			lines.push(
-				"	interpolatedColor=color;"
-			);
-		}
-		lines.push(
+		lines.a(
+			"void main() {",
+			generateMain().indent(),
 			"}"
 		);
-		return lines;
+		console.log(lines.data); //
+		return lines.data;
 	}
 	function generateFragmentShaderLines() {
 		if (options.shader=='single') {

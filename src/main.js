@@ -70,6 +70,13 @@ var i18n=function(id){ // fake temporary i18n
 		'options.debugShader': 'Log shader compilation errors',
 		'options.debugInputs': 'Log input values',
 
+		'options.formatting': 'Code formatting options',
+		'options.indent': 'Indent',
+		'options.indent.tab': 'Tab',
+		'options.indent.2': '2 spaces',
+		'options.indent.4': '4 spaces',
+		'options.indent.8': '8 spaces',
+
 		'controls.type.mousemovex': 'Move the mouse pointer horizontally over the canvas',
 		'controls.type.mousemovey': 'Move the mouse pointer vertically over the canvas',
 		'controls.to': 'to update',
@@ -272,6 +279,10 @@ $(function(){
 			).append(
 				$("<fieldset>").append("<legend>"+i18n('options.debug')+"</legend>").append(
 					options.debugOptions.map(writeDebugOption)
+				)
+			).append(
+				$("<fieldset>").append("<legend>"+i18n('options.formatting')+"</legend>").append(
+					options.formattingOptions.map(writeGeneralOption)
 				)
 			);
 			makeSortable($transforms,function(){

@@ -117,20 +117,18 @@ OptionsBlueprint.prototype.debugOptions=[
 	new DebugOption('debugShader',true),
 	new DebugOption('debugInputs'), // TODO hide if no inputs?
 ];
+OptionsBlueprint.prototype.formattingOptions=[
+	new Option('indent',['tab','2','4','8']),
+];
+OptionsBlueprint.prototype.groupNames=['generalOptions','inputOptions','transformOptions','debugOptions','formattingOptions'];
 OptionsBlueprint.prototype.reset=function(){
-	this.generalOptions.forEach(function(option){
-		this[option.name]=option.defaultValue;
-	},this);
-	this.inputOptions.forEach(function(option){
-		this[option.name]=option.defaultValue;
-		this[option.name+'.input']='constant';
-	},this);
-	this.transformOptions.forEach(function(option){
-		this[option.name]=option.defaultValue;
-		this[option.name+'.input']='constant';
-	},this);
-	this.debugOptions.forEach(function(option){
-		this[option.name]=option.defaultValue;
+	this.groupNames.forEach(function(groupName){
+		this[groupName].forEach(function(option){
+			this[option.name]=option.defaultValue;
+			if (groupName=='inputOptions' || groupName=='transformOptions') {
+				this[option.name+'.input']='constant';
+			}
+		},this);
 	},this);
 	this.transformOrder=this.transforms.map(function(transform){
 		return transform.name;
@@ -141,7 +139,7 @@ OptionsBlueprint.prototype.fix=function(){
 };
 
 var OptionsInstance=function(blueprint){
-	['generalOptions','inputOptions','transformOptions','debugOptions'].forEach(function(groupName){
+	blueprint.groupNames.forEach(function(groupName){
 		this[groupName]=[];
 		blueprint[groupName].forEach(function(option){
 			var isHidden=blueprint.generalOptions.some(function(generalOption){
