@@ -1,10 +1,8 @@
 var listeners=require('./listeners.js');
 var shapes=require('./shapes.js');
+var Lines=require('./lines.js');
 
 module.exports=function(options,i18n){
-	var Lines=require('./lines.js')(
-		options.indent=='tab' ? '\t' : Array(parseInt(options.indent)+1).join(' ')
-	);
 	function intOptionValue(name) {
 		return parseInt(options[name]);
 	}
@@ -921,4 +919,9 @@ module.exports=function(options,i18n){
 		"</body>",
 		"</html>",
 	]).join("\n");
+	/*
+	lines.join(
+		options.indent=='tab' ? '\t' : Array(parseInt(options.indent)+1).join(' ')
+	);
+	*/
 };

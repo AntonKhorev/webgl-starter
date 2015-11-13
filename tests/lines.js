@@ -1,15 +1,13 @@
 var assert=require('assert');
 
-var linesMetaclass=require('../src/lines.js');
+var Lines=require('../src/lines.js');
 
 describe('Lines',function(){
 	it('is empty at the beginning',function(){
-		var Lines=linesMetaclass('\t');
 		var lines=new Lines;
 		assert.deepEqual(lines.data,[]);
 	});
 	it('adds one line',function(){
-		var Lines=linesMetaclass('\t');
 		var lines=new Lines;
 		lines.a(
 			"Hello World"
@@ -19,7 +17,6 @@ describe('Lines',function(){
 		]);
 	});
 	it('adds two lines in one call',function(){
-		var Lines=linesMetaclass('\t');
 		var lines=new Lines;
 		lines.a(
 			"Hello",
@@ -31,7 +28,6 @@ describe('Lines',function(){
 		]);
 	});
 	it('adds two lines in two calls',function(){
-		var Lines=linesMetaclass('\t');
 		var lines=new Lines;
 		lines.a(
 			"Hello"
@@ -45,7 +41,6 @@ describe('Lines',function(){
 		]);
 	});
 	it('appends one line to last line',function(){
-		var Lines=linesMetaclass('\t');
 		var lines=new Lines;
 		lines.a(
 			"Hello"
@@ -58,7 +53,6 @@ describe('Lines',function(){
 		]);
 	});
 	it('appends several lines to last line',function(){
-		var Lines=linesMetaclass('\t');
 		var lines=new Lines;
 		lines.a(
 			"a"
@@ -75,7 +69,6 @@ describe('Lines',function(){
 		]);
 	});
 	it('indents by one by default',function(){
-		var Lines=linesMetaclass('\t');
 		var lines=new Lines;
 		lines.a(
 			"1",
@@ -90,7 +83,6 @@ describe('Lines',function(){
 		]);
 	});
 	it('adds Lines object',function(){
-		var Lines=linesMetaclass('\t');
 		var lines=new Lines;
 		var lines2=new Lines;
 		lines2.a(
@@ -104,7 +96,6 @@ describe('Lines',function(){
 		]);
 	});
 	it('adds array of strings',function(){
-		var Lines=linesMetaclass('\t');
 		var lines=new Lines;
 		lines.a([
 			"1","2","3"
@@ -114,20 +105,17 @@ describe('Lines',function(){
 		]);
 	});
 	it('returns self after call to .a()',function(){
-		var Lines=linesMetaclass('\t');
 		var lines=new Lines;
 		var o=lines.a('123');
 		assert(o instanceof Lines);
 	});
 	it('returns self after call to .t()',function(){
-		var Lines=linesMetaclass('\t');
 		var lines=new Lines;
 		lines.a('123');
 		var o=lines.t('456');
 		assert(o instanceof Lines);
 	});
 	it('returns self after call to .indent()',function(){
-		var Lines=linesMetaclass('\t');
 		var lines=new Lines;
 		lines.a('123');
 		var o=lines.indent();
