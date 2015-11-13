@@ -103,4 +103,24 @@ describe('Lines',function(){
 			"nested"
 		]);
 	});
+	it('returns self after call to .a()',function(){
+		var Lines=linesMetaclass('\t');
+		var lines=new Lines;
+		var o=lines.a('123');
+		assert(o instanceof Lines);
+	});
+	it('returns self after call to .t()',function(){
+		var Lines=linesMetaclass('\t');
+		var lines=new Lines;
+		lines.a('123');
+		var o=lines.t('456');
+		assert(o instanceof Lines);
+	});
+	it('returns self after call to .indent()',function(){
+		var Lines=linesMetaclass('\t');
+		var lines=new Lines;
+		lines.a('123');
+		var o=lines.indent();
+		assert(o instanceof Lines);
+	});
 });

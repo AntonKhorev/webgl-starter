@@ -85,7 +85,7 @@ module.exports=function(options,i18n){
 		var needTransformedPosition=options.shader=='light' && options.projection=='perspective';
 
 		function generateMain() {
-			lines=new Lines();
+			var lines=new Lines();
 			['x','y','z'].forEach(function(d){
 				var D=d.toUpperCase();
 				var optName='rotate.'+d;
@@ -312,7 +312,6 @@ module.exports=function(options,i18n){
 			generateMain().indent(),
 			"}"
 		);
-		console.log(lines.data); //
 		return lines.data;
 	}
 	function generateFragmentShaderLines() {
