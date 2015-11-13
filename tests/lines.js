@@ -103,6 +103,16 @@ describe('Lines',function(){
 			"nested"
 		]);
 	});
+	it('adds array of strings',function(){
+		var Lines=linesMetaclass('\t');
+		var lines=new Lines;
+		lines.a([
+			"1","2","3"
+		]);
+		assert.deepEqual(lines.data,[
+			"1","2","3"
+		]);
+	});
 	it('returns self after call to .a()',function(){
 		var Lines=linesMetaclass('\t');
 		var lines=new Lines;

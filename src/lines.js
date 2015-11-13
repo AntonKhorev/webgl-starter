@@ -1,8 +1,6 @@
 /*
 .a = add AFTER last line
 .t = add TO last line
-
-requires array arg for transforms
 */
 
 module.exports=function(indent){
@@ -16,7 +14,9 @@ module.exports=function(indent){
 		for (var i=0;i<s.length;i++) {
 			if (typeof s[i] == 'string') {
 				r.push(s[i]);
-			} else {
+			} else if (Array.isArray(s[i])) {
+				Array.prototype.push.apply(r,s[i]);
+			} else if (s[i] instanceof Lines) {
 				Array.prototype.push.apply(r,s[i].data);
 			}
 		}
