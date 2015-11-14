@@ -7,7 +7,7 @@ describe('SliderListener',function(){
 		var listener=new listeners.SliderListener('mySlider');
 		var entry=listener.enter();
 		var lines=listener.write(false,false);
-		assert.deepEqual(lines,[]);
+		assert.deepEqual(lines.data,[]);
 	});
 	it('supports chained calls to entry',function(){
 		var listener=new listeners.SliderListener('mySlider');
@@ -15,7 +15,7 @@ describe('SliderListener',function(){
 			.pre("preAction();")
 			.post("postAction();");
 		var lines=listener.write(false,false);
-		assert.deepEqual(lines,[
+		assert.deepEqual(lines.data,[
 			"document.getElementById('mySlider').addEventListener('change',function(){",
 			"	preAction();",
 			"	postAction();",
@@ -30,7 +30,7 @@ describe('MultipleSliderListener',function(){
 		listener.enter()
 			.post("postAction();");
 		var lines=listener.write(true,false);
-		assert.deepEqual(lines,[
+		assert.deepEqual(lines.data,[
 			"[].forEach.call(document.querySelectorAll('.mySliders'),function(el){",
 			"	el.addEventListener('change',function(){",
 			"		postAction();",
@@ -44,7 +44,7 @@ describe('MultipleSliderListener',function(){
 		listener.enter()
 			.post("postAction();");
 		var lines=listener.write(false,false);
-		assert.deepEqual(lines,[
+		assert.deepEqual(lines.data,[
 			"[].forEach.call(document.querySelectorAll('.mySliders'),function(el){",
 			"	el.addEventListener('change',postAction);",
 			"});",
@@ -56,14 +56,14 @@ describe('CanvasMousemoveListener',function(){
 	it('is empty',function(){
 		var listener=new listeners.CanvasMousemoveListener();
 		var lines=listener.write(false,false);
-		assert.deepEqual(lines,[]);
+		assert.deepEqual(lines.data,[]);
 	});
 	it('should only have preAction()',function(){
 		var listener=new listeners.CanvasMousemoveListener();
 		var entry=listener.enter();
 		entry.pre("preAction();");
 		var lines=listener.write(false,false);
-		assert.deepEqual(lines,[
+		assert.deepEqual(lines.data,[
 			"canvas.addEventListener('mousemove',function(ev){",
 			"	var rect=this.getBoundingClientRect();",
 			"	preAction();",
@@ -75,7 +75,7 @@ describe('CanvasMousemoveListener',function(){
 		var entry1=listener.enter();
 		var entry2=listener.enter();
 		var lines=listener.write(true,false);
-		assert.deepEqual(lines,[
+		assert.deepEqual(lines.data,[
 			"canvas.addEventListener('mousemove',function(ev){",
 			"	var rect=this.getBoundingClientRect();",
 			"	scheduleFrame();",
@@ -93,7 +93,7 @@ describe('CanvasMousemoveListener',function(){
 			"updateColor();"
 		);
 		var lines=listener.write(false,false);
-		assert.deepEqual(lines,[
+		assert.deepEqual(lines.data,[
 			"canvas.addEventListener('mousemove',function(ev){",
 			"	var rect=this.getBoundingClientRect();",
 			"	updateColor();",
@@ -109,7 +109,7 @@ describe('CanvasMousemoveListener',function(){
 		entry2.pre("preAction2();");
 		entry2.post("postAction();");
 		var lines=listener.write(false,false);
-		assert.deepEqual(lines,[
+		assert.deepEqual(lines.data,[
 			"canvas.addEventListener('mousemove',function(ev){",
 			"	var rect=this.getBoundingClientRect();",
 			"	preAction1();",

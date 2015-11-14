@@ -30,25 +30,6 @@ module.exports=function(options,i18n){
 		return ['mousemovex','mousemovey'].indexOf(options[name+'.input'])>=0;
 	}
 
-	// { move to Lines class
-	function indentLines(level,lines) {
-		return lines.map(function(line){
-			return Array(level+1).join("	")+line;
-		});
-	}
-	function appendLinesToLastLine(lines,addedLines) {
-		var lastLine=lines.pop();
-		var indent=/^\s*/.exec(lastLine)[0];
-		addedLines.forEach(function(line,i){
-			if (i==0) {
-				lines.push(lastLine+line);
-			} else {
-				lines.push(indent+line);
-			}
-		});
-	}
-	// }
-
 	function makeShape() {
 		var className=options.shape.charAt(0).toUpperCase()+options.shape.slice(1);
 		var shapeParams=options.getInputOptionsFor('shape').map(function(option){
@@ -71,6 +52,25 @@ module.exports=function(options,i18n){
 	}
 	var shape=makeShape();
 
+	function generateStyleLines() {
+		return new Lines(
+			"label {",
+			"	display: inline-block;",
+			"	width: 15em;",
+			"	text-align: right;",
+			"}",
+			".min {",
+			"	display: inline-block;",
+			"	width: 3em;",
+			"	text-align: right;",
+			"}",
+			".max {",
+			"	display: inline-block;",
+			"	width: 3em;",
+			"	text-align: left;",
+			"}"
+		);
+	}
 	function generateVertexShaderLines() {
 		var use2dTransform=(
 			shape.dim==2 &&
@@ -310,37 +310,42 @@ module.exports=function(options,i18n){
 			generateMain().indent(),
 			"}"
 		);
-		return lines.data;
+		return lines;
 	}
 	function generateFragmentShaderLines() {
+		var lines=new Lines;
+		lines.a(
+			"precision mediump float;"
+		);
 		if (options.shader=='single') {
 			if (options.hasInputsFor('shader.single.color')) {
-				return [
+				lines.a(
 					"uniform vec4 color;",
 					"void main() {",
 					"	gl_FragColor=color;",
-					"}",
-				];
+					"}"
+				);
 			} else {
-				return [
+				lines.a(
 					"void main() {",
 					"	gl_FragColor=vec4("+glslColorValue('shader.single.color')+");",
-					"}",
-				];
+					"}"
+				);
 			}
 		} else if (options.shader=='vertex' || options.shader=='face') {
-			return [
+			lines.a(
 				"varying vec4 interpolatedColor;",
 				"void main() {",
 				"	gl_FragColor=interpolatedColor;",
-				"}",
-			];
+				"}"
+			);
 		} else if (options.shader=='light') {
-			var lines=[];
 			if (options.projection=='perspective') {
-				lines.push("varying vec3 interpolatedView;");
+				lines.a(
+					"varying vec3 interpolatedView;"
+				);
 			}
-			lines.push(
+			lines.a(
 				"varying vec3 interpolatedNormal;",
 				"void main() {",
 				"	vec3 ambientColor=vec3(0.2,0.2,0.2);",
@@ -349,23 +354,23 @@ module.exports=function(options,i18n){
 				"	float shininess=100.0;"
 			);
 			if (options.projection=='ortho') {
-				lines.push(
+				lines.a(
 					"	vec3 V=vec3( 0.0, 0.0,+1.0);"
 				);
 			} else if (options.projection=='perspective') {
-				lines.push(
+				lines.a(
 					"	vec3 V=normalize(interpolatedView);"
 				);
 			}
-			lines.push(
+			lines.a(
 				"	vec3 N=normalize(interpolatedNormal);"
 			);
 			if (shape.twoSided) {
-				lines.push(
+				lines.a(
 					"	if (!gl_FrontFacing) N=-N;"
 				);
 			}
-			lines.push(
+			lines.a(
 				"	vec3 L=normalize(vec3(-1.0,+1.0,+1.0));",
 				"	vec3 H=normalize(L+V);",
 				"	gl_FragColor=vec4(",
@@ -375,35 +380,34 @@ module.exports=function(options,i18n){
 				"	,1.0);",
 				"}"
 			);
-			return lines;
 		}
+		return lines;
 	}
 	function generateControlMessageLines() {
-		var lines=[];
+		var lines=new Lines;
 		function writeOptionGroup(group) {
 			group.filter(function(option){
 				return isMousemoveInput(option.name);
 			}).forEach(function(option){
-				lines.push(
-					"	<li>"+i18n('controls.type.'+options[option.name+'.input'])+" "+i18n('controls.to')+" <strong>"+i18n('options.'+option.name)+"</strong></li>"
+				lines.a(
+					"<li>"+i18n('controls.type.'+options[option.name+'.input'])+" "+i18n('controls.to')+" <strong>"+i18n('options.'+option.name)+"</strong></li>"
 				);
 			});
 		}
 		writeOptionGroup(options.inputOptions);
 		writeOptionGroup(options.transformOptions);
-		if (lines.length) {
-			return ["<ul>"].concat(lines,["</ul>"]);
-		} else {
-			return [];
-		}
+		return lines.wrapIfNotEmpty(
+			"<ul>",
+			"</ul>"
+		);
 	}
 	function generateInputLines() {
-		var lines=[];
+		var lines=new Lines;
 		function writeOptionGroup(group) {
 			group.filter(function(option){
 				return options[option.name+'.input']=='slider';
 			}).forEach(function(option){
-				lines.push(
+				lines.a(
 					"<div>",
 					"	<label for='"+option.name+"'>"+i18n('options.'+option.name)+":</label>",
 					"	<span class='min'>"+option.getMinLabel()+"</span> "+
@@ -421,47 +425,80 @@ module.exports=function(options,i18n){
 		return lines;
 	}
 	function generateMakeProgramLines() {
-		lines=[
-			"function makeProgram(vertexShaderSrc,fragmentShaderSrc) {",
-			"	var vertexShader=gl.createShader(gl.VERTEX_SHADER);",
-			"	gl.shaderSource(vertexShader,vertexShaderSrc);",
-			"	gl.compileShader(vertexShader);",
-		];
-		if (options.debugShader) {
-			lines.push(
-				"	if (!gl.getShaderParameter(vertexShader,gl.COMPILE_STATUS)) console.log(gl.getShaderInfoLog(vertexShader));"
-			);
-		}
-		lines.push(
-			"	var fragmentShader=gl.createShader(gl.FRAGMENT_SHADER);",
-			"	gl.shaderSource(fragmentShader,fragmentShaderSrc);",
-			"	gl.compileShader(fragmentShader);"
+		var lines=new Lines;
+		lines.a(
+			"var vertexShader=gl.createShader(gl.VERTEX_SHADER);",
+			"gl.shaderSource(vertexShader,vertexShaderSrc);",
+			"gl.compileShader(vertexShader);"
 		);
 		if (options.debugShader) {
-			lines.push(
-				"	if (!gl.getShaderParameter(fragmentShader,gl.COMPILE_STATUS)) console.log(gl.getShaderInfoLog(fragmentShader));"
+			lines.a(
+				"if (!gl.getShaderParameter(vertexShader,gl.COMPILE_STATUS)) console.log(gl.getShaderInfoLog(vertexShader));"
 			);
 		}
-		lines.push(
-			"	var program=gl.createProgram();",
-			"	gl.attachShader(program,vertexShader);",
-			"	gl.attachShader(program,fragmentShader);",
-			"	gl.linkProgram(program);",
-			"	return program;",
+		lines.a(
+			"var fragmentShader=gl.createShader(gl.FRAGMENT_SHADER);",
+			"gl.shaderSource(fragmentShader,fragmentShaderSrc);",
+			"gl.compileShader(fragmentShader);"
+		);
+		if (options.debugShader) {
+			lines.a(
+				"if (!gl.getShaderParameter(fragmentShader,gl.COMPILE_STATUS)) console.log(gl.getShaderInfoLog(fragmentShader));"
+			);
+		}
+		lines.a(
+			"var program=gl.createProgram();",
+			"gl.attachShader(program,vertexShader);",
+			"gl.attachShader(program,fragmentShader);",
+			"gl.linkProgram(program);",
+			"return program;"
+		);
+		return lines.wrap(
+			"function makeProgram(vertexShaderSrc,fragmentShaderSrc) {",
 			"}"
+		);
+	}
+	function generateJsInitLines() {
+		var lines=new Lines;
+		lines.a(
+			"var canvas=document.getElementById('myCanvas');",
+			"var gl=canvas.getContext('webgl')||canvas.getContext('experimental-webgl');"
+		);
+		if (options.background=='solid' && !options.hasInputsFor('background.solid.color') && !(
+			// default clear color in OpenGL
+			options['background.solid.color.r']==0 &&
+			options['background.solid.color.g']==0 &&
+			options['background.solid.color.b']==0 &&
+			options['background.solid.color.a']==0
+		)) {
+			lines.a(
+				"gl.clearColor("+colorValue('background.solid.color')+");"
+			)
+		}
+		if (shape.dim>2) {
+			lines.a(
+				"gl.enable(gl.DEPTH_TEST);"
+			);
+		}
+		lines.a(
+			"var program=makeProgram(",
+			"	document.getElementById('myVertexShader').text,",
+			"	document.getElementById('myFragmentShader').text",
+			");",
+			"gl.useProgram(program);"
 		);
 		return lines;
 	}
 	function generateInputHandlerLines() {
-		var lines=[];
+		var lines=new Lines;
 		function writeListener(listener) {
-			lines=lines.concat(
+			lines.a(
 				listener.write(!options.isAnimated(),options.debugInputs)
 			);
 		}
 		var canvasMousemoveListener=new listeners.CanvasMousemoveListener();
 		function canvasUpdater() {
-			lines.push(
+			lines.a(
 				"function updateAspect() {",
 				"	gl.viewport(0,0,canvas.width,canvas.height);",
 				"	gl.uniform1f(aspectLoc,canvas.width/canvas.height);",
@@ -484,25 +521,25 @@ module.exports=function(options,i18n){
 			['r','g','b','a'].forEach(function(c){
 				var name=optionPrefix+'.'+c;
 				if (isMousemoveInput(name)) {
-					lines.push(
+					lines.a(
 						"var "+stateVarPrefix+c.toUpperCase()+'='+floatOptionValue(name)+';'
 					);
 				}
 			});
 		}
 		function colorUpdater(optionPrefix,updateFnName,stateVarPrefix,allInputsPre,allInputsPost,someInputsPre,someInputsPost) {
-			lines.push(
+			lines.a(
 				"function "+updateFnName+"() {"
 			);
 			if (options.hasAllSliderInputsFor(optionPrefix)) {
-				lines.push(
+				lines.a(
 					"	"+allInputsPre+"['r','g','b','a'].map(function(c){",
 					"		return parseFloat(document.getElementById('"+optionPrefix+".'+c).value);",
 					"	})"+allInputsPost
 				);
 			// TODO hasAllStateInputsFor(optionPrefix)
 			} else {
-				lines.push(
+				lines.a(
 					"	"+someInputsPre+['r','g','b','a'].map(function(c){
 						var name=optionPrefix+'.'+c;
 						if (options[name+'.input']=='slider') {
@@ -515,7 +552,7 @@ module.exports=function(options,i18n){
 					}).join()+someInputsPost
 				);
 			}
-			lines.push(
+			lines.a(
 				"}",
 				updateFnName+"();"
 			);
@@ -576,7 +613,7 @@ module.exports=function(options,i18n){
 			colorListeners(optionPrefix,updateFnName,stateVarPrefix);
 		}
 		if (options.hasInputsFor('canvas')) {
-			lines.push(
+			lines.a(
 				"var aspectLoc=gl.getUniformLocation(program,'aspect');"
 			);
 			canvasUpdater();
@@ -591,7 +628,7 @@ module.exports=function(options,i18n){
 			);
 		}
 		if (options.hasInputsFor('shader.single.color')) {
-			lines.push(
+			lines.a(
 				"var colorLoc=gl.getUniformLocation(program,'color');"
 			);
 			colorStatesAndUpdaterAndListeners(
@@ -639,7 +676,7 @@ module.exports=function(options,i18n){
 				var entry=listener.enter()
 					.log("console.log(this.id,'input value:',parseFloat(this.value));");
 				if (options[optName+'.speed']==0 && options[optName+'.speed.input']=='constant') {
-					lines.push(
+					lines.a(
 						"var "+varName+"Loc=gl.getUniformLocation(program,'"+varName+"');",
 						"function "+updateName+"() {",
 						"	gl.uniform1f("+varName+"Loc,parseFloat(document.getElementById('"+optName+"').value));",
@@ -651,7 +688,7 @@ module.exports=function(options,i18n){
 				writeListener(listener);
 			} else if (isMousemoveInput(optName)) {
 				if (options[optName+'.speed']==0 && options[optName+'.speed.input']=='constant') {
-					lines.push(
+					lines.a(
 						"var "+varName+"Loc=gl.getUniformLocation(program,'"+varName+"');",
 						"gl.uniform1f("+varName+"Loc,"+floatOptionValue(optName)+");"
 					);
@@ -691,7 +728,7 @@ module.exports=function(options,i18n){
 			}
 		});
 		writeListener(canvasMousemoveListener);
-		if (lines.length) lines.push("	");
+		if (!lines.isEmpty()) lines.a("	");
 		return lines;
 	}
 	function generateRenderLines() {
@@ -700,7 +737,7 @@ module.exports=function(options,i18n){
 		function renderInner() {
 			var needWrap=false; // set by renderInnerTransforms()
 			function renderInnerTransforms() {
-				var lines=[];
+				var lines=new Lines;
 				['x','y','z'].forEach(function(d){
 					var D=d.toUpperCase();
 					var optName='rotate.'+d;
@@ -709,7 +746,7 @@ module.exports=function(options,i18n){
 						if (options[optName+'.speed.input']=='constant' && options[optName+'.input']=='constant') {
 							// no rotation state branch
 							needStartTime=true;
-							lines.push(
+							lines.a(
 								"var "+varName+"="+(options[optName]
 									? floatOptionValue(optName)+"+"
 									: ""
@@ -719,18 +756,18 @@ module.exports=function(options,i18n){
 							// rotation state branch
 							needPrevTime=true;
 							if (options[optName+'.input']=='slider') {
-								lines.push(
+								lines.a(
 									"var "+varName+"Input=document.getElementById('"+optName+"');",
 									"var "+varName+"=parseFloat("+varName+"Input.value);"
 								);
 							}
 							if (options[optName+'.speed.input']=='slider') {
-								lines.push(
+								lines.a(
 									"var "+varName+"SpeedInput=document.getElementById('"+optName+".speed');",
 									"var "+varName+"Speed=parseFloat("+varName+"SpeedInput.value);"
 								);
 							}
-							lines.push(
+							lines.a(
 								varName+"+="+(options[optName+'.speed.input']=='constant'
 									? floatOptionValue(optName+'.speed')
 									: varName+"Speed"
@@ -738,13 +775,13 @@ module.exports=function(options,i18n){
 							);
 							if (options[optName+'.input']=='slider') {
 								needWrap=true;
-								lines.push(
+								lines.a(
 									varName+"=wrap("+varName+",180);",
 									varName+"Input.value="+varName+";"
 								);
 							}
 						}
-						lines.push(
+						lines.a(
 							"gl.uniform1f("+varName+"Loc,"+varName+");"
 						);
 					}
@@ -752,9 +789,9 @@ module.exports=function(options,i18n){
 				return lines;
 			}
 			var innerTransformsLines=renderInnerTransforms();
-			var lines=[];
+			var lines=new Lines;
 			if (needWrap) {
-				lines.push(
+				lines.a(
 					"function wrap(v,maxAbsV) {",
 					"	v%=maxAbsV*2;",
 					"	if (Math.abs(v)<=maxAbsV) return v;",
@@ -763,17 +800,17 @@ module.exports=function(options,i18n){
 				);
 			}
 			if (options.background=='solid') {
-				lines.push(
+				lines.a(
 					"gl.clear(gl.COLOR_BUFFER_BIT);"
 				);
 			}
-			lines=lines.concat(
+			lines.a(
 				innerTransformsLines,
 				shape.writeDraw()
 			);
 			return lines;
 		}
-		var lines=[];
+		var lines=new Lines;
 		var innerLines=renderInner();
 		if (options.isAnimated()) {
 			['x','y','z'].forEach(function(d){
@@ -787,54 +824,52 @@ module.exports=function(options,i18n){
 						options[optName+'.speed']==0 && options[optName+'.speed.input']=='constant'
 					)
 				) {
-					lines.push(
+					lines.a(
 						"var "+varName+"Loc=gl.getUniformLocation(program,'"+varName+"');"
 					);
 				}
 				if (options[optName+'.speed.input']!='constant' && options[optName+'.input']=='constant') {
-					lines.push(
+					lines.a(
 						"var "+varName+"="+floatOptionValue(optName)+";"
 					);
 				}
 			});
 			if (needStartTime && needPrevTime) {
-				lines.push(
+				lines.a(
 					"var startTime=performance.now();",
 					"var prevTime=startTime;"
 				);
 			} else if (needStartTime) {
-				lines.push(
+				lines.a(
 					"var startTime=performance.now();"
 				);
 			} else if (needPrevTime) {
-				lines.push(
+				lines.a(
 					"var prevTime=performance.now();"
 				);
 			}
 		}
 		// wrap inner render lines in function if needed
 		if (options.isAnimated()) {
-			lines.push(
-				"function renderFrame(time) {"
+			lines.a(
+				"function renderFrame(time) {",
+				innerLines.indent()
 			);
-			lines=lines.concat(indentLines(1,innerLines));
 			if (needPrevTime) {
-				lines.push(
+				lines.a(
 					"	prevTime=time;"
 				);
 			}
-			lines.push(
+			lines.a(
 				"	requestAnimationFrame(renderFrame);",
 				"}",
 				"requestAnimationFrame(renderFrame);"
 			);
 		} else if (options.hasInputs()) {
-			lines.push(
+			lines.a(
 				"var frameId=null;",
-				"function renderFrame() {"
-			);
-			lines=lines.concat(indentLines(1,innerLines));
-			lines.push(
+				"function renderFrame() {",
+				innerLines.indent(),
 				"	frameId=null;",
 				"}",
 				"function scheduleFrame() {",
@@ -845,83 +880,55 @@ module.exports=function(options,i18n){
 				"scheduleFrame();"
 			);
 		} else {
-			lines=lines.concat(innerLines);
+			lines.a(innerLines);
 		}
 		return lines;
 	}
 
-	return [].concat([
+	var lines=new Lines;
+	lines.a(
 		"<!DOCTYPE html>",
 		"<html lang='en'>",
 		"<head>",
 		"<meta charset='utf-8' />",
-		"<title>Generated code</title>",
-	],options.hasSliderInputs()?[
-		"<style>",
-		"	label {",
-		"		display: inline-block;",
-		"		width: 15em;",
-		"		text-align: right;",
-		"	}",
-		"	.min {",
-		"		display: inline-block;",
-		"		width: 3em;",
-		"		text-align: right;",
-		"	}",
-		"	.max {",
-		"		display: inline-block;",
-		"		width: 3em;",
-		"		text-align: left;",
-		"	}",
-		"</style>",
-	]:[],[
+		"<title>Generated code</title>"
+	);
+	if (options.hasSliderInputs()) {
+		lines.a(
+			"<style>",
+			generateStyleLines().indent(),
+			"</style>"
+		);
+	}
+	lines.a(
 		"<script id='myVertexShader' type='x-shader/x-vertex'>",
-	],indentLines(1,generateVertexShaderLines()),[
+		generateVertexShaderLines().indent(),
 		"</script>",
 		"<script id='myFragmentShader' type='x-shader/x-fragment'>",
-		"	precision mediump float;",
-	],indentLines(1,generateFragmentShaderLines()),[
+		generateFragmentShaderLines().indent(),
 		"</script>",
 		"</head>",
 		"<body>",
 		"<div>",
 		"	<canvas id='myCanvas' width='"+intOptionValue('canvas.width')+"' height='"+intOptionValue('canvas.height')+"'></canvas>",
 		"</div>",
-	],generateControlMessageLines(),generateInputLines(),[
+		generateControlMessageLines(),
+		generateInputLines(),
 		"<script>",
-	],indentLines(1,generateMakeProgramLines()),[
+		generateMakeProgramLines().indent(),
 		"	",
-		"	var canvas=document.getElementById('myCanvas');",
-		"	var gl=canvas.getContext('webgl')||canvas.getContext('experimental-webgl');",
-	],(
-		options.background=='solid' && !options.hasInputsFor('background.solid.color') && !(
-			// default clear color in OpenGL
-			options['background.solid.color.r']==0 &&
-			options['background.solid.color.g']==0 &&
-			options['background.solid.color.b']==0 &&
-			options['background.solid.color.a']==0
-		)
-	)?[
-		"	gl.clearColor("+colorValue('background.solid.color')+");",
-	]:[],shape.dim>2?[
-		"	gl.enable(gl.DEPTH_TEST);"
-	]:[],[
-		"	var program=makeProgram(",
-		"		document.getElementById('myVertexShader').text,",
-		"		document.getElementById('myFragmentShader').text",
-		"	);",
-		"	gl.useProgram(program);",
+		generateJsInitLines().indent(),
 		"	",
-	],indentLines(1,shape.writeInit()),[
+		//shape.writeInit().indent(),
+		shape.writeInit(), // TODO
 		"	",
-	],indentLines(1,generateInputHandlerLines()),indentLines(1,generateRenderLines()),[
+		generateInputHandlerLines().indent(),
+		generateRenderLines().indent(),
 		"</script>",
 		"</body>",
-		"</html>",
-	]).join("\n");
-	/*
-	lines.join(
+		"</html>"
+	);
+	return lines.join(
 		options.indent=='tab' ? '\t' : Array(parseInt(options.indent)+1).join(' ')
 	);
-	*/
 };

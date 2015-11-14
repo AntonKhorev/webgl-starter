@@ -3,9 +3,29 @@ var assert=require('assert');
 var Lines=require('../src/lines.js');
 
 describe('Lines',function(){
-	it('is empty at the beginning',function(){
+	it('has no lines at the beginning',function(){
 		var lines=new Lines;
 		assert.deepEqual(lines.data,[]);
+	});
+	it('is empty at the beginning',function(){
+		var lines=new Lines;
+		assert(lines.isEmpty());
+	});
+	it('is not empty if lines added',function(){
+		var lines=new Lines(
+			"something"
+		);
+		assert(!lines.isEmpty());
+	});
+	it('adds lines with ctor args',function(){
+		var lines=new Lines(
+			"foo",
+			"bar"
+		);
+		assert.deepEqual(lines.data,[
+			"foo",
+			"bar"
+		]);
 	});
 	it('adds one line',function(){
 		var lines=new Lines;
@@ -104,6 +124,73 @@ describe('Lines',function(){
 			"1","2","3"
 		]);
 	});
+	it('wraps nonempty lines',function(){
+		var lines=new Lines;
+		lines.a(
+			"foo();",
+			"bar();"
+		).wrap(
+			"function fooBar() {",
+			"}"
+		);
+		assert.deepEqual(lines.data,[
+			"function fooBar() {",
+			"	foo();",
+			"	bar();",
+			"}"
+		]);
+	});
+	it('wraps empty lines',function(){
+		var lines=new Lines;
+		lines.wrap(
+			"function fubar() {",
+			"}"
+		);
+		assert.deepEqual(lines.data,[
+			"function fubar() {",
+			"}"
+		]);
+	});
+	it('wrapsIfNotEmpty nonempty lines',function(){
+		var lines=new Lines;
+		lines.a(
+			"foo();",
+			"bar();"
+		).wrapIfNotEmpty(
+			"function fooBar() {",
+			"}"
+		);
+		assert.deepEqual(lines.data,[
+			"function fooBar() {",
+			"	foo();",
+			"	bar();",
+			"}"
+		]);
+	});
+	it("doesn't wrapIfNotEmpty empty lines",function(){
+		var lines=new Lines;
+		lines.wrapIfNotEmpty(
+			"function fubar() {",
+			"}"
+		);
+		assert.deepEqual(lines.data,[
+		]);
+	});
+	/*
+	it('wraps each line',function(){
+		var lines=new Lines(
+			"Hello",
+			"World"
+		);
+		lines.wrapEachLine(
+			"<b>","</b>"
+		);
+		assert.deepEqual(lines.data,[
+			"<b>Hello</b>",
+			"<b>World</b>"
+		]);
+	});
+	*/
 	it('returns self after call to .a()',function(){
 		var lines=new Lines;
 		var o=lines.a('123');
@@ -120,5 +207,13 @@ describe('Lines',function(){
 		lines.a('123');
 		var o=lines.indent();
 		assert(o instanceof Lines);
+	});
+	it('joins lines',function(){
+		var lines=new Lines(
+			"foo",
+			"bar"
+		);
+		var s=lines.join('\t');
+		assert.equal(s,"foo\nbar");
 	});
 });

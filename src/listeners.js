@@ -1,3 +1,5 @@
+var Lines=require('./lines.js');
+
 var Listener=function(){
 	this.entries=[];
 };
@@ -40,10 +42,7 @@ Listener.prototype.wrapCall=function(line){
 	return line;
 };
 Listener.prototype.write=function(haveToUpdateCanvas,haveToLogInput){
-	function indent(line) {
-		return "\t"+line;
-	}
-	var outerLines=[];
+	var outerLines=new Lines;
 	var innerLinesGraph={};
 	var innerLinesRoot=[];
 	var innerLinesPrev=null;
@@ -97,7 +96,7 @@ Listener.prototype.write=function(haveToUpdateCanvas,haveToLogInput){
 				}
 			}
 			if (currentCond!==null) {
-				lines.push(indent(line));
+				lines.push('\t'+line);
 			} else {
 				lines.push(line);
 			}
@@ -119,10 +118,10 @@ Listener.prototype.write=function(haveToUpdateCanvas,haveToLogInput){
 		if (currentCond!==null) {
 			lines.push("}");
 		}
-		return lines;
+		return new Lines(lines);
 	}
 	this.entries.forEach(function(entry){
-		outerLines=outerLines.concat(entry.state);
+		outerLines.a(entry.state);
 		entry.pre.forEach(function(line){
 			addInnerLine(line,null);
 		});
@@ -141,26 +140,33 @@ Listener.prototype.write=function(haveToUpdateCanvas,haveToLogInput){
 	});
 	var br=this.bracketListener();
 	var innerLines=writeInnerLines();
-	if (innerLines.length) {
-		innerLines=this.innerPrependedLines().concat(innerLines);
+	if (!innerLines.isEmpty()) {
+		innerLines=new Lines(
+			this.innerPrependedLines(),
+			innerLines
+		);
 	}
-	if (innerLines.length==1) {
-		var match=/^(\w+)\(\);$/.exec(innerLines[0]);
+	if (innerLines.data.length==1) {
+		var match=/^(\w+)\(\);$/.exec(innerLines.data[0]);
 		if (match) {
-			return outerLines.concat(
+			return outerLines.a(
 				this.wrapCall(
-					[br[0]+match[1]+br[1]]
+					new Lines(
+						br[0]+match[1]+br[1]
+					)
 				)
 			);
 		}
+		// TODO what if no match?
 	}
-	if (innerLines.length) {
-		return outerLines.concat(
-			this.wrapCall([].concat(
-				[br[0]+"function("+this.bracketFnArg()+"){"],
-				innerLines.map(indent),
-				["}"+br[1]]
-			))
+	if (innerLines.data.length) {
+		return outerLines.a(
+			this.wrapCall(
+				innerLines.wrap(
+					br[0]+"function("+this.bracketFnArg()+"){",
+					"}"+br[1]
+				)
+			)
 		);
 	} else {
 		return outerLines;
@@ -184,12 +190,9 @@ var MultipleSliderListener=function(query){
 MultipleSliderListener.prototype=Object.create(Listener.prototype);
 MultipleSliderListener.prototype.constructor=MultipleSliderListener;
 MultipleSliderListener.prototype.wrapCall=function(lines){
-	return [].concat(
-		["[].forEach.call(document.querySelectorAll('"+this.query+"'),function(el){"],
-		lines.map(function(line){
-			return "\t"+line;
-		}),
-		["});"]
+	return lines.wrap(
+		"[].forEach.call(document.querySelectorAll('"+this.query+"'),function(el){",
+		"});"
 	);
 };
 MultipleSliderListener.prototype.bracketListener=function(){

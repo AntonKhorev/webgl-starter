@@ -5,6 +5,9 @@
 
 var Lines=function(){
 	this.data=[];
+	this.addFlattenedArgs(
+		this.flattenArgs(arguments)
+	);
 };
 
 // private
@@ -44,6 +47,32 @@ Lines.prototype.indent=function(){
 		return '\t'+line;
 	});
 	return this;
+};
+Lines.prototype.isEmpty=function(){
+	return this.data.length<=0;
+};
+Lines.prototype.wrap=function(begin,end){
+	this.indent();
+	this.data.unshift(begin);
+	this.data.push(end);
+	return this;
+};
+Lines.prototype.wrapIfNotEmpty=function(begin,end){
+	if (!this.isEmpty()) {
+		this.wrap(begin,end);
+	}
+	return this;
+};
+/*
+Lines.prototype.wrapEachLine=function(begin,end){
+	this.data=this.data.map(function(line){
+		return begin+line+end;
+	});
+	return this;
+};
+*/
+Lines.prototype.join=function(){ // TODO formatting options
+	return this.data.join('\n');
 };
 
 module.exports=Lines;
