@@ -138,6 +138,28 @@ describe('Lines',function(){
 			"1","2","3"
 		]);
 	});
+	it('interleaves nonempty line groups',function(){
+		var lines=new Lines;
+		lines.interleave(
+			new Lines('a','b'),
+			new Lines('c'),
+			'd'
+		);
+		assert.deepEqual(lines.data,[
+			'a','b','','c','','d'
+		]);
+	});
+	it('interleaves line groups, some of which are empty',function(){
+		var lines=new Lines;
+		lines.interleave(
+			new Lines('a','b'),
+			new Lines(),
+			'd'
+		);
+		assert.deepEqual(lines.data,[
+			'a','b','','d'
+		]);
+	});
 	it('wraps nonempty lines',function(){
 		var lines=new Lines;
 		lines.a(

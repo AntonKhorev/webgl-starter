@@ -54,6 +54,21 @@ Lines.prototype.indent=function(level){
 Lines.prototype.isEmpty=function(){
 	return this.data.length<=0;
 };
+Lines.prototype.interleave=function(){
+	var first=true;
+	for (var i=0;i<arguments.length;i++) {
+		var r=this.flattenArgs([arguments[i]]);
+		if (r.length>0) {
+			if (first) {
+				first=false;
+			} else {
+				this.data.push('');
+			}
+			this.addFlattenedArgs(r);
+		}
+	}
+	return this;
+};
 Lines.prototype.wrap=function(begin,end){
 	this.indent();
 	this.data.unshift(begin);

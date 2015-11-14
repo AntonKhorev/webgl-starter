@@ -735,7 +735,6 @@ module.exports=function(options,i18n){
 			}
 		});
 		writeListener(canvasMousemoveListener);
-		if (!lines.isEmpty()) lines.a("	");
 		return lines;
 	}
 	function generateJsRenderLines() {
@@ -892,6 +891,17 @@ module.exports=function(options,i18n){
 		return lines;
 	}
 
+	var scriptLines=new Lines;
+	scriptLines.interleave(
+		generateJsMakeProgramLines(),
+		generateJsInitLines(),
+		shape.writeInit(),
+		generateJsInputHandlerLines(),
+		generateJsRenderLines()
+	).wrap(
+		"<script>",
+		"</script>"
+	);
 	var lines=new Lines;
 	lines.a(
 		"<!DOCTYPE html>",
@@ -913,17 +923,7 @@ module.exports=function(options,i18n){
 		"</div>",
 		generateHtmlControlMessageLines(),
 		generateHtmlInputLines(),
-		"<script>",
-		generateJsMakeProgramLines().indent(),
-		"	",
-		generateJsInitLines().indent(),
-		"	",
-		shape.writeInit().indent(),
-		"	",
-		generateJsInputHandlerLines().indent(),
-		//"	", // TODO
-		generateJsRenderLines().indent(),
-		"</script>",
+		scriptLines,
 		"</body>",
 		"</html>"
 	);
