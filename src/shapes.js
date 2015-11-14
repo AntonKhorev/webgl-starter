@@ -180,6 +180,98 @@ LodShape.prototype.writeArraysAndBufferData=function(c,cv){
 	return lines;
 };
 
+var Mesh=function(shaderType,lod){
+	LodShape.call(this,shaderType,lod);
+};
+Mesh.prototype=Object.create(LodShape.prototype);
+Mesh.prototype.constructor=Mesh;
+Mesh.prototype.dim=3;
+Mesh.prototype.usesElements=function(){
+	return this.shaderType!='face';
+};
+// abstract Mesh.prototype.writeMeshInit=function(){};
+// abstract Mesh.prototype.writeMeshVertex=function(c,cv){};
+Mesh.prototype.writeStoreShape=function(c,cv){
+	var lines=new Lines;
+	lines.a(
+		"var res=(1<<shapeLod);"
+	);
+	if (this.shaderType!='face') {
+		lines.a(
+			"function vertexElement(i,j) {",
+			"	return i*(res+1)+j;",
+			"}"
+		);
+	} else {
+		lines.a(
+			"function vertexElement(i,j,k) {",
+			"	return (i*res+j)*6+k;",
+			"}"
+		);
+	}
+	if (this.getNumbersPerNormal()) {
+		lines.a(
+			"function normalize(v) {",
+			"	var l=Math.sqrt(v[0]*v[0]+v[1]*v[1]+v[2]*v[2]);",
+			"	return [v[0]/l,v[1]/l,v[2]/l];",
+			"}"
+		);
+	}
+	if (c) {
+		lines.a(
+			"var colors=[",
+			"	[1.0, 1.0, 0.0],",
+			"	[1.0, 0.0, 0.0],",
+			"	[0.0, 1.0, 0.0],",
+			"	[0.0, 0.0, 1.0],",
+			"];"
+		);
+	}
+	lines.a(
+		this.writeMeshInit()
+	);
+	if (this.shaderType!='face') {
+		lines.a(
+			"var i,j;",
+			"for (i=0;i<=res;i++) {",
+			"	var y=i/res*xyRange*2-xyRange;",
+			"	for (j=0;j<=res;j++) {",
+			"		var x=j/res*xyRange*2-xyRange;",
+			"		var vertexOffset=vertexElement(i,j)*"+this.getNumbersPerVertex()+";",
+			this.writeMeshVertex(c,cv).indent(2),
+			"	}",
+			"}",
+			"for (i=0;i<res;i++) {",
+			"	for (j=0;j<res;j++) {",
+			"		var elementOffset=(i*res+j)*6;",
+			"		elements[elementOffset+0]=vertexElement(i+0,j+0);",
+			"		elements[elementOffset+1]=vertexElement(i+0,j+1);",
+			"		elements[elementOffset+2]=vertexElement(i+1,j+0);",
+			"		elements[elementOffset+3]=vertexElement(i+1,j+0);",
+			"		elements[elementOffset+4]=vertexElement(i+0,j+1);",
+			"		elements[elementOffset+5]=vertexElement(i+1,j+1);",
+			"	}",
+			"}"
+		);
+	} else {
+		lines.a(
+			"for (var i=0;i<res;i++) {",
+			"	for (var j=0;j<res;j++) {",
+			"		for (var k=0;k<6;k++) {",
+			"			var di=[0,0,1,1,0,1][k];",
+			"			var dj=[0,1,0,0,1,1][k];",
+			"			var y=(i+di)/res*xyRange*2-xyRange;",
+			"			var x=(j+dj)/res*xyRange*2-xyRange;",
+			"			var vertexOffset=vertexElement(i,j,k)*"+this.getNumbersPerVertex()+";",
+			this.writeMeshVertex(c,cv).indent(3),
+			"		}",
+			"	}",
+			"}"
+		);
+	}
+	return lines;
+};
+
 var Square=function(shaderType){
 	Shape.call(this,shaderType);
 };
@@ -389,21 +481,23 @@ Cube.prototype.writeArrays=function(c,cv){
 };
 
 var Hat=function(shaderType,lod){
-	LodShape.call(this,shaderType,lod);
+	Mesh.call(this,shaderType,lod);
 };
-Hat.prototype=Object.create(LodShape.prototype);
+Hat.prototype=Object.create(Mesh.prototype);
 Hat.prototype.constructor=Hat;
-Hat.prototype.dim=3;
-Hat.prototype.usesElements=function(){
-	return this.shaderType!='face';
-};
 Hat.prototype.getDistinctVertexCount=function(lodSymbol){
 	return "Math.pow((1<<"+lodSymbol+")+1,2)";
 };
 Hat.prototype.getTotalVertexCount=function(lodSymbol){
 	return "Math.pow((1<<"+lodSymbol+"),2)*6";
 };
-Hat.prototype.writeGridVertex=function(c,cv){
+Hat.prototype.writeMeshInit=function(){
+	return new Lines(
+		"var xyRange=4;",
+		"var xyScale=1/(4*Math.sqrt(2));"
+	);
+};
+Hat.prototype.writeMeshVertex=function(c,cv){
 	var lines=new Lines;
 	lines.a(
 		"var r2=(x*x+y*y)/2;",
@@ -430,178 +524,24 @@ Hat.prototype.writeGridVertex=function(c,cv){
 	}
 	return lines;
 };
-Hat.prototype.writeStoreShape=function(c,cv){
-	var lines=new Lines;
-	lines.a(
-		"var xyRange=4;",
-		"var xyScale=1/(4*Math.sqrt(2));",
-		"var res=(1<<shapeLod);"
-	);
-	if (this.shaderType!='face') {
-		lines.a(
-			"function vertexElement(i,j) {",
-			"	return i*(res+1)+j;",
-			"}"
-		);
-	} else {
-		lines.a(
-			"function vertexElement(i,j,k) {",
-			"	return (i*res+j)*6+k;",
-			"}"
-		);
-	}
-	if (this.getNumbersPerNormal()) {
-		lines.a(
-			"function normalize(v) {",
-			"	var l=Math.sqrt(v[0]*v[0]+v[1]*v[1]+v[2]*v[2]);",
-			"	return [v[0]/l,v[1]/l,v[2]/l];",
-			"}"
-		);
-	}
-	if (c) {
-		lines.a(
-			"var colors=[",
-			"	[1.0, 1.0, 0.0],",
-			"	[1.0, 0.0, 0.0],",
-			"	[0.0, 1.0, 0.0],",
-			"	[0.0, 0.0, 1.0],",
-			"];"
-		);
-	}
-	if (this.shaderType!='face') {
-		lines.a(
-			"var i,j;",
-			"for (i=0;i<=res;i++) {",
-			"	var y=i/res*xyRange*2-xyRange;",
-			"	for (j=0;j<=res;j++) {",
-			"		var x=j/res*xyRange*2-xyRange;",
-			"		var vertexOffset=vertexElement(i,j)*"+this.getNumbersPerVertex()+";",
-			this.writeGridVertex(c,cv).indent(2),
-			"	}",
-			"}",
-			"for (i=0;i<res;i++) {",
-			"	for (j=0;j<res;j++) {",
-			"		var elementOffset=(i*res+j)*6;",
-			"		elements[elementOffset+0]=vertexElement(i+0,j+0);",
-			"		elements[elementOffset+1]=vertexElement(i+0,j+1);",
-			"		elements[elementOffset+2]=vertexElement(i+1,j+0);",
-			"		elements[elementOffset+3]=vertexElement(i+1,j+0);",
-			"		elements[elementOffset+4]=vertexElement(i+0,j+1);",
-			"		elements[elementOffset+5]=vertexElement(i+1,j+1);",
-			"	}",
-			"}"
-		);
-	} else {
-		lines.a(
-			"for (var i=0;i<res;i++) {",
-			"	for (var j=0;j<res;j++) {",
-			"		for (var k=0;k<6;k++) {",
-			"			var di=[0,0,1,1,0,1][k];",
-			"			var dj=[0,1,0,0,1,1][k];",
-			"			var y=(i+di)/res*xyRange*2-xyRange;",
-			"			var x=(j+dj)/res*xyRange*2-xyRange;",
-			"			var vertexOffset=vertexElement(i,j,k)*"+this.getNumbersPerVertex()+";",
-			this.writeGridVertex(c,cv).indent(3),
-			"		}",
-			"	}",
-			"}"
-		);
-	}
-	return lines;
-};
 
 var Terrain=function(shaderType,lod){
-	LodShape.call(this,shaderType,lod);
+	Mesh.call(this,shaderType,lod);
 };
-Terrain.prototype=Object.create(LodShape.prototype);
+Terrain.prototype=Object.create(Mesh.prototype);
 Terrain.prototype.constructor=Terrain;
-Terrain.prototype.dim=3;
-Terrain.prototype.usesElements=function(){
-	return this.shaderType!='face';
-};
 Terrain.prototype.getDistinctVertexCount=function(lodSymbol){
 	return "Math.pow((1<<"+lodSymbol+")+1,2)";
 };
 Terrain.prototype.getTotalVertexCount=function(lodSymbol){
 	return "Math.pow((1<<"+lodSymbol+"),2)*6";
 };
-Terrain.prototype.writeGridVertex=function(c,cv){
-	var lines=new Lines;
-	lines.a(
-		"vertices[vertexOffset+0]=x;",
-		"vertices[vertexOffset+1]=y;",
-		(this.shaderType!='face'
-			?"// vertices[vertexOffset+2] already written"
-			:"vertices[vertexOffset+2]=vertices[zOffset((i+di)&mask,(j+dj)&mask)];"
-		)
-	);
-	if (this.getNumbersPerNormal()) {
-		lines.a(
-			"var d=4*xyRange/res;",
-			"var normal=normalize([",
-			(this.shaderType!='face'
-				?"	(vertices[zOffset(i,(j-1)&mask)]-vertices[zOffset(i,(j+1)&mask)])/d,"
-				:"	(vertices[zOffset((i+di)&mask,(j+dj-1)&mask)]-vertices[zOffset((i+di)&mask,(j+dj+1)&mask)])/d,"
-			),
-			(this.shaderType!='face'
-				?"	(vertices[zOffset((i-1)&mask,j)]-vertices[zOffset((i+1)&mask,j)])/d,"
-				:"	(vertices[zOffset((i+di-1)&mask,(j+dj)&mask)]-vertices[zOffset((i+di+1)&mask,(j+dj)&mask)])/d,"
-			),
-			"1]);",
-			"vertices[vertexOffset+3]=normal[0];",
-			"vertices[vertexOffset+4]=normal[1];",
-			"vertices[vertexOffset+5]=normal[2];"
-		);
-	} else if (c) {
-		lines.a(
-			"var ic=(i&1)*2+(j&1);",
-			"vertices[vertexOffset+3]=colors[ic][0];",
-			"vertices[vertexOffset+4]=colors[ic][1];",
-			"vertices[vertexOffset+5]=colors[ic][2];"
-		);
-	}
-	return lines;
-};
-Terrain.prototype.writeStoreShape=function(c,cv){
+Terrain.prototype.writeMeshInit=function(){
 	var lines=new Lines;
 	lines.a(
 		"var xyRange=1/Math.sqrt(2);",
 		"var zRange=xyRange;",
-		"var res=1<<shapeLod;",
-		"var mask=res-1;"
-	);
-	if (this.shaderType!='face') {
-		lines.a(
-			"function vertexElement(i,j) {",
-			"	return i*(res+1)+j;",
-			"}"
-		);
-	} else {
-		lines.a(
-			"function vertexElement(i,j,k) {",
-			"	return (i*res+j)*6+k;",
-			"}"
-		);
-	}
-	if (this.getNumbersPerNormal()) {
-		lines.a(
-			"function normalize(v) {",
-			"	var l=Math.sqrt(v[0]*v[0]+v[1]*v[1]+v[2]*v[2]);",
-			"	return [v[0]/l,v[1]/l,v[2]/l];",
-			"}"
-		);
-	}
-	if (c) {
-		lines.a(
-			"var colors=[",
-			"	[1.0, 1.0, 0.0],",
-			"	[1.0, 0.0, 0.0],",
-			"	[0.0, 1.0, 0.0],",
-			"	[0.0, 0.0, 1.0],",
-			"];"
-		);
-	}
-	lines.a(
+		"var mask=res-1;",
 		"function zOffset(i,j) {",
 		"	return vertexElement(i,j"+(this.shaderType!='face'?"":",0")+")*"+this.getNumbersPerVertex()+"+2;",
 		"}",
@@ -610,8 +550,8 @@ Terrain.prototype.writeStoreShape=function(c,cv){
 		"	return Math.random()*2*r-r;",
 		"}",
 		"vertices[2]=0.0;",
-		"var i1,i2,i3,i4;",
-		"var j1,j2,j3,j4;",
+		"var i0,i1,i2,i3;",
+		"var j0,j1,j2,j3;",
 		"for (var depth=shapeLod-1;depth>=0;depth--) {",
 		"	var d=1<<depth;",
 		"	// diamond step",
@@ -650,48 +590,46 @@ Terrain.prototype.writeStoreShape=function(c,cv){
 	);
 	if (this.shaderType!='face') {
 		lines.a(
-			"var i,j;",
-			"for (i=0;i<res;i++) vertices[zOffset(i,res)]=vertices[zOffset(i,0)];",
-			"for (j=0;j<res;j++) vertices[zOffset(res,j)]=vertices[zOffset(0,j)];",
+			"for (i0=0;i0<res;i0++) vertices[zOffset(i0,res)]=vertices[zOffset(i0,0)];",
+			"for (j0=0;j0<res;j0++) vertices[zOffset(res,j0)]=vertices[zOffset(0,j0)];",
 			"vertices[zOffset(res,res)]=vertices[zOffset(0,0)];"
 		);
+	}
+	return lines;
+};
+Terrain.prototype.writeMeshVertex=function(c,cv){
+	var lines=new Lines;
+	lines.a(
+		"vertices[vertexOffset+0]=x;",
+		"vertices[vertexOffset+1]=y;",
+		(this.shaderType!='face'
+			?"// vertices[vertexOffset+2] already written"
+			:"vertices[vertexOffset+2]=vertices[zOffset((i+di)&mask,(j+dj)&mask)];"
+		)
+	);
+	if (this.getNumbersPerNormal()) {
 		lines.a(
-			"for (i=0;i<=res;i++) {",
-			"	var y=i/res*xyRange*2-xyRange;",
-			"	for (j=0;j<=res;j++) {",
-			"		var x=j/res*xyRange*2-xyRange;",
-			"		var vertexOffset=vertexElement(i,j)*"+this.getNumbersPerVertex()+";",
-			this.writeGridVertex(c,cv).indent(2),
-			"	}",
-			"}"
+			"var d=4*xyRange/res;",
+			"var normal=normalize([",
+			(this.shaderType!='face'
+				?"	(vertices[zOffset(i,(j-1)&mask)]-vertices[zOffset(i,(j+1)&mask)])/d,"
+				:"	(vertices[zOffset((i+di)&mask,(j+dj-1)&mask)]-vertices[zOffset((i+di)&mask,(j+dj+1)&mask)])/d,"
+			),
+			(this.shaderType!='face'
+				?"	(vertices[zOffset((i-1)&mask,j)]-vertices[zOffset((i+1)&mask,j)])/d,"
+				:"	(vertices[zOffset((i+di-1)&mask,(j+dj)&mask)]-vertices[zOffset((i+di+1)&mask,(j+dj)&mask)])/d,"
+			),
+			"1]);",
+			"vertices[vertexOffset+3]=normal[0];",
+			"vertices[vertexOffset+4]=normal[1];",
+			"vertices[vertexOffset+5]=normal[2];"
 		);
+	} else if (c) {
 		lines.a(
-			"for (i=0;i<res;i++) {",
-			"	for (j=0;j<res;j++) {",
-			"		var elementOffset=(i*res+j)*6;",
-			"		elements[elementOffset+0]=vertexElement(i+0,j+0);",
-			"		elements[elementOffset+1]=vertexElement(i+0,j+1);",
-			"		elements[elementOffset+2]=vertexElement(i+1,j+0);",
-			"		elements[elementOffset+3]=vertexElement(i+1,j+0);",
-			"		elements[elementOffset+4]=vertexElement(i+0,j+1);",
-			"		elements[elementOffset+5]=vertexElement(i+1,j+1);",
-			"	}",
-			"}"
-		);
-	} else {
-		lines.a(
-			"for (var i=0;i<res;i++) {",
-			"	for (var j=0;j<res;j++) {",
-			"		for (var k=0;k<6;k++) {",
-			"			var di=[0,0,1,1,0,1][k];",
-			"			var dj=[0,1,0,0,1,1][k];",
-			"			var y=(i+di)/res*xyRange*2-xyRange;",
-			"			var x=(j+dj)/res*xyRange*2-xyRange;",
-			"			var vertexOffset=vertexElement(i,j,k)*"+this.getNumbersPerVertex()+";",
-			this.writeGridVertex(c,cv).indent(3),
-			"		}",
-			"	}",
-			"}"
+			"var ic=(i&1)*2+(j&1);",
+			"vertices[vertexOffset+3]=colors[ic][0];",
+			"vertices[vertexOffset+4]=colors[ic][1];",
+			"vertices[vertexOffset+5]=colors[ic][2];"
 		);
 	}
 	return lines;
