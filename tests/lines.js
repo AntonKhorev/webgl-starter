@@ -102,6 +102,20 @@ describe('Lines',function(){
 			"	3"
 		]);
 	});
+	it('indents by 2',function(){
+		var lines=new Lines;
+		lines.a(
+			"11",
+			"22",
+			"33"
+		);
+		lines.indent(2);
+		assert.deepEqual(lines.data,[
+			"		11",
+			"		22",
+			"		33"
+		]);
+	});
 	it('adds Lines object',function(){
 		var lines=new Lines;
 		var lines2=new Lines;

@@ -42,9 +42,12 @@ Lines.prototype.t=function(){
 	this.addFlattenedArgs(s);
 	return this;
 };
-Lines.prototype.indent=function(){
+Lines.prototype.indent=function(level){
+	if (level===undefined) {
+		level=1;
+	}
 	this.data=this.data.map(function(line){
-		return '\t'+line;
+		return Array(level+1).join('\t')+line;
 	});
 	return this;
 };

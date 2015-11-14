@@ -918,10 +918,10 @@ module.exports=function(options,i18n){
 		"	",
 		generateJsInitLines().indent(),
 		"	",
-		//shape.writeInit().indent(),
-		shape.writeInit(), // TODO
+		shape.writeInit().indent(),
 		"	",
 		generateJsInputHandlerLines().indent(),
+		//"	", // TODO
 		generateJsRenderLines().indent(),
 		"</script>",
 		"</body>",
