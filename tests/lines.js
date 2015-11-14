@@ -252,4 +252,23 @@ describe('Lines',function(){
 		var s=lines.join('\t');
 		assert.equal(s,"foo\nbar");
 	});
+	it('joins lines with 2 space indent',function(){
+		var lines=new Lines(
+			"foo {",
+			"	bar",
+			"}"
+		);
+		var s=lines.join('  ');
+		assert.equal(s,"foo {\n  bar\n}");
+	});
+	it('joins lines with 2 space indent, leaves other tabs intact',function(){
+		var lines=new Lines(
+			"foo {",
+			"	bar",
+			"	baz(	)",
+			"}"
+		);
+		var s=lines.join('  ');
+		assert.equal(s,"foo {\n  bar\n  baz(	)\n}");
+	});
 });

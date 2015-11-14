@@ -89,8 +89,12 @@ Lines.prototype.wrapEachLine=function(begin,end){
 	return this;
 };
 */
-Lines.prototype.join=function(){ // TODO formatting options
-	return this.data.join('\n');
+Lines.prototype.join=function(indent){
+	return this.data.map(function(line){
+		return line.replace(/^(\t)+/,function(match){
+			return Array(match.length+1).join(indent);
+		});
+	}).join('\n');
 };
 
 module.exports=Lines;
