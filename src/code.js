@@ -52,23 +52,30 @@ module.exports=function(options,i18n){
 	}
 	var shape=makeShape();
 
-	function generateStyleLines() {
-		return new Lines(
-			"label {",
-			"	display: inline-block;",
-			"	width: 15em;",
-			"	text-align: right;",
-			"}",
-			".min {",
-			"	display: inline-block;",
-			"	width: 3em;",
-			"	text-align: right;",
-			"}",
-			".max {",
-			"	display: inline-block;",
-			"	width: 3em;",
-			"	text-align: left;",
-			"}"
+	function generateHtmlStyleLines() {
+		var lines=new Lines;
+		if (options.hasSliderInputs()) {
+			lines.a(
+				"label {",
+				"	display: inline-block;",
+				"	width: 15em;",
+				"	text-align: right;",
+				"}",
+				".min {",
+				"	display: inline-block;",
+				"	width: 3em;",
+				"	text-align: right;",
+				"}",
+				".max {",
+				"	display: inline-block;",
+				"	width: 3em;",
+				"	text-align: left;",
+				"}"
+			);
+		}
+		return lines.wrapIfNotEmpty(
+			"<style>",
+			"</style>"
 		);
 	}
 	function generateVertexShaderLines() {
@@ -383,7 +390,7 @@ module.exports=function(options,i18n){
 		}
 		return lines;
 	}
-	function generateControlMessageLines() {
+	function generateHtmlControlMessageLines() {
 		var lines=new Lines;
 		function writeOptionGroup(group) {
 			group.filter(function(option){
@@ -401,7 +408,7 @@ module.exports=function(options,i18n){
 			"</ul>"
 		);
 	}
-	function generateInputLines() {
+	function generateHtmlInputLines() {
 		var lines=new Lines;
 		function writeOptionGroup(group) {
 			group.filter(function(option){
@@ -424,7 +431,7 @@ module.exports=function(options,i18n){
 		writeOptionGroup(options.transformOptions);
 		return lines;
 	}
-	function generateMakeProgramLines() {
+	function generateJsMakeProgramLines() {
 		var lines=new Lines;
 		lines.a(
 			"var vertexShader=gl.createShader(gl.VERTEX_SHADER);",
@@ -489,7 +496,7 @@ module.exports=function(options,i18n){
 		);
 		return lines;
 	}
-	function generateInputHandlerLines() {
+	function generateJsInputHandlerLines() {
 		var lines=new Lines;
 		function writeListener(listener) {
 			lines.a(
@@ -731,7 +738,7 @@ module.exports=function(options,i18n){
 		if (!lines.isEmpty()) lines.a("	");
 		return lines;
 	}
-	function generateRenderLines() {
+	function generateJsRenderLines() {
 		var needStartTime=false; // set by renderInner()
 		var needPrevTime=false; // set by renderInner()
 		function renderInner() {
@@ -891,16 +898,8 @@ module.exports=function(options,i18n){
 		"<html lang='en'>",
 		"<head>",
 		"<meta charset='utf-8' />",
-		"<title>Generated code</title>"
-	);
-	if (options.hasSliderInputs()) {
-		lines.a(
-			"<style>",
-			generateStyleLines().indent(),
-			"</style>"
-		);
-	}
-	lines.a(
+		"<title>Generated code</title>",
+		generateHtmlStyleLines(),
 		"<script id='myVertexShader' type='x-shader/x-vertex'>",
 		generateVertexShaderLines().indent(),
 		"</script>",
@@ -912,18 +911,18 @@ module.exports=function(options,i18n){
 		"<div>",
 		"	<canvas id='myCanvas' width='"+intOptionValue('canvas.width')+"' height='"+intOptionValue('canvas.height')+"'></canvas>",
 		"</div>",
-		generateControlMessageLines(),
-		generateInputLines(),
+		generateHtmlControlMessageLines(),
+		generateHtmlInputLines(),
 		"<script>",
-		generateMakeProgramLines().indent(),
+		generateJsMakeProgramLines().indent(),
 		"	",
 		generateJsInitLines().indent(),
 		"	",
 		//shape.writeInit().indent(),
 		shape.writeInit(), // TODO
 		"	",
-		generateInputHandlerLines().indent(),
-		generateRenderLines().indent(),
+		generateJsInputHandlerLines().indent(),
+		generateJsRenderLines().indent(),
 		"</script>",
 		"</body>",
 		"</html>"
