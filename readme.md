@@ -21,11 +21,13 @@ with the possibility of including/excluding its parts.
 
 Some of the examples used here are based on:
 
-1. [Edward Angel, Dave Shreiner. *Interactive Computer Graphics, A top-down approach with WebGL*][esangel]
-2. [Mozilla Developer Network WebGL tutorial][mdn]
+1. [*Interactive Computer Graphics with WebGL* course][esangel-course] by Edward Angel
+2. Edward Angel, Dave Shreiner. *Interactive Computer Graphics, A top-down approach with WebGL*: [source code examples][esangel-code] from this book
+3. [Mozilla Developer Network WebGL tutorial][mdn]
 
 [demo-en-base]: http://antonkhorev.github.io/webgl-starter/en/base/
 [npm]: https://www.npmjs.com/
 [gulp]: http://gulpjs.com/
-[esangel]: https://github.com/esangel/WebGL
+[esangel-course]: https://www.coursera.org/course/webgl
+[esangel-code]: https://github.com/esangel/WebGL
 [mdn]: https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API/Tutorial
