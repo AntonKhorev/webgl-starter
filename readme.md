@@ -2,13 +2,39 @@
 
 **[Demo page][demo-en-base]**, generates html/javascript/glsl self-contained code for simple things like rotating triangles.
 
-Build with [npm] and [gulp].
-
 ## What is it
 
 This is a javascript library intended to be used on a web page that contains a *WebGL* example generator and provides the user interface for it.
 The user interface consists of dropdown selectors and numeric inputs to tune the generated code, which is presented below the inputs.
 The generated code is another web page that is supposed to be either saved by the user or opened in a new browser window.
+
+## Usage
+
+If you want to just use the generator, you can do it on **[demo page][demo-en-base]**.
+
+If you want to include the generator on your page, you have to do the following:
+
+1. Include [jQuery], possibly from CDN:
+   ```html
+   <script src="http://code.jquery.com/jquery-2.1.4.min.js"></script>
+   ```
+
+2. If you want syntax highlighting for generated code, include [highlight.js], possibly from CDN:
+   ```html
+   <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.7/styles/default.min.css">
+   <script src="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.7/highlight.min.js"></script>
+   ```
+
+3. Copy the generator library [css][lib-css] and [javascript][lib-js] files to your site and include them.
+
+4. Put a `div` with class `webgl-starter` in a place where the generator is supposed to show up:
+   ```html
+   <div class="webgl-starter">message in case javascript is disabled</div>
+   ```
+
+## Building from source
+
+Build with [npm] and [gulp].
 
 ## Reasons behind this generator
 
@@ -57,6 +83,10 @@ Some of the examples used here are based on:
 3. [Mozilla Developer Network WebGL tutorial][mdn]
 
 [demo-en-base]: http://antonkhorev.github.io/webgl-starter/en/base/
+[lib-css]: http://antonkhorev.github.io/webgl-starter/en/base/index.css
+[lib-js]: http://antonkhorev.github.io/webgl-starter/en/base/index.js
+[jQuery]: https://jquery.com/
+[highlight.js]: https://highlightjs.org/
 [npm]: https://www.npmjs.com/
 [gulp]: http://gulpjs.com/
 [webgl-utils]: https://github.com/KhronosGroup/WebGL/blob/master/sdk/demos/common/webgl-utils.js
