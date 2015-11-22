@@ -84,6 +84,7 @@ OptionsBlueprint.prototype.generalOptions=[
 	new Option('shader',['single','vertex','face','light']),
 	new Option('shape',['square','triangle','gasket','cube','hat','terrain']),
 	new Option('projection',['ortho','perspective']),
+	new Option('elementIndex',['8','16','32'],'16'),
 ];
 OptionsBlueprint.prototype.inputOptions=[
 	new CanvasIntInputOption('canvas.width',[1,1024],512),

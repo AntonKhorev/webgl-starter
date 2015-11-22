@@ -1,6 +1,7 @@
 var Lines=require('./lines.js');
 
-var Shape=function(shaderType){
+var Shape=function(elementIndexBits,shaderType){
+	this.elementIndexBits=elementIndexBits; // 8, 16 or 32 bits per element index, limits lod of shape
 	this.shaderType=shaderType; // 'vertex' or 'face' for colors, 'light' for normals, anything else for no colors/normals
 };
 Shape.prototype.dim=2;
@@ -20,6 +21,18 @@ Shape.prototype.getNumbersPerColor=function(){
 };
 Shape.prototype.getNumbersPerVertex=function(){
 	return this.getNumbersPerPosition()+this.getNumbersPerNormal()+this.getNumbersPerColor();
+};
+Shape.prototype.getElementIndexJsArray=function(){
+	return "Uint"+this.elementIndexBits+"Array";
+};
+Shape.prototype.getElementIndexGlType=function(){
+	if (this.elementIndexBits==8) {
+		return "gl.UNSIGNED_BYTE"; // not recommended by ms [https://msdn.microsoft.com/en-us/library/dn798776%28v=vs.85%29.aspx]
+	} else if (this.elementIndexBits==16) {
+		return "gl.UNSIGNED_SHORT"; // mozilla examples use this
+	} else if (this.elementIndexBits==32) {
+		return "gl.UNSIGNED_INT"; // needs extension
+	}
 };
 Shape.prototype.writeBufferData=function(){
 	var lines=new Lines;
@@ -45,7 +58,6 @@ Shape.prototype.writeInit=function(){
 	var cv=this.shaderType=='vertex';
 	var lines=new Lines;
 	lines.a(
-		"gl.getExtension('OES_element_index_uint');", // check if null is returned and don't allow more elements
 		"gl.bindBuffer(gl.ARRAY_BUFFER,gl.createBuffer());"
 	);
 	if (this.usesElements()) {
@@ -100,19 +112,14 @@ Shape.prototype.writeInit=function(){
 // public fn for render
 Shape.prototype.writeDraw=function(){
 	if (this.usesElements()) {
-		//return new Lines("gl.drawElements(gl."+this.glPrimitive+",nElements,gl.UNSIGNED_SHORT,0);");
-		// element array types:
-		// 	UNSIGNED_BYTE - not recommended by ms [https://msdn.microsoft.com/en-us/library/dn798776%28v=vs.85%29.aspx]
-		//	UNSIGNED_SHORT - mozilla examples use this
-		//	UNSIGNED_INT - needs extension
-		return new Lines("gl.drawElements(gl."+this.glPrimitive+",nElements,gl.UNSIGNED_INT,0);");
+		return new Lines("gl.drawElements(gl."+this.glPrimitive+",nElements,"+this.getElementIndexGlType()+",0);");
 	} else {
 		return new Lines("gl.drawArrays(gl."+this.glPrimitive+",0,nVertices);");
 	}
 };
 
-var LodShape=function(shaderType,lod){
-	Shape.call(this,shaderType);
+var LodShape=function(elementIndexBits,shaderType,lod){
+	Shape.call(this,elementIndexBits,shaderType);
 	this.lod=lod;
 };
 LodShape.prototype=Object.create(Shape.prototype);
@@ -132,7 +139,7 @@ LodShape.prototype.writeArraysAndBufferData=function(c,cv){
 				"var nMaxVertices="+this.getDistinctVertexCount("maxShapeLod")+";",
 				"var vertices=new Float32Array(nMaxVertices*"+this.getNumbersPerVertex()+");",
 				"var nMaxElements="+this.getTotalVertexCount("maxShapeLod")+";",
-				"var elements=new Uint16Array(nMaxElements);",
+				"var elements=new "+this.getElementIndexJsArray()+"(nMaxElements);",
 				"var shapeLod,nVertices,nElements;",
 				"function storeShape(newShapeLod) {",
 				"	shapeLod=newShapeLod;",
@@ -158,7 +165,7 @@ LodShape.prototype.writeArraysAndBufferData=function(c,cv){
 				"var nVertices="+this.getDistinctVertexCount("shapeLod")+";",
 				"var vertices=new Float32Array(nVertices*"+this.getNumbersPerVertex()+");",
 				"var nElements="+this.getTotalVertexCount("shapeLod")+";",
-				"var elements=new Uint16Array(nElements);",
+				"var elements=new "+this.getElementIndexJsArray()+"(nElements);",
 				"function storeShape() {"
 			);
 		} else {
@@ -186,8 +193,8 @@ LodShape.prototype.writeArraysAndBufferData=function(c,cv){
 	return lines;
 };
 
-var Mesh=function(shaderType,lod){
-	LodShape.call(this,shaderType,lod);
+var Mesh=function(elementIndexBits,shaderType,lod){
+	LodShape.call(this,elementIndexBits,shaderType,lod);
 };
 Mesh.prototype=Object.create(LodShape.prototype);
 Mesh.prototype.constructor=Mesh;
@@ -278,8 +285,8 @@ Mesh.prototype.writeStoreShape=function(c,cv){
 	return lines;
 };
 
-var Square=function(shaderType){
-	Shape.call(this,shaderType);
+var Square=function(elementIndexBits,shaderType){
+	Shape.call(this,elementIndexBits,shaderType);
 };
 Square.prototype=Object.create(Shape.prototype);
 Square.prototype.constructor=Square;
@@ -297,8 +304,8 @@ Square.prototype.writeArrays=function(c,cv){
 	);
 };
 
-var Triangle=function(shaderType){
-	Shape.call(this,shaderType);
+var Triangle=function(elementIndexBits,shaderType){
+	Shape.call(this,elementIndexBits,shaderType);
 };
 Triangle.prototype=Object.create(Shape.prototype);
 Triangle.prototype.constructor=Triangle;
@@ -314,8 +321,8 @@ Triangle.prototype.writeArrays=function(c,cv){
 	);
 };
 
-var Gasket=function(shaderType,lod){
-	LodShape.call(this,shaderType,lod);
+var Gasket=function(elementIndexBits,shaderType,lod){
+	LodShape.call(this,elementIndexBits,shaderType,lod);
 };
 Gasket.prototype=Object.create(LodShape.prototype);
 Gasket.prototype.constructor=Gasket;
@@ -409,8 +416,8 @@ Gasket.prototype.writeStoreShape=function(c,cv){
 	return lines;
 };
 
-var Cube=function(shaderType){
-	Shape.call(this,shaderType);
+var Cube=function(elementIndexBits,shaderType){
+	Shape.call(this,elementIndexBits,shaderType);
 };
 Cube.prototype=Object.create(Shape.prototype);
 Cube.prototype.constructor=Cube;
@@ -451,9 +458,7 @@ Cube.prototype.writeArrays=function(c,cv){
 			"	+0.5,+0.5,+0.5,"+(n?" 0.0, 0.0,+1.0,":" 0.0, 1.0, 1.0,"),
 			"]);",
 			"var nElements=36;",
-			//"var elements=new Uint16Array([",
-			"var elements=new Uint32Array([",
-			//
+			"var elements=new "+this.getElementIndexJsArray()+"([",
 			"	 0,  1,  2,  2,  1,  3, // left face",
 			"	 4,  5,  6,  6,  5,  7, // right face",
 			"	 8,  9, 10, 10,  9, 11, // bottom face",
@@ -476,9 +481,7 @@ Cube.prototype.writeArrays=function(c,cv){
 			"	+0.5,+0.5,+0.5,"+(c?" 1.0, 1.0, 1.0,":""),
 			"]);",
 			"var nElements=36;",
-			//"var elements=new Uint16Array([",
-			"var elements=new Uint32Array([",
-			//
+			"var elements=new "+this.getElementIndexJsArray()+"([",
 			"	4, 6, 0, 0, 6, 2, // left face",
 			"	1, 3, 5, 5, 3, 7, // right face",
 			"	0, 1, 4, 4, 1, 5, // bottom face",
@@ -490,8 +493,8 @@ Cube.prototype.writeArrays=function(c,cv){
 	}
 };
 
-var Hat=function(shaderType,lod){
-	Mesh.call(this,shaderType,lod);
+var Hat=function(elementIndexBits,shaderType,lod){
+	Mesh.call(this,elementIndexBits,shaderType,lod);
 };
 Hat.prototype=Object.create(Mesh.prototype);
 Hat.prototype.constructor=Hat;
@@ -535,8 +538,8 @@ Hat.prototype.writeMeshVertex=function(c,cv){
 	return lines;
 };
 
-var Terrain=function(shaderType,lod){
-	Mesh.call(this,shaderType,lod);
+var Terrain=function(elementIndexBits,shaderType,lod){
+	Mesh.call(this,elementIndexBits,shaderType,lod);
 };
 Terrain.prototype=Object.create(Mesh.prototype);
 Terrain.prototype.constructor=Terrain;

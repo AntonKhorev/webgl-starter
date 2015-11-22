@@ -47,7 +47,7 @@ module.exports=function(options,i18n){
 				};
 			}
 		});
-		var shapeCtorArgs=[null,options.shader].concat(shapeParams);
+		var shapeCtorArgs=[null,parseInt(options.elementIndex),options.shader].concat(shapeParams);
 		return new (Function.prototype.bind.apply(shapes[className],shapeCtorArgs));
 	}
 	var shape=makeShape();
@@ -471,6 +471,11 @@ module.exports=function(options,i18n){
 			"var canvas=document.getElementById('myCanvas');",
 			"var gl=canvas.getContext('webgl')||canvas.getContext('experimental-webgl');"
 		);
+		if (options['elementIndex']=='32' && shape.usesElements()) {
+			lines.a(
+				"gl.getExtension('OES_element_index_uint');" // TODO check if null is returned and don't allow more elements
+			);
+		}
 		if (options.background=='solid' && !options.hasInputsFor('background.solid.color') && !(
 			// default clear color in OpenGL
 			options['background.solid.color.r']==0 &&
