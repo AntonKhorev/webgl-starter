@@ -97,8 +97,8 @@ OptionsBlueprint.prototype.inputOptions=[
 	new FloatInputOption('shader.single.color.b',[0,1]),
 	new FloatInputOption('shader.single.color.a',[0,1],1),
 	new IntInputOption('shape.gasket.lod',[0,10],6),
-	new IntInputOption('shape.hat.lod',[0,7],5), // max resolution limited by number of vertices <= 2^16
-	new IntInputOption('shape.terrain.lod',[0,7],5),
+	new IntInputOption('shape.hat.lod',[0,10],6),
+	new IntInputOption('shape.terrain.lod',[0,10],6),
 ];
 OptionsBlueprint.prototype.transformOptions=[];
 OptionsBlueprint.prototype.transforms=[];

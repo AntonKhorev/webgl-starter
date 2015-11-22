@@ -45,6 +45,7 @@ Shape.prototype.writeInit=function(){
 	var cv=this.shaderType=='vertex';
 	var lines=new Lines;
 	lines.a(
+		"gl.getExtension('OES_element_index_uint');", // check if null is returned and don't allow more elements
 		"gl.bindBuffer(gl.ARRAY_BUFFER,gl.createBuffer());"
 	);
 	if (this.usesElements()) {
@@ -99,7 +100,12 @@ Shape.prototype.writeInit=function(){
 // public fn for render
 Shape.prototype.writeDraw=function(){
 	if (this.usesElements()) {
-		return new Lines("gl.drawElements(gl."+this.glPrimitive+",nElements,gl.UNSIGNED_SHORT,0);");
+		//return new Lines("gl.drawElements(gl."+this.glPrimitive+",nElements,gl.UNSIGNED_SHORT,0);");
+		// element array types:
+		// 	UNSIGNED_BYTE - not recommended by ms [https://msdn.microsoft.com/en-us/library/dn798776%28v=vs.85%29.aspx]
+		//	UNSIGNED_SHORT - mozilla examples use this
+		//	UNSIGNED_INT - needs extension
+		return new Lines("gl.drawElements(gl."+this.glPrimitive+",nElements,gl.UNSIGNED_INT,0);");
 	} else {
 		return new Lines("gl.drawArrays(gl."+this.glPrimitive+",0,nVertices);");
 	}
@@ -445,7 +451,9 @@ Cube.prototype.writeArrays=function(c,cv){
 			"	+0.5,+0.5,+0.5,"+(n?" 0.0, 0.0,+1.0,":" 0.0, 1.0, 1.0,"),
 			"]);",
 			"var nElements=36;",
-			"var elements=new Uint16Array([",
+			//"var elements=new Uint16Array([",
+			"var elements=new Uint32Array([",
+			//
 			"	 0,  1,  2,  2,  1,  3, // left face",
 			"	 4,  5,  6,  6,  5,  7, // right face",
 			"	 8,  9, 10, 10,  9, 11, // bottom face",
@@ -468,7 +476,9 @@ Cube.prototype.writeArrays=function(c,cv){
 			"	+0.5,+0.5,+0.5,"+(c?" 1.0, 1.0, 1.0,":""),
 			"]);",
 			"var nElements=36;",
-			"var elements=new Uint16Array([",
+			//"var elements=new Uint16Array([",
+			"var elements=new Uint32Array([",
+			//
 			"	4, 6, 0, 0, 6, 2, // left face",
 			"	1, 3, 5, 5, 3, 7, // right face",
 			"	0, 1, 4, 4, 1, 5, // bottom face",
