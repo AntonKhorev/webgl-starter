@@ -43,6 +43,11 @@ Some problems with this approach are:
   The generator presented here may not be the best programming either, but most of its potentially questionable code stays inside it.
   The generated code does not require the generator to function.
 
+The approach used here is to put all of the generated code into one html file.
+This is done to help studying the code, so no code is away somewhere else.
+For production use, it's up to the user to copy the necessary parts and paste them into different files.
+This is supposed to be easier than picking the parts out of the library (if the user is unwilling to use the whole library), because the user has to deal with less code.
+
 ## References
 
 Some of the examples used here are based on:
