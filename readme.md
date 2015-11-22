@@ -6,6 +6,12 @@ Build with [npm] and [gulp].
 
 ## What is it
 
+This is a javascript library intended to be used on a web page that contains a *WebGL* example generator and provides the user interface for it.
+The user interface consists of dropdown selectors and numeric inputs to tune the generated code, which is presented below the inputs.
+The generated code is another web page that is supposed to be either saved by the user or opened in a new browser window.
+
+## Reasons behind this generator
+
 Let's suppose there's a book or a course on some subject which has a set of examples in some programming language.
 There can be a number of examples that are similar to each other or share a significant amount of common code.
 This similarity is not what we'll necessarily find for any subject.
