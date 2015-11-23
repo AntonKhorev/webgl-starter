@@ -18,13 +18,14 @@ module.exports=function(id){ // fake temporary i18n
 		'options.shape.cube': 'Cube',
 		'options.shape.hat': 'Mexican hat function', // wp: Mexican hat wavelet
 		'options.shape.terrain': 'Diamond-square fractal terrain', // wp: Diamond-square algorithm
+		'options.elements': 'Element array',
+		'options.elements.0': 'not used',
+		'options.elements.8': 'with 8-bit index',
+		'options.elements.16': 'with 16-bit index',
+		'options.elements.32': 'with 32-bit index',
 		'options.projection': 'Projection',
 		'options.projection.ortho': 'Orthogonal',
 		'options.projection.perspective': 'Perspective',
-		'options.elementIndex': 'Element index type',
-		'options.elementIndex.8': '8-bit',
-		'options.elementIndex.16': '16-bit',
-		'options.elementIndex.32': '32-bit',
 
 		'options.input': 'Input options',
 		'options.canvas.width': 'Canvas width',
@@ -54,7 +55,8 @@ module.exports=function(id){ // fake temporary i18n
 		'options.rotate.z.speed': 'Speed of rotation around z axis',
 
 		'options.debug': 'Debug options',
-		'options.debugShader': 'Log shader compilation errors',
+		'options.debugShaders': 'Log shader compilation errors',
+		'options.debugArrays': 'Log allocated array sizes',
 		'options.debugInputs': 'Log input values',
 
 		'options.formatting': 'Code formatting options',

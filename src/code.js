@@ -47,7 +47,7 @@ module.exports=function(options,i18n){
 				};
 			}
 		});
-		var shapeCtorArgs=[null,parseInt(options.elementIndex),options.shader].concat(shapeParams);
+		var shapeCtorArgs=[null,parseInt(options.elements),options.shader].concat(shapeParams);
 		return new (Function.prototype.bind.apply(shapes[className],shapeCtorArgs));
 	}
 	var shape=makeShape();
@@ -438,7 +438,7 @@ module.exports=function(options,i18n){
 			"gl.shaderSource(vertexShader,vertexShaderSrc);",
 			"gl.compileShader(vertexShader);"
 		);
-		if (options.debugShader) {
+		if (options.debugShaders) {
 			lines.a(
 				"if (!gl.getShaderParameter(vertexShader,gl.COMPILE_STATUS)) console.log(gl.getShaderInfoLog(vertexShader));"
 			);
@@ -448,7 +448,7 @@ module.exports=function(options,i18n){
 			"gl.shaderSource(fragmentShader,fragmentShaderSrc);",
 			"gl.compileShader(fragmentShader);"
 		);
-		if (options.debugShader) {
+		if (options.debugShaders) {
 			lines.a(
 				"if (!gl.getShaderParameter(fragmentShader,gl.COMPILE_STATUS)) console.log(gl.getShaderInfoLog(fragmentShader));"
 			);
@@ -471,7 +471,7 @@ module.exports=function(options,i18n){
 			"var canvas=document.getElementById('myCanvas');",
 			"var gl=canvas.getContext('webgl')||canvas.getContext('experimental-webgl');"
 		);
-		if (options['elementIndex']=='32' && shape.usesElements()) {
+		if (options['elements']=='32') {
 			lines.a(
 				"gl.getExtension('OES_element_index_uint');" // TODO check if null is returned and don't allow more elements
 			);
@@ -900,7 +900,7 @@ module.exports=function(options,i18n){
 	scriptLines.interleave(
 		generateJsMakeProgramLines(),
 		generateJsInitLines(),
-		shape.writeInit(),
+		shape.writeInit(options.debugArrays),
 		generateJsInputHandlerLines(),
 		generateJsRenderLines()
 	).wrap(

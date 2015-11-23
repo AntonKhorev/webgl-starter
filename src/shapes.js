@@ -1,14 +1,14 @@
 var Lines=require('./lines.js');
 
 var Shape=function(elementIndexBits,shaderType){
-	this.elementIndexBits=elementIndexBits; // 8, 16 or 32 bits per element index, limits lod of shape
+	this.elementIndexBits=elementIndexBits; // 0 if don't want element arrays; 8, 16 or 32 bits per element index, limits lod of shape
 	this.shaderType=shaderType; // 'vertex' or 'face' for colors, 'light' for normals, anything else for no colors/normals
 };
 Shape.prototype.dim=2;
 Shape.prototype.twoSided=true; // triangles can be viewed from both sides
 Shape.prototype.glPrimitive='TRIANGLES';
 Shape.prototype.usesElements=function(){
-	return false;
+	return this.elementIndexBits>0;
 };
 Shape.prototype.getNumbersPerPosition=function(){
 	return this.dim;
@@ -46,14 +46,21 @@ Shape.prototype.writeBufferData=function(){
 	}
 	return lines;
 };
-Shape.prototype.writeArraysAndBufferData=function(c,cv){
-	return new Lines(
-		this.writeArrays(c,cv),
-		this.writeBufferData()
-	);
+Shape.prototype.writeArraysAndBufferData=function(debugArrays,c,cv){
+	var lines=new Lines;
+	lines.a(this.writeArrays(c,cv));
+	if (debugArrays) {
+		lines.a("console.log('vertex array byte length:',vertices.byteLength);");
+		if (this.usesElements()) {
+			lines.a("console.log('element array byte length:',elements.byteLength);");
+			lines.a("console.log('vertex+element array byte length:',vertices.byteLength+elements.byteLength);");
+		}
+	}
+	lines.a(this.writeBufferData());
+	return lines;
 };
 // public fn for init
-Shape.prototype.writeInit=function(){
+Shape.prototype.writeInit=function(debugArrays){
 	var c=(this.shaderType=='vertex' || this.shaderType=='face');
 	var cv=this.shaderType=='vertex';
 	var lines=new Lines;
@@ -66,7 +73,7 @@ Shape.prototype.writeInit=function(){
 		);
 	}
 	lines.a(
-		this.writeArraysAndBufferData(c,cv),
+		this.writeArraysAndBufferData(debugArrays,c,cv),
 		"var positionLoc=gl.getAttribLocation(program,'position');"
 	);
 	if (c) {
@@ -127,7 +134,7 @@ LodShape.prototype.constructor=LodShape;
 // abstract LodShape.prototype.getDistinctVertexCount=function(lodSymbol){}; // # of vertices when usesElements()
 // abstract LodShape.prototype.getTotalVertexCount=function(lodSymbol){}; // # of elements when usesElements(), otherwise # of vertices
 // abstract LodShape.prototype.writeStoreShape=function(c,cv){};
-LodShape.prototype.writeArraysAndBufferData=function(c,cv){
+LodShape.prototype.writeArraysAndBufferData=function(debugArrays,c,cv){
 	var lines=new Lines;
 	if (this.lod.changes) {
 		lines.a(
@@ -285,6 +292,7 @@ Mesh.prototype.writeStoreShape=function(c,cv){
 	return lines;
 };
 
+// recommended options: no elements
 var Square=function(elementIndexBits,shaderType){
 	Shape.call(this,elementIndexBits,shaderType);
 };
@@ -292,7 +300,7 @@ Square.prototype=Object.create(Shape.prototype);
 Square.prototype.constructor=Square;
 Square.prototype.glPrimitive='TRIANGLE_FAN';
 Square.prototype.writeArrays=function(c,cv){
-	return new Lines(
+	var lines=new Lines(
 		"var nVertices=4;",
 		"var vertices=new Float32Array([",
 		"	// x    y"+(c?   "    r    g    b":""),
@@ -302,6 +310,13 @@ Square.prototype.writeArrays=function(c,cv){
 		"	-0.5,+0.5,"+(c?cv?" 1.0, 1.0, 0.0,":" 1.0, 0.0, 0.0,":""),
 		"]);"
 	);
+	if (this.usesElements()) {
+		lines.a(
+			"var nElements=4;",
+			"var elements=new "+this.getElementIndexJsArray()+"([0,1,2,3]);"
+		);
+	}
+	return lines;
 };
 
 var Triangle=function(elementIndexBits,shaderType){

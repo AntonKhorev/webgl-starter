@@ -96,8 +96,8 @@ OptionsBlueprint.prototype.generalOptions=[
 	new Option('background',['none','solid']),
 	new Option('shader',['single','vertex','face','light']),
 	new Option('shape',['square','triangle','gasket','cube','hat','terrain']),
+	new Option('elements',['0','8','16','32'],'16'),
 	new Option('projection',['ortho','perspective']),
-	new Option('elementIndex',['8','16','32'],'16'),
 ];
 OptionsBlueprint.prototype.inputOptions=[
 	new CanvasIntInputOption('canvas.width',[1,1024],512),
@@ -126,7 +126,8 @@ OptionsBlueprint.prototype.transforms=[];
 	});
 });
 OptionsBlueprint.prototype.debugOptions=[
-	new DebugOption('debugShader',true),
+	new DebugOption('debugShaders',true),
+	new DebugOption('debugArrays'),
 	new DebugOption('debugInputs'), // TODO hide if no inputs?
 ];
 OptionsBlueprint.prototype.formattingOptions=[
