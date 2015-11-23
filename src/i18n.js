@@ -37,9 +37,7 @@ module.exports=function(id){ // fake temporary i18n
 		'options.shader.single.color.g': 'Fragment color green component',
 		'options.shader.single.color.b': 'Fragment color blue component',
 		'options.shader.single.color.a': 'Fragment color alpha component',
-		'options.shape.gasket.lod': 'Sierpinski gasket recursion depth',
-		'options.shape.hat.lod': 'Mexican hat detail level',
-		'options.shape.terrain.lod': 'Fractal terrain detail level',
+		'options.shape.lodShape.lod': 'Shape detail level', // recursion depth for fractal shapes
 		'options.*.input': 'This value is',
 		'options.*.input.constant': 'kept constant',
 		'options.*.input.slider': 'updated with a slider',

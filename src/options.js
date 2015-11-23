@@ -7,11 +7,24 @@ var Option=function(name,availableValues,defaultValue){
 		this.defaultValue=defaultValue;
 	}
 };
+Option.prototype.getSuboptionScopePrefix=function(){
+	return this.name+'.';
+}
+Option.prototype.getSuboptionHitPrefix=function(value){
+	if (this.name=='shape' && ['gasket','hat','terrain'].indexOf(value)>=0) {
+		value='lodShape';
+	}
+	return this.getSuboptionScopePrefix()+value+'.';
+}
 Option.prototype.doesValueHideOption=function(value,option){
 	function optionStartsWith(prefix) {
 		return option.name.indexOf(prefix)===0;
 	}
-	return optionStartsWith(this.name+'.') && !optionStartsWith(this.name+'.'+value+'.');
+	return optionStartsWith(
+		this.getSuboptionScopePrefix()
+	) && !optionStartsWith(
+		this.getSuboptionHitPrefix(value)
+	);
 };
 
 var InputOption=function(name,rangeOfValues,defaultValue){
@@ -97,9 +110,7 @@ OptionsBlueprint.prototype.inputOptions=[
 	new FloatInputOption('shader.single.color.g',[0,1]),
 	new FloatInputOption('shader.single.color.b',[0,1]),
 	new FloatInputOption('shader.single.color.a',[0,1],1),
-	new IntInputOption('shape.gasket.lod',[0,10],6),
-	new IntInputOption('shape.hat.lod',[0,10],6),
-	new IntInputOption('shape.terrain.lod',[0,10],6),
+	new IntInputOption('shape.lodShape.lod',[0,10],6),
 ];
 OptionsBlueprint.prototype.transformOptions=[];
 OptionsBlueprint.prototype.transforms=[];

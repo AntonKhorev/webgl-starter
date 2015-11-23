@@ -23,10 +23,9 @@ $(function(){
 		var codeUpdateTimeoutId=null;
 		var codeUpdateDelay=200;
 
-		function showHideSuboptionInputs(optionName,optionValue) {
-			// TODO sub-sub option support?
-			$options.find("[data-option^='"+optionName+".']").show()
-				.not("[data-option^='"+optionName+"."+optionValue+".']").hide();
+		function showHideSuboptionInputs(option,optionValue) {
+			$options.find("[data-option^='"+option.getSuboptionScopePrefix()+"']").show()
+				.not("[data-option^='"+option.getSuboptionHitPrefix(optionValue)+"']").hide();
 		}
 		function updateCode() {
 			clearTimeout(codeUpdateTimeoutId);
@@ -47,7 +46,7 @@ $(function(){
 						})
 					).val(options[option.name]).change(function(){
 						options[option.name]=this.value;
-						showHideSuboptionInputs(option.name,this.value);
+						showHideSuboptionInputs(option,this.value);
 						updateCode();
 					})
 				);
@@ -213,7 +212,7 @@ $(function(){
 		}
 		function hideSuboptionInputs() {
 			options.generalOptions.forEach(function(option){
-				showHideSuboptionInputs(option.name,options[option.name]);
+				showHideSuboptionInputs(option,options[option.name]);
 			});
 		}
 		function writeButtons() {
