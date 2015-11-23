@@ -34,6 +34,17 @@ Shape.prototype.getElementIndexGlType=function(){
 		return "gl.UNSIGNED_INT"; // needs extension
 	}
 };
+Shape.prototype.writeDebug=function(debugArrays){
+	var lines=new Lines;
+	if (debugArrays) {
+		lines.a("console.log('vertex array byte length:',vertices.byteLength);");
+		if (this.usesElements()) {
+			lines.a("console.log('element array byte length:',elements.byteLength);");
+			lines.a("console.log('vertex+element array byte length:',vertices.byteLength+elements.byteLength);");
+		}
+	}
+	return lines;
+};
 Shape.prototype.writeBufferData=function(){
 	var lines=new Lines;
 	lines.a(
@@ -47,17 +58,11 @@ Shape.prototype.writeBufferData=function(){
 	return lines;
 };
 Shape.prototype.writeArraysAndBufferData=function(debugArrays,c,cv){
-	var lines=new Lines;
-	lines.a(this.writeArrays(c,cv));
-	if (debugArrays) {
-		lines.a("console.log('vertex array byte length:',vertices.byteLength);");
-		if (this.usesElements()) {
-			lines.a("console.log('element array byte length:',elements.byteLength);");
-			lines.a("console.log('vertex+element array byte length:',vertices.byteLength+elements.byteLength);");
-		}
-	}
-	lines.a(this.writeBufferData());
-	return lines;
+	return new Lines(
+		this.writeArrays(c,cv),
+		this.writeDebug(debugArrays),
+		this.writeBufferData()
+	);
 };
 // public fn for init
 Shape.prototype.writeInit=function(debugArrays){
@@ -147,6 +152,7 @@ LodShape.prototype.writeArraysAndBufferData=function(debugArrays,c,cv){
 				"var vertices=new Float32Array(nMaxVertices*"+this.getNumbersPerVertex()+");",
 				"var nMaxElements="+this.getTotalVertexCount("maxShapeLod")+";",
 				"var elements=new "+this.getElementIndexJsArray()+"(nMaxElements);",
+				this.writeDebug(debugArrays),
 				"var shapeLod,nVertices,nElements;",
 				"function storeShape(newShapeLod) {",
 				"	shapeLod=newShapeLod;",
@@ -157,6 +163,7 @@ LodShape.prototype.writeArraysAndBufferData=function(debugArrays,c,cv){
 			lines.a(
 				"var nMaxVertices="+this.getTotalVertexCount("maxShapeLod")+";",
 				"var vertices=new Float32Array(nMaxVertices*"+this.getNumbersPerVertex()+");",
+				this.writeDebug(debugArrays),
 				"var shapeLod,nVertices;",
 				"function storeShape(newShapeLod) {",
 				"	shapeLod=newShapeLod;",
@@ -173,12 +180,14 @@ LodShape.prototype.writeArraysAndBufferData=function(debugArrays,c,cv){
 				"var vertices=new Float32Array(nVertices*"+this.getNumbersPerVertex()+");",
 				"var nElements="+this.getTotalVertexCount("shapeLod")+";",
 				"var elements=new "+this.getElementIndexJsArray()+"(nElements);",
+				this.writeDebug(debugArrays),
 				"function storeShape() {"
 			);
 		} else {
 			lines.a(
 				"var nVertices="+this.getTotalVertexCount("shapeLod")+";",
 				"var vertices=new Float32Array(nVertices*"+this.getNumbersPerVertex()+");",
+				this.writeDebug(debugArrays),
 				"function storeShape() {"
 			);
 		}
@@ -292,7 +301,6 @@ Mesh.prototype.writeStoreShape=function(c,cv){
 	return lines;
 };
 
-// recommended options: no elements
 var Square=function(elementIndexBits,shaderType){
 	Shape.call(this,elementIndexBits,shaderType);
 };
@@ -348,10 +356,59 @@ var Gasket=function(elementIndexBits,shaderType,lod){
 };
 Gasket.prototype=Object.create(LodShape.prototype);
 Gasket.prototype.constructor=Gasket;
+Gasket.prototype.getDistinctVertexCount=function(lodSymbol){
+	return "(Math.pow(3,"+lodSymbol+"+1)+3)/2";
+};
 Gasket.prototype.getTotalVertexCount=function(lodSymbol){
 	return "Math.pow(3,"+lodSymbol+")*3";
 };
-Gasket.prototype.writeStoreShape=function(c,cv){
+Gasket.prototype.writeStoreShapeWithElements=function(c,cv){
+	return new Lines(
+		"var iv=0;",
+		"var ev=0;",
+		"var ie=0;",
+		"function pushVertex(v) {",
+		"	vertices[iv++]=v[0]; vertices[iv++]=v[1];",
+		"}",
+		"function pushElement(e) {",
+		"	elements[ie++]=e;",
+		"}",
+		"function mix(a,b,m) {",
+		"	return [",
+		"		a[0]*(1-m)+b[0]*m,",
+		"		a[1]*(1-m)+b[1]*m,",
+		"	];",
+		"}",
+		"function triangle(depth,a,b,c,ep) {",
+		"	if (depth<=0) {",
+		"		var es=[ep[0],ep[1],ep[2]];",
+		"		if (es[0]===null) { pushVertex(a); es[0]=ev++; }",
+		"		if (es[1]===null) { pushVertex(b); es[1]=ev++; }",
+		"		if (es[2]===null) { pushVertex(c); es[2]=ev++; }",
+		"		pushElement(es[0]);",
+		"		pushElement(es[1]);",
+		"		pushElement(es[2]);",
+		"		return es;",
+		"	} else {",
+		"		var ab=mix(a,b,0.5);",
+		"		var bc=mix(b,c,0.5);",
+		"		var ca=mix(c,a,0.5);",
+		"		var e0=triangle(depth-1,a,ab,ca,[ep[0],null,null]);",
+		"		var e1=triangle(depth-1,ab,b,bc,[e0[1],ep[1],null]);",
+		"		var e2=triangle(depth-1,ca,bc,c,[e0[2],e1[2],ep[2]]);",
+		"		return [e0[0],e1[1],e2[2]];",
+		"	}",
+		"}",
+		"triangle(",
+		"	shapeLod,",
+		"	[-Math.sin(0/3*Math.PI),Math.cos(0/3*Math.PI)],",
+		"	[-Math.sin(2/3*Math.PI),Math.cos(2/3*Math.PI)],",
+		"	[-Math.sin(4/3*Math.PI),Math.cos(4/3*Math.PI)],",
+		"	[null,null,null]",
+		");"
+	);
+}
+Gasket.prototype.writeStoreShapeWithoutElements=function(c,cv){
 	var lines=new Lines;
 	lines.a(
 		"var iv=0;"
@@ -436,6 +493,13 @@ Gasket.prototype.writeStoreShape=function(c,cv){
 		");"
 	);
 	return lines;
+};
+Gasket.prototype.writeStoreShape=function(c,cv){
+	if (this.usesElements()) {
+		return this.writeStoreShapeWithElements(c,cv);
+	} else {
+		return this.writeStoreShapeWithoutElements(c,cv);
+	}
 };
 
 var Cube=function(elementIndexBits,shaderType){
