@@ -30,8 +30,16 @@ Hat.prototype.writeMeshVertex=function(c,cv){
 			"vertices[vertexOffset+5]=normal[2];"
 		);
 	} else if (c) {
+		if (!this.usesElements() && this.shaderType!='face') {
+			lines.a(
+				"var ic=((i+di)&1)*2+((j+dj)&1);"
+			);
+		} else {
+			lines.a(
+				"var ic=(i&1)*2+(j&1);"
+			);
+		}
 		lines.a(
-			"var ic=(i&1)*2+(j&1);",
 			"vertices[vertexOffset+3]=colors[ic][0];",
 			"vertices[vertexOffset+4]=colors[ic][1];",
 			"vertices[vertexOffset+5]=colors[ic][2];"

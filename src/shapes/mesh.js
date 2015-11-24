@@ -10,6 +10,9 @@ Mesh.prototype.dim=3;
 Mesh.prototype.getDistinctVertexCount=function(lodSymbol){
 	return "Math.pow((1<<"+lodSymbol+")+1,2)";
 };
+Mesh.prototype.getFaceVertexCount=function(lodSymbol){
+	return "Math.pow((1<<"+lodSymbol+"),2)*4";
+};
 Mesh.prototype.getTotalVertexCount=function(lodSymbol){
 	return "Math.pow((1<<"+lodSymbol+"),2)*6";
 };
@@ -20,16 +23,22 @@ Mesh.prototype.writeStoreShape=function(c,cv){
 	lines.a(
 		"var res=(1<<shapeLod);"
 	);
-	if (this.shaderType!='face') {
+	if (!this.usesElements()) {
 		lines.a(
-			"function vertexElement(i,j) {",
-			"	return i*(res+1)+j;",
+			"function vertexElement(i,j,k) {",
+			"	return (i*res+j)*6+k;",
+			"}"
+		);
+	} else if (this.shaderType=='face') {
+		lines.a(
+			"function vertexElement(i,j,k) {",
+			"	return (i*res+j)*4+k;",
 			"}"
 		);
 	} else {
 		lines.a(
-			"function vertexElement(i,j,k) {",
-			"	return (i*res+j)*6+k;",
+			"function vertexElement(i,j) {",
+			"	return i*(res+1)+j;",
 			"}"
 		);
 	}
@@ -54,7 +63,49 @@ Mesh.prototype.writeStoreShape=function(c,cv){
 	lines.a(
 		this.writeMeshInit()
 	);
-	if (this.shaderType!='face') {
+	if (!this.usesElements()) {
+		lines.a(
+			"for (var i=0;i<res;i++) {",
+			"	for (var j=0;j<res;j++) {",
+			"		for (var k=0;k<6;k++) {",
+			"			var di=[0,0,1,1,0,1][k];",
+			"			var dj=[0,1,0,0,1,1][k];",
+			"			var y=(i+di)/res*xyRange*2-xyRange;",
+			"			var x=(j+dj)/res*xyRange*2-xyRange;",
+			"			var vertexOffset=vertexElement(i,j,k)*"+this.getNumbersPerVertex()+";",
+			this.writeMeshVertex(c,cv).indent(3),
+			"		}",
+			"	}",
+			"}"
+		);
+	} else if (this.shaderType=='face') {
+		lines.a(
+			"var i,j;",
+			"for (i=0;i<=res;i++) {",
+			"	for (j=0;j<=res;j++) {",
+			"		for (var k=0;k<6;k++) {",
+			"			var di=[0,0,1,1][k];",
+			"			var dj=[0,1,0,1][k];",
+			"			var y=(i+di)/res*xyRange*2-xyRange;",
+			"			var x=(j+dj)/res*xyRange*2-xyRange;",
+			"			var vertexOffset=vertexElement(i,j,k)*"+this.getNumbersPerVertex()+";",
+			this.writeMeshVertex(c,cv).indent(3),
+			"		}",
+			"	}",
+			"}",
+			"for (i=0;i<res;i++) {",
+			"	for (j=0;j<res;j++) {",
+			"		var elementOffset=(i*res+j)*6;",
+			"		elements[elementOffset+0]=vertexElement(i,j,0);",
+			"		elements[elementOffset+1]=vertexElement(i,j,1);",
+			"		elements[elementOffset+2]=vertexElement(i,j,2);",
+			"		elements[elementOffset+3]=vertexElement(i,j,2);",
+			"		elements[elementOffset+4]=vertexElement(i,j,1);",
+			"		elements[elementOffset+5]=vertexElement(i,j,3);",
+			"	}",
+			"}"
+		);
+	} else {
 		lines.a(
 			"var i,j;",
 			"for (i=0;i<=res;i++) {",
@@ -74,21 +125,6 @@ Mesh.prototype.writeStoreShape=function(c,cv){
 			"		elements[elementOffset+3]=vertexElement(i+1,j+0);",
 			"		elements[elementOffset+4]=vertexElement(i+0,j+1);",
 			"		elements[elementOffset+5]=vertexElement(i+1,j+1);",
-			"	}",
-			"}"
-		);
-	} else {
-		lines.a(
-			"for (var i=0;i<res;i++) {",
-			"	for (var j=0;j<res;j++) {",
-			"		for (var k=0;k<6;k++) {",
-			"			var di=[0,0,1,1,0,1][k];",
-			"			var dj=[0,1,0,0,1,1][k];",
-			"			var y=(i+di)/res*xyRange*2-xyRange;",
-			"			var x=(j+dj)/res*xyRange*2-xyRange;",
-			"			var vertexOffset=vertexElement(i,j,k)*"+this.getNumbersPerVertex()+";",
-			this.writeMeshVertex(c,cv).indent(3),
-			"		}",
 			"	}",
 			"}"
 		);
