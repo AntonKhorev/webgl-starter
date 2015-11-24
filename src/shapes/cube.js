@@ -8,9 +8,6 @@ Cube.prototype=Object.create(Shape.prototype);
 Cube.prototype.constructor=Cube;
 Cube.prototype.dim=3;
 Cube.prototype.twoSided=false;
-Cube.prototype.usesElements=function(){
-	return true;
-};
 Cube.prototype.writeArrays=function(c,cv){
 	var nCubeVertices=8;
 	var cubeVertexPositions=[
@@ -67,9 +64,7 @@ Cube.prototype.writeArrays=function(c,cv){
 		[5, 7, 4, 4, 7, 6],
 	];
 
-	if (!this.usesElements()) {
-
-	} else if (this.shaderType=='face' || this.shaderType=='light') {
+	if (this.shaderType=='face' || this.shaderType=='light') {
 		// elements with face data
 		var n=this.shaderType=='light';
 		return new Lines(
@@ -111,33 +106,54 @@ Cube.prototype.writeArrays=function(c,cv){
 			"]);"
 		);
 	} else {
-		// elements with no face data
+		// no face data
 		var vertexLines=new Lines;
 		vertexLines.a("// x    y    z");
 		if (c) {
 			vertexLines.t("    r    g    b");
 		}
-		for (var i=0;i<nCubeVertices;i++) {
-			vertexLines.a(cubeVertexPositions[i]);
-			if (c) {
-				vertexLines.t(cubeVertexColors[i]);
+		if (this.usesElements()) {
+			for (var i=0;i<nCubeVertices;i++) {
+				vertexLines.a(cubeVertexPositions[i]);
+				if (c) {
+					vertexLines.t(cubeVertexColors[i]);
+				}
 			}
+			var elementLines=new Lines;
+			for (var i=0;i<nCubeFaces;i++) {
+				elementLines.a(cubeFaceVertices[i].join(", ")+", // "+cubeFaceNames[i]+" face");
+			}
+			return new Lines(
+				vertexLines.wrap(
+					"var vertices=new Float32Array([",
+					"]);"
+				),
+				"var nElements=36;",
+				elementLines.wrap(
+					"var elements=new "+this.getElementIndexJsArray()+"([",
+					"]);"
+				)
+			);
+		} else {
+			for (var i=0;i<nCubeFaces;i++) {
+				cubeFaceVertices[i].forEach(function(j,k){
+					vertexLines.a(cubeVertexPositions[j]);
+					if (c) {
+						vertexLines.t(cubeVertexColors[j]);
+					}
+					if (k==0) {
+						vertexLines.t(" // "+cubeFaceNames[i]+" face");
+					}
+				});
+			}
+			return new Lines(
+				"var nVertices=36;",
+				vertexLines.wrap(
+					"var vertices=new Float32Array([",
+					"]);"
+				)
+			);
 		}
-		var elementLines=new Lines;
-		for (var i=0;i<nCubeFaces;i++) {
-			elementLines.a(cubeFaceVertices[i].join(", ")+", // "+cubeFaceNames[i]+" face");
-		}
-		return new Lines(
-			vertexLines.wrap(
-				"var vertices=new Float32Array([",
-				"]);"
-			),
-			"var nElements=36;",
-			elementLines.wrap(
-				"var elements=new "+this.getElementIndexJsArray()+"([",
-				"]);"
-			)
-		);
 	}
 };
 
