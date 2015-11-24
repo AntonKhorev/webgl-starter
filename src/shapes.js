@@ -363,16 +363,57 @@ Gasket.prototype.getTotalVertexCount=function(lodSymbol){
 	return "Math.pow(3,"+lodSymbol+")*3";
 };
 Gasket.prototype.writeStoreShapeWithElements=function(c,cv){
-	return new Lines(
+	function writePushVertex() {
+		var lines=new Lines;
+		lines.a(
+			"vertices[nextIndexIntoVertices++]=p[0];",
+			"vertices[nextIndexIntoVertices++]=p[1];"
+		);
+		if (c) {
+			lines.a(
+				"vertices[nextIndexIntoVertices++]=c[0];",
+				"vertices[nextIndexIntoVertices++]=c[1];",
+				"vertices[nextIndexIntoVertices++]=c[2];"
+			);
+		}
+		lines.a(
+			"return nextElement++;"
+		);
+		if (c) {
+			return lines.wrap(
+				"function pushVertex(p,c) {",
+				"}"
+			);
+		} else {
+			return lines.wrap(
+				"function pushVertex(p) {",
+				"}"
+			);
+		}
+	}
+	var lines=new Lines;
+	lines.a(
 		"var nextIndexIntoVertices=0;",
 		"var nextIndexIntoElements=0;",
-		"var nextElement=0;",
-		"function pushVertex(p) {",
-		"	vertices[nextIndexIntoVertices++]=p[0];",
-		"	vertices[nextIndexIntoVertices++]=p[1];",
-		"	return nextElement++;",
-		"}",
-		"// p = position, e = element, es = elements",
+		"var nextElement=0;"
+	);
+	if (c) {
+		lines.a(
+			"// p = position, c = color, e = element, es = elements",
+			"var colors=[",
+			"	[1.0, 0.0, 0.0],",
+			"	[0.0, 1.0, 0.0],",
+			"	[0.0, 0.0, 1.0],",
+			"	[1.0, 1.0, 0.0],",
+			"];"
+		);
+	} else {
+		lines.a(
+			"// p = position, e = element, es = elements"
+		);
+	}
+	lines.a(
+		writePushVertex(),
 		"function pushElement(e) {",
 		"	elements[nextIndexIntoElements++]=e;",
 		"}",
@@ -383,10 +424,22 @@ Gasket.prototype.writeStoreShapeWithElements=function(c,cv){
 		"	];",
 		"}",
 		"function triangle(depth,p0,p1,p2,es) {",
-		"	if (depth<=0) {",
-		"		if (es[0]===null) es[0]=pushVertex(p0);",
-		"		if (es[1]===null) es[1]=pushVertex(p1);",
-		"		if (es[2]===null) es[2]=pushVertex(p2);",
+		"	if (depth<=0) {"
+	);
+	if (this.shaderType=='vertex') {
+		lines.a(
+			"		if (es[0]===null) es[0]=pushVertex(p0,colors[nextElement%colors.length]);",
+			"		if (es[1]===null) es[1]=pushVertex(p1,colors[nextElement%colors.length]);",
+			"		if (es[2]===null) es[2]=pushVertex(p2,colors[nextElement%colors.length]);"
+		);
+	} else {
+		lines.a(
+			"		if (es[0]===null) es[0]=pushVertex(p0);",
+			"		if (es[1]===null) es[1]=pushVertex(p1);",
+			"		if (es[2]===null) es[2]=pushVertex(p2);"
+		);
+	}
+	lines.a(
 		"		pushElement(es[0]);",
 		"		pushElement(es[1]);",
 		"		pushElement(es[2]);",
@@ -409,6 +462,7 @@ Gasket.prototype.writeStoreShapeWithElements=function(c,cv){
 		"	[null,null,null]",
 		");"
 	);
+	return lines;
 }
 Gasket.prototype.writeStoreShapeWithoutElements=function(c,cv){
 	var lines=new Lines;
