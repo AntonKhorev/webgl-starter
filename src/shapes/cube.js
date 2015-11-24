@@ -12,7 +12,65 @@ Cube.prototype.usesElements=function(){
 	return true;
 };
 Cube.prototype.writeArrays=function(c,cv){
-	if (this.shaderType=='face' || this.shaderType=='light') {
+	var nCubeVertices=8;
+	var cubeVertexPositions=[
+		"-0.5,-0.5,-0.5,",
+		"+0.5,-0.5,-0.5,",
+		"-0.5,+0.5,-0.5,",
+		"+0.5,+0.5,-0.5,",
+		"-0.5,-0.5,+0.5,",
+		"+0.5,-0.5,+0.5,",
+		"-0.5,+0.5,+0.5,",
+		"+0.5,+0.5,+0.5,",
+	];
+	var cubeVertexColors=[
+		" 0.0, 0.0, 0.0,",
+		" 1.0, 0.0, 0.0,",
+		" 0.0, 1.0, 0.0,",
+		" 1.0, 1.0, 0.0,",
+		" 0.0, 0.0, 1.0,",
+		" 1.0, 0.0, 1.0,",
+		" 0.0, 1.0, 1.0,",
+		" 1.0, 1.0, 1.0,",
+	];
+	var nCubeFaces=6;
+	var cubeFaceNames=[
+		"left",
+		"right",
+		"bottom",
+		"top",
+		"back",
+		"front",
+	];
+	var cubeFaceNormals=[
+		"-1.0, 0.0, 0.0,",
+		"+1.0, 0.0, 0.0,",
+		" 0.0,-1.0, 0.0,",
+		" 0.0,+1.0, 0.0,",
+		" 0.0, 0.0,-1.0,",
+		" 0.0, 0.0,+1.0,",
+	];
+	var cubeFaceColors=[
+		" 1.0, 0.0, 0.0,",
+		" 0.0, 1.0, 0.0,",
+		" 1.0, 1.0, 0.0,",
+		" 0.0, 0.0, 1.0,",
+		" 1.0, 0.0, 1.0,",
+		" 0.0, 1.0, 1.0,",
+	];
+	var cubeFaceVertices=[
+		[4, 6, 0, 0, 6, 2],
+		[1, 3, 5, 5, 3, 7],
+		[0, 1, 4, 4, 1, 5],
+		[2, 6, 3, 3, 6, 7],
+		[0, 2, 1, 1, 2, 3],
+		[5, 7, 4, 4, 7, 6],
+	];
+
+	if (!this.usesElements()) {
+
+	} else if (this.shaderType=='face' || this.shaderType=='light') {
+		// elements with face data
 		var n=this.shaderType=='light';
 		return new Lines(
 			"var vertices=new Float32Array([",
@@ -53,27 +111,32 @@ Cube.prototype.writeArrays=function(c,cv){
 			"]);"
 		);
 	} else {
+		// elements with no face data
+		var vertexLines=new Lines;
+		vertexLines.a("// x    y    z");
+		if (c) {
+			vertexLines.t("    r    g    b");
+		}
+		for (var i=0;i<nCubeVertices;i++) {
+			vertexLines.a(cubeVertexPositions[i]);
+			if (c) {
+				vertexLines.t(cubeVertexColors[i]);
+			}
+		}
+		var elementLines=new Lines;
+		for (var i=0;i<nCubeFaces;i++) {
+			elementLines.a(cubeFaceVertices[i].join(", ")+", // "+cubeFaceNames[i]+" face");
+		}
 		return new Lines(
-			"var vertices=new Float32Array([",
-			"	// x    y    z"+(c?"    r    g    b":""),
-			"	-0.5,-0.5,-0.5,"+(c?" 0.0, 0.0, 0.0,":""),
-			"	+0.5,-0.5,-0.5,"+(c?" 1.0, 0.0, 0.0,":""),
-			"	-0.5,+0.5,-0.5,"+(c?" 0.0, 1.0, 0.0,":""),
-			"	+0.5,+0.5,-0.5,"+(c?" 1.0, 1.0, 0.0,":""),
-			"	-0.5,-0.5,+0.5,"+(c?" 0.0, 0.0, 1.0,":""),
-			"	+0.5,-0.5,+0.5,"+(c?" 1.0, 0.0, 1.0,":""),
-			"	-0.5,+0.5,+0.5,"+(c?" 0.0, 1.0, 1.0,":""),
-			"	+0.5,+0.5,+0.5,"+(c?" 1.0, 1.0, 1.0,":""),
-			"]);",
+			vertexLines.wrap(
+				"var vertices=new Float32Array([",
+				"]);"
+			),
 			"var nElements=36;",
-			"var elements=new "+this.getElementIndexJsArray()+"([",
-			"	4, 6, 0, 0, 6, 2, // left face",
-			"	1, 3, 5, 5, 3, 7, // right face",
-			"	0, 1, 4, 4, 1, 5, // bottom face",
-			"	2, 6, 3, 3, 6, 7, // top face",
-			"	0, 2, 1, 1, 2, 3, // back face",
-			"	5, 7, 4, 4, 7, 6, // front face",
-			"]);"
+			elementLines.wrap(
+				"var elements=new "+this.getElementIndexJsArray()+"([",
+				"]);"
+			)
 		);
 	}
 };
