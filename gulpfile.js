@@ -67,7 +67,7 @@ gulp.task('css',function(){
 
 gulp.task('watch',function(){
 	// TODO html - will have to reload navbar.js
-	gulp.watch(['src/main.js','src/i18n.js','src/options.js','src/code.js','src/listeners.js','src/shapes.js','src/lines.js'],['js']);
+	gulp.watch(['src/main.js','src/i18n.js','src/options.js','src/code.js','src/listeners.js','src/lines.js','src/shapes.js','src/shapes/*.js'],['js']);
 	gulp.watch(['src/index.less'],['css']);
 });
 
