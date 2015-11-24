@@ -72,23 +72,25 @@ Cube.prototype.writeArrays=function(c,cv){
 	if (c) {
 		vertexLines.t("    r    g    b");
 	}
+	function appendVertex(iFace,iVertex,firstInFace) {
+		vertexLines.a(cubeVertexPositions[iVertex]);
+		if (this.shaderType=='light') {
+			vertexLines.t(cubeFaceNormals[iFace]);
+		}
+		if (this.shaderType=='vertex') {
+			vertexLines.t(cubeVertexColors[iVertex]);
+		}
+		if (this.shaderType=='face') {
+			vertexLines.t(cubeFaceColors[iFace]);
+		}
+		if (firstInFace) {
+			vertexLines.t(" // "+cubeFaceNames[iFace]+" face");
+		}
+	}
 	if (!this.usesElements()) {
 		for (var i=0;i<nCubeFaces;i++) {
 			quadToTriangleMap.forEach(function(j,k){
-				var v=cubeFaceVertices[i][j];
-				vertexLines.a(cubeVertexPositions[v]);
-				if (this.shaderType=='light') {
-					vertexLines.t(cubeFaceNormals[i]);
-				}
-				if (this.shaderType=='vertex') {
-					vertexLines.t(cubeVertexColors[v]);
-				}
-				if (this.shaderType=='face') {
-					vertexLines.t(cubeFaceColors[i]);
-				}
-				if (k==0) {
-					vertexLines.t(" // "+cubeFaceNames[i]+" face");
-				}
+				appendVertex.call(this,i,cubeFaceVertices[i][j],k==0);
 			},this);
 		}
 		return new Lines(
@@ -102,15 +104,7 @@ Cube.prototype.writeArrays=function(c,cv){
 		// elements, face data
 		for (var i=0;i<nCubeFaces;i++) {
 			cubeFaceVertices[i].forEach(function(j,k){
-				vertexLines.a(cubeVertexPositions[j]);
-				if (this.shaderType=='light') {
-					vertexLines.t(cubeFaceNormals[i]);
-				} else {
-					vertexLines.t(cubeFaceColors[i]);
-				}
-				if (k==0) {
-					vertexLines.t(" // "+cubeFaceNames[i]+" face");
-				}
+				appendVertex.call(this,i,j,k==0);
 			},this);
 		}
 		return new Lines(
