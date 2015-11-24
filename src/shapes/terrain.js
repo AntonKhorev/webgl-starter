@@ -6,12 +6,6 @@ var Terrain=function(elementIndexBits,shaderType,lod){
 };
 Terrain.prototype=Object.create(Mesh.prototype);
 Terrain.prototype.constructor=Terrain;
-Terrain.prototype.getDistinctVertexCount=function(lodSymbol){
-	return "Math.pow((1<<"+lodSymbol+")+1,2)";
-};
-Terrain.prototype.getTotalVertexCount=function(lodSymbol){
-	return "Math.pow((1<<"+lodSymbol+"),2)*6";
-};
 Terrain.prototype.writeMeshInit=function(){
 	var lines=new Lines;
 	lines.a(

@@ -6,12 +6,6 @@ var Hat=function(elementIndexBits,shaderType,lod){
 };
 Hat.prototype=Object.create(Mesh.prototype);
 Hat.prototype.constructor=Hat;
-Hat.prototype.getDistinctVertexCount=function(lodSymbol){
-	return "Math.pow((1<<"+lodSymbol+")+1,2)";
-};
-Hat.prototype.getTotalVertexCount=function(lodSymbol){
-	return "Math.pow((1<<"+lodSymbol+"),2)*6";
-};
 Hat.prototype.writeMeshInit=function(){
 	return new Lines(
 		"var xyRange=4;",

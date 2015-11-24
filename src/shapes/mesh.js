@@ -7,8 +7,11 @@ var Mesh=function(elementIndexBits,shaderType,lod){
 Mesh.prototype=Object.create(LodShape.prototype);
 Mesh.prototype.constructor=Mesh;
 Mesh.prototype.dim=3;
-Mesh.prototype.usesElements=function(){
-	return this.shaderType!='face';
+Mesh.prototype.getDistinctVertexCount=function(lodSymbol){
+	return "Math.pow((1<<"+lodSymbol+")+1,2)";
+};
+Mesh.prototype.getTotalVertexCount=function(lodSymbol){
+	return "Math.pow((1<<"+lodSymbol+"),2)*6";
 };
 // abstract Mesh.prototype.writeMeshInit=function(){};
 // abstract Mesh.prototype.writeMeshVertex=function(c,cv){};
