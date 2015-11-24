@@ -81,9 +81,9 @@ Mesh.prototype.writeStoreShape=function(c,cv){
 	} else if (this.shaderType=='face') {
 		lines.a(
 			"var i,j;",
-			"for (i=0;i<=res;i++) {",
-			"	for (j=0;j<=res;j++) {",
-			"		for (var k=0;k<6;k++) {",
+			"for (i=0;i<res;i++) {",
+			"	for (j=0;j<res;j++) {",
+			"		for (var k=0;k<4;k++) {",
 			"			var di=[0,0,1,1][k];",
 			"			var dj=[0,1,0,1][k];",
 			"			var y=(i+di)/res*xyRange*2-xyRange;",

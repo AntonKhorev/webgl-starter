@@ -7,13 +7,14 @@ var Terrain=function(elementIndexBits,shaderType,lod){
 Terrain.prototype=Object.create(Mesh.prototype);
 Terrain.prototype.constructor=Terrain;
 Terrain.prototype.writeMeshInit=function(){
+	var noFaces=(this.usesElements()&&this.shaderType!='face');
 	var lines=new Lines;
 	lines.a(
 		"var xyRange=1/Math.sqrt(2);",
 		"var zRange=xyRange;",
 		"var mask=res-1;",
 		"function zOffset(i,j) {",
-		"	return vertexElement(i,j"+(this.shaderType!='face'?"":",0")+")*"+this.getNumbersPerVertex()+"+2;",
+		"	return vertexElement(i,j"+(noFaces?"":",0")+")*"+this.getNumbersPerVertex()+"+2;",
 		"}",
 		"function noise(depth) {",
 		"	var r=zRange/Math.pow(2,shapeLod-depth-1);",
@@ -58,7 +59,7 @@ Terrain.prototype.writeMeshInit=function(){
 		"	}",
 		"}"
 	);
-	if (this.shaderType!='face') {
+	if (noFaces) {
 		lines.a(
 			"for (i0=0;i0<res;i0++) vertices[zOffset(i0,res)]=vertices[zOffset(i0,0)];",
 			"for (j0=0;j0<res;j0++) vertices[zOffset(res,j0)]=vertices[zOffset(0,j0)];",
@@ -68,11 +69,12 @@ Terrain.prototype.writeMeshInit=function(){
 	return lines;
 };
 Terrain.prototype.writeMeshVertex=function(c,cv){
+	var noFaces=(this.usesElements()&&this.shaderType!='face');
 	var lines=new Lines;
 	lines.a(
 		"vertices[vertexOffset+0]=x;",
 		"vertices[vertexOffset+1]=y;",
-		(this.shaderType!='face'
+		(noFaces
 			?"// vertices[vertexOffset+2] already written"
 			:"vertices[vertexOffset+2]=vertices[zOffset((i+di)&mask,(j+dj)&mask)];"
 		)
@@ -81,11 +83,11 @@ Terrain.prototype.writeMeshVertex=function(c,cv){
 		lines.a(
 			"var d=4*xyRange/res;",
 			"var normal=normalize([",
-			(this.shaderType!='face'
+			(noFaces
 				?"	(vertices[zOffset(i,(j-1)&mask)]-vertices[zOffset(i,(j+1)&mask)])/d,"
 				:"	(vertices[zOffset((i+di)&mask,(j+dj-1)&mask)]-vertices[zOffset((i+di)&mask,(j+dj+1)&mask)])/d,"
 			),
-			(this.shaderType!='face'
+			(noFaces
 				?"	(vertices[zOffset((i-1)&mask,j)]-vertices[zOffset((i+1)&mask,j)])/d,"
 				:"	(vertices[zOffset((i+di-1)&mask,(j+dj)&mask)]-vertices[zOffset((i+di+1)&mask,(j+dj)&mask)])/d,"
 			),
@@ -96,7 +98,10 @@ Terrain.prototype.writeMeshVertex=function(c,cv){
 		);
 	} else if (c) {
 		lines.a(
-			"var ic=(i&1)*2+(j&1);",
+			((!this.usesElements() && this.shaderType!='face')
+				?"var ic=((i+di)&1)*2+((j+dj)&1);"
+				:"var ic=(i&1)*2+(j&1);"
+			),
 			"vertices[vertexOffset+3]=colors[ic][0];",
 			"vertices[vertexOffset+4]=colors[ic][1];",
 			"vertices[vertexOffset+5]=colors[ic][2];"
