@@ -73,7 +73,7 @@ Cube.prototype.writeArrays=function(c,cv){
 		vertexLines.t("    r    g    b");
 	}
 	if (this.shaderType=='face' || this.shaderType=='light') {
-		// elements with face data
+		// face data
 		if (this.usesElements()) {
 			for (var i=0;i<nCubeFaces;i++) {
 				cubeFaceVertices[i].forEach(function(j,k){
@@ -104,6 +104,27 @@ Cube.prototype.writeArrays=function(c,cv){
 				"]);"
 			);
 		} else {
+			for (var i=0;i<nCubeFaces;i++) {
+				quadToTriangleMap.forEach(function(j,k){
+					var v=cubeFaceVertices[i][j];
+					vertexLines.a(cubeVertexPositions[v]);
+					if (this.shaderType=='light') {
+						vertexLines.t(cubeFaceNormals[i]);
+					} else {
+						vertexLines.t(cubeFaceColors[i]);
+					}
+					if (k==0) {
+						vertexLines.t(" // "+cubeFaceNames[i]+" face");
+					}
+				},this);
+			}
+			return new Lines(
+				"var nVertices=36;",
+				vertexLines.wrap(
+					"var vertices=new Float32Array([",
+					"]);"
+				)
+			);
 		}
 	} else {
 		// no face data
