@@ -96,7 +96,7 @@ OptionsBlueprint.prototype.generalOptions=[
 	new Option('background',['none','solid']),
 	new Option('shader',['single','vertex','face','light']),
 	new Option('shape',['square','triangle','gasket','cube','hat','terrain']),
-	new Option('elements',['0','8','16','32'],'16'),
+	new Option('elements',['0','8','16','32']),
 	new Option('projection',['ortho','perspective']),
 ];
 OptionsBlueprint.prototype.inputOptions=[
