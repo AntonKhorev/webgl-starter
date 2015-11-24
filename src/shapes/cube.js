@@ -72,109 +72,89 @@ Cube.prototype.writeArrays=function(c,cv){
 	if (c) {
 		vertexLines.t("    r    g    b");
 	}
-	if (this.shaderType=='face' || this.shaderType=='light') {
-		// face data
-		if (this.usesElements()) {
-			for (var i=0;i<nCubeFaces;i++) {
-				cubeFaceVertices[i].forEach(function(j,k){
-					vertexLines.a(cubeVertexPositions[j]);
-					if (this.shaderType=='light') {
-						vertexLines.t(cubeFaceNormals[i]);
-					} else {
-						vertexLines.t(cubeFaceColors[i]);
-					}
-					if (k==0) {
-						vertexLines.t(" // "+cubeFaceNames[i]+" face");
-					}
-				},this);
-			}
-			return new Lines(
-				vertexLines.wrap(
-					"var vertices=new Float32Array([",
-					"]);"
-				),
-				"var nElements=36;",
-				"var elements=new "+this.getElementIndexJsArray()+"([",
-				"	 0,  1,  2,  2,  1,  3, // left face",
-				"	 4,  5,  6,  6,  5,  7, // right face",
-				"	 8,  9, 10, 10,  9, 11, // bottom face",
-				"	12, 13, 14, 14, 13, 15, // top face",
-				"	16, 17, 18, 18, 17, 19, // back face",
-				"	20, 21, 22, 22, 21, 23, // front face",
-				"]);"
-			);
-		} else {
-			for (var i=0;i<nCubeFaces;i++) {
-				quadToTriangleMap.forEach(function(j,k){
-					var v=cubeFaceVertices[i][j];
-					vertexLines.a(cubeVertexPositions[v]);
-					if (this.shaderType=='light') {
-						vertexLines.t(cubeFaceNormals[i]);
-					} else {
-						vertexLines.t(cubeFaceColors[i]);
-					}
-					if (k==0) {
-						vertexLines.t(" // "+cubeFaceNames[i]+" face");
-					}
-				},this);
-			}
-			return new Lines(
-				"var nVertices=36;",
-				vertexLines.wrap(
-					"var vertices=new Float32Array([",
-					"]);"
-				)
-			);
-		}
-	} else {
-		// no face data
-		if (this.usesElements()) {
-			for (var i=0;i<nCubeVertices;i++) {
-				vertexLines.a(cubeVertexPositions[i]);
-				if (c) {
-					vertexLines.t(cubeVertexColors[i]);
+	if (!this.usesElements()) {
+		for (var i=0;i<nCubeFaces;i++) {
+			quadToTriangleMap.forEach(function(j,k){
+				var v=cubeFaceVertices[i][j];
+				vertexLines.a(cubeVertexPositions[v]);
+				if (this.shaderType=='light') {
+					vertexLines.t(cubeFaceNormals[i]);
 				}
-			}
-			var elementLines=new Lines;
-			for (var i=0;i<nCubeFaces;i++) {
-				elementLines.a("");
-				quadToTriangleMap.forEach(function(j){
-					elementLines.t(cubeFaceVertices[i][j]+", ");
-				});
-				elementLines.t("// "+cubeFaceNames[i]+" face");
-			}
-			return new Lines(
-				vertexLines.wrap(
-					"var vertices=new Float32Array([",
-					"]);"
-				),
-				"var nElements=36;",
-				elementLines.wrap(
-					"var elements=new "+this.getElementIndexJsArray()+"([",
-					"]);"
-				)
-			);
-		} else {
-			for (var i=0;i<nCubeFaces;i++) {
-				quadToTriangleMap.forEach(function(j,k){
-					var v=cubeFaceVertices[i][j];
-					vertexLines.a(cubeVertexPositions[v]);
-					if (c) {
-						vertexLines.t(cubeVertexColors[v]);
-					}
-					if (k==0) {
-						vertexLines.t(" // "+cubeFaceNames[i]+" face");
-					}
-				});
-			}
-			return new Lines(
-				"var nVertices=36;",
-				vertexLines.wrap(
-					"var vertices=new Float32Array([",
-					"]);"
-				)
-			);
+				if (this.shaderType=='vertex') {
+					vertexLines.t(cubeVertexColors[v]);
+				}
+				if (this.shaderType=='face') {
+					vertexLines.t(cubeFaceColors[i]);
+				}
+				if (k==0) {
+					vertexLines.t(" // "+cubeFaceNames[i]+" face");
+				}
+			},this);
 		}
+		return new Lines(
+			"var nVertices=36;",
+			vertexLines.wrap(
+				"var vertices=new Float32Array([",
+				"]);"
+			)
+		);
+	} else if (this.shaderType=='face' || this.shaderType=='light') {
+		// elements, face data
+		for (var i=0;i<nCubeFaces;i++) {
+			cubeFaceVertices[i].forEach(function(j,k){
+				vertexLines.a(cubeVertexPositions[j]);
+				if (this.shaderType=='light') {
+					vertexLines.t(cubeFaceNormals[i]);
+				} else {
+					vertexLines.t(cubeFaceColors[i]);
+				}
+				if (k==0) {
+					vertexLines.t(" // "+cubeFaceNames[i]+" face");
+				}
+			},this);
+		}
+		return new Lines(
+			vertexLines.wrap(
+				"var vertices=new Float32Array([",
+				"]);"
+			),
+			"var nElements=36;",
+			"var elements=new "+this.getElementIndexJsArray()+"([",
+			"	 0,  1,  2,  2,  1,  3, // left face",
+			"	 4,  5,  6,  6,  5,  7, // right face",
+			"	 8,  9, 10, 10,  9, 11, // bottom face",
+			"	12, 13, 14, 14, 13, 15, // top face",
+			"	16, 17, 18, 18, 17, 19, // back face",
+			"	20, 21, 22, 22, 21, 23, // front face",
+			"]);"
+		);
+	} else {
+		// elements, no face data
+		for (var i=0;i<nCubeVertices;i++) {
+			vertexLines.a(cubeVertexPositions[i]);
+			if (c) {
+				vertexLines.t(cubeVertexColors[i]);
+			}
+		}
+		var elementLines=new Lines;
+		for (var i=0;i<nCubeFaces;i++) {
+			elementLines.a("");
+			quadToTriangleMap.forEach(function(j){
+				elementLines.t(cubeFaceVertices[i][j]+", ");
+			});
+			elementLines.t("// "+cubeFaceNames[i]+" face");
+		}
+		return new Lines(
+			vertexLines.wrap(
+				"var vertices=new Float32Array([",
+				"]);"
+			),
+			"var nElements=36;",
+			elementLines.wrap(
+				"var elements=new "+this.getElementIndexJsArray()+"([",
+				"]);"
+			)
+		);
 	}
 };
 
