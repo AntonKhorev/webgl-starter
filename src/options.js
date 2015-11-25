@@ -112,6 +112,9 @@ OptionsBlueprint.prototype.inputOptions=[
 	new FloatInputOption('shader.single.color.g',[0,1]),
 	new FloatInputOption('shader.single.color.b',[0,1]),
 	new FloatInputOption('shader.single.color.a',[0,1],1),
+	new FloatInputOption('shader.light.direction.x',[-4,+4],-1),
+	new FloatInputOption('shader.light.direction.y',[-4,+4],+1),
+	new FloatInputOption('shader.light.direction.z',[-4,+4],+1),
 	new IntInputOption('shape.lodShape.lod',[0,10],6),
 ];
 OptionsBlueprint.prototype.transformOptions=[];

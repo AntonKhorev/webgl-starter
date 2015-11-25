@@ -39,6 +39,9 @@ module.exports=function(id){ // fake temporary i18n
 		'options.shader.single.color.g': 'Fragment color green component',
 		'options.shader.single.color.b': 'Fragment color blue component',
 		'options.shader.single.color.a': 'Fragment color alpha component',
+		'options.shader.light.direction.x': 'Light direction x component',
+		'options.shader.light.direction.y': 'Light direction y component',
+		'options.shader.light.direction.z': 'Light direction z component',
 		'options.shape.lodShape.lod': 'Shape detail level', // recursion depth for fractal shapes
 		'options.*.input': 'This value is',
 		'options.*.input.constant': 'kept constant',

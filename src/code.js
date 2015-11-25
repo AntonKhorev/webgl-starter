@@ -9,6 +9,9 @@ module.exports=function(options,i18n){
 	function floatOptionValue(name) {
 		return options[name].toFixed(3);
 	}
+	function signedFloatOptionValue(name) {
+		return (options[name]<=0 ? options[name]<0 ? '' /* - */ : ' ' : '+')+options[name].toFixed(3);
+	}
 	function colorValue(prefix) {
 		return floatOptionValue(prefix+'.r')+","+
 		       floatOptionValue(prefix+'.g')+","+
@@ -24,6 +27,21 @@ module.exports=function(options,i18n){
 			return a; // see OpenGL ES SL section 5.4.2
 		} else {
 			return r+","+g+","+b+","+a;
+		}
+	}
+	function directionValue(prefix) {
+		return signedFloatOptionValue(prefix+'.x')+","+
+		       signedFloatOptionValue(prefix+'.y')+","+
+		       signedFloatOptionValue(prefix+'.z');
+	}
+	function glslDirectionValue(prefix) {
+		var x=signedFloatOptionValue(prefix+'.x');
+		var y=signedFloatOptionValue(prefix+'.y');
+		var z=signedFloatOptionValue(prefix+'.z');
+		if (x==y && y==z) {
+			return x; // see OpenGL ES SL section 5.4.2
+		} else {
+			return x+","+y+","+z;
 		}
 	}
 	function isMousemoveInput(name) {
@@ -349,6 +367,11 @@ module.exports=function(options,i18n){
 				"}"
 			);
 		} else if (options.shader=='light') {
+			if (options.hasInputsFor('shader.light.direction')) {
+				lines.a(
+					"uniform vec3 lightDirection;"
+				);
+			}
 			if (options.projection=='perspective') {
 				lines.a(
 					"varying vec3 interpolatedView;"
@@ -379,8 +402,16 @@ module.exports=function(options,i18n){
 					"	if (!gl_FrontFacing) N=-N;"
 				);
 			}
+			if (options.hasInputsFor('shader.light.direction')) {
+				lines.a(
+					"	vec3 L=normalize(lightDirection);"
+				);
+			} else {
+				lines.a(
+					"	vec3 L=normalize(vec3("+glslDirectionValue('shader.light.direction')+"));"
+				);
+			}
 			lines.a(
-				"	vec3 L=normalize(vec3(-1.0,+1.0,+1.0));",
 				"	vec3 H=normalize(L+V);",
 				"	gl_FragColor=vec4(",
 				"		ambientColor",
