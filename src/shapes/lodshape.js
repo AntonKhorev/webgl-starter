@@ -14,7 +14,17 @@ LodShape.prototype.getMaxPossibleLod=function(){ // due to element index type
 	if (!this.usesElements() || this.elementIndexBits>=31) { // 1<<31 is a negative number, can't compare with it
 		return this.lod.max; // no need to limit lod if elements are not used or index type is large enough
 	}
-	return 6;
+	var nVerticesFn = this.shaderType=='face'
+		? this.getFaceVertexCount
+		: this.getDistinctVertexCount;
+	var indexLimit=1<<this.elementIndexBits;
+	for (var m=this.lod.max;m>=0;m--) {
+		var n=eval(nVerticesFn(m));
+		if (n<=indexLimit) {
+			return m;
+		}
+	}
+	// TODO fail here
 };
 // abstract LodShape.prototype.getDistinctVertexCount=function(lodSymbol){}; // # of distinct vertices where one vertex can be shared between different faces and output primitives
 // abstract LodShape.prototype.getFaceVertexCount=function(lodSymbol){}; // # of distinct (vertex,face) pairs that still can be shared between output primitives
