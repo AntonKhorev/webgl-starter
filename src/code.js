@@ -36,7 +36,9 @@ module.exports=function(options,i18n){
 			if (options[option.name+'.input']=='constant') {
 				return {
 					value: intOptionValue(option.name),
-					changes: false
+					changes: false,
+					min: intOptionValue(option.name),
+					max: intOptionValue(option.name)
 				};
 			} else {
 				return {
@@ -416,13 +418,36 @@ module.exports=function(options,i18n){
 			}).forEach(function(option){
 				lines.a(
 					"<div>",
-					"	<label for='"+option.name+"'>"+i18n('options.'+option.name)+":</label>",
-					"	<span class='min'>"+option.getMinLabel()+"</span> "+
-						(option.getStep()==1
-							? "<input type='range' id='"+option.name+"' min='"+option.getMin()+"' max='"+option.getMax()+"' value='"+intOptionValue(option.name)+"' />"
-							: "<input type='range' id='"+option.name+"' min='"+option.getMin()+"' max='"+option.getMax()+"' step='"+option.getStep()+"' value='"+floatOptionValue(option.name)+"' />"
-						)+
-						" <span class='max'>"+option.getMaxLabel()+"</span>",
+					"	<label for='"+option.name+"'>"+i18n('options.'+option.name)+":</label>"
+				);
+				if (option.name!='shape.lodShape.lod') {
+					lines.a(
+						"	<span class='min'>"+option.getMinLabel()+"</span> "
+					);
+					if (option.getStep()==1) {
+						lines.t(
+							"<input type='range' id='"+option.name+"' min='"+option.getMin()+"' max='"+option.getMax()+"' value='"+intOptionValue(option.name)+"' />"
+						);
+					} else {
+						lines.t(
+							"<input type='range' id='"+option.name+"' min='"+option.getMin()+"' max='"+option.getMax()+"' step='"+option.getStep()+"' value='"+floatOptionValue(option.name)+"' />"
+						);
+					}
+					lines.t(
+						" <span class='max'>"+option.getMaxLabel()+"</span>"
+					);
+				} else {
+					lines.a(
+						"	<span class='min'>"+option.getMinLabel(shape.lod.min)+"</span> "
+					);
+					lines.t(
+							"<input type='range' id='"+option.name+"' min='"+shape.lod.min+"' max='"+shape.lod.max+"' value='"+shape.lod.value+"' />"
+						);
+					lines.t(
+						" <span class='max'>"+option.getMaxLabel(shape.lod.max)+"</span>"
+					);
+				}
+				lines.t(
 					"</div>"
 				);
 			});

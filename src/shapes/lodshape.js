@@ -4,9 +4,15 @@ var Shape=require('./shape.js');
 var LodShape=function(elementIndexBits,shaderType,lod){
 	Shape.call(this,elementIndexBits,shaderType);
 	this.lod=lod;
+	var maxLod=this.getMaxPossibleLod();
+	if (this.lod.value>maxLod) this.lod.value=maxLod;
+	if (this.lod.max>maxLod) this.lod.max=maxLod;
 };
 LodShape.prototype=Object.create(Shape.prototype);
 LodShape.prototype.constructor=LodShape;
+LodShape.prototype.getMaxPossibleLod=function(){
+	return 6; // TODO abstract? or use *Count fns
+};
 // abstract LodShape.prototype.getDistinctVertexCount=function(lodSymbol){}; // # of distinct vertices where one vertex can be shared between different faces and output primitives
 // abstract LodShape.prototype.getFaceVertexCount=function(lodSymbol){}; // # of distinct (vertex,face) pairs that still can be shared between output primitives
 // abstract LodShape.prototype.getTotalVertexCount=function(lodSymbol){}; // # of vertices in output primitives = # of elements when element arrays are in use

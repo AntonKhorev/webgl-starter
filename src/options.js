@@ -39,11 +39,13 @@ InputOption.prototype.getMin=function(){
 InputOption.prototype.getMax=function(){
 	return this.availableValues[1];
 };
-InputOption.prototype.getMinLabel=function(){
-	return this.getMin().toString().replace('-','−');
+InputOption.prototype.getMinLabel=function(value){
+	if (value===undefined) value=this.getMin();
+	return value.toString().replace('-','−');
 };
-InputOption.prototype.getMaxLabel=function(){
-	return this.getMax().toString().replace('-','−');
+InputOption.prototype.getMaxLabel=function(value){
+	if (value===undefined) value=this.getMax();
+	return value.toString().replace('-','−');
 };
 
 var FloatInputOption=function(name,rangeOfValues,defaultValue){
