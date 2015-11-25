@@ -27,6 +27,11 @@ Gasket.prototype.writeStoreShape=function(c,cv){
 				lines.a(
 					"var c=colors[nextIndexIntoColors];"
 				);
+				if (this.shaderType!='face') {
+					lines.a(
+						"nextIndexIntoColors=(nextIndexIntoColors+1)%colors.length;"
+					);
+				}
 			} else {
 				lines.a(
 					"var c=colors[nextElement%colors.length];"
@@ -58,15 +63,6 @@ Gasket.prototype.writeStoreShape=function(c,cv){
 				lines.a(
 					"	pushVertex(p0);",
 					"	pushVertex(p1);",
-					"	pushVertex(p2);",
-					"	nextIndexIntoColors=(nextIndexIntoColors+1)%colors.length;"
-				);
-			} else if (this.shaderType=='vertex') {
-				lines.a(
-					"	pushVertex(p0);",
-					"	nextIndexIntoColors=(nextIndexIntoColors+1)%colors.length;",
-					"	pushVertex(p1);",
-					"	nextIndexIntoColors=(nextIndexIntoColors+1)%colors.length;",
 					"	pushVertex(p2);",
 					"	nextIndexIntoColors=(nextIndexIntoColors+1)%colors.length;"
 				);
