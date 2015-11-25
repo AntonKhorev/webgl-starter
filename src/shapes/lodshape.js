@@ -10,8 +10,11 @@ var LodShape=function(elementIndexBits,shaderType,lod){
 };
 LodShape.prototype=Object.create(Shape.prototype);
 LodShape.prototype.constructor=LodShape;
-LodShape.prototype.getMaxPossibleLod=function(){
-	return 6; // TODO abstract? or use *Count fns
+LodShape.prototype.getMaxPossibleLod=function(){ // due to element index type
+	if (!this.usesElements() || this.elementIndexBits>=31) { // 1<<31 is a negative number, can't compare with it
+		return this.lod.max; // no need to limit lod if elements are not used or index type is large enough
+	}
+	return 6;
 };
 // abstract LodShape.prototype.getDistinctVertexCount=function(lodSymbol){}; // # of distinct vertices where one vertex can be shared between different faces and output primitives
 // abstract LodShape.prototype.getFaceVertexCount=function(lodSymbol){}; // # of distinct (vertex,face) pairs that still can be shared between output primitives
