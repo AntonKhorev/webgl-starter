@@ -1,6 +1,7 @@
 module.exports=function(id){ // fake temporary i18n
 	return {
 		'message.hljs': "<a href='https://highlightjs.org/'>highlight.js</a> (hosted on cdnjs.cloudflare.com) is not loaded. Syntax highlighting is disabled.",
+		'message.elements': "choosing 8- or 16-bit index may limit available shape detail levels",
 
 		'options.general': 'General options',
 		'options.background': 'Background',

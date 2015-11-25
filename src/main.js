@@ -36,7 +36,7 @@ $(function(){
 		}
 		function writeGeneralOption(option) {
 			var id=generateId();
-			return $("<div>")
+			var $option=$("<div>")
 				.append("<label for='"+id+"'>"+i18n('options.'+option.name)+":</label>")
 				.append(" ")
 				.append(
@@ -50,6 +50,10 @@ $(function(){
 						updateCode();
 					})
 				);
+			if (option.name=='elements') {
+				$option.append(" "+i18n('message.elements'));
+			}
+			return $option;
 		}
 		function writeInputOption(option) {
 			var id=generateId();
