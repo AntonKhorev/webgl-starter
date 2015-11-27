@@ -59,7 +59,7 @@ describe('Uniform',function(){
 				"vec3(foo,+3.000)"
 			);
 		});
-		it('returns interface with one location',function(){
+		it('returns interface with one location and two simple listeners',function(){
 			assert.deepEqual(uniform.getJsInterfaceLines([false,false]).data,[
 				"var fooLoc=gl.getUniformLocation(program,'foo');",
 				"function updateFoo() {",
@@ -71,6 +71,24 @@ describe('Uniform',function(){
 				"updateFoo();",
 				"document.getElementById('bar.x').addEventListener('change',updateFoo);",
 				"document.getElementById('bar.y').addEventListener('change',updateFoo);"
+			]);
+		});
+		it('returns interface with one location and query listener with frame sheduling',function(){
+			assert.deepEqual(uniform.getJsInterfaceLines([true,false]).data,[
+				"var fooLoc=gl.getUniformLocation(program,'foo');",
+				"function updateFoo() {",
+				"	gl.uniform2f(fooLoc,",
+				"		parseFloat(document.getElementById('bar.x').value),",
+				"		parseFloat(document.getElementById('bar.y').value)",
+				"	);",
+				"};",
+				"updateFoo();",
+				"[].forEach.call(document.querySelectorAll('[id^=\"bar.\"]'),function(el){",
+				"	el.addEventListener('change',function(){",
+				"		updateFoo();",
+				"		scheduleFrame();",
+				"	});",
+				"});"
 			]);
 		});
 	});

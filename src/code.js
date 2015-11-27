@@ -1,6 +1,6 @@
+var Lines=require('./lines.js');
 var listeners=require('./listeners.js');
 var shapes=require('./shapes.js');
-var Lines=require('./lines.js');
 var Uniform=require('./uniform.js');
 
 module.exports=function(options,i18n){

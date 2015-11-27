@@ -1,4 +1,5 @@
 var Lines=require('./lines.js');
+var listeners=require('./listeners.js');
 
 // currently supports two cases:
 //	all constant components
@@ -10,6 +11,9 @@ var Uniform=function(varName,optName,components,options){
 	this.components=components.split('');
 	this.values=this.components.map(function(c){
 		return options[optName+'.'+c];
+	});
+	this.inputs=this.components.map(function(c){
+		return options[optName+'.'+c+'.input'];
 	});
 	this.allConst=this.components.every(function(c){
 		return options[optName+'.'+c+'.input']=='constant'
@@ -45,10 +49,35 @@ Uniform.prototype.getJsInterfaceLines=function(writeListenerArgs){
 	function capitalize(s) {
 		return s.charAt(0).toUpperCase()+s.slice(1);
 	}
+	var updateFnName='update'+capitalize(this.varName);
+	function writeManyListenersLines() {
+		var lines=new Lines;
+		this.components.forEach(function(c,i){
+			if (this.inputs[i]!='slider') return;
+			var listener=new listeners.SliderListener(this.optName+'.'+c);
+			listener.enter()
+				.log("console.log(this.id,'input value:',parseFloat(this.value));")
+				.post(updateFnName+"();");
+			lines.a(
+				listener.write.apply(listener,writeListenerArgs)
+			);
+		},this);
+		return lines;
+	}
+	function writeOneListenerLines() {
+		var listener=new listeners.MultipleSliderListener("[id^=\""+this.optName+".\"]");
+		listener.enter()
+			.log("console.log(this.id,'input value:',parseFloat(this.value));")
+			.post(updateFnName+"();");
+		return new Lines(
+			listener.write.apply(listener,writeListenerArgs)
+		);
+	}
 	if (this.allConst) {
 		return new Lines;
 	} else {
-		var updateFnName='update'+capitalize(this.varName);
+		var manyListenersLines=writeManyListenersLines.call(this);
+		var oneListenerLines=writeOneListenerLines.call(this);
 		return new Lines(
 			"var "+this.varName+"Loc=gl.getUniformLocation(program,'"+this.varName+"');",
 			"function "+updateFnName+"() {",
@@ -58,9 +87,8 @@ Uniform.prototype.getJsInterfaceLines=function(writeListenerArgs){
 			"	);",
 			"};",
 			updateFnName+"();",
-			"document.getElementById('"+this.optName+".x').addEventListener('change',"+updateFnName+");",
-			"document.getElementById('"+this.optName+".y').addEventListener('change',"+updateFnName+");"
-		); // TODO real event listener
+			manyListenersLines.data.length<=oneListenerLines.data.length ? manyListenersLines : oneListenerLines
+		);
 	}
 };
 
