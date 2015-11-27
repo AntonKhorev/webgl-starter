@@ -1,6 +1,7 @@
 var listeners=require('./listeners.js');
 var shapes=require('./shapes.js');
 var Lines=require('./lines.js');
+var Uniform=require('./uniform.js');
 
 module.exports=function(options,i18n){
 	function intOptionValue(name) {
@@ -8,9 +9,6 @@ module.exports=function(options,i18n){
 	}
 	function floatOptionValue(name) {
 		return options[name].toFixed(3);
-	}
-	function signedFloatOptionValue(name) {
-		return (options[name]<=0 ? options[name]<0 ? '' /* - */ : ' ' : '+')+options[name].toFixed(3);
 	}
 	function colorValue(prefix) {
 		return floatOptionValue(prefix+'.r')+","+
@@ -27,21 +25,6 @@ module.exports=function(options,i18n){
 			return a; // see OpenGL ES SL section 5.4.2
 		} else {
 			return r+","+g+","+b+","+a;
-		}
-	}
-	function directionValue(prefix) {
-		return signedFloatOptionValue(prefix+'.x')+","+
-		       signedFloatOptionValue(prefix+'.y')+","+
-		       signedFloatOptionValue(prefix+'.z');
-	}
-	function glslDirectionValue(prefix) {
-		var x=signedFloatOptionValue(prefix+'.x');
-		var y=signedFloatOptionValue(prefix+'.y');
-		var z=signedFloatOptionValue(prefix+'.z');
-		if (x==y && y==z) {
-			return x; // see OpenGL ES SL section 5.4.2
-		} else {
-			return x+","+y+","+z;
 		}
 	}
 	function isMousemoveInput(name) {
@@ -71,6 +54,9 @@ module.exports=function(options,i18n){
 		return new (Function.prototype.bind.apply(shapes[className],shapeCtorArgs));
 	}
 	var shape=makeShape();
+	if (options.shader=='light') {
+		var lightDirectionUniform=new Uniform('lightDirection','shader.light.direction','xyz',options);
+	}
 
 	function generateHtmlStyleLines() {
 		var lines=new Lines;
@@ -367,11 +353,9 @@ module.exports=function(options,i18n){
 				"}"
 			);
 		} else if (options.shader=='light') {
-			if (options.hasInputsFor('shader.light.direction')) {
-				lines.a(
-					"uniform vec3 lightDirection;"
-				);
-			}
+			lines.a(
+				lightDirectionUniform.getGlslDeclarationLines()
+			);
 			if (options.projection=='perspective') {
 				lines.a(
 					"varying vec3 interpolatedView;"
@@ -402,16 +386,8 @@ module.exports=function(options,i18n){
 					"	if (!gl_FrontFacing) N=-N;"
 				);
 			}
-			if (options.hasInputsFor('shader.light.direction')) {
-				lines.a(
-					"	vec3 L=normalize(lightDirection);"
-				);
-			} else {
-				lines.a(
-					"	vec3 L=normalize(vec3("+glslDirectionValue('shader.light.direction')+"));"
-				);
-			}
 			lines.a(
+				"	vec3 L=normalize("+lightDirectionUniform.getGlslValue()+");",
 				"	vec3 H=normalize(L+V);",
 				"	gl_FragColor=vec4(",
 				"		ambientColor",
@@ -558,10 +534,11 @@ module.exports=function(options,i18n){
 		return lines;
 	}
 	function generateJsInputHandlerLines() {
+		var writeListenerArgs=[!options.isAnimated(),options.debugInputs];
 		var lines=new Lines;
 		function writeListener(listener) {
 			lines.a(
-				listener.write(!options.isAnimated(),options.debugInputs)
+				listener.write.apply(listener,writeListenerArgs)
 			);
 		}
 		var canvasMousemoveListener=new listeners.CanvasMousemoveListener();
@@ -703,6 +680,11 @@ module.exports=function(options,i18n){
 				'shader.single.color','updateColor','color',
 				'gl.uniform4fv(colorLoc,',');',
 				'gl.uniform4fv(colorLoc,[',']);'
+			);
+		}
+		if (options.shader=='light') {
+			lines.a(
+				lightDirectionUniform.getJsInterfaceLines(writeListenerArgs)
 			);
 		}
 		options.getInputsFor('shape').forEach(function(option){
