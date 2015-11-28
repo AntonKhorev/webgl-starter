@@ -684,7 +684,7 @@ module.exports=function(options,i18n){
 		}
 		if (options.shader=='light') {
 			lines.a(
-				lightDirectionUniform.getJsInterfaceLines(writeListenerArgs)
+				lightDirectionUniform.getJsInterfaceLines(writeListenerArgs,canvasMousemoveListener)
 			);
 		}
 		options.getInputsFor('shape').forEach(function(option){

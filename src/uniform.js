@@ -31,6 +31,13 @@ var Uniform=function(varName,optName,components,options){
 		this.modeVectorDim=0;
 	}
 };
+Uniform.prototype.formatSignedValue=function(value){
+	return (value<=0 ? value<0 ? '' /* - */ : ' ' : '+')+value.toFixed(3);
+};
+Uniform.prototype.varNameC=function(c){
+	return this.varName+c.toUpperCase();
+};
+// public:
 Uniform.prototype.getGlslDeclarationLines=function(){
 	if (this.modeConstant) {
 		return new Lines;
@@ -38,9 +45,8 @@ Uniform.prototype.getGlslDeclarationLines=function(){
 		var lines=new Lines;
 		this.components.forEach(function(c,i){
 			if (this.inputs[i]=='constant') return;
-			var C=c.toUpperCase();
 			lines.a(
-				"uniform float "+this.varName+C+";"
+				"uniform float "+this.varNameC(c)+";"
 			);
 		},this);
 		return lines;
@@ -52,15 +58,11 @@ Uniform.prototype.getGlslDeclarationLines=function(){
 };
 Uniform.prototype.getGlslValue=function(){
 	var vecType="vec"+this.values.length;
-	function formatSignedValue(value) {
-		return (value<=0 ? value<0 ? '' /* - */ : ' ' : '+')+value.toFixed(3);
-	}
 	function varComponentMap(c,i) {
-		var C=c.toUpperCase();
 		if (this.inputs[i]=='constant') {
-			return formatSignedValue(this.values[i]);
+			return this.formatSignedValue(this.values[i]);
 		} else {
-			return this.varName+C;
+			return this.varNameC(c);
 		}
 	}
 	var vs=this.components.map(varComponentMap,this);
@@ -82,7 +84,7 @@ Uniform.prototype.getGlslValue=function(){
 	}
 	return vecType+"("+vs.join(",")+")";
 };
-Uniform.prototype.getJsInterfaceLines=function(writeListenerArgs){
+Uniform.prototype.getJsInterfaceLines=function(writeListenerArgs,canvasMousemoveListener){
 	function capitalize(s) {
 		return s.charAt(0).toUpperCase()+s.slice(1);
 	}
@@ -119,9 +121,8 @@ Uniform.prototype.getJsInterfaceLines=function(writeListenerArgs){
 	if (this.modeFloats) {
 		this.components.forEach(function(c,i){
 			if (this.inputs[i]=='constant') return;
-			var C=c.toUpperCase();
 			lines.a(
-				"var "+this.varName+C+"Loc=gl.getUniformLocation(program,'"+this.varName+C+"');"
+				"var "+this.varNameC(c)+"Loc=gl.getUniformLocation(program,'"+this.varNameC(c)+"');"
 			);
 		},this);
 	} else {
@@ -129,13 +130,26 @@ Uniform.prototype.getJsInterfaceLines=function(writeListenerArgs){
 			"var "+this.varName+"Loc=gl.getUniformLocation(program,'"+this.varName+"');"
 		);
 	}
+	this.components.forEach(function(c,i){
+		if (this.inputs[i]=='mousemovex' || this.inputs[i]=='mousemovey') {
+			lines.a(
+				"var "+this.varNameC(c)+"="+this.formatSignedValue(this.values[i])+";"
+			);
+		}
+	},this);
 	var updateFnLines=new Lines;
+	function componentValue(c,i) {
+		if (this.inputs[i]=='slider') {
+			return "parseFloat(document.getElementById('"+this.optName+"."+c+"').value)";
+		} else if (this.inputs[i]=='mousemovex' || this.inputs[i]=='mousemovey') {
+			return this.varNameC(c);
+		}
+	}
 	if (this.modeFloats) {
 		this.components.forEach(function(c,i){
 			if (this.inputs[i]=='constant') return;
-			var C=c.toUpperCase();
 			updateFnLines.a(
-				"gl.uniform1f("+this.varName+C+"Loc,parseFloat(document.getElementById('"+this.optName+"."+c+"').value));"
+				"gl.uniform1f("+this.varNameC(c)+"Loc,"+componentValue.call(this,c,i)+");"
 			);
 		},this);
 	} else {
@@ -146,7 +160,7 @@ Uniform.prototype.getJsInterfaceLines=function(writeListenerArgs){
 			if (this.inputs[i]=='constant') return;
 			updateFnLines.t(
 				",",
-				"	parseFloat(document.getElementById('"+this.optName+"."+c+"').value)"
+				"	"+componentValue.call(this,c,i)
 			);
 		},this);
 		updateFnLines.a(
@@ -161,6 +175,21 @@ Uniform.prototype.getJsInterfaceLines=function(writeListenerArgs){
 		updateFnName+"();",
 		manyListenersLines.data.length<=oneListenerLines.data.length ? manyListenersLines : oneListenerLines
 	);
+	if (canvasMousemoveListener) {
+		this.components.forEach(function(c,i){
+			if (this.inputs[i]=='mousemovex' || this.inputs[i]=='mousemovey') {
+				canvasMousemoveListener.enter()
+					.prexy(
+						this.inputs[i],
+						// TODO supply ranges
+						this.varNameC(c)+"=4*(-1+2*(ev.clientX-rect.left)/(rect.width-1));",
+						this.varNameC(c)+"=4*(-1+2*(rect.bottom-1-ev.clientY)/(rect.height-1));"
+					)
+					.log("console.log('"+this.optName+"."+c+" input value:',"+this.varNameC(c)+");")
+					.post(updateFnName+"();");
+			}
+		},this);
+	}
 	return lines;
 };
 

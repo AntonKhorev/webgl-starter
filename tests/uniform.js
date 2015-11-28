@@ -1,6 +1,7 @@
 var assert=require('assert');
 
 var Uniform=require('../src/uniform.js');
+var listeners=require('../src/listeners.js');
 
 describe('Uniform',function(){
 	context('with constant vector',function(){
@@ -165,6 +166,40 @@ describe('Uniform',function(){
 			assert.equal(uniform.getGlslValue(),
 				"foo"
 			);
+		});
+	});
+	context('with 2 first components (slider, mousemove) out of 3 variable vector',function(){
+		var uniform=new Uniform('foo','bar','xyz',{
+			'bar.x':1.0, 'bar.x.input':'slider',
+			'bar.y':2.0, 'bar.y.input':'mousemovex',
+			'bar.z':3.0, 'bar.z.input':'constant'
+		});
+		it('returns interface with 1 location, 1 state var and 1 simple listener and mousemove listener',function(){
+			var canvasMousemoveListener=new listeners.CanvasMousemoveListener;
+			assert.deepEqual(uniform.getJsInterfaceLines([false,false],canvasMousemoveListener).data,[
+				"var fooLoc=gl.getUniformLocation(program,'foo');",
+				"var fooY=+2.000;",
+				"function updateFoo() {",
+				"	gl.uniform2f(fooLoc,",
+				"		parseFloat(document.getElementById('bar.x').value),",
+				"		fooY",
+				"	);",
+				"}",
+				"updateFoo();",
+				"document.getElementById('bar.x').addEventListener('change',updateFoo);"
+			]);
+			assert.deepEqual(canvasMousemoveListener.write(false,false).data,[
+				"canvas.addEventListener('mousemove',function(ev){",
+				"	var rect=this.getBoundingClientRect();",
+				"	fooY=4*(-1+2*(ev.clientX-rect.left)/(rect.width-1));",
+				/*
+				"	var minFooY=-4;",
+				"	var maxFooY=+4;",
+				"	fooY=(minFooY+(maxFooY-minFooY)*(ev.clientX-rect.left)/(rect.width-1));",
+				*/
+				"	updateFoo();",
+				"});"
+			]);
 		});
 	});
 });
