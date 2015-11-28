@@ -43,6 +43,33 @@ describe('Uniform',function(){
 			]);
 		});
 	});
+	context('with 1 first component out of 3 variable vector',function(){
+		var uniform=new Uniform('foo','bar','xyz',{
+			'bar.x':1.0, 'bar.x.input':'slider',
+			'bar.y':2.0, 'bar.y.input':'constant',
+			'bar.z':3.0, 'bar.z.input':'constant'
+		});
+		it('returns float declaration',function(){
+			assert.deepEqual(uniform.getGlslDeclarationLines().data,[
+				"uniform float fooX;"
+			]);
+		});
+		it('returns vec3 made of float and constants as value',function(){
+			assert.equal(uniform.getGlslValue(),
+				"vec3(fooX,+2.000,+3.000)"
+			);
+		});
+		it('returns interface with 1 location and 1 simple listener',function(){
+			assert.deepEqual(uniform.getJsInterfaceLines([false,false]).data,[
+				"var fooXLoc=gl.getUniformLocation(program,'fooX');",
+				"function updateFoo() {",
+				"	gl.uniform1f(fooXLoc,parseFloat(document.getElementById('bar.x').value));",
+				"}",
+				"updateFoo();",
+				"document.getElementById('bar.x').addEventListener('change',updateFoo);"
+			]);
+		});
+	});
 	context('with 2 first components out of 3 variable vector',function(){
 		var uniform=new Uniform('foo','bar','xyz',{
 			'bar.x':1.0, 'bar.x.input':'slider',
@@ -59,7 +86,7 @@ describe('Uniform',function(){
 				"vec3(foo,+3.000)"
 			);
 		});
-		it('returns interface with one location and two simple listeners',function(){
+		it('returns interface with 1 location and 2 simple listeners',function(){
 			assert.deepEqual(uniform.getJsInterfaceLines([false,false]).data,[
 				"var fooLoc=gl.getUniformLocation(program,'foo');",
 				"function updateFoo() {",
@@ -67,7 +94,7 @@ describe('Uniform',function(){
 				"		parseFloat(document.getElementById('bar.x').value),",
 				"		parseFloat(document.getElementById('bar.y').value)",
 				"	);",
-				"};",
+				"}",
 				"updateFoo();",
 				"document.getElementById('bar.x').addEventListener('change',updateFoo);",
 				"document.getElementById('bar.y').addEventListener('change',updateFoo);"
@@ -81,7 +108,7 @@ describe('Uniform',function(){
 				"		parseFloat(document.getElementById('bar.x').value),",
 				"		parseFloat(document.getElementById('bar.y').value)",
 				"	);",
-				"};",
+				"}",
 				"updateFoo();",
 				"[].forEach.call(document.querySelectorAll('[id^=\"bar.\"]'),function(el){",
 				"	el.addEventListener('change',function(){",
@@ -89,6 +116,37 @@ describe('Uniform',function(){
 				"		scheduleFrame();",
 				"	});",
 				"});"
+			]);
+		});
+	});
+	context('with first and third components out of 3 variable vector',function(){
+		var uniform=new Uniform('foo','bar','xyz',{
+			'bar.x':1.0, 'bar.x.input':'slider',
+			'bar.y':2.0, 'bar.y.input':'constant',
+			'bar.z':3.0, 'bar.z.input':'slider'
+		});
+		it('returns 2 float declarations',function(){
+			assert.deepEqual(uniform.getGlslDeclarationLines().data,[
+				"uniform float fooX;",
+				"uniform float fooZ;"
+			]);
+		});
+		it('returns vec3 made of floats and constant as value',function(){
+			assert.equal(uniform.getGlslValue(),
+				"vec3(fooX,+2.000,fooZ)"
+			);
+		});
+		it('returns interface with 2 locations and 2 simple listeners',function(){
+			assert.deepEqual(uniform.getJsInterfaceLines([false,false]).data,[
+				"var fooXLoc=gl.getUniformLocation(program,'fooX');",
+				"var fooZLoc=gl.getUniformLocation(program,'fooZ');",
+				"function updateFoo() {",
+				"	gl.uniform1f(fooXLoc,parseFloat(document.getElementById('bar.x').value));",
+				"	gl.uniform1f(fooZLoc,parseFloat(document.getElementById('bar.z').value));",
+				"}",
+				"updateFoo();",
+				"document.getElementById('bar.x').addEventListener('change',updateFoo);",
+				"document.getElementById('bar.z').addEventListener('change',updateFoo);"
 			]);
 		});
 	});
