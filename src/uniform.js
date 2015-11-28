@@ -75,6 +75,9 @@ Uniform.prototype.getGlslValue=function(){
 		}
 	} else if (!this.modeFloats) {
 		vs=vs.slice(this.modeVectorDim);
+		if (vs.length==0) {
+			return this.varName;
+		}
 		vs.unshift(this.varName);
 	}
 	return vecType+"("+vs.join(",")+")";

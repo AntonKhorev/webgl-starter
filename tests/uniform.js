@@ -150,4 +150,21 @@ describe('Uniform',function(){
 			]);
 		});
 	});
+	context('with all-variable 3 component vector',function(){
+		var uniform=new Uniform('foo','bar','xyz',{
+			'bar.x':1.0, 'bar.x.input':'slider',
+			'bar.y':2.0, 'bar.y.input':'slider',
+			'bar.z':3.0, 'bar.z.input':'slider'
+		});
+		it('returns vec3 declaration',function(){
+			assert.deepEqual(uniform.getGlslDeclarationLines().data,[
+				"uniform vec3 foo;"
+			]);
+		});
+		it('returns value equal to declaration',function(){
+			assert.equal(uniform.getGlslValue(),
+				"foo"
+			);
+		});
+	});
 });
