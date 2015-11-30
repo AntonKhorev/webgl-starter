@@ -34,21 +34,12 @@ module.exports=function(options,i18n){
 	function makeShape() {
 		var className=options.shape.charAt(0).toUpperCase()+options.shape.slice(1);
 		var shapeParams=options.getInputOptionsFor('shape').map(function(option){
-			if (options[option.name+'.input']=='constant') {
-				return {
-					value: intOptionValue(option.name),
-					changes: false,
-					min: intOptionValue(option.name),
-					max: intOptionValue(option.name)
-				};
-			} else {
-				return {
-					value: intOptionValue(option.name),
-					changes: true,
-					min: option.getMin(),
-					max: option.getMax()
-				};
-			}
+			return {
+				value: intOptionValue(option.name),
+				changes: options[option.name+'.input']!='constant',
+				min: intOptionValue(option.name+'.min'),
+				max: intOptionValue(option.name+'.max')
+			};
 		});
 		var shapeCtorArgs=[null,parseInt(options.elements),options.shader].concat(shapeParams);
 		return new (Function.prototype.bind.apply(shapes[className],shapeCtorArgs));
@@ -429,19 +420,19 @@ module.exports=function(options,i18n){
 				);
 				if (option.name!='shape.lodShape.lod') {
 					lines.a(
-						"	<span class='min'>"+option.getMinLabel()+"</span> "
+						"	<span class='min'>"+option.getMinLabel(options[option.name+'.min'])+"</span> "
 					);
 					if (option.getStep()==1) {
 						lines.t(
-							"<input type='range' id='"+option.name+"' min='"+option.getMin()+"' max='"+option.getMax()+"' value='"+intOptionValue(option.name)+"' />"
+							"<input type='range' id='"+option.name+"' min='"+intOptionValue(option.name+'.min')+"' max='"+intOptionValue(option.name+'.max')+"' value='"+intOptionValue(option.name)+"' />"
 						);
 					} else {
 						lines.t(
-							"<input type='range' id='"+option.name+"' min='"+option.getMin()+"' max='"+option.getMax()+"' step='"+option.getStep()+"' value='"+floatOptionValue(option.name)+"' />"
+							"<input type='range' id='"+option.name+"' min='"+floatOptionValue(option.name+'.min')+"' max='"+floatOptionValue(option.name+'.max')+"' step='"+option.getStep()+"' value='"+floatOptionValue(option.name)+"' />"
 						);
 					}
 					lines.t(
-						" <span class='max'>"+option.getMaxLabel()+"</span>"
+						" <span class='max'>"+option.getMaxLabel(options[option.name+'.max'])+"</span>"
 					);
 				} else {
 					lines.a(
@@ -627,7 +618,7 @@ module.exports=function(options,i18n){
 					writeListener(listener);
 				} else if (isMousemoveInput(name)) {
 					canvasMousemoveListener.enter()
-						.minMaxFloat(options[name+'.input'],varName,0,1)
+						.minMaxFloat(options[name+'.input'],varName,floatOptionValue(name+'.min'),floatOptionValue(name+'.max'))
 						.log("console.log('"+name+" input value:',"+varName+");")
 						.post(updateFnName+"();");
 				}

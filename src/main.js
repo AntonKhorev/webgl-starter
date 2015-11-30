@@ -68,6 +68,19 @@ $(function(){
 					updateCode();
 				}
 			}
+			function minMaxInput(minOrMax) {
+				return $("<input type='number' required>")
+					.attr('min',option.getMin())
+					.attr('max',option.getMax())
+					.attr('step',option.getSetupStep())
+					.val(options[option.name+'.'+minOrMax])
+					.on('input change',function(){
+						if (this.checkValidity()) {
+							options[option.name+'.'+minOrMax]=parseFloat(this.value);
+							updateCode();
+						}
+					});
+			}
 			var $optionDiv=$("<div data-option='"+option.name+"'>")
 				.append("<label for='"+id+"'>"+i18n('options.'+option.name)+":</label>")
 				.append(" <span class='min'>"+option.getMinLabel()+"</span> ")
@@ -115,21 +128,9 @@ $(function(){
 				$optionDiv.append(" ").append(
 					$rangeSpan=$("<span class='range'>")
 						.append(i18n('options.*.range')+" ")
-						.append(
-							$rangeMinInput=$("<input type='number' required>")
-								.attr('min',option.getMin())
-								.attr('max',option.getMax())
-								.attr('step',option.getSetupStep())
-								.val(options[option.name+'.min'])
-						)
+						.append($rangeMinInput=minMaxInput('min'))
 						.append(" .. ")
-						.append(
-							$rangeMaxInput=$("<input type='number' required>")
-								.attr('min',option.getMin())
-								.attr('max',option.getMax())
-								.attr('step',option.getSetupStep())
-								.val(options[option.name+'.max'])
-						)
+						.append($rangeMinInput=minMaxInput('max'))
 				);
 				if ($inputSelect.val()=='constant') {
 					$rangeSpan.hide();
