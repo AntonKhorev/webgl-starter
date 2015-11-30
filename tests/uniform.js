@@ -191,16 +191,13 @@ describe('Uniform',function(){
 			assert.deepEqual(canvasMousemoveListener.write(false,false).data,[
 				"canvas.addEventListener('mousemove',function(ev){",
 				"	var rect=this.getBoundingClientRect();",
-				"	fooY=4*(-1+2*(ev.clientX-rect.left)/(rect.width-1));",
-				/*
 				"	var minFooY=-4;",
 				"	var maxFooY=+4;",
-				"	fooY=(minFooY+(maxFooY-minFooY)*(ev.clientX-rect.left)/(rect.width-1));",
-				*/
+				"	fooY=minFooY+(maxFooY-minFooY)*(ev.clientX-rect.left)/(rect.width-1);",
 				"	updateFoo();",
 				"});"
 			]);
 		});
 	});
-	// TODO mousemove-only components that don't need update fn
+	// TODO mousemove-only components that don't need update fn - like rotateX oneliners
 });

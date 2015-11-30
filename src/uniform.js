@@ -179,12 +179,7 @@ Uniform.prototype.getJsInterfaceLines=function(writeListenerArgs,canvasMousemove
 		this.components.forEach(function(c,i){
 			if (this.inputs[i]=='mousemovex' || this.inputs[i]=='mousemovey') {
 				canvasMousemoveListener.enter()
-					.prexy(
-						this.inputs[i],
-						// TODO supply ranges
-						this.varNameC(c)+"=4*(-1+2*(ev.clientX-rect.left)/(rect.width-1));",
-						this.varNameC(c)+"=4*(-1+2*(rect.bottom-1-ev.clientY)/(rect.height-1));"
-					)
+					.minMaxFloat(this.inputs[i],this.varNameC(c),'-4','+4') // TODO supply ranges
 					.log("console.log('"+this.optName+"."+c+" input value:',"+this.varNameC(c)+");")
 					.post(updateFnName+"();");
 			}

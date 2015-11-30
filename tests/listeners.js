@@ -132,4 +132,18 @@ describe('CanvasMousemoveListener',function(){
 			"});",
 		]);
 	});
+	it('outputs code to get float value with y-axis, min/max declaration, value declaration',function(){
+		var listener=new listeners.CanvasMousemoveListener();
+		listener.enter()
+			.minMaxVarFloat('mousemovey','bar','-100','+100');
+		var lines=listener.write(false,false);
+		assert.deepEqual(lines.data,[
+			"canvas.addEventListener('mousemove',function(ev){",
+			"	var rect=this.getBoundingClientRect();",
+			"	var minBar=-100;",
+			"	var maxBar=+100;",
+			"	var bar=minBar+(maxBar-minBar)*(rect.bottom-1-ev.clientY)/(rect.height-1);",
+			"});",
+		]);
+	});
 });

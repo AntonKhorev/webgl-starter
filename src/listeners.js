@@ -206,6 +206,17 @@ CanvasMousemoveListener.prototype=Object.create(Listener.prototype);
 CanvasMousemoveListener.prototype.constructor=CanvasMousemoveListener;
 CanvasMousemoveListener.prototype.enter=function(){
 	var proxy=Listener.prototype.enter.call(this);
+	function floatHelper(minMaxFlag,varFlag,inputType,varName,minValue,maxValue){
+		var VarName=varName.charAt(0).toUpperCase()+varName.slice(1);
+		proxy.pre("var min"+VarName+"="+minValue+";");
+		proxy.pre("var max"+VarName+"="+maxValue+";");
+		var dest=(varFlag?"var ":"")+varName+"=min"+VarName+"+(max"+VarName+"-min"+VarName+")*";
+		return proxy.prexy(
+			inputType,
+			dest+"(ev.clientX-rect.left)/(rect.width-1);",
+			dest+"(rect.bottom-1-ev.clientY)/(rect.height-1);"
+		);
+	}
 	proxy.prexy=function(inputType,xLine,yLine){
 		if (inputType=='mousemovex') {
 			return proxy.pre(xLine);
@@ -215,14 +226,10 @@ CanvasMousemoveListener.prototype.enter=function(){
 		return proxy;
 	};
 	proxy.minMaxFloat=function(inputType,varName,minValue,maxValue){
-		var VarName=varName.charAt(0).toUpperCase()+varName.slice(1);
-		proxy.pre("var min"+VarName+"="+minValue+";");
-		proxy.pre("var max"+VarName+"="+maxValue+";");
-		return proxy.prexy(
-			inputType,
-			varName+"=min"+VarName+"+(max"+VarName+"-min"+VarName+")*(ev.clientX-rect.left)/(rect.width-1);",
-			varName+"=min"+VarName+"+(max"+VarName+"-min"+VarName+")*(rect.bottom-1-ev.clientY)/(rect.height-1);"
-		);
+		return floatHelper(true,false,inputType,varName,minValue,maxValue);
+	};
+	proxy.minMaxVarFloat=function(inputType,varName,minValue,maxValue){
+		return floatHelper(true,true,inputType,varName,minValue,maxValue);
 	};
 	return proxy;
 };

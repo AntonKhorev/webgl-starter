@@ -743,11 +743,7 @@ module.exports=function(options,i18n){
 						"gl.uniform1f("+varName+"Loc,"+floatOptionValue(optName)+");"
 					);
 					canvasMousemoveListener.enter()
-						.prexy(
-							options[optName+'.input'],
-							"var "+varName+"=180*(-1+2*(ev.clientX-rect.left)/(rect.width-1));",
-							"var "+varName+"=180*(-1+2*(rect.bottom-1-ev.clientY)/(rect.height-1));"
-						)
+						.minMaxVarFloat(options[optName+'.input'],varName,'-180','+180')
 						.log("console.log('"+optName+" input value:',"+varName+");")
 						.post("gl.uniform1f("+varName+"Loc,"+varName+");");
 				} else {
