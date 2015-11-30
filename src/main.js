@@ -60,7 +60,7 @@ $(function(){
 			var inputId=generateId();
 			var $sliderInput,$numberInput;
 			var $inputSelect;
-			var $rangeSpan;
+			var $rangeSpan,$rangeMinInput,$rangeMaxInput;
 			function inputListener(that) {
 				if (this.checkValidity()) {
 					that.val(this.value);
@@ -93,12 +93,6 @@ $(function(){
 						})
 				)
 				.append(" ")
-				.append(
-					$("<button type='button'>Reset</button>").click(function(){
-						$sliderInput.val(option.defaultValue).change();
-					})
-				)
-				.append(" ")
 				.append("<label for='"+inputId+"'>"+i18n('options.*.input')+":</label> ")
 				.append(
 					$inputSelect=$("<select id='"+inputId+"'>").append(
@@ -122,7 +116,7 @@ $(function(){
 					$rangeSpan=$("<span class='range'>")
 						.append(i18n('options.*.range')+" ")
 						.append(
-							$("<input type='number' required>")
+							$rangeMinInput=$("<input type='number' required>")
 								.attr('min',option.getMin())
 								.attr('max',option.getMax())
 								.attr('step',option.getSetupStep())
@@ -130,7 +124,7 @@ $(function(){
 						)
 						.append(" .. ")
 						.append(
-							$("<input type='number' required>")
+							$rangeMaxInput=$("<input type='number' required>")
 								.attr('min',option.getMin())
 								.attr('max',option.getMax())
 								.attr('step',option.getSetupStep())
@@ -141,6 +135,17 @@ $(function(){
 					$rangeSpan.hide();
 				}
 			}
+			$optionDiv.append(" ")
+				.append(
+					$("<button type='button'>Reset</button>").click(function(){
+						if (withRange) {
+							$rangeMinInput.val(option.getMin());
+							$rangeMaxInput.val(option.getMax());
+						}
+						$sliderInput.val(option.defaultValue).change();
+						$inputSelect.val('constant').change();
+					})
+				);
 			return $optionDiv;
 		}
 		function writeDebugOption(option) {
