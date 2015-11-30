@@ -202,4 +202,5 @@ describe('Uniform',function(){
 			]);
 		});
 	});
+	// TODO mousemove-only components that don't need update fn
 });

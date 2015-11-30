@@ -214,6 +214,16 @@ CanvasMousemoveListener.prototype.enter=function(){
 		}
 		return proxy;
 	};
+	proxy.minMaxFloat=function(inputType,varName,minValue,maxValue){
+		var VarName=varName.charAt(0).toUpperCase()+varName.slice(1);
+		proxy.pre("var min"+VarName+"="+minValue+";");
+		proxy.pre("var max"+VarName+"="+maxValue+";");
+		return proxy.prexy(
+			inputType,
+			varName+"=min"+VarName+"+(max"+VarName+"-min"+VarName+")*(ev.clientX-rect.left)/(rect.width-1);",
+			varName+"=min"+VarName+"+(max"+VarName+"-min"+VarName+")*(rect.bottom-1-ev.clientY)/(rect.height-1);"
+		);
+	};
 	return proxy;
 };
 CanvasMousemoveListener.prototype.bracketListener=function(){

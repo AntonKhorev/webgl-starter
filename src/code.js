@@ -753,11 +753,7 @@ module.exports=function(options,i18n){
 				} else {
 					canvasMousemoveListener.enter()
 						.state("var "+varName+"="+floatOptionValue(optName)+";")
-						.prexy(
-							options[optName+'.input'],
-							varName+"=180*(-1+2*(ev.clientX-rect.left)/(rect.width-1));",
-							varName+"=180*(-1+2*(rect.bottom-1-ev.clientY)/(rect.height-1));"
-						)
+						.minMaxFloat(options[optName+'.input'],varName,'-180','+180')
 						.log("console.log('"+optName+" input value:',"+varName+");");
 				}
 			}
@@ -769,11 +765,7 @@ module.exports=function(options,i18n){
 			} else if (isMousemoveInput(optName+'.speed')) {
 				canvasMousemoveListener.enter()
 					.state("var "+varName+"Speed="+floatOptionValue(optName+'.speed')+";")
-					.prexy(
-						options[optName+'.speed.input'],
-						varName+"Speed=360*(-1+2*(ev.clientX-rect.left)/(rect.width-1));",
-						varName+"Speed=360*(-1+2*(rect.bottom-1-ev.clientY)/(rect.height-1));"
-					)
+					.minMaxFloat(options[optName+'.speed.input'],varName+'Speed','-360','+360')
 					.log("console.log('"+optName+".speed input value:',"+varName+"Speed);");
 			}
 		});
