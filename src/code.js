@@ -702,11 +702,7 @@ module.exports=function(options,i18n){
 				writeListener(listener);
 			} else if (isMousemoveInput(option.name)) {
 				canvasMousemoveListener.enter()
-					.prexy(
-						options[option.name+'.input'],
-						"var "+varName('new')+"=Math.floor("+varName('min')+"+("+varName('max')+"-"+varName('min')+"+1)*(ev.clientX-rect.left)/rect.width);",
-						"var "+varName('new')+"=Math.floor("+varName('min')+"+("+varName('max')+"-"+varName('min')+"+1)*(rect.bottom-1-ev.clientY)/rect.height);"
-					)
+					.newVarInt(options[option.name+'.input'],varName())
 					.cond(varName('new')+"!="+varName())
 					.log("console.log('"+option.name+" input value:',"+varName('new')+");")
 					.post("storeShape("+varName('new')+");");

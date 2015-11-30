@@ -158,4 +158,16 @@ describe('CanvasMousemoveListener',function(){
 			"});",
 		]);
 	});
+	it('outputs code to get int value with y-axis, new value declaration',function(){
+		var listener=new listeners.CanvasMousemoveListener();
+		listener.enter()
+			.newVarInt('mousemovey','depth');
+		var lines=listener.write(false,false);
+		assert.deepEqual(lines.data,[
+			"canvas.addEventListener('mousemove',function(ev){",
+			"	var rect=this.getBoundingClientRect();",
+			"	var newDepth=Math.floor(minDepth+(maxDepth-minDepth+1)*(rect.bottom-1-ev.clientY)/rect.height);",
+			"});",
+		]);
+	});
 });

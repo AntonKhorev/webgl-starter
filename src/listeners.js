@@ -235,6 +235,14 @@ CanvasMousemoveListener.prototype.enter=function(){
 	proxy.minMaxVarFloat=function(inputType,varName,minValue,maxValue){
 		return floatHelper(true,true,inputType,varName,minValue,maxValue);
 	};
+	proxy.newVarInt=function(inputType,varName){
+		var VarName=varName.charAt(0).toUpperCase()+varName.slice(1);
+		return proxy.prexy(
+			inputType,
+			"var new"+VarName+"=Math.floor(min"+VarName+"+(max"+VarName+"-min"+VarName+"+1)*(ev.clientX-rect.left)/rect.width);",
+			"var new"+VarName+"=Math.floor(min"+VarName+"+(max"+VarName+"-min"+VarName+"+1)*(rect.bottom-1-ev.clientY)/rect.height);"
+		);
+	};
 	return proxy;
 };
 CanvasMousemoveListener.prototype.bracketListener=function(){
