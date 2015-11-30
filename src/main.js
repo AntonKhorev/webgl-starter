@@ -55,10 +55,12 @@ $(function(){
 			}
 			return $option;
 		}
-		function writeInputOption(option) {
+		function writeInputOption(option,withRange) {
 			var id=generateId();
 			var inputId=generateId();
-			var sliderInput,numberInput;
+			var $sliderInput,$numberInput;
+			var $inputSelect;
+			var $rangeSpan;
 			function inputListener(that) {
 				if (this.checkValidity()) {
 					that.val(this.value);
@@ -66,48 +68,80 @@ $(function(){
 					updateCode();
 				}
 			}
-			return $("<div data-option='"+option.name+"'>")
+			var $optionDiv=$("<div data-option='"+option.name+"'>")
 				.append("<label for='"+id+"'>"+i18n('options.'+option.name)+":</label>")
 				.append(" <span class='min'>"+option.getMinLabel()+"</span> ")
 				.append(
-					sliderInput=$("<input type='range' id='"+id+"'>")
+					$sliderInput=$("<input type='range' id='"+id+"'>")
 						.attr('min',option.getMin())
 						.attr('max',option.getMax())
 						.attr('step',option.getSetupStep())
 						.val(options[option.name])
 						.on('input change',function(){
-							inputListener.call(this,numberInput);
+							inputListener.call(this,$numberInput);
 						})
 				)
 				.append(" <span class='max'>"+option.getMaxLabel()+"</span> ")
 				.append(
-					numberInput=$("<input type='number' required>")
+					$numberInput=$("<input type='number' required>")
 						.attr('min',option.getMin())
 						.attr('max',option.getMax())
 						.attr('step',option.getSetupStep())
 						.val(options[option.name])
 						.on('input change',function(){
-							inputListener.call(this,sliderInput);
+							inputListener.call(this,$sliderInput);
 						})
 				)
 				.append(" ")
 				.append(
 					$("<button type='button'>Reset</button>").click(function(){
-						sliderInput.val(option.defaultValue).change();
+						$sliderInput.val(option.defaultValue).change();
 					})
 				)
 				.append(" ")
-				.append("<label for='"+inputId+"'>"+i18n('options.*.input')+"</label> ")
+				.append("<label for='"+inputId+"'>"+i18n('options.*.input')+":</label> ")
 				.append(
-					$("<select id='"+inputId+"'>").append(
+					$inputSelect=$("<select id='"+inputId+"'>").append(
 						option.availableInputTypes.map(function(availableInputType){
 							return $("<option>").val(availableInputType).html(i18n('options.*.input.'+availableInputType))
 						})
 					).val(options[option.name+'.input']).change(function(){
 						options[option.name+'.input']=this.value;
+						if (withRange) {
+							if (this.value=='constant') {
+								$rangeSpan.hide();
+							} else {
+								$rangeSpan.show();
+							}
+						}
 						updateCode();
 					})
 				);
+			if (withRange) {
+				$optionDiv.append(" ").append(
+					$rangeSpan=$("<span class='range'>")
+						.append(i18n('options.*.range')+" ")
+						.append(
+							$("<input type='number' required>")
+								.attr('min',option.getMin())
+								.attr('max',option.getMax())
+								.attr('step',option.getSetupStep())
+								.val(options[option.name+'.min'])
+						)
+						.append(" .. ")
+						.append(
+							$("<input type='number' required>")
+								.attr('min',option.getMin())
+								.attr('max',option.getMax())
+								.attr('step',option.getSetupStep())
+								.val(options[option.name+'.max'])
+						)
+				);
+				if ($inputSelect.val()=='constant') {
+					$rangeSpan.hide();
+				}
+			}
+			return $optionDiv;
 		}
 		function writeDebugOption(option) {
 			var id=generateId();
@@ -185,14 +219,18 @@ $(function(){
 				)
 			).append(
 				$("<fieldset>").append("<legend>"+i18n('options.input')+"</legend>").append(
-					options.inputOptions.map(writeInputOption)
+					options.inputOptions.map(function(option){
+						return writeInputOption(option,true)
+					})
 				)
 			).append(
 				$("<fieldset>").append("<legend>"+i18n('options.transform')+"</legend>").append(
 					$transforms=$("<div>").append(
 						options.transforms.map(function(transform){
 							return $("<div class='transform' data-transform='"+transform.name+"'>").append(
-								transform.options.map(writeInputOption)
+								transform.options.map(function(option){
+									return writeInputOption(option,false)
+								})
 							);
 						})
 					)

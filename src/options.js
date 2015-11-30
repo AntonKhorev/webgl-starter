@@ -145,6 +145,8 @@ OptionsBlueprint.prototype.reset=function(){
 			this[option.name]=option.defaultValue;
 			if (groupName=='inputOptions' || groupName=='transformOptions') {
 				this[option.name+'.input']='constant';
+				this[option.name+'.min']=option.getMin();
+				this[option.name+'.max']=option.getMax();
 			}
 		},this);
 	},this);
@@ -168,6 +170,8 @@ var OptionsInstance=function(blueprint){
 				this[option.name]=blueprint[option.name];
 				if (groupName=='inputOptions' || groupName=='transformOptions') {
 					this[option.name+'.input']=blueprint[option.name+'.input'];
+					this[option.name+'.min']=blueprint[option.name+'.min'];
+					this[option.name+'.max']=blueprint[option.name+'.max'];
 				}
 			}
 		},this);

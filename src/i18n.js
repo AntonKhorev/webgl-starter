@@ -43,12 +43,13 @@ module.exports=function(id){ // fake temporary i18n
 		'options.shader.light.direction.y': 'Light direction y component',
 		'options.shader.light.direction.z': 'Light direction z component',
 		'options.shape.lodShape.lod': 'Shape detail level', // recursion depth for fractal shapes
-		'options.*.input': 'This value is',
-		'options.*.input.constant': 'kept constant',
-		'options.*.input.slider': 'updated with a slider',
-		'options.*.input.mousemovex': 'updated by moving the mouse horizontally',
-		'options.*.input.mousemovey': 'updated by moving the mouse vertically',
+		'options.*.input': 'Input method',
+		'options.*.input.constant': 'none',
+		'options.*.input.slider': 'slider',
+		'options.*.input.mousemovex': 'mouse x axis',
+		'options.*.input.mousemovey': 'mouse y axis',
 		'options.*.input.animated': 'animated',
+		'options.*.range': 'with range',
 
 		'options.transform': 'Transforms',
 		'options.rotate.x': 'Angle of rotation around x axis',
