@@ -208,9 +208,13 @@ CanvasMousemoveListener.prototype.enter=function(){
 	var proxy=Listener.prototype.enter.call(this);
 	function floatHelper(minMaxFlag,varFlag,inputType,varName,minValue,maxValue){
 		var VarName=varName.charAt(0).toUpperCase()+varName.slice(1);
-		proxy.pre("var min"+VarName+"="+minValue+";");
-		proxy.pre("var max"+VarName+"="+maxValue+";");
-		var dest=(varFlag?"var ":"")+varName+"=min"+VarName+"+(max"+VarName+"-min"+VarName+")*";
+		if (minValue==0 && maxValue==1) {
+			var dest=(varFlag?"var ":"")+varName+"=";
+		} else {
+			proxy.pre("var min"+VarName+"="+minValue+";");
+			proxy.pre("var max"+VarName+"="+maxValue+";");
+			var dest=(varFlag?"var ":"")+varName+"=min"+VarName+"+(max"+VarName+"-min"+VarName+")*";
+		}
 		return proxy.prexy(
 			inputType,
 			dest+"(ev.clientX-rect.left)/(rect.width-1);",

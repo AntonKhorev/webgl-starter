@@ -132,6 +132,18 @@ describe('CanvasMousemoveListener',function(){
 			"});",
 		]);
 	});
+	it('outputs code to get [0..1] value with x-axis, min/max declaration omitted b/c not needed, no value declaration',function(){
+		var listener=new listeners.CanvasMousemoveListener();
+		listener.enter()
+			.minMaxFloat('mousemovex','baz',0,1);
+		var lines=listener.write(false,false);
+		assert.deepEqual(lines.data,[
+			"canvas.addEventListener('mousemove',function(ev){",
+			"	var rect=this.getBoundingClientRect();",
+			"	baz=(ev.clientX-rect.left)/(rect.width-1);",
+			"});",
+		]);
+	});
 	it('outputs code to get float value with y-axis, min/max declaration, value declaration',function(){
 		var listener=new listeners.CanvasMousemoveListener();
 		listener.enter()

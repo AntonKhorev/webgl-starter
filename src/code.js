@@ -627,11 +627,7 @@ module.exports=function(options,i18n){
 					writeListener(listener);
 				} else if (isMousemoveInput(name)) {
 					canvasMousemoveListener.enter()
-						.prexy(
-							options[name+'.input'],
-							varName+"=(ev.clientX-rect.left)/(rect.width-1);",
-							varName+"=(rect.bottom-1-ev.clientY)/(rect.height-1);"
-						)
+						.minMaxFloat(options[name+'.input'],varName,0,1)
 						.log("console.log('"+name+" input value:',"+varName+");")
 						.post(updateFnName+"();");
 				}
