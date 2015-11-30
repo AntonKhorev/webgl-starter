@@ -11,6 +11,12 @@ var Uniform=function(varName,optName,components,options){
 	this.inputs=this.components.map(function(c){
 		return options[optName+'.'+c+'.input'];
 	});
+	this.minValues=this.components.map(function(c){
+		return options[optName+'.'+c+'.min'];
+	});
+	this.maxValues=this.components.map(function(c){
+		return options[optName+'.'+c+'.max'];
+	});
 	this.modeConstant=true;
 	this.modeFloats=false;
 	this.modeVectorDim=0;
@@ -179,7 +185,10 @@ Uniform.prototype.getJsInterfaceLines=function(writeListenerArgs,canvasMousemove
 		this.components.forEach(function(c,i){
 			if (this.inputs[i]=='mousemovex' || this.inputs[i]=='mousemovey') {
 				canvasMousemoveListener.enter()
-					.minMaxFloat(this.inputs[i],this.varNameC(c),'-4','+4') // TODO supply ranges
+					.minMaxFloat(this.inputs[i],this.varNameC(c),
+						this.formatSignedValue(this.minValues[i]),
+						this.formatSignedValue(this.maxValues[i])
+					)
 					.log("console.log('"+this.optName+"."+c+" input value:',"+this.varNameC(c)+");")
 					.post(updateFnName+"();");
 			}

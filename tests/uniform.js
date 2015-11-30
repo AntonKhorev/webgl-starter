@@ -6,9 +6,9 @@ var listeners=require('../src/listeners.js');
 describe('Uniform',function(){
 	context('with constant vector',function(){
 		var uniform=new Uniform('foo','bar','xyz',{
-			'bar.x':1.0, 'bar.x.input':'constant',
-			'bar.y':2.0, 'bar.y.input':'constant',
-			'bar.z':3.0, 'bar.z.input':'constant'
+			'bar.x':1.0, 'bar.x.input':'constant', 'bar.x.min':-4.0, 'bar.x.max':+4.0,
+			'bar.y':2.0, 'bar.y.input':'constant', 'bar.y.min':-4.0, 'bar.y.max':+4.0,
+			'bar.z':3.0, 'bar.z.input':'constant', 'bar.z.min':-4.0, 'bar.z.max':+4.0
 		});
 		it('returns empty declaration',function(){
 			assert.deepEqual(uniform.getGlslDeclarationLines().data,[
@@ -26,9 +26,9 @@ describe('Uniform',function(){
 	});
 	context('with equal-component constant vector',function(){
 		var uniform=new Uniform('foo','bar','xyz',{
-			'bar.x':2.0, 'bar.x.input':'constant',
-			'bar.y':2.0, 'bar.y.input':'constant',
-			'bar.z':2.0, 'bar.z.input':'constant'
+			'bar.x':2.0, 'bar.x.input':'constant', 'bar.x.min':-4.0, 'bar.x.max':+4.0,
+			'bar.y':2.0, 'bar.y.input':'constant', 'bar.y.min':-4.0, 'bar.y.max':+4.0,
+			'bar.z':2.0, 'bar.z.input':'constant', 'bar.z.min':-4.0, 'bar.z.max':+4.0
 		});
 		it('returns empty declaration',function(){
 			assert.deepEqual(uniform.getGlslDeclarationLines().data,[
@@ -46,9 +46,9 @@ describe('Uniform',function(){
 	});
 	context('with 1 first component out of 3 variable vector',function(){
 		var uniform=new Uniform('foo','bar','xyz',{
-			'bar.x':1.0, 'bar.x.input':'slider',
-			'bar.y':2.0, 'bar.y.input':'constant',
-			'bar.z':3.0, 'bar.z.input':'constant'
+			'bar.x':1.0, 'bar.x.input':'slider',   'bar.x.min':-4.0, 'bar.x.max':+4.0,
+			'bar.y':2.0, 'bar.y.input':'constant', 'bar.y.min':-4.0, 'bar.y.max':+4.0,
+			'bar.z':3.0, 'bar.z.input':'constant', 'bar.z.min':-4.0, 'bar.z.max':+4.0
 		});
 		it('returns float declaration',function(){
 			assert.deepEqual(uniform.getGlslDeclarationLines().data,[
@@ -73,9 +73,9 @@ describe('Uniform',function(){
 	});
 	context('with 2 first components out of 3 variable vector',function(){
 		var uniform=new Uniform('foo','bar','xyz',{
-			'bar.x':1.0, 'bar.x.input':'slider',
-			'bar.y':2.0, 'bar.y.input':'slider',
-			'bar.z':3.0, 'bar.z.input':'constant'
+			'bar.x':1.0, 'bar.x.input':'slider',   'bar.x.min':-4.0, 'bar.x.max':+4.0,
+			'bar.y':2.0, 'bar.y.input':'slider',   'bar.y.min':-4.0, 'bar.y.max':+4.0,
+			'bar.z':3.0, 'bar.z.input':'constant', 'bar.z.min':-4.0, 'bar.z.max':+4.0
 		});
 		it('returns vec2 declaration',function(){
 			assert.deepEqual(uniform.getGlslDeclarationLines().data,[
@@ -122,9 +122,9 @@ describe('Uniform',function(){
 	});
 	context('with first and third components out of 3 variable vector',function(){
 		var uniform=new Uniform('foo','bar','xyz',{
-			'bar.x':1.0, 'bar.x.input':'slider',
-			'bar.y':2.0, 'bar.y.input':'constant',
-			'bar.z':3.0, 'bar.z.input':'slider'
+			'bar.x':1.0, 'bar.x.input':'slider',   'bar.x.min':-4.0, 'bar.x.max':+4.0,
+			'bar.y':2.0, 'bar.y.input':'constant', 'bar.y.min':-4.0, 'bar.y.max':+4.0,
+			'bar.z':3.0, 'bar.z.input':'slider',   'bar.z.min':-4.0, 'bar.z.max':+4.0
 		});
 		it('returns 2 float declarations',function(){
 			assert.deepEqual(uniform.getGlslDeclarationLines().data,[
@@ -153,9 +153,9 @@ describe('Uniform',function(){
 	});
 	context('with all-variable 3 component vector',function(){
 		var uniform=new Uniform('foo','bar','xyz',{
-			'bar.x':1.0, 'bar.x.input':'slider',
-			'bar.y':2.0, 'bar.y.input':'slider',
-			'bar.z':3.0, 'bar.z.input':'slider'
+			'bar.x':1.0, 'bar.x.input':'slider', 'bar.x.min':-4.0, 'bar.x.max':+4.0,
+			'bar.y':2.0, 'bar.y.input':'slider', 'bar.y.min':-4.0, 'bar.y.max':+4.0,
+			'bar.z':3.0, 'bar.z.input':'slider', 'bar.z.min':-4.0, 'bar.z.max':+4.0
 		});
 		it('returns vec3 declaration',function(){
 			assert.deepEqual(uniform.getGlslDeclarationLines().data,[
@@ -170,9 +170,9 @@ describe('Uniform',function(){
 	});
 	context('with 2 first components (slider, mousemove) out of 3 variable vector',function(){
 		var uniform=new Uniform('foo','bar','xyz',{
-			'bar.x':1.0, 'bar.x.input':'slider',
-			'bar.y':2.0, 'bar.y.input':'mousemovex',
-			'bar.z':3.0, 'bar.z.input':'constant'
+			'bar.x':1.0, 'bar.x.input':'slider',     'bar.x.min':-4.0, 'bar.x.max':+4.0,
+			'bar.y':2.0, 'bar.y.input':'mousemovex', 'bar.y.min':-4.0, 'bar.y.max':+4.0,
+			'bar.z':3.0, 'bar.z.input':'constant',   'bar.z.min':-4.0, 'bar.z.max':+4.0
 		});
 		it('returns interface with 1 location, 1 state var and 1 simple listener and mousemove listener',function(){
 			var canvasMousemoveListener=new listeners.CanvasMousemoveListener;
@@ -191,8 +191,8 @@ describe('Uniform',function(){
 			assert.deepEqual(canvasMousemoveListener.write(false,false).data,[
 				"canvas.addEventListener('mousemove',function(ev){",
 				"	var rect=this.getBoundingClientRect();",
-				"	var minFooY=-4;",
-				"	var maxFooY=+4;",
+				"	var minFooY=-4.000;",
+				"	var maxFooY=+4.000;",
 				"	fooY=minFooY+(maxFooY-minFooY)*(ev.clientX-rect.left)/(rect.width-1);",
 				"	updateFoo();",
 				"});"
