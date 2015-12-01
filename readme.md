@@ -83,8 +83,8 @@ Some of the examples used here are based on:
 3. [Mozilla Developer Network WebGL tutorial][mdn]
 
 [demo-en-base]: http://antonkhorev.github.io/webgl-starter/en/base/
-[lib-css]: http://antonkhorev.github.io/webgl-starter/en/base/index.css
-[lib-js]: http://antonkhorev.github.io/webgl-starter/en/base/index.js
+[lib-css]: http://antonkhorev.github.io/webgl-starter/lib/webgl-starter.css
+[lib-js]: http://antonkhorev.github.io/webgl-starter/lib/webgl-starter.js
 [jQuery]: https://jquery.com/
 [highlight.js]: https://highlightjs.org/
 [npm]: https://www.npmjs.com/
