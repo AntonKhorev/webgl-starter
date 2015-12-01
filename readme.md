@@ -32,6 +32,8 @@ If you want to include the generator on your page, you have to do the following:
    <div class="webgl-starter">message in case javascript is disabled</div>
    ```
 
+See [demo page][demo-en-base] html source for example.
+
 ## Building from source
 
 Build with [npm] and [gulp].

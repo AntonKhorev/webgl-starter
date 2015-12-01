@@ -1,6 +1,6 @@
 var gulp=require('gulp');
-var notify=require("gulp-notify");
-var jade=require('gulp-jade');
+var notify=require('gulp-notify');
+var file=require('gulp-file');
 var browserify=require('browserify');
 var source=require('vinyl-source-stream');
 var buffer=require('vinyl-buffer');
@@ -25,12 +25,15 @@ function handleErrors() {
 }
 
 gulp.task('html',function(){
-	gulp.src('demos/index.jade')
-		.pipe(jade({
-			locals: {
-				navbar: require('./demos/navbar.js')
-			}
-		}))
+	return file(
+		'index.html',
+		require('./demos/template.js')( // TODO reload
+			"WebGL starter code generator",
+			['http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.7/styles/default.min.css'],
+			['http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.7/highlight.min.js']
+		),
+		{src: true}
+	)
 		.pipe(gulp.dest(demoDestination));
 });
 
