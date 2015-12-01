@@ -36,6 +36,7 @@ var Uniform=function(varName,optName,components,options){
 	if (this.modeDim==1) {
 		this.modeFloats=true;
 	}
+	this.modeVector= !this.modeConstant && !this.modeFloats;
 };
 Uniform.prototype.formatSignedValue=function(value){
 	return (value<=0 ? value<0 ? '' /* - */ : ' ' : '+')+value.toFixed(3);
@@ -169,20 +170,36 @@ Uniform.prototype.getJsInterfaceLines=function(writeListenerArgs,canvasMousemove
 			"var "+this.varName+"Loc=gl.getUniformLocation(program,'"+this.varName+"');"
 		);
 	}
-	this.components.forEach(function(c,i){
-		if (this.inputs[i]=='mousemovex' || this.inputs[i]=='mousemovey') {
-			if (!(this.modeNoSliders && this.modeDim==1)) {
-				lines.a(
-					"var "+this.varNameC(c)+"="+this.formatSignedValue(this.values[i])+";"
-				);
-			} else {
+	if (this.modeNoSliders && this.modeDim==1) {
+		this.components.forEach(function(c,i){
+			if (this.inputs[i]!='constant') {
 				lines.a(
 					"gl.uniform1f("+this.varNameC(c)+"Loc,"+this.formatSignedValue(this.values[i])+");"
 				);
 			}
-		}
-	},this);
-	if (!(this.modeNoSliders && this.modeDim==1)) {
+		},this);
+	} else if (this.modeNoSliders && this.modeVector) {
+		lines.a(
+			"gl.uniform"+this.modeDim+"f("+this.varName+"Loc"
+		);
+		this.components.forEach(function(c,i){
+			if (this.inputs[i]!='constant') {
+				lines.t(
+					","+this.formatSignedValue(this.values[i])
+				);
+			}
+		},this);
+		lines.t(
+			");"
+		);
+	} else {
+		this.components.forEach(function(c,i){
+			if (this.inputs[i]=='mousemovex' || this.inputs[i]=='mousemovey') {
+				lines.a(
+					"var "+this.varNameC(c)+"="+this.formatSignedValue(this.values[i])+";"
+				);
+			}
+		},this);
 		lines.a(
 			writeUpdateFnLines.call(this).wrap(
 				"function "+updateFnName+"() {",
@@ -193,26 +210,34 @@ Uniform.prototype.getJsInterfaceLines=function(writeListenerArgs,canvasMousemove
 		);
 	}
 	if (canvasMousemoveListener) {
+		var entry=canvasMousemoveListener.enter();
+		var vs=[];
 		this.components.forEach(function(c,i){
 			if (this.inputs[i]=='mousemovex' || this.inputs[i]=='mousemovey') {
-				var entry=canvasMousemoveListener.enter();
-				if (!(this.modeNoSliders && this.modeDim==1)) {
-					entry.minMaxFloat(this.inputs[i],this.varNameC(c),
-						this.formatSignedValue(this.minValues[i]),
-						this.formatSignedValue(this.maxValues[i])
-					);
-					entry.log("console.log('"+this.optName+"."+c+" input value:',"+this.varNameC(c)+");");
-					entry.post(updateFnName+"();");
-				} else {
+				if (this.modeNoSliders && (this.modeDim==1 || this.modeVector)) {
 					entry.minMaxVarFloat(this.inputs[i],this.varNameC(c),
 						this.formatSignedValue(this.minValues[i]),
 						this.formatSignedValue(this.maxValues[i])
 					);
-					entry.log("console.log('"+this.optName+"."+c+" input value:',"+this.varNameC(c)+");");
+				} else {
+					entry.minMaxFloat(this.inputs[i],this.varNameC(c),
+						this.formatSignedValue(this.minValues[i]),
+						this.formatSignedValue(this.maxValues[i])
+					);
+				}
+				entry.log("console.log('"+this.optName+"."+c+" input value:',"+this.varNameC(c)+");");
+				if (this.modeNoSliders && this.modeDim==1) {
 					entry.post("gl.uniform1f("+this.varNameC(c)+"Loc,"+this.varNameC(c)+");");
+				} else if (this.modeNoSliders && this.modeVector) {
+					vs.push(this.varNameC(c));
+				} else {
+					entry.post(updateFnName+"();");
 				}
 			}
 		},this);
+		if (this.modeNoSliders && this.modeVector) {
+			entry.post("gl.uniform"+this.modeDim+"f("+this.varName+"Loc,"+vs.join(",")+");");
+		}
 	}
 	return lines;
 };

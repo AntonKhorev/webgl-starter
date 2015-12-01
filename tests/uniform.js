@@ -222,4 +222,30 @@ describe('Uniform',function(){
 			]);
 		});
 	});
+	context('with 2 first mousemove components out of 3 variable vector',function(){
+		var uniform=new Uniform('bar','baz','xyz',{
+			'baz.x':1.5, 'baz.x.input':'mousemovex', 'baz.x.min':-4.0, 'baz.x.max':+4.0,
+			'baz.y':2.5, 'baz.y.input':'mousemovey', 'baz.y.min':-4.0, 'baz.y.max':+4.0,
+			'baz.z':3.0, 'baz.z.input':'constant',   'baz.z.min':-4.0, 'baz.z.max':+4.0
+		});
+		it('returns interface without update fn',function(){
+			var canvasMousemoveListener=new listeners.CanvasMousemoveListener;
+			assert.deepEqual(uniform.getJsInterfaceLines([false,false],canvasMousemoveListener).data,[
+				"var barLoc=gl.getUniformLocation(program,'bar');",
+				"gl.uniform2f(barLoc,+1.500,+2.500);"
+			]);
+			assert.deepEqual(canvasMousemoveListener.write(false,false).data,[
+				"canvas.addEventListener('mousemove',function(ev){",
+				"	var rect=this.getBoundingClientRect();",
+				"	var minBarX=-4.000;",
+				"	var maxBarX=+4.000;",
+				"	var barX=minBarX+(maxBarX-minBarX)*(ev.clientX-rect.left)/(rect.width-1);",
+				"	var minBarY=-4.000;",
+				"	var maxBarY=+4.000;",
+				"	var barY=minBarY+(maxBarY-minBarY)*(rect.bottom-1-ev.clientY)/(rect.height-1);",
+				"	gl.uniform2f(barLoc,barX,barY);",
+				"});"
+			]);
+		});
+	});
 });
