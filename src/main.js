@@ -130,7 +130,7 @@ $(function(){
 						.append(i18n('options.*.range')+" ")
 						.append($rangeMinInput=minMaxInput('min'))
 						.append(" .. ")
-						.append($rangeMinInput=minMaxInput('max'))
+						.append($rangeMaxInput=minMaxInput('max'))
 				);
 				if ($inputSelect.val()=='constant') {
 					$rangeSpan.hide();
