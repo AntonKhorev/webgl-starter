@@ -199,5 +199,27 @@ describe('Uniform',function(){
 			]);
 		});
 	});
-	// TODO mousemove-only components that don't need update fn - like rotateX oneliners
+	context('with 1 mousemove component out of 3 variable vector',function(){
+		var uniform=new Uniform('bar','baz','xyz',{
+			'baz.x':1.0, 'baz.x.input':'constant',   'baz.x.min':-4.0, 'baz.x.max':+4.0,
+			'baz.y':2.5, 'baz.y.input':'mousemovey', 'baz.y.min':-4.0, 'baz.y.max':+4.0,
+			'baz.z':3.0, 'baz.z.input':'constant',   'baz.z.min':-4.0, 'baz.z.max':+4.0
+		});
+		it('returns interface without update fn',function(){
+			var canvasMousemoveListener=new listeners.CanvasMousemoveListener;
+			assert.deepEqual(uniform.getJsInterfaceLines([false,false],canvasMousemoveListener).data,[
+				"var barYLoc=gl.getUniformLocation(program,'barY');",
+				"gl.uniform1f(barYLoc,+2.500);"
+			]);
+			assert.deepEqual(canvasMousemoveListener.write(false,false).data,[
+				"canvas.addEventListener('mousemove',function(ev){",
+				"	var rect=this.getBoundingClientRect();",
+				"	var minBarY=-4.000;",
+				"	var maxBarY=+4.000;",
+				"	var barY=minBarY+(maxBarY-minBarY)*(rect.bottom-1-ev.clientY)/(rect.height-1);",
+				"	gl.uniform1f(barYLoc,barY);",
+				"});"
+			]);
+		});
+	});
 });

@@ -17,24 +17,24 @@ var Uniform=function(varName,optName,components,options){
 	this.maxValues=this.components.map(function(c){
 		return options[optName+'.'+c+'.max'];
 	});
+	this.modeNoSliders=true; // no <input> elements with values that can be populated by the browser, disregarding default value
 	this.modeConstant=true;
 	this.modeFloats=false;
-	this.modeVectorDim=0;
+	this.modeDim=0;
 	this.components.forEach(function(c,i){
-		var isVar=options[optName+'.'+c+'.input']!='constant';
-		if (isVar) {
+		var inputType=options[optName+'.'+c+'.input'];
+		if (inputType!='constant') {
 			this.modeConstant=false;
-			if (this.modeVectorDim==i) {
-				this.modeVectorDim++;
-			} else {
-				this.modeVectorDim=0;
+			if (this.modeDim++!=i) {
 				this.modeFloats=true;
 			}
 		}
+		if (inputType=='slider') {
+			this.modeNoSliders=false;
+		}
 	},this);
-	if (this.modeVectorDim==1) {
+	if (this.modeDim==1) {
 		this.modeFloats=true;
-		this.modeVectorDim=0;
 	}
 };
 Uniform.prototype.formatSignedValue=function(value){
@@ -58,7 +58,7 @@ Uniform.prototype.getGlslDeclarationLines=function(){
 		return lines;
 	} else {
 		return new Lines(
-			"uniform vec"+this.modeVectorDim+" "+this.varName+";"
+			"uniform vec"+this.modeDim+" "+this.varName+";"
 		);
 	}
 };
@@ -82,7 +82,7 @@ Uniform.prototype.getGlslValue=function(){
 			return vecType+"("+vs.join(",")+")";
 		}
 	} else if (!this.modeFloats) {
-		vs=vs.slice(this.modeVectorDim);
+		vs=vs.slice(this.modeDim);
 		if (vs.length==0) {
 			return this.varName;
 		}
@@ -118,6 +118,39 @@ Uniform.prototype.getJsInterfaceLines=function(writeListenerArgs,canvasMousemove
 			listener.write.apply(listener,writeListenerArgs)
 		);
 	}
+	function writeUpdateFnLines() {
+		var updateFnLines=new Lines;
+		function componentValue(c,i) {
+			if (this.inputs[i]=='slider') {
+				return "parseFloat(document.getElementById('"+this.optName+"."+c+"').value)";
+			} else if (this.inputs[i]=='mousemovex' || this.inputs[i]=='mousemovey') {
+				return this.varNameC(c);
+			}
+		}
+		if (this.modeFloats) {
+			this.components.forEach(function(c,i){
+				if (this.inputs[i]=='constant') return;
+				updateFnLines.a(
+					"gl.uniform1f("+this.varNameC(c)+"Loc,"+componentValue.call(this,c,i)+");"
+				);
+			},this);
+		} else {
+			updateFnLines.a(
+				"gl.uniform"+this.modeDim+"f("+this.varName+"Loc"
+			);
+			this.components.forEach(function(c,i){
+				if (this.inputs[i]=='constant') return;
+				updateFnLines.t(
+					",",
+					"	"+componentValue.call(this,c,i)
+				);
+			},this);
+			updateFnLines.a(
+				");"
+			);
+		}
+		return updateFnLines;
+	}
 	if (this.modeConstant) {
 		return new Lines;
 	}
@@ -138,59 +171,46 @@ Uniform.prototype.getJsInterfaceLines=function(writeListenerArgs,canvasMousemove
 	}
 	this.components.forEach(function(c,i){
 		if (this.inputs[i]=='mousemovex' || this.inputs[i]=='mousemovey') {
-			lines.a(
-				"var "+this.varNameC(c)+"="+this.formatSignedValue(this.values[i])+";"
-			);
+			if (!(this.modeNoSliders && this.modeDim==1)) {
+				lines.a(
+					"var "+this.varNameC(c)+"="+this.formatSignedValue(this.values[i])+";"
+				);
+			} else {
+				lines.a(
+					"gl.uniform1f("+this.varNameC(c)+"Loc,"+this.formatSignedValue(this.values[i])+");"
+				);
+			}
 		}
 	},this);
-	var updateFnLines=new Lines;
-	function componentValue(c,i) {
-		if (this.inputs[i]=='slider') {
-			return "parseFloat(document.getElementById('"+this.optName+"."+c+"').value)";
-		} else if (this.inputs[i]=='mousemovex' || this.inputs[i]=='mousemovey') {
-			return this.varNameC(c);
-		}
-	}
-	if (this.modeFloats) {
-		this.components.forEach(function(c,i){
-			if (this.inputs[i]=='constant') return;
-			updateFnLines.a(
-				"gl.uniform1f("+this.varNameC(c)+"Loc,"+componentValue.call(this,c,i)+");"
-			);
-		},this);
-	} else {
-		updateFnLines.a(
-			"gl.uniform"+this.modeVectorDim+"f("+this.varName+"Loc"
-		);
-		this.components.forEach(function(c,i){
-			if (this.inputs[i]=='constant') return;
-			updateFnLines.t(
-				",",
-				"	"+componentValue.call(this,c,i)
-			);
-		},this);
-		updateFnLines.a(
-			");"
+	if (!(this.modeNoSliders && this.modeDim==1)) {
+		lines.a(
+			writeUpdateFnLines.call(this).wrap(
+				"function "+updateFnName+"() {",
+				"}"
+			),
+			updateFnName+"();",
+			manyListenersLines.data.length<=oneListenerLines.data.length ? manyListenersLines : oneListenerLines
 		);
 	}
-	lines.a(
-		updateFnLines.wrap(
-			"function "+updateFnName+"() {",
-			"}"
-		),
-		updateFnName+"();",
-		manyListenersLines.data.length<=oneListenerLines.data.length ? manyListenersLines : oneListenerLines
-	);
 	if (canvasMousemoveListener) {
 		this.components.forEach(function(c,i){
 			if (this.inputs[i]=='mousemovex' || this.inputs[i]=='mousemovey') {
-				canvasMousemoveListener.enter()
-					.minMaxFloat(this.inputs[i],this.varNameC(c),
+				var entry=canvasMousemoveListener.enter();
+				if (!(this.modeNoSliders && this.modeDim==1)) {
+					entry.minMaxFloat(this.inputs[i],this.varNameC(c),
 						this.formatSignedValue(this.minValues[i]),
 						this.formatSignedValue(this.maxValues[i])
-					)
-					.log("console.log('"+this.optName+"."+c+" input value:',"+this.varNameC(c)+");")
-					.post(updateFnName+"();");
+					);
+					entry.log("console.log('"+this.optName+"."+c+" input value:',"+this.varNameC(c)+");");
+					entry.post(updateFnName+"();");
+				} else {
+					entry.minMaxVarFloat(this.inputs[i],this.varNameC(c),
+						this.formatSignedValue(this.minValues[i]),
+						this.formatSignedValue(this.maxValues[i])
+					);
+					entry.log("console.log('"+this.optName+"."+c+" input value:',"+this.varNameC(c)+");");
+					entry.post("gl.uniform1f("+this.varNameC(c)+"Loc,"+this.varNameC(c)+");");
+				}
 			}
 		},this);
 	}
