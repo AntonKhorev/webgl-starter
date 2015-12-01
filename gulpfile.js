@@ -71,7 +71,7 @@ gulp.task('css',function(){
 
 gulp.task('watch',function(){
 	// TODO html - will have to reload navbar.js
-	gulp.watch(['src/*.js','src/shapes/*.js'],['js']);
+	gulp.watch(['src/**/*.js'],['js']);
 	gulp.watch(['src/index.less'],['css']);
 });
 
