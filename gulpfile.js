@@ -1,4 +1,5 @@
 var gulp=require('gulp');
+var reload=require('require-reload')(require);
 var notify=require('gulp-notify');
 var file=require('gulp-file');
 var browserify=require('browserify');
@@ -27,7 +28,7 @@ function handleErrors() {
 gulp.task('html',function(){
 	return file(
 		'index.html',
-		require('./demos/template.js')( // TODO reload
+		reload('./demos/template.js')(
 			"WebGL starter code generator",
 			['http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.7/styles/default.min.css'],
 			['http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.7/highlight.min.js']
@@ -35,6 +36,19 @@ gulp.task('html',function(){
 		{src: true}
 	)
 		.pipe(gulp.dest(demoDestination));
+});
+
+gulp.task('css',function(){
+	gulp.src('src/webgl-starter.less')
+		.pipe(sourcemaps.init())
+		.pipe(less())
+		.on('error',handleErrors)
+		.pipe(autoprefixer())
+		.pipe(minifyCss())
+		.pipe(sourcemaps.write('.',{
+			sourceRoot: '.'
+		}))
+		.pipe(gulp.dest(libDestination));
 });
 
 gulp.task('js',function(){
@@ -56,21 +70,8 @@ gulp.task('js',function(){
 		.pipe(gulp.dest(libDestination));
 });
 
-gulp.task('css',function(){
-	gulp.src('src/webgl-starter.less')
-		.pipe(sourcemaps.init())
-		.pipe(less())
-		.on('error',handleErrors)
-		.pipe(autoprefixer())
-		.pipe(minifyCss())
-		.pipe(sourcemaps.write('.',{
-			sourceRoot: '.'
-		}))
-		.pipe(gulp.dest(libDestination));
-});
-
 gulp.task('watch',function(){
-	// TODO html - will have to reload navbar.js
+	gulp.watch(['demos/*'],['html']);
 	gulp.watch(['src/**/*.js'],['js']);
 	gulp.watch(['src/index.less'],['css']);
 });
@@ -80,4 +81,4 @@ gulp.task('test',function(){
 		.pipe(mocha());
 });
 
-gulp.task('default',['html','js','css']);
+gulp.task('default',['html','css','js']);
