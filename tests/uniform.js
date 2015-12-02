@@ -70,6 +70,12 @@ describe('Uniform',function(){
 				"document.getElementById('bar.x').addEventListener('change',updateFoo);"
 			]);
 		});
+		it("doesn't write empty mousemove listener code",function(){
+			var canvasMousemoveListener=new listeners.CanvasMousemoveListener;
+			uniform.getJsInterfaceLines([true,false],canvasMousemoveListener);
+			assert.deepEqual(canvasMousemoveListener.write(true,false).data,[
+			]);
+		});
 	});
 	context('with 2 first components out of 3 variable vector',function(){
 		var uniform=new Uniform('foo','bar','xyz',{

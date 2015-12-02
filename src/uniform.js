@@ -217,10 +217,16 @@ Uniform.prototype.getJsInterfaceLines=function(writeListenerArgs,canvasMousemove
 		);
 	}
 	if (canvasMousemoveListener) {
-		var entry=canvasMousemoveListener.enter();
+		var entry;
 		var vs=[];
+		if (this.modeNoSliders && this.modeVector) {
+			entry=canvasMousemoveListener.enter(); // one entry - final post() is dependent on all previous lines
+		}
 		this.components.forEach(function(c,i){
 			if (this.inputs[i]=='mousemovex' || this.inputs[i]=='mousemovey') {
+				if (!(this.modeNoSliders && this.modeVector)) {
+					entry=canvasMousemoveListener.enter(); // several independent entries
+				}
 				if (this.modeNoSliders && (this.modeDim==1 || this.modeVector)) {
 					entry.minMaxVarFloat(this.inputs[i],this.varNameC(c),
 						this.formatValue(this.minValues[i]),
