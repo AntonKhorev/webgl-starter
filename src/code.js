@@ -1,7 +1,7 @@
 var Lines=require('./lines.js');
 var listeners=require('./listeners.js');
 var shapes=require('./shapes.js');
-var Uniform=require('./uniform.js');
+var GlslVector=require('./glsl-vector.js');
 
 module.exports=function(options,i18n){
 	function intOptionValue(name) {
@@ -35,9 +35,9 @@ module.exports=function(options,i18n){
 	}
 	var shape=makeShape();
 	if (options.shader=='single') {
-		var colorUniform=new Uniform('color','shader.single.color','rgba',options);
+		var colorVector=new GlslVector('color','shader.single.color','rgba',options);
 	} else if (options.shader=='light') {
-		var lightDirectionUniform=new Uniform('lightDirection','shader.light.direction','xyz',options);
+		var lightDirectionVector=new GlslVector('lightDirection','shader.light.direction','xyz',options);
 	}
 
 	function generateHtmlStyleLines() {
@@ -314,9 +314,9 @@ module.exports=function(options,i18n){
 		);
 		if (options.shader=='single') {
 			lines.a(
-				colorUniform.getGlslDeclarationLines(),
+				colorVector.getGlslDeclarationLines(),
 				"void main() {",
-				"	gl_FragColor="+colorUniform.getGlslValue()+";",
+				"	gl_FragColor="+colorVector.getGlslValue()+";",
 				"}"
 			);
 		} else if (options.shader=='vertex' || options.shader=='face') {
@@ -328,7 +328,7 @@ module.exports=function(options,i18n){
 			);
 		} else if (options.shader=='light') {
 			lines.a(
-				lightDirectionUniform.getGlslDeclarationLines()
+				lightDirectionVector.getGlslDeclarationLines()
 			);
 			if (options.projection=='perspective') {
 				lines.a(
@@ -361,7 +361,7 @@ module.exports=function(options,i18n){
 				);
 			}
 			lines.a(
-				"	vec3 L=normalize("+lightDirectionUniform.getGlslValue()+");",
+				"	vec3 L=normalize("+lightDirectionVector.getGlslValue()+");",
 				"	vec3 H=normalize(L+V);",
 				"	gl_FragColor=vec4(",
 				"		ambientColor",
@@ -644,11 +644,11 @@ module.exports=function(options,i18n){
 		}
 		if (options.shader=='single') {
 			lines.a(
-				colorUniform.getJsInterfaceLines(writeListenerArgs,canvasMousemoveListener)
+				colorVector.getJsInterfaceLines(writeListenerArgs,canvasMousemoveListener)
 			);
 		} else if (options.shader=='light') {
 			lines.a(
-				lightDirectionUniform.getJsInterfaceLines(writeListenerArgs,canvasMousemoveListener)
+				lightDirectionVector.getJsInterfaceLines(writeListenerArgs,canvasMousemoveListener)
 			);
 		}
 		options.getInputsFor('shape').forEach(function(option){

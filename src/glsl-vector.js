@@ -1,7 +1,7 @@
 var Lines=require('./lines.js');
 var listeners=require('./listeners.js');
 
-var Uniform=function(varName,optName,components,options){
+var GlslVector=function(varName,optName,components,options){
 	this.varName=varName;
 	this.optName=optName;
 	this.components=components.split('');
@@ -48,11 +48,11 @@ var Uniform=function(varName,optName,components,options){
 		};
 	}
 };
-Uniform.prototype.varNameC=function(c){
+GlslVector.prototype.varNameC=function(c){
 	return this.varName+c.toUpperCase();
 };
 // public:
-Uniform.prototype.getGlslDeclarationLines=function(){
+GlslVector.prototype.getGlslDeclarationLines=function(){
 	if (this.modeConstant) {
 		return new Lines;
 	} else if (this.modeFloats) {
@@ -70,7 +70,7 @@ Uniform.prototype.getGlslDeclarationLines=function(){
 		);
 	}
 };
-Uniform.prototype.getGlslValue=function(){
+GlslVector.prototype.getGlslValue=function(){
 	var vecType="vec"+this.values.length;
 	function varComponentMap(c,i) {
 		if (this.inputs[i]=='constant') {
@@ -98,7 +98,7 @@ Uniform.prototype.getGlslValue=function(){
 	}
 	return vecType+"("+vs.join(",")+")";
 };
-Uniform.prototype.getJsInterfaceLines=function(writeListenerArgs,canvasMousemoveListener){
+GlslVector.prototype.getJsInterfaceLines=function(writeListenerArgs,canvasMousemoveListener){
 	function capitalize(s) {
 		return s.charAt(0).toUpperCase()+s.slice(1);
 	}
@@ -255,4 +255,4 @@ Uniform.prototype.getJsInterfaceLines=function(writeListenerArgs,canvasMousemove
 	return lines;
 };
 
-module.exports=Uniform;
+module.exports=GlslVector;
