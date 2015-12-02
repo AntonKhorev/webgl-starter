@@ -37,9 +37,16 @@ var Uniform=function(varName,optName,components,options){
 		this.modeFloats=true;
 	}
 	this.modeVector= !this.modeConstant && !this.modeFloats;
-};
-Uniform.prototype.formatSignedValue=function(value){
-	return (value<=0 ? value<0 ? '' /* - */ : ' ' : '+')+value.toFixed(3);
+	var nonnegativeLimits=this.minValues.every(function(v){return v>=0}) && this.maxValues.every(function(v){return v>=0});
+	if (nonnegativeLimits) {
+		this.formatValue=function(value){
+			return value.toFixed(3);
+		};
+	} else {
+		this.formatValue=function(value){
+			return (value<=0 ? value<0 ? '' /* - */ : ' ' : '+')+value.toFixed(3);
+		};
+	}
 };
 Uniform.prototype.varNameC=function(c){
 	return this.varName+c.toUpperCase();
@@ -67,7 +74,7 @@ Uniform.prototype.getGlslValue=function(){
 	var vecType="vec"+this.values.length;
 	function varComponentMap(c,i) {
 		if (this.inputs[i]=='constant') {
-			return this.formatSignedValue(this.values[i]);
+			return this.formatValue(this.values[i]);
 		} else {
 			return this.varNameC(c);
 		}
@@ -174,7 +181,7 @@ Uniform.prototype.getJsInterfaceLines=function(writeListenerArgs,canvasMousemove
 		this.components.forEach(function(c,i){
 			if (this.inputs[i]!='constant') {
 				lines.a(
-					"gl.uniform1f("+this.varNameC(c)+"Loc,"+this.formatSignedValue(this.values[i])+");"
+					"gl.uniform1f("+this.varNameC(c)+"Loc,"+this.formatValue(this.values[i])+");"
 				);
 			}
 		},this);
@@ -185,7 +192,7 @@ Uniform.prototype.getJsInterfaceLines=function(writeListenerArgs,canvasMousemove
 		this.components.forEach(function(c,i){
 			if (this.inputs[i]!='constant') {
 				lines.t(
-					","+this.formatSignedValue(this.values[i])
+					","+this.formatValue(this.values[i])
 				);
 			}
 		},this);
@@ -196,7 +203,7 @@ Uniform.prototype.getJsInterfaceLines=function(writeListenerArgs,canvasMousemove
 		this.components.forEach(function(c,i){
 			if (this.inputs[i]=='mousemovex' || this.inputs[i]=='mousemovey') {
 				lines.a(
-					"var "+this.varNameC(c)+"="+this.formatSignedValue(this.values[i])+";"
+					"var "+this.varNameC(c)+"="+this.formatValue(this.values[i])+";"
 				);
 			}
 		},this);
@@ -216,13 +223,13 @@ Uniform.prototype.getJsInterfaceLines=function(writeListenerArgs,canvasMousemove
 			if (this.inputs[i]=='mousemovex' || this.inputs[i]=='mousemovey') {
 				if (this.modeNoSliders && (this.modeDim==1 || this.modeVector)) {
 					entry.minMaxVarFloat(this.inputs[i],this.varNameC(c),
-						this.formatSignedValue(this.minValues[i]),
-						this.formatSignedValue(this.maxValues[i])
+						this.formatValue(this.minValues[i]),
+						this.formatValue(this.maxValues[i])
 					);
 				} else {
 					entry.minMaxFloat(this.inputs[i],this.varNameC(c),
-						this.formatSignedValue(this.minValues[i]),
-						this.formatSignedValue(this.maxValues[i])
+						this.formatValue(this.minValues[i]),
+						this.formatValue(this.maxValues[i])
 					);
 				}
 				entry.log("console.log('"+this.optName+"."+c+" input value:',"+this.varNameC(c)+");");

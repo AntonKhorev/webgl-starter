@@ -248,4 +248,17 @@ describe('Uniform',function(){
 			]);
 		});
 	});
+	context('with nonnegative limits',function(){
+		var uniform=new Uniform('color','shader.color','rgba',{
+			'shader.color.r':0.2, 'shader.color.r.input':'constant', 'shader.color.r.min':0, 'shader.color.r.max':1,
+			'shader.color.g':0.3, 'shader.color.g.input':'constant', 'shader.color.g.min':0, 'shader.color.g.max':1,
+			'shader.color.b':0.4, 'shader.color.b.input':'constant', 'shader.color.b.min':0, 'shader.color.b.max':1,
+			'shader.color.a':0.5, 'shader.color.a.input':'constant', 'shader.color.a.min':0, 'shader.color.a.max':1
+		});
+		it('returns unsigned value',function(){
+			assert.equal(uniform.getGlslValue(),
+				"vec4(0.200,0.300,0.400,0.500)"
+			);
+		});
+	});
 });
