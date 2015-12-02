@@ -45,7 +45,9 @@ module.exports=function(options,i18n){
 		return new (Function.prototype.bind.apply(shapes[className],shapeCtorArgs));
 	}
 	var shape=makeShape();
-	if (options.shader=='light') {
+	if (options.shader=='single') {
+		var colorUniform=new Uniform('color','shader.single.color','rgba',options);
+	} else if (options.shader=='light') {
 		var lightDirectionUniform=new Uniform('lightDirection','shader.light.direction','xyz',options);
 	}
 
@@ -322,20 +324,12 @@ module.exports=function(options,i18n){
 			"precision mediump float;"
 		);
 		if (options.shader=='single') {
-			if (options.hasInputsFor('shader.single.color')) {
-				lines.a(
-					"uniform vec4 color;",
-					"void main() {",
-					"	gl_FragColor=color;",
-					"}"
-				);
-			} else {
-				lines.a(
-					"void main() {",
-					"	gl_FragColor=vec4("+glslColorValue('shader.single.color')+");",
-					"}"
-				);
-			}
+			lines.a(
+				colorUniform.getGlslDeclarationLines(),
+				"void main() {",
+				"	gl_FragColor="+colorUniform.getGlslValue()+";",
+				"}"
+			);
 		} else if (options.shader=='vertex' || options.shader=='face') {
 			lines.a(
 				"varying vec4 interpolatedColor;",
@@ -659,17 +653,11 @@ module.exports=function(options,i18n){
 				'gl.clearColor(',');'
 			);
 		}
-		if (options.hasInputsFor('shader.single.color')) {
+		if (options.shader=='single') {
 			lines.a(
-				"var colorLoc=gl.getUniformLocation(program,'color');"
+				colorUniform.getJsInterfaceLines(writeListenerArgs,canvasMousemoveListener)
 			);
-			colorStatesAndUpdaterAndListeners(
-				'shader.single.color','updateColor','color',
-				'gl.uniform4fv(colorLoc,',');',
-				'gl.uniform4fv(colorLoc,[',']);'
-			);
-		}
-		if (options.shader=='light') {
+		} else if (options.shader=='light') {
 			lines.a(
 				lightDirectionUniform.getJsInterfaceLines(writeListenerArgs,canvasMousemoveListener)
 			);
