@@ -1,6 +1,7 @@
 var Lines=require('./lines.js');
 var listeners=require('./listeners.js');
 var shapes=require('./shapes.js');
+var CallVector=require('./call-vector.js');
 var GlslVector=require('./glsl-vector.js');
 
 module.exports=function(options,i18n){
@@ -34,6 +35,9 @@ module.exports=function(options,i18n){
 		return new (Function.prototype.bind.apply(shapes[className],shapeCtorArgs));
 	}
 	var shape=makeShape();
+	if (options.background=='solid') {
+		var backgroundColorVector=new CallVector('backgroundColor','background.solid.color','rgba',options,'gl.clearColor',[0,0,0,0]);
+	}
 	if (options.shader=='single') {
 		var colorVector=new GlslVector('color','shader.single.color','rgba',options);
 	} else if (options.shader=='light') {
@@ -482,16 +486,10 @@ module.exports=function(options,i18n){
 				"gl.getExtension('OES_element_index_uint');" // TODO check if null is returned and don't allow more elements
 			);
 		}
-		if (options.background=='solid' && !options.hasInputsFor('background.solid.color') && !(
-			// default clear color in OpenGL
-			options['background.solid.color.r']==0 &&
-			options['background.solid.color.g']==0 &&
-			options['background.solid.color.b']==0 &&
-			options['background.solid.color.a']==0
-		)) {
+		if (options.background=='solid') {
 			lines.a(
-				"gl.clearColor("+colorValue('background.solid.color')+");"
-			)
+				backgroundColorVector.getJsInitLines()
+			);
 		}
 		if (shape.dim>2) {
 			lines.a(
