@@ -11,12 +11,6 @@ module.exports=function(options,i18n){
 	function floatOptionValue(name) {
 		return options[name].toFixed(3);
 	}
-	function colorValue(prefix) {
-		return floatOptionValue(prefix+'.r')+","+
-		       floatOptionValue(prefix+'.g')+","+
-		       floatOptionValue(prefix+'.b')+","+
-		       floatOptionValue(prefix+'.a');
-	}
 	function isMousemoveInput(name) {
 		return ['mousemovex','mousemovey'].indexOf(options[name+'.input'])>=0;
 	}
@@ -534,97 +528,6 @@ module.exports=function(options,i18n){
 				writeListener(listener);
 			}
 		}
-		function colorStates(optionPrefix,updateFnName,stateVarPrefix) {
-			['r','g','b','a'].forEach(function(c){
-				var name=optionPrefix+'.'+c;
-				if (isMousemoveInput(name)) {
-					lines.a(
-						"var "+stateVarPrefix+c.toUpperCase()+'='+floatOptionValue(name)+';'
-					);
-				}
-			});
-		}
-		function colorUpdater(optionPrefix,updateFnName,stateVarPrefix,allInputsPre,allInputsPost,someInputsPre,someInputsPost) {
-			lines.a(
-				"function "+updateFnName+"() {"
-			);
-			if (options.hasAllSliderInputsFor(optionPrefix)) {
-				lines.a(
-					"	"+allInputsPre+"['r','g','b','a'].map(function(c){",
-					"		return parseFloat(document.getElementById('"+optionPrefix+".'+c).value);",
-					"	})"+allInputsPost
-				);
-			// TODO hasAllStateInputsFor(optionPrefix)
-			} else {
-				lines.a(
-					"	"+someInputsPre+['r','g','b','a'].map(function(c){
-						var name=optionPrefix+'.'+c;
-						if (options[name+'.input']=='slider') {
-							return "parseFloat(document.getElementById('"+name+"').value)";
-						} else if (isMousemoveInput(name)) {
-							return stateVarPrefix+c.toUpperCase();
-						} else {
-							return floatOptionValue(name);
-						}
-					}).join()+someInputsPost
-				);
-			}
-			lines.a(
-				"}",
-				updateFnName+"();"
-			);
-		}
-		function colorSingleListener(optionPrefix,updateFnName,stateVarPrefix) {
-			var onlyInput=options.getOnlyInputFor(optionPrefix);
-			var listener;
-			if (onlyInput===null) {
-				listener=new listeners.MultipleSliderListener("[id^=\""+optionPrefix+".\"]");
-			} else {
-				listener=new listeners.SliderListener(onlyInput.name);
-			}
-			listener.enter()
-				.log("console.log(this.id,'input value:',parseFloat(this.value));")
-				.post(updateFnName+"();");
-			writeListener(listener);
-		}
-		function colorMultipleListeners(optionPrefix,updateFnName,stateVarPrefix) {
-			['r','g','b','a'].forEach(function(c){
-				var name=optionPrefix+'.'+c;
-				var varName=stateVarPrefix+c.toUpperCase();
-				if (options[name+'.input']=='slider') {
-					var listener=new listeners.SliderListener(name);
-					listener.enter()
-						.log("console.log(this.id,'input value:',parseFloat(this.value));")
-						.post(updateFnName+"();");
-					writeListener(listener);
-				} else if (isMousemoveInput(name)) {
-					canvasMousemoveListener.enter()
-						.minMaxFloat(options[name+'.input'],varName,floatOptionValue(name+'.min'),floatOptionValue(name+'.max'))
-						.log("console.log('"+name+" input value:',"+varName+");")
-						.post(updateFnName+"();");
-				}
-			});
-		}
-		function colorListeners(optionPrefix,updateFnName,stateVarPrefix) {
-			var needOnlyOneListener=['r','g','b','a'].every(function(c){
-				var inputType=options[optionPrefix+'.'+c+'.input'];
-				return inputType=='constant' || inputType=='slider';
-			});
-			if (needOnlyOneListener) {
-				colorSingleListener(optionPrefix,updateFnName,stateVarPrefix);
-			} else {
-				colorMultipleListeners(optionPrefix,updateFnName,stateVarPrefix);
-			}
-		}
-		function colorStatesAndUpdaterAndListeners(
-			optionPrefix,updateFnName,stateVarPrefix,
-			allInputsPre,allInputsPost,
-			someInputsPre,someInputsPost
-		) {
-			colorStates(optionPrefix,updateFnName,stateVarPrefix);
-			colorUpdater(optionPrefix,updateFnName,stateVarPrefix,allInputsPre,allInputsPost,someInputsPre,someInputsPost);
-			colorListeners(optionPrefix,updateFnName,stateVarPrefix);
-		}
 		if (options.hasInputsFor('canvas')) {
 			lines.a(
 				"var aspectLoc=gl.getUniformLocation(program,'aspect');"
@@ -633,11 +536,9 @@ module.exports=function(options,i18n){
 			canvasListener('width');
 			canvasListener('height');
 		}
-		if (options.hasInputsFor('background.solid.color')) {
-			colorStatesAndUpdaterAndListeners(
-				'background.solid.color','updateClearColor','clearColor',
-				'gl.clearColor.apply(gl,',');',
-				'gl.clearColor(',');'
+		if (options.background=='solid') {
+			lines.a(
+				backgroundColorVector.getJsInterfaceLines(writeListenerArgs,canvasMousemoveListener)
 			);
 		}
 		if (options.shader=='single') {
