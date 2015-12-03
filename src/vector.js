@@ -14,7 +14,9 @@ var Vector=function(varName,optName,components,options){
 	this.maxValues=this.components.map(function(c){
 		return options[optName+'.'+c+'.max'];
 	});
-	this.modeNoSliders=true; // no <input> elements with values that can be populated by the browser, disregarding default value
+	//this.nVars=0;
+	this.nSliders=0; // sliders are <input> elements with values that can be populated by the browser, disregarding default value
+	//this.nMousemoves=0;
 	// TODO count sliders instead, and then count mousemoves:
 	// this.nSliders, nMousemoves, nVars instead of modeDim
 	this.modeConstant=true;
@@ -28,9 +30,7 @@ var Vector=function(varName,optName,components,options){
 				this.modeFloats=true;
 			}
 		}
-		if (inputType=='slider') {
-			this.modeNoSliders=false;
-		}
+		this.nSliders+=inputType=='slider';
 	},this);
 	if (this.modeDim==1) {
 		this.modeFloats=true;

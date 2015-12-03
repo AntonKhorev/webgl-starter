@@ -126,7 +126,7 @@ GlslVector.prototype.getJsInterfaceLines=function(writeListenerArgs,canvasMousem
 			"var "+this.varName+"Loc=gl.getUniformLocation(program,'"+this.varName+"');"
 		);
 	}
-	if (this.modeNoSliders && this.modeDim==1) {
+	if (this.nSliders==0 && this.modeDim==1) {
 		this.components.forEach(function(c,i){
 			if (this.inputs[i]!='constant') {
 				lines.a(
@@ -134,7 +134,7 @@ GlslVector.prototype.getJsInterfaceLines=function(writeListenerArgs,canvasMousem
 				);
 			}
 		},this);
-	} else if (this.modeNoSliders && this.modeVector) {
+	} else if (this.nSliders==0 && this.modeVector) {
 		lines.a(
 			"gl.uniform"+this.modeDim+"f("+this.varName+"Loc"
 		);
@@ -168,15 +168,15 @@ GlslVector.prototype.getJsInterfaceLines=function(writeListenerArgs,canvasMousem
 	if (canvasMousemoveListener) {
 		var entry;
 		var vs=[];
-		if (this.modeNoSliders && this.modeVector) {
+		if (this.nSliders==0 && this.modeVector) {
 			entry=canvasMousemoveListener.enter(); // one entry - final post() is dependent on all previous lines
 		}
 		this.components.forEach(function(c,i){
 			if (this.inputs[i]=='mousemovex' || this.inputs[i]=='mousemovey') {
-				if (!(this.modeNoSliders && this.modeVector)) {
+				if (!(this.nSliders==0 && this.modeVector)) {
 					entry=canvasMousemoveListener.enter(); // several independent entries
 				}
-				if (this.modeNoSliders && (this.modeDim==1 || this.modeVector)) {
+				if (this.nSliders==0 && (this.modeDim==1 || this.modeVector)) {
 					entry.minMaxVarFloat(this.inputs[i],this.varNameC(c),
 						this.formatValue(this.minValues[i]),
 						this.formatValue(this.maxValues[i])
@@ -188,16 +188,16 @@ GlslVector.prototype.getJsInterfaceLines=function(writeListenerArgs,canvasMousem
 					);
 				}
 				entry.log("console.log('"+this.optName+"."+c+" input value:',"+this.varNameC(c)+");");
-				if (this.modeNoSliders && this.modeDim==1) {
+				if (this.nSliders==0 && this.modeDim==1) {
 					entry.post("gl.uniform1f("+this.varNameC(c)+"Loc,"+this.varNameC(c)+");");
-				} else if (this.modeNoSliders && this.modeVector) {
+				} else if (this.nSliders==0 && this.modeVector) {
 					vs.push(this.varNameC(c));
 				} else {
 					entry.post(updateFnName+"();");
 				}
 			}
 		},this);
-		if (this.modeNoSliders && this.modeVector) {
+		if (this.nSliders==0 && this.modeVector) {
 			entry.post("gl.uniform"+this.modeDim+"f("+this.varName+"Loc,"+vs.join(",")+");");
 		}
 	}
