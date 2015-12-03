@@ -59,6 +59,12 @@ describe("CallVector",function(){
 			assert.deepEqual(canvasMousemoveListener.write(false,false).data,[
 			]);
 		});
+		it("returns empty mousemove listener when not animated",function(){
+			var canvasMousemoveListener=new listeners.CanvasMousemoveListener;
+			vector.getJsInterfaceLines([true,false],canvasMousemoveListener);
+			assert.deepEqual(canvasMousemoveListener.write(true,false).data,[
+			]);
+		});
 	});
 	context("with 2 slider components",function(){
 		var vector=new CallVector('color','shader.color','rgba',{

@@ -197,16 +197,21 @@ CallVector.prototype.getJsInterfaceLines=function(writeListenerArgs,canvasMousem
 	if (canvasMousemoveListener) {
 		var entry;
 		var vs=[];
-		//if (this.modeNoSliders && this.modeVector) {
+		/*
+		if (this.modeNoSliders && this.modeVector) {
 			entry=canvasMousemoveListener.enter(); // one entry - final post() is dependent on all previous lines
-		//}
+		}
+		*/
 		// {
 		var hasMousemoves=false;
 		// }
 		this.components.forEach(function(c,i){
 			if (this.inputs[i]=='mousemovex' || this.inputs[i]=='mousemovey') {
 				// {
-				hasMousemoves=true;
+				if (!hasMousemoves) {
+					hasMousemoves=true;
+					entry=canvasMousemoveListener.enter(); // one entry - final post() is dependent on all previous lines
+				}
 				// }
 				/*
 				if (!(this.modeNoSliders && this.modeVector)) {
