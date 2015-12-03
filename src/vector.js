@@ -47,8 +47,18 @@ var Vector=function(varName,optName,components,options){
 		};
 	}
 };
+// fns that can be mapped over components:
 Vector.prototype.varNameC=function(c){
 	return this.varName+c.toUpperCase();
 };
+Vector.prototype.componentValue=function(c,i){
+	if (this.inputs[i]=='constant') {
+		return this.formatValue(this.values[i]);
+	} else if (this.inputs[i]=='slider') {
+		return "parseFloat(document.getElementById('"+this.optName+"."+c+"').value)";
+	} else if (this.inputs[i]=='mousemovex' || this.inputs[i]=='mousemovey') {
+		return this.varNameC(c);
+	}
+}
 
 module.exports=Vector;

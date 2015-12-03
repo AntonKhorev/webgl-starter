@@ -49,30 +49,12 @@ CallVector.prototype.getJsInterfaceLines=function(writeListenerArgs,canvasMousem
 	}
 	function writeUpdateFnLines() {
 		var updateFnLines=new Lines;
-		function componentValue(c,i) {
-			/*
-			if (this.inputs[i]=='slider') {
-				return "parseFloat(document.getElementById('"+this.optName+"."+c+"').value)";
-			} else if (this.inputs[i]=='mousemovex' || this.inputs[i]=='mousemovey') {
-				return this.varNameC(c);
-			}
-			*/
-			// safe to replace with this one {
-			if (this.inputs[i]=='constant') {
-				return this.formatValue(this.values[i]);
-			} else if (this.inputs[i]=='slider') {
-				return "parseFloat(document.getElementById('"+this.optName+"."+c+"').value)";
-			} else if (this.inputs[i]=='mousemovex' || this.inputs[i]=='mousemovey') {
-				return this.varNameC(c);
-			}
-			// }
-		}
 		/*
 		if (this.modeFloats) {
 			this.components.forEach(function(c,i){
 				if (this.inputs[i]=='constant') return;
 				updateFnLines.a(
-					"gl.uniform1f("+this.varNameC(c)+"Loc,"+componentValue.call(this,c,i)+");"
+					"gl.uniform1f("+this.varNameC(c)+"Loc,"+this.componentValue(c,i)+");"
 				);
 			},this);
 		} else {
@@ -83,7 +65,7 @@ CallVector.prototype.getJsInterfaceLines=function(writeListenerArgs,canvasMousem
 				if (this.inputs[i]=='constant') return;
 				updateFnLines.t(
 					",",
-					"	"+componentValue.call(this,c,i)
+					"	"+this.componentValue(c,i)
 				);
 			},this);
 			updateFnLines.a(
@@ -98,7 +80,7 @@ CallVector.prototype.getJsInterfaceLines=function(writeListenerArgs,canvasMousem
 		},this);
 		if (nSliders<=1) {
 			updateFnLines.a(
-				this.calledFn+"("+this.components.map(componentValue,this).join(",")+");"
+				this.calledFn+"("+this.components.map(this.componentValue,this).join(",")+");"
 			);
 		} else if (nSliders==this.components.length) {
 			var obj=this.calledFn;
@@ -120,7 +102,7 @@ CallVector.prototype.getJsInterfaceLines=function(writeListenerArgs,canvasMousem
 					updateFnLines.t(",");
 				}
 				updateFnLines.a(
-					"	"+componentValue.call(this,c,i)
+					"	"+this.componentValue(c,i)
 				);
 			},this);
 			updateFnLines.a(
@@ -247,19 +229,10 @@ CallVector.prototype.getJsInterfaceLines=function(writeListenerArgs,canvasMousem
 		}
 		*/
 		// {
-		var componentValue=function(c,i) { // copypasted from above
-			if (this.inputs[i]=='constant') {
-				return this.formatValue(this.values[i]);
-			} else if (this.inputs[i]=='slider') {
-				return "parseFloat(document.getElementById('"+this.optName+"."+c+"').value)";
-			} else if (this.inputs[i]=='mousemovex' || this.inputs[i]=='mousemovey') {
-				return this.varNameC(c);
-			}
-		}
 		if (hasMousemoves) {
 			if (this.modeNoSliders) {
 				entry.post(
-					this.calledFn+"("+this.components.map(componentValue,this).join(",")+");"
+					this.calledFn+"("+this.components.map(this.componentValue,this).join(",")+");"
 				);
 			} else {
 				entry.post(updateFnName+"();");
