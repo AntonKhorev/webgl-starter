@@ -8,6 +8,7 @@ var CallVector=function(varName,optName,components,options,calledFn,calledFnDefa
 };
 CallVector.prototype=Object.create(Vector.prototype);
 CallVector.prototype.constructor=CallVector;
+// public:
 CallVector.prototype.getJsInitLines=function(){
 	if (this.nSliders>0 || this.values.every(function(v,i){
 		return v==this.calledFnDefaultArgs[i];
@@ -18,10 +19,11 @@ CallVector.prototype.getJsInitLines=function(){
 		this.calledFn+"("+this.values.map(this.formatValue).join(",")+");"
 	);
 };
-CallVector.prototype.writeLocLines=function(){
+// private:
+CallVector.prototype.writeJsInterfaceGlslLines=function(){
 	return new Lines;
 };
-CallVector.prototype.writeUpdateFnLines=function(){
+CallVector.prototype.writeJsInterfaceUpdateFnLines=function(){
 	var updateFnLines=new Lines;
 	if (this.nSliders<=1) {
 		updateFnLines.a(
@@ -56,9 +58,9 @@ CallVector.prototype.writeUpdateFnLines=function(){
 	}
 	return updateFnLines;
 };
-CallVector.prototype.writeMousemoveEach=function(entry,c){
+CallVector.prototype.addPostToEntryForComponent=function(entry,c){
 };
-CallVector.prototype.writeMousemoveEnd=function(entry){
+CallVector.prototype.addPostToEntryAfterComponents=function(entry){
 	if (this.nSliders==0) {
 		entry.post(
 			this.calledFn+"("+this.components.map(this.componentValue,this).join(",")+");"

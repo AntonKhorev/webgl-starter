@@ -53,7 +53,8 @@ GlslVector.prototype.getGlslValue=function(){
 	}
 	return vecType+"("+vs.join(",")+")";
 };
-GlslVector.prototype.writeLocLines=function(){
+// private:
+GlslVector.prototype.writeJsInterfaceGlslLines=function(){
 	lines=new Lines;
 	if (this.modeFloats) {
 		this.components.forEach(function(c,i){
@@ -92,7 +93,7 @@ GlslVector.prototype.writeLocLines=function(){
 	}
 	return lines;
 };
-GlslVector.prototype.writeUpdateFnLines=function() {
+GlslVector.prototype.writeJsInterfaceUpdateFnLines=function() {
 	var updateFnLines=new Lines;
 	if (this.modeFloats) {
 		this.components.forEach(function(c,i){
@@ -118,7 +119,7 @@ GlslVector.prototype.writeUpdateFnLines=function() {
 	}
 	return updateFnLines;
 };
-GlslVector.prototype.writeMousemoveEach=function(entry,c){
+GlslVector.prototype.addPostToEntryForComponent=function(entry,c){
 	if (this.nSliders==0 && this.modeVector) {
 		// written at the end as a vector
 	} else if (this.nSliders==0) {
@@ -127,7 +128,7 @@ GlslVector.prototype.writeMousemoveEach=function(entry,c){
 		entry.post(this.updateFnName()+"();");
 	}
 };
-GlslVector.prototype.writeMousemoveEnd=function(entry){
+GlslVector.prototype.addPostToEntryAfterComponents=function(entry){
 	if (this.nSliders==0 && this.modeVector) {
 		var vs=[];
 		this.components.forEach(function(c,i){

@@ -67,7 +67,7 @@ Vector.prototype.componentValue=function(c,i){
 		return this.varNameC(c);
 	}
 }
-// public
+// public:
 Vector.prototype.getJsInterfaceLines=function(writeListenerArgs,canvasMousemoveListener){
 	function writeManyListenersLines() {
 		var lines=new Lines;
@@ -99,7 +99,7 @@ Vector.prototype.getJsInterfaceLines=function(writeListenerArgs,canvasMousemoveL
 	var manyListenersLines=writeManyListenersLines.call(this);
 	var oneListenerLines=writeOneListenerLines.call(this);
 	lines.a(
-		this.writeLocLines()
+		this.writeJsInterfaceGlslLines()
 	);
 	if (this.nSliders>0) {
 		this.components.forEach(function(c,i){
@@ -110,7 +110,7 @@ Vector.prototype.getJsInterfaceLines=function(writeListenerArgs,canvasMousemoveL
 			}
 		},this);
 		lines.a(
-			this.writeUpdateFnLines().wrap(
+			this.writeJsInterfaceUpdateFnLines().wrap(
 				"function "+this.updateFnName()+"() {",
 				"}"
 			),
@@ -134,10 +134,10 @@ Vector.prototype.getJsInterfaceLines=function(writeListenerArgs,canvasMousemoveL
 					);
 				}
 				entry.log("console.log('"+this.optName+"."+c+" input value:',"+this.varNameC(c)+");");
-				this.writeMousemoveEach(entry,c);
+				this.addPostToEntryForComponent(entry,c);
 			}
 		},this);
-		this.writeMousemoveEnd(entry);
+		this.addPostToEntryAfterComponents(entry);
 	}
 	return lines;
 };
