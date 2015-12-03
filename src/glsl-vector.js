@@ -22,7 +22,7 @@ GlslVector.prototype.getGlslDeclarationLines=function(){
 		return lines;
 	} else {
 		return new Lines(
-			"uniform vec"+this.modeDim+" "+this.varName+";"
+			"uniform vec"+this.nVars+" "+this.varName+";"
 		);
 	}
 };
@@ -46,7 +46,7 @@ GlslVector.prototype.getGlslValue=function(){
 			return vecType+"("+vs.join(",")+")";
 		}
 	} else if (!this.modeFloats) {
-		vs=vs.slice(this.modeDim);
+		vs=vs.slice(this.nVars);
 		if (vs.length==0) {
 			return this.varName;
 		}
@@ -93,7 +93,7 @@ GlslVector.prototype.getJsInterfaceLines=function(writeListenerArgs,canvasMousem
 			},this);
 		} else {
 			updateFnLines.a(
-				"gl.uniform"+this.modeDim+"f("+this.varName+"Loc"
+				"gl.uniform"+this.nVars+"f("+this.varName+"Loc"
 			);
 			this.components.forEach(function(c,i){
 				if (this.inputs[i]=='constant') return;
@@ -126,7 +126,7 @@ GlslVector.prototype.getJsInterfaceLines=function(writeListenerArgs,canvasMousem
 			"var "+this.varName+"Loc=gl.getUniformLocation(program,'"+this.varName+"');"
 		);
 	}
-	if (this.nSliders==0 && this.modeDim==1) {
+	if (this.nSliders==0 && this.nVars==1) {
 		this.components.forEach(function(c,i){
 			if (this.inputs[i]!='constant') {
 				lines.a(
@@ -136,7 +136,7 @@ GlslVector.prototype.getJsInterfaceLines=function(writeListenerArgs,canvasMousem
 		},this);
 	} else if (this.nSliders==0 && this.modeVector) {
 		lines.a(
-			"gl.uniform"+this.modeDim+"f("+this.varName+"Loc"
+			"gl.uniform"+this.nVars+"f("+this.varName+"Loc"
 		);
 		this.components.forEach(function(c,i){
 			if (this.inputs[i]!='constant') {
@@ -176,7 +176,7 @@ GlslVector.prototype.getJsInterfaceLines=function(writeListenerArgs,canvasMousem
 				if (!(this.nSliders==0 && this.modeVector)) {
 					entry=canvasMousemoveListener.enter(); // several independent entries
 				}
-				if (this.nSliders==0 && (this.modeDim==1 || this.modeVector)) {
+				if (this.nSliders==0 && (this.nVars==1 || this.modeVector)) {
 					entry.minMaxVarFloat(this.inputs[i],this.varNameC(c),
 						this.formatValue(this.minValues[i]),
 						this.formatValue(this.maxValues[i])
@@ -188,7 +188,7 @@ GlslVector.prototype.getJsInterfaceLines=function(writeListenerArgs,canvasMousem
 					);
 				}
 				entry.log("console.log('"+this.optName+"."+c+" input value:',"+this.varNameC(c)+");");
-				if (this.nSliders==0 && this.modeDim==1) {
+				if (this.nSliders==0 && this.nVars==1) {
 					entry.post("gl.uniform1f("+this.varNameC(c)+"Loc,"+this.varNameC(c)+");");
 				} else if (this.nSliders==0 && this.modeVector) {
 					vs.push(this.varNameC(c));
@@ -198,7 +198,7 @@ GlslVector.prototype.getJsInterfaceLines=function(writeListenerArgs,canvasMousem
 			}
 		},this);
 		if (this.nSliders==0 && this.modeVector) {
-			entry.post("gl.uniform"+this.modeDim+"f("+this.varName+"Loc,"+vs.join(",")+");");
+			entry.post("gl.uniform"+this.nVars+"f("+this.varName+"Loc,"+vs.join(",")+");");
 		}
 	}
 	return lines;
