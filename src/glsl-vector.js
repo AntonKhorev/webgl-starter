@@ -1,5 +1,4 @@
 var Lines=require('./lines.js');
-var listeners=require('./listeners.js');
 var Vector=require('./vector.js');
 
 var GlslVector=function(varName,optName,components,options){
@@ -54,66 +53,8 @@ GlslVector.prototype.getGlslValue=function(){
 	}
 	return vecType+"("+vs.join(",")+")";
 };
-GlslVector.prototype.getJsInterfaceLines=function(writeListenerArgs,canvasMousemoveListener){
-	function capitalize(s) {
-		return s.charAt(0).toUpperCase()+s.slice(1);
-	}
-	var updateFnName='update'+capitalize(this.varName);
-	function writeManyListenersLines() {
-		var lines=new Lines;
-		this.components.forEach(function(c,i){
-			if (this.inputs[i]!='slider') return;
-			var listener=new listeners.SliderListener(this.optName+'.'+c);
-			listener.enter()
-				.log("console.log(this.id,'input value:',parseFloat(this.value));")
-				.post(updateFnName+"();");
-			lines.a(
-				listener.write.apply(listener,writeListenerArgs)
-			);
-		},this);
-		return lines;
-	}
-	function writeOneListenerLines() {
-		var listener=new listeners.MultipleSliderListener("[id^=\""+this.optName+".\"]");
-		listener.enter()
-			.log("console.log(this.id,'input value:',parseFloat(this.value));")
-			.post(updateFnName+"();");
-		return new Lines(
-			listener.write.apply(listener,writeListenerArgs)
-		);
-	}
-	function writeUpdateFnLines() {
-		var updateFnLines=new Lines;
-		if (this.modeFloats) {
-			this.components.forEach(function(c,i){
-				if (this.inputs[i]=='constant') return;
-				updateFnLines.a(
-					"gl.uniform1f("+this.varNameC(c)+"Loc,"+this.componentValue(c,i)+");"
-				);
-			},this);
-		} else {
-			updateFnLines.a(
-				"gl.uniform"+this.nVars+"f("+this.varName+"Loc"
-			);
-			this.components.forEach(function(c,i){
-				if (this.inputs[i]=='constant') return;
-				updateFnLines.t(
-					",",
-					"	"+this.componentValue(c,i)
-				);
-			},this);
-			updateFnLines.a(
-				");"
-			);
-		}
-		return updateFnLines;
-	}
-	if (this.modeConstant) {
-		return new Lines;
-	}
-	var lines=new Lines;
-	var manyListenersLines=writeManyListenersLines.call(this);
-	var oneListenerLines=writeOneListenerLines.call(this);
+GlslVector.prototype.writeLocLines=function(){
+	lines=new Lines;
 	if (this.modeFloats) {
 		this.components.forEach(function(c,i){
 			if (this.inputs[i]=='constant') return;
@@ -148,54 +89,54 @@ GlslVector.prototype.getJsInterfaceLines=function(writeListenerArgs,canvasMousem
 				);
 			}
 		},this);
-	} else {
-		this.components.forEach(function(c,i){
-			if (this.inputs[i]=='mousemovex' || this.inputs[i]=='mousemovey') {
-				lines.a(
-					"var "+this.varNameC(c)+"="+this.formatValue(this.values[i])+";"
-				);
-			}
-		},this);
-		lines.a(
-			writeUpdateFnLines.call(this).wrap(
-				"function "+updateFnName+"() {",
-				"}"
-			),
-			updateFnName+"();",
-			manyListenersLines.data.length<=oneListenerLines.data.length ? manyListenersLines : oneListenerLines
-		);
-	}
-	if (this.nMousemoves>0) {
-		var entry=canvasMousemoveListener.enter();
-		var vs=[];
-		this.components.forEach(function(c,i){
-			if (this.inputs[i]=='mousemovex' || this.inputs[i]=='mousemovey') {
-				if (this.nSliders==0) {
-					entry.minMaxVarFloat(this.inputs[i],this.varNameC(c),
-						this.formatValue(this.minValues[i]),
-						this.formatValue(this.maxValues[i])
-					);
-				} else {
-					entry.minMaxFloat(this.inputs[i],this.varNameC(c),
-						this.formatValue(this.minValues[i]),
-						this.formatValue(this.maxValues[i])
-					);
-				}
-				entry.log("console.log('"+this.optName+"."+c+" input value:',"+this.varNameC(c)+");");
-				if (this.nSliders==0 && this.modeVector) {
-					vs.push(this.varNameC(c));
-				} else if (this.nSliders==0) {
-					entry.post("gl.uniform1f("+this.varNameC(c)+"Loc,"+this.varNameC(c)+");");
-				} else {
-					entry.post(updateFnName+"();");
-				}
-			}
-		},this);
-		if (this.nSliders==0 && this.modeVector) {
-			entry.post("gl.uniform"+this.nVars+"f("+this.varName+"Loc,"+vs.join(",")+");");
-		}
 	}
 	return lines;
+};
+GlslVector.prototype.writeUpdateFnLines=function() {
+	var updateFnLines=new Lines;
+	if (this.modeFloats) {
+		this.components.forEach(function(c,i){
+			if (this.inputs[i]=='constant') return;
+			updateFnLines.a(
+				"gl.uniform1f("+this.varNameC(c)+"Loc,"+this.componentValue(c,i)+");"
+			);
+		},this);
+	} else {
+		updateFnLines.a(
+			"gl.uniform"+this.nVars+"f("+this.varName+"Loc"
+		);
+		this.components.forEach(function(c,i){
+			if (this.inputs[i]=='constant') return;
+			updateFnLines.t(
+				",",
+				"	"+this.componentValue(c,i)
+			);
+		},this);
+		updateFnLines.a(
+			");"
+		);
+	}
+	return updateFnLines;
+};
+GlslVector.prototype.writeMousemoveEach=function(entry,c){
+	if (this.nSliders==0 && this.modeVector) {
+		// written at the end as a vector
+	} else if (this.nSliders==0) {
+		entry.post("gl.uniform1f("+this.varNameC(c)+"Loc,"+this.varNameC(c)+");");
+	} else {
+		entry.post(this.updateFnName()+"();");
+	}
+};
+GlslVector.prototype.writeMousemoveEnd=function(entry){
+	if (this.nSliders==0 && this.modeVector) {
+		var vs=[];
+		this.components.forEach(function(c,i){
+			if (i<this.nVars) {
+				vs.push(this.varNameC(c));
+			}
+		},this);
+		entry.post("gl.uniform"+this.nVars+"f("+this.varName+"Loc,"+vs.join(",")+");");
+	}
 };
 
 module.exports=GlslVector;

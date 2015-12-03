@@ -1,3 +1,6 @@
+var Lines=require('./lines.js');
+var listeners=require('./listeners.js');
+
 var Vector=function(varName,optName,components,options){
 	this.varName=varName;
 	this.optName=optName;
@@ -45,6 +48,12 @@ var Vector=function(varName,optName,components,options){
 		};
 	}
 };
+Vector.prototype.updateFnName=function(){
+	function capitalize(s) {
+		return s.charAt(0).toUpperCase()+s.slice(1);
+	}
+	return 'update'+capitalize(this.varName);
+};
 // fns that can be mapped over components:
 Vector.prototype.varNameC=function(c){
 	return this.varName+c.toUpperCase();
@@ -58,5 +67,79 @@ Vector.prototype.componentValue=function(c,i){
 		return this.varNameC(c);
 	}
 }
+// public
+Vector.prototype.getJsInterfaceLines=function(writeListenerArgs,canvasMousemoveListener){
+	function writeManyListenersLines() {
+		var lines=new Lines;
+		this.components.forEach(function(c,i){
+			if (this.inputs[i]!='slider') return;
+			var listener=new listeners.SliderListener(this.optName+'.'+c);
+			listener.enter()
+				.log("console.log(this.id,'input value:',parseFloat(this.value));")
+				.post(this.updateFnName()+"();");
+			lines.a(
+				listener.write.apply(listener,writeListenerArgs)
+			);
+		},this);
+		return lines;
+	}
+	function writeOneListenerLines() {
+		var listener=new listeners.MultipleSliderListener("[id^=\""+this.optName+".\"]");
+		listener.enter()
+			.log("console.log(this.id,'input value:',parseFloat(this.value));")
+			.post(this.updateFnName()+"();");
+		return new Lines(
+			listener.write.apply(listener,writeListenerArgs)
+		);
+	}
+	if (this.modeConstant) {
+		return new Lines;
+	}
+	var lines=new Lines;
+	var manyListenersLines=writeManyListenersLines.call(this);
+	var oneListenerLines=writeOneListenerLines.call(this);
+	lines.a(
+		this.writeLocLines()
+	);
+	if (this.nSliders>0) {
+		this.components.forEach(function(c,i){
+			if (this.inputs[i]=='mousemovex' || this.inputs[i]=='mousemovey') {
+				lines.a(
+					"var "+this.varNameC(c)+"="+this.formatValue(this.values[i])+";"
+				);
+			}
+		},this);
+		lines.a(
+			this.writeUpdateFnLines().wrap(
+				"function "+this.updateFnName()+"() {",
+				"}"
+			),
+			this.updateFnName()+"();",
+			manyListenersLines.data.length<=oneListenerLines.data.length ? manyListenersLines : oneListenerLines
+		);
+	}
+	if (this.nMousemoves>0) {
+		var entry=canvasMousemoveListener.enter();
+		this.components.forEach(function(c,i){
+			if (this.inputs[i]=='mousemovex' || this.inputs[i]=='mousemovey') {
+				if (this.nSliders==0) {
+					entry.minMaxVarFloat(this.inputs[i],this.varNameC(c),
+						this.formatValue(this.minValues[i]),
+						this.formatValue(this.maxValues[i])
+					);
+				} else {
+					entry.minMaxFloat(this.inputs[i],this.varNameC(c),
+						this.formatValue(this.minValues[i]),
+						this.formatValue(this.maxValues[i])
+					);
+				}
+				entry.log("console.log('"+this.optName+"."+c+" input value:',"+this.varNameC(c)+");");
+				this.writeMousemoveEach(entry,c);
+			}
+		},this);
+		this.writeMousemoveEnd(entry);
+	}
+	return lines;
+};
 
 module.exports=Vector;

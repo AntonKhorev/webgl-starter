@@ -1,5 +1,4 @@
 var Lines=require('./lines.js');
-var listeners=require('./listeners.js');
 var Vector=require('./vector.js');
 
 var CallVector=function(varName,optName,components,options,calledFn,calledFnDefaultArgs){
@@ -19,159 +18,54 @@ CallVector.prototype.getJsInitLines=function(){
 		this.calledFn+"("+this.values.map(this.formatValue).join(",")+");"
 	);
 };
-CallVector.prototype.getJsInterfaceLines=function(writeListenerArgs,canvasMousemoveListener){
-	function capitalize(s) {
-		return s.charAt(0).toUpperCase()+s.slice(1);
-	}
-	var updateFnName='update'+capitalize(this.varName);
-	function writeManyListenersLines() {
-		var lines=new Lines;
-		this.components.forEach(function(c,i){
-			if (this.inputs[i]!='slider') return;
-			var listener=new listeners.SliderListener(this.optName+'.'+c);
-			listener.enter()
-				.log("console.log(this.id,'input value:',parseFloat(this.value));")
-				.post(updateFnName+"();");
-			lines.a(
-				listener.write.apply(listener,writeListenerArgs)
-			);
-		},this);
-		return lines;
-	}
-	function writeOneListenerLines() {
-		var listener=new listeners.MultipleSliderListener("[id^=\""+this.optName+".\"]");
-		listener.enter()
-			.log("console.log(this.id,'input value:',parseFloat(this.value));")
-			.post(updateFnName+"();");
-		return new Lines(
-			listener.write.apply(listener,writeListenerArgs)
+CallVector.prototype.writeLocLines=function(){
+	return new Lines;
+};
+CallVector.prototype.writeUpdateFnLines=function(){
+	var updateFnLines=new Lines;
+	if (this.nSliders<=1) {
+		updateFnLines.a(
+			this.calledFn+"("+this.components.map(this.componentValue,this).join(",")+");"
 		);
-	}
-	function writeUpdateFnLines() {
-		var updateFnLines=new Lines;
-		/*
-		if (this.modeFloats) {
-			this.components.forEach(function(c,i){
-				if (this.inputs[i]=='constant') return;
-				updateFnLines.a(
-					"gl.uniform1f("+this.varNameC(c)+"Loc,"+this.componentValue(c,i)+");"
-				);
-			},this);
-		} else {
-			updateFnLines.a(
-				"gl.uniform"+this.nVars+"f("+this.varName+"Loc"
-			);
-			this.components.forEach(function(c,i){
-				if (this.inputs[i]=='constant') return;
-				updateFnLines.t(
-					",",
-					"	"+this.componentValue(c,i)
-				);
-			},this);
-			updateFnLines.a(
-				");"
-			);
+	} else if (this.nSliders==this.components.length) {
+		var obj=this.calledFn;
+		var dotIndex=obj.lastIndexOf('.');
+		if (dotIndex>=0) {
+			obj=obj.slice(0,dotIndex);
 		}
-		*/
-		// try checking # of sliders for glsl too {
-		if (this.nSliders<=1) {
-			updateFnLines.a(
-				this.calledFn+"("+this.components.map(this.componentValue,this).join(",")+");"
-			);
-		} else if (this.nSliders==this.components.length) {
-			var obj=this.calledFn;
-			var dotIndex=obj.lastIndexOf('.');
-			if (dotIndex>=0) {
-				obj=obj.slice(0,dotIndex);
-			}
-			updateFnLines.a(
-				this.calledFn+".apply("+obj+",["+this.components.map(function(c){return "'"+c+"'"}).join(",")+"].map(function(c){",
-				"	return parseFloat(document.getElementById('"+this.optName+".'+c).value);",
-				"}));"
-			);
-		} else {
-			updateFnLines.a(
-				this.calledFn+"("
-			);
-			this.components.forEach(function(c,i){
-				if (i>0) {
-					updateFnLines.t(",");
-				}
-				updateFnLines.a(
-					"	"+this.componentValue(c,i)
-				);
-			},this);
-			updateFnLines.a(
-				");"
-			);
-		}
-		// }
-		return updateFnLines;
-	}
-	if (this.modeConstant) {
-		return new Lines;
-	}
-	var lines=new Lines;
-	var manyListenersLines=writeManyListenersLines.call(this);
-	var oneListenerLines=writeOneListenerLines.call(this);
-	/*
-	if (this.modeFloats) {
-		this.components.forEach(function(c,i){
-			if (this.inputs[i]=='constant') return;
-			lines.a(
-				"var "+this.varNameC(c)+"Loc=gl.getUniformLocation(program,'"+this.varNameC(c)+"');"
-			);
-		},this);
+		updateFnLines.a(
+			this.calledFn+".apply("+obj+",["+this.components.map(function(c){return "'"+c+"'"}).join(",")+"].map(function(c){",
+			"	return parseFloat(document.getElementById('"+this.optName+".'+c).value);",
+			"}));"
+		);
 	} else {
-		lines.a(
-			"var "+this.varName+"Loc=gl.getUniformLocation(program,'"+this.varName+"');"
+		updateFnLines.a(
+			this.calledFn+"("
 		);
-	}
-	*/
-	if (this.nSliders>0) {
 		this.components.forEach(function(c,i){
-			if (this.inputs[i]=='mousemovex' || this.inputs[i]=='mousemovey') {
-				lines.a(
-					"var "+this.varNameC(c)+"="+this.formatValue(this.values[i])+";"
-				);
+			if (i>0) {
+				updateFnLines.t(",");
 			}
-		},this);
-		lines.a(
-			writeUpdateFnLines.call(this).wrap(
-				"function "+updateFnName+"() {",
-				"}"
-			),
-			updateFnName+"();",
-			manyListenersLines.data.length<=oneListenerLines.data.length ? manyListenersLines : oneListenerLines
-		);
-	}
-	if (this.nMousemoves>0) {
-		var entry=canvasMousemoveListener.enter();;
-		this.components.forEach(function(c,i){
-			if (this.inputs[i]=='mousemovex' || this.inputs[i]=='mousemovey') {
-				if (this.nSliders==0) {
-					entry.minMaxVarFloat(this.inputs[i],this.varNameC(c),
-						this.formatValue(this.minValues[i]),
-						this.formatValue(this.maxValues[i])
-					);
-				} else {
-					entry.minMaxFloat(this.inputs[i],this.varNameC(c),
-						this.formatValue(this.minValues[i]),
-						this.formatValue(this.maxValues[i])
-					);
-				}
-				entry.log("console.log('"+this.optName+"."+c+" input value:',"+this.varNameC(c)+");");
-			}
-		},this);
-		if (this.nSliders==0) {
-			entry.post(
-				this.calledFn+"("+this.components.map(this.componentValue,this).join(",")+");"
+			updateFnLines.a(
+				"	"+this.componentValue(c,i)
 			);
-		} else {
-			entry.post(updateFnName+"();");
-		}
+		},this);
+		updateFnLines.a(
+			");"
+		);
 	}
-	return lines;
+	return updateFnLines;
+};
+CallVector.prototype.writeMousemoveEach=function(entry,c){
+};
+CallVector.prototype.writeMousemoveEnd=function(entry){
+	if (this.nSliders==0) {
+		entry.post(
+			this.calledFn+"("+this.components.map(this.componentValue,this).join(",")+");"
+		);
+	} else {
+		entry.post(this.updateFnName()+"();");
+	}
 };
 
 module.exports=CallVector;
