@@ -254,6 +254,35 @@ describe('GlslVector',function(){
 			]);
 		});
 	});
+	context('with 2 non-first mousemove components out of 3 variable vector',function(){
+		var vector=new GlslVector('bar','baz','xyz',{
+			'baz.x':1.5, 'baz.x.input':'constant',   'baz.x.min':-4.0, 'baz.x.max':+4.0,
+			'baz.y':2.5, 'baz.y.input':'mousemovey', 'baz.y.min':-4.0, 'baz.y.max':+4.0,
+			'baz.z':3.0, 'baz.z.input':'mousemovex', 'baz.z.min':-4.0, 'baz.z.max':+4.0
+		});
+		it('returns interface without update fn',function(){
+			var canvasMousemoveListener=new listeners.CanvasMousemoveListener;
+			assert.deepEqual(vector.getJsInterfaceLines([false,false],canvasMousemoveListener).data,[
+				"var barYLoc=gl.getUniformLocation(program,'barY');",
+				"var barZLoc=gl.getUniformLocation(program,'barZ');",
+				"gl.uniform1f(barYLoc,+2.500);",
+				"gl.uniform1f(barZLoc,+3.000);"
+			]);
+			assert.deepEqual(canvasMousemoveListener.write(false,false).data,[
+				"canvas.addEventListener('mousemove',function(ev){",
+				"	var rect=this.getBoundingClientRect();",
+				"	var minBarY=-4.000;",
+				"	var maxBarY=+4.000;",
+				"	var barY=minBarY+(maxBarY-minBarY)*(rect.bottom-1-ev.clientY)/(rect.height-1);",
+				"	var minBarZ=-4.000;",
+				"	var maxBarZ=+4.000;",
+				"	var barZ=minBarZ+(maxBarZ-minBarZ)*(ev.clientX-rect.left)/(rect.width-1);",
+				"	gl.uniform1f(barYLoc,barY);",
+				"	gl.uniform1f(barZLoc,barZ);",
+				"});"
+			]);
+		});
+	});
 	context('with nonnegative limits',function(){
 		var vector=new GlslVector('color','shader.color','rgba',{
 			'shader.color.r':0.2, 'shader.color.r.input':'constant', 'shader.color.r.min':0, 'shader.color.r.max':1,

@@ -128,34 +128,7 @@ CallVector.prototype.getJsInterfaceLines=function(writeListenerArgs,canvasMousem
 		);
 	}
 	*/
-	/*
-	if (this.nSliders==0 && this.nVars==1) {
-		this.components.forEach(function(c,i){
-			if (this.inputs[i]!='constant') {
-				lines.a(
-					"gl.uniform1f("+this.varNameC(c)+"Loc,"+this.formatValue(this.values[i])+");"
-				);
-			}
-		},this);
-	} else if (this.nSliders==0 && this.modeVector) {
-		lines.a(
-			"gl.uniform"+this.nVars+"f("+this.varName+"Loc"
-		);
-		this.components.forEach(function(c,i){
-			if (this.inputs[i]!='constant') {
-				lines.t(
-					","+this.formatValue(this.values[i])
-				);
-			}
-		},this);
-		lines.t(
-			");"
-		);
-	} else {
-	*/
-	// {
 	if (this.nSliders>0) {
-	// }
 		this.components.forEach(function(c,i){
 			if (this.inputs[i]=='mousemovex' || this.inputs[i]=='mousemovey') {
 				lines.a(
@@ -174,12 +147,9 @@ CallVector.prototype.getJsInterfaceLines=function(writeListenerArgs,canvasMousem
 	}
 	if (this.nMousemoves>0) {
 		var entry=canvasMousemoveListener.enter();;
-		/*
-		var vs=[];
-		*/
 		this.components.forEach(function(c,i){
 			if (this.inputs[i]=='mousemovex' || this.inputs[i]=='mousemovey') {
-				if (this.nSliders==0 /* && (this.nVars==1 || this.modeVector)*/) {
+				if (this.nSliders==0) {
 					entry.minMaxVarFloat(this.inputs[i],this.varNameC(c),
 						this.formatValue(this.minValues[i]),
 						this.formatValue(this.maxValues[i])
@@ -191,23 +161,8 @@ CallVector.prototype.getJsInterfaceLines=function(writeListenerArgs,canvasMousem
 					);
 				}
 				entry.log("console.log('"+this.optName+"."+c+" input value:',"+this.varNameC(c)+");");
-				/*
-				if (this.nSliders==0 && this.nVars==1) {
-					entry.post("gl.uniform1f("+this.varNameC(c)+"Loc,"+this.varNameC(c)+");");
-				} else if (this.nSliders==0 && this.modeVector) {
-					vs.push(this.varNameC(c));
-				} else {
-					entry.post(updateFnName+"();");
-				}
-				*/
 			}
 		},this);
-		/*
-		if (this.nSliders==0 && this.modeVector) {
-			entry.post("gl.uniform"+this.nVars+"f("+this.varName+"Loc,"+vs.join(",")+");");
-		}
-		*/
-		// {
 		if (this.nSliders==0) {
 			entry.post(
 				this.calledFn+"("+this.components.map(this.componentValue,this).join(",")+");"
@@ -215,7 +170,6 @@ CallVector.prototype.getJsInterfaceLines=function(writeListenerArgs,canvasMousem
 		} else {
 			entry.post(updateFnName+"();");
 		}
-		// }
 	}
 	return lines;
 };

@@ -126,15 +126,7 @@ GlslVector.prototype.getJsInterfaceLines=function(writeListenerArgs,canvasMousem
 			"var "+this.varName+"Loc=gl.getUniformLocation(program,'"+this.varName+"');"
 		);
 	}
-	if (this.nSliders==0 && this.nVars==1) {
-		this.components.forEach(function(c,i){
-			if (this.inputs[i]!='constant') {
-				lines.a(
-					"gl.uniform1f("+this.varNameC(c)+"Loc,"+this.formatValue(this.values[i])+");"
-				);
-			}
-		},this);
-	} else if (this.nSliders==0 && this.modeVector) {
+	if (this.nSliders==0 && this.modeVector) {
 		lines.a(
 			"gl.uniform"+this.nVars+"f("+this.varName+"Loc"
 		);
@@ -148,6 +140,14 @@ GlslVector.prototype.getJsInterfaceLines=function(writeListenerArgs,canvasMousem
 		lines.t(
 			");"
 		);
+	} else if (this.nSliders==0) {
+		this.components.forEach(function(c,i){
+			if (this.inputs[i]!='constant') {
+				lines.a(
+					"gl.uniform1f("+this.varNameC(c)+"Loc,"+this.formatValue(this.values[i])+");"
+				);
+			}
+		},this);
 	} else {
 		this.components.forEach(function(c,i){
 			if (this.inputs[i]=='mousemovex' || this.inputs[i]=='mousemovey') {
@@ -170,7 +170,7 @@ GlslVector.prototype.getJsInterfaceLines=function(writeListenerArgs,canvasMousem
 		var vs=[];
 		this.components.forEach(function(c,i){
 			if (this.inputs[i]=='mousemovex' || this.inputs[i]=='mousemovey') {
-				if (this.nSliders==0 && (this.nVars==1 || this.modeVector)) {
+				if (this.nSliders==0) {
 					entry.minMaxVarFloat(this.inputs[i],this.varNameC(c),
 						this.formatValue(this.minValues[i]),
 						this.formatValue(this.maxValues[i])
@@ -182,10 +182,10 @@ GlslVector.prototype.getJsInterfaceLines=function(writeListenerArgs,canvasMousem
 					);
 				}
 				entry.log("console.log('"+this.optName+"."+c+" input value:',"+this.varNameC(c)+");");
-				if (this.nSliders==0 && this.nVars==1) {
-					entry.post("gl.uniform1f("+this.varNameC(c)+"Loc,"+this.varNameC(c)+");");
-				} else if (this.nSliders==0 && this.modeVector) {
+				if (this.nSliders==0 && this.modeVector) {
 					vs.push(this.varNameC(c));
+				} else if (this.nSliders==0) {
+					entry.post("gl.uniform1f("+this.varNameC(c)+"Loc,"+this.varNameC(c)+");");
 				} else {
 					entry.post(updateFnName+"();");
 				}
