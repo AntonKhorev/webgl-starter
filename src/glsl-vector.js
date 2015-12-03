@@ -165,17 +165,11 @@ GlslVector.prototype.getJsInterfaceLines=function(writeListenerArgs,canvasMousem
 			manyListenersLines.data.length<=oneListenerLines.data.length ? manyListenersLines : oneListenerLines
 		);
 	}
-	if (canvasMousemoveListener) {
-		var entry;
+	if (this.nMousemoves>0) {
+		var entry=canvasMousemoveListener.enter();
 		var vs=[];
-		if (this.nSliders==0 && this.modeVector) {
-			entry=canvasMousemoveListener.enter(); // one entry - final post() is dependent on all previous lines
-		}
 		this.components.forEach(function(c,i){
 			if (this.inputs[i]=='mousemovex' || this.inputs[i]=='mousemovey') {
-				if (!(this.nSliders==0 && this.modeVector)) {
-					entry=canvasMousemoveListener.enter(); // several independent entries
-				}
 				if (this.nSliders==0 && (this.nVars==1 || this.modeVector)) {
 					entry.minMaxVarFloat(this.inputs[i],this.varNameC(c),
 						this.formatValue(this.minValues[i]),

@@ -16,7 +16,7 @@ var Vector=function(varName,optName,components,options){
 	});
 	this.nVars=0;
 	this.nSliders=0; // sliders are <input> elements with values that can be populated by the browser, disregarding default value
-	//this.nMousemoves=0; // TODO
+	this.nMousemoves=0;
 	this.modeConstant=true;
 	this.modeFloats=false;
 	this.components.forEach(function(c,i){
@@ -28,6 +28,7 @@ var Vector=function(varName,optName,components,options){
 			}
 		}
 		this.nSliders+=inputType=='slider';
+		this.nMousemoves+=(inputType=='mousemovex' || inputType=='mousemovey');
 	},this);
 	if (this.nVars==1) {
 		this.modeFloats=true;

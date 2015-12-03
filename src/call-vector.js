@@ -172,30 +172,13 @@ CallVector.prototype.getJsInterfaceLines=function(writeListenerArgs,canvasMousem
 			manyListenersLines.data.length<=oneListenerLines.data.length ? manyListenersLines : oneListenerLines
 		);
 	}
-	if (canvasMousemoveListener) {
-		var entry;
-		var vs=[];
+	if (this.nMousemoves>0) {
+		var entry=canvasMousemoveListener.enter();;
 		/*
-		if (this.nSliders==0 && this.modeVector) {
-			entry=canvasMousemoveListener.enter(); // one entry - final post() is dependent on all previous lines
-		}
+		var vs=[];
 		*/
-		// {
-		var hasMousemoves=false;
-		// }
 		this.components.forEach(function(c,i){
 			if (this.inputs[i]=='mousemovex' || this.inputs[i]=='mousemovey') {
-				// {
-				if (!hasMousemoves) {
-					hasMousemoves=true;
-					entry=canvasMousemoveListener.enter(); // one entry - final post() is dependent on all previous lines
-				}
-				// }
-				/*
-				if (!(this.nSliders==0 && this.modeVector)) {
-					entry=canvasMousemoveListener.enter(); // several independent entries
-				}
-				*/
 				if (this.nSliders==0 /* && (this.nVars==1 || this.modeVector)*/) {
 					entry.minMaxVarFloat(this.inputs[i],this.varNameC(c),
 						this.formatValue(this.minValues[i]),
@@ -225,14 +208,12 @@ CallVector.prototype.getJsInterfaceLines=function(writeListenerArgs,canvasMousem
 		}
 		*/
 		// {
-		if (hasMousemoves) {
-			if (this.nSliders==0) {
-				entry.post(
-					this.calledFn+"("+this.components.map(this.componentValue,this).join(",")+");"
-				);
-			} else {
-				entry.post(updateFnName+"();");
-			}
+		if (this.nSliders==0) {
+			entry.post(
+				this.calledFn+"("+this.components.map(this.componentValue,this).join(",")+");"
+			);
+		} else {
+			entry.post(updateFnName+"();");
 		}
 		// }
 	}
