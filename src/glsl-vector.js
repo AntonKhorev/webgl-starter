@@ -7,9 +7,6 @@ var GlslVector=function(varName,optName,components,options){
 };
 GlslVector.prototype=Object.create(Vector.prototype);
 GlslVector.prototype.constructor=GlslVector;
-GlslVector.prototype.varNameC=function(c){
-	return this.varName+c.toUpperCase();
-};
 // public:
 GlslVector.prototype.getGlslDeclarationLines=function(){
 	if (this.modeConstant) {

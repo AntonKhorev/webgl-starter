@@ -15,6 +15,8 @@ var Vector=function(varName,optName,components,options){
 		return options[optName+'.'+c+'.max'];
 	});
 	this.modeNoSliders=true; // no <input> elements with values that can be populated by the browser, disregarding default value
+	// TODO count sliders instead, and then count mousemoves:
+	// this.nSliders, nMousemoves, nVars instead of modeDim
 	this.modeConstant=true;
 	this.modeFloats=false;
 	this.modeDim=0;
@@ -44,6 +46,9 @@ var Vector=function(varName,optName,components,options){
 			return (value<=0 ? value<0 ? '' /* - */ : ' ' : '+')+value.toFixed(3);
 		};
 	}
+};
+Vector.prototype.varNameC=function(c){
+	return this.varName+c.toUpperCase();
 };
 
 module.exports=Vector;
