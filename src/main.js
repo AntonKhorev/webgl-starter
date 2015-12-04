@@ -23,9 +23,14 @@ $(function(){
 		var codeUpdateTimeoutId=null;
 		var codeUpdateDelay=200;
 
-		function showHideSuboptionInputs(option,optionValue) {
-			$options.find("[data-option^='"+option.getSuboptionScopePrefix()+"']").show()
-				.not("[data-option^='"+option.getSuboptionHitPrefix(optionValue)+"']").hide();
+		function showHideSuboptionInputs(changedOption) {
+			options.inputOptions.forEach(function(affectedOption){
+				if (affectedOption.isVisibilityAffectedBy(changedOption)) {
+					$options.find("[data-option='"+affectedOption.name+"']").toggle(
+						affectedOption.isVisible(options)
+					);
+				}
+			});
 		}
 		function updateCode() {
 			clearTimeout(codeUpdateTimeoutId);
@@ -46,7 +51,7 @@ $(function(){
 						})
 					).val(options[option.name]).change(function(){
 						options[option.name]=this.value;
-						showHideSuboptionInputs(option,this.value);
+						showHideSuboptionInputs(option);
 						updateCode();
 					})
 				);
@@ -259,8 +264,10 @@ $(function(){
 			return $options;
 		}
 		function hideSuboptionInputs() {
-			options.generalOptions.forEach(function(option){
-				showHideSuboptionInputs(option,options[option.name]);
+			options.inputOptions.forEach(function(affectedOption){
+				$options.find("[data-option='"+affectedOption.name+"']").toggle(
+					affectedOption.isVisible(options)
+				);
 			});
 		}
 		function writeButtons() {

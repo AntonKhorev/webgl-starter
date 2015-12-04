@@ -1,4 +1,4 @@
-var Option=function(name,availableValues,defaultValue){
+var Option=function(name,availableValues,defaultValue,visibilityData){
 	this.name=name;
 	this.availableValues=availableValues; // for range its [min,max,step]
 	if (defaultValue===undefined) {
@@ -6,29 +6,26 @@ var Option=function(name,availableValues,defaultValue){
 	} else {
 		this.defaultValue=defaultValue;
 	}
+	if (visibilityData===undefined) {
+		this.visibilityData={};
+	} else {
+		this.visibilityData=visibilityData;
+	}
 };
-Option.prototype.getSuboptionScopePrefix=function(){
-	return this.name+'.';
-}
-Option.prototype.getSuboptionHitPrefix=function(value){
-	if (this.name=='shape' && ['gasket','hat','terrain'].indexOf(value)>=0) {
-		value='lodShape';
+Option.prototype.isVisible=function(options){
+	for (var testName in this.visibilityData) {
+		if (this.visibilityData[testName].indexOf(options[testName])<0) {
+			return false;
+		}
 	}
-	return this.getSuboptionScopePrefix()+value+'.';
-}
-Option.prototype.doesValueHideOption=function(value,option){
-	function optionStartsWith(prefix) {
-		return option.name.indexOf(prefix)===0;
-	}
-	return optionStartsWith(
-		this.getSuboptionScopePrefix()
-	) && !optionStartsWith(
-		this.getSuboptionHitPrefix(value)
-	);
+	return true;
+};
+Option.prototype.isVisibilityAffectedBy=function(changedOption){
+	return this.visibilityData[changedOption.name]!==undefined;
 };
 
-var InputOption=function(name,rangeOfValues,defaultValue){
-	Option.call(this,name,rangeOfValues,defaultValue);
+var InputOption=function(name,rangeOfValues,defaultValue,visibilityData){
+	Option.call(this,name,rangeOfValues,defaultValue,visibilityData);
 };
 InputOption.prototype=Object.create(Option.prototype);
 InputOption.prototype.constructor=InputOption;
@@ -48,8 +45,8 @@ InputOption.prototype.getMaxLabel=function(value){
 	return value.toString().replace('-','−');
 };
 
-var FloatInputOption=function(name,rangeOfValues,defaultValue){
-	InputOption.call(this,name,rangeOfValues,defaultValue);
+var FloatInputOption=function(name,rangeOfValues,defaultValue,visibilityData){
+	InputOption.call(this,name,rangeOfValues,defaultValue,visibilityData);
 };
 FloatInputOption.prototype=Object.create(InputOption.prototype);
 FloatInputOption.prototype.constructor=FloatInputOption;
@@ -66,8 +63,8 @@ FloatInputOption.prototype.getSetupStep=function(){
 	}
 };
 
-var IntInputOption=function(name,rangeOfValues,defaultValue){
-	InputOption.call(this,name,rangeOfValues,defaultValue);
+var IntInputOption=function(name,rangeOfValues,defaultValue,visibilityData){
+	InputOption.call(this,name,rangeOfValues,defaultValue,visibilityData);
 };
 IntInputOption.prototype=Object.create(InputOption.prototype);
 IntInputOption.prototype.constructor=IntInputOption;
@@ -78,8 +75,8 @@ IntInputOption.prototype.getSetupStep=function(){
 	return 1;
 };
 
-var CanvasIntInputOption=function(name,rangeOfValues,defaultValue){
-	IntInputOption.call(this,name,rangeOfValues,defaultValue);
+var CanvasIntInputOption=function(name,rangeOfValues,defaultValue,visibilityData){
+	IntInputOption.call(this,name,rangeOfValues,defaultValue,visibilityData);
 };
 CanvasIntInputOption.prototype=Object.create(IntInputOption.prototype);
 CanvasIntInputOption.prototype.constructor=CanvasIntInputOption;
@@ -96,26 +93,38 @@ var OptionsBlueprint=function(){
 };
 OptionsBlueprint.prototype.generalOptions=[
 	new Option('background',['none','solid']),
-	new Option('shader',['single','vertex','face','light']),
+	new Option('materialScope',['global','vertex','face']),
+	new Option('materialData',['one','sda']),
 	new Option('shape',['square','triangle','gasket','cube','hat','terrain']),
 	new Option('elements',['0','8','16','32']),
+	new Option('light',['off','on']),
+	//new Option('lightData',['none','one','sda'],'sda',{light:['on']}),
 	new Option('projection',['ortho','perspective']),
 ];
 OptionsBlueprint.prototype.inputOptions=[
 	new CanvasIntInputOption('canvas.width',[1,1024],512),
 	new CanvasIntInputOption('canvas.height',[1,1024],512),
-	new FloatInputOption('background.solid.color.r',[0,1],1),
-	new FloatInputOption('background.solid.color.g',[0,1],1),
-	new FloatInputOption('background.solid.color.b',[0,1],1),
-	new FloatInputOption('background.solid.color.a',[0,1],1),
-	new FloatInputOption('shader.single.color.r',[0,1],1),
-	new FloatInputOption('shader.single.color.g',[0,1]),
-	new FloatInputOption('shader.single.color.b',[0,1]),
-	new FloatInputOption('shader.single.color.a',[0,1],1),
-	new FloatInputOption('shader.light.direction.x',[-4,+4],-1),
-	new FloatInputOption('shader.light.direction.y',[-4,+4],+1),
-	new FloatInputOption('shader.light.direction.z',[-4,+4],+1),
-	new IntInputOption('shape.lodShape.lod',[0,10],6),
+	new FloatInputOption('backgroundColor.r',[0,1],1,{background:['solid']}),
+	new FloatInputOption('backgroundColor.g',[0,1],1,{background:['solid']}),
+	new FloatInputOption('backgroundColor.b',[0,1],1,{background:['solid']}),
+	new FloatInputOption('backgroundColor.a',[0,1],1,{background:['solid']}),
+	new FloatInputOption('materialColor.r',[0,1],1,{materialScope:['global'],materialData:['one']}),
+	new FloatInputOption('materialColor.g',[0,1],0,{materialScope:['global'],materialData:['one']}),
+	new FloatInputOption('materialColor.b',[0,1],0,{materialScope:['global'],materialData:['one']}),
+	new FloatInputOption('materialColor.a',[0,1],1,{materialScope:['global'],materialData:['one']}),
+	new FloatInputOption('materialSpecularColor.r',[0,1],0.4,{materialScope:['global'],materialData:['sda']}),
+	new FloatInputOption('materialSpecularColor.g',[0,1],0.4,{materialScope:['global'],materialData:['sda']}),
+	new FloatInputOption('materialSpecularColor.b',[0,1],0.4,{materialScope:['global'],materialData:['sda']}),
+	new FloatInputOption('materialDiffuseColor.r' ,[0,1],0.4,{materialScope:['global'],materialData:['sda']}),
+	new FloatInputOption('materialDiffuseColor.g' ,[0,1],0.4,{materialScope:['global'],materialData:['sda']}),
+	new FloatInputOption('materialDiffuseColor.b' ,[0,1],0.4,{materialScope:['global'],materialData:['sda']}),
+	new FloatInputOption('materialAmbientColor.r' ,[0,1],0.2,{materialScope:['global'],materialData:['sda']}),
+	new FloatInputOption('materialAmbientColor.g' ,[0,1],0.2,{materialScope:['global'],materialData:['sda']}),
+	new FloatInputOption('materialAmbientColor.b' ,[0,1],0.2,{materialScope:['global'],materialData:['sda']}),
+	new FloatInputOption('lightDirection.x',[-4,+4],-1,{light:['on']}),
+	new FloatInputOption('lightDirection.y',[-4,+4],+1,{light:['on']}),
+	new FloatInputOption('lightDirection.z',[-4,+4],+1,{light:['on']}),
+	new IntInputOption('shapeLod',[0,10],6,{shape:['gasket','hat','terrain']}),
 ];
 OptionsBlueprint.prototype.transformOptions=[];
 OptionsBlueprint.prototype.transforms=[];
@@ -162,10 +171,7 @@ var OptionsInstance=function(blueprint){
 	blueprint.groupNames.forEach(function(groupName){
 		this[groupName]=[];
 		blueprint[groupName].forEach(function(option){
-			var isHidden=blueprint.generalOptions.some(function(generalOption){
-				return generalOption.doesValueHideOption(blueprint[generalOption.name],option);
-			});
-			if (!isHidden) {
+			if (option.isVisible(blueprint)) {
 				this[groupName].push(option);
 				this[option.name]=blueprint[option.name];
 				if (groupName=='inputOptions' || groupName=='transformOptions') {
