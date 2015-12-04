@@ -5,6 +5,18 @@ var CallVector=require('./call-vector.js');
 var GlslVector=require('./glsl-vector.js');
 
 module.exports=function(options,i18n){
+	// temporary compatibility code {
+	if (options.materialScope=='global' && options.materialData=='one' && options.light=='off') {
+		options.shader='single';
+	} else if (options.materialScope=='vertex'/* && options.materialData=='one'*/ && options.light=='off') {
+		options.shader='vertex';
+	} else if (options.materialScope=='face'/* && options.materialData=='one'*/ && options.light=='off') {
+		options.shader='face';
+	} else if (options.light=='on') {
+		options.shader='light';
+	}
+	// }
+
 	function intOptionValue(name) {
 		return parseInt(options[name]);
 	}
@@ -17,25 +29,25 @@ module.exports=function(options,i18n){
 
 	function makeShape() {
 		var className=options.shape.charAt(0).toUpperCase()+options.shape.slice(1);
-		var shapeParams=options.getInputOptionsFor('shape').map(function(option){
-			return {
-				value: intOptionValue(option.name),
-				changes: options[option.name+'.input']!='constant',
-				min: intOptionValue(option.name+'.min'),
-				max: intOptionValue(option.name+'.max')
-			};
-		});
-		var shapeCtorArgs=[null,parseInt(options.elements),options.shader].concat(shapeParams);
-		return new (Function.prototype.bind.apply(shapes[className],shapeCtorArgs));
+		if (options.shapeLod!==undefined) {
+			return new shapes[className](parseInt(options.elements),options.shader,{
+				value: intOptionValue('shapeLod'),
+				changes: options['shapeLod.input']!='constant',
+				min: intOptionValue('shapeLod.min'),
+				max: intOptionValue('shapeLod.max')
+			});
+		} else {
+			return new shapes[className](parseInt(options.elements),options.shader);
+		}
 	}
 	var shape=makeShape();
 	if (options.background=='solid') {
-		var backgroundColorVector=new CallVector('backgroundColor','background.solid.color','rgba',options,'gl.clearColor',[0,0,0,0]);
+		var backgroundColorVector=new CallVector('backgroundColor','backgroundColor','rgba',options,'gl.clearColor',[0,0,0,0]);
 	}
 	if (options.shader=='single') {
-		var colorVector=new GlslVector('color','shader.single.color','rgba',options);
+		var colorVector=new GlslVector('color','materialColor','rgba',options);
 	} else if (options.shader=='light') {
-		var lightDirectionVector=new GlslVector('lightDirection','shader.light.direction','xyz',options);
+		var lightDirectionVector=new GlslVector('lightDirection','lightDirection','xyz',options);
 	}
 
 	function generateHtmlStyleLines() {
@@ -399,7 +411,7 @@ module.exports=function(options,i18n){
 					"<div>",
 					"	<label for='"+option.name+"'>"+i18n('options.'+option.name)+":</label>"
 				);
-				if (option.name!='shape.lodShape.lod') {
+				if (option.name!='shapeLod') {
 					lines.a(
 						"	<span class='min'>"+option.getMinLabel(options[option.name+'.min'])+"</span> "
 					);
@@ -550,31 +562,19 @@ module.exports=function(options,i18n){
 				lightDirectionVector.getJsInterfaceLines(writeListenerArgs,canvasMousemoveListener)
 			);
 		}
-		options.getInputsFor('shape').forEach(function(option){
-			function varName(prefix) {
-				var i=option.name.lastIndexOf('.');
-				var s=option.name.substring(i+1);
-				var S=s.charAt(0).toUpperCase()+s.slice(1);
-				if (prefix!==undefined) {
-					return prefix+'Shape'+S;
-				} else {
-					return 'shape'+S;
-				}
-			}
-			if (options[option.name+'.input']=='slider') {
-				var listener=new listeners.SliderListener(option.name);
-				listener.enter()
-					.log("console.log(this.id,'input value:',parseInt(this.value));")
-					.post("storeShape(parseInt(this.value));");
-				writeListener(listener);
-			} else if (isMousemoveInput(option.name)) {
-				canvasMousemoveListener.enter()
-					.newVarInt(options[option.name+'.input'],varName())
-					.cond(varName('new')+"!="+varName())
-					.log("console.log('"+option.name+" input value:',"+varName('new')+");")
-					.post("storeShape("+varName('new')+");");
-			}
-		});
+		if (options['shapeLod.input']=='slider') {
+			var listener=new listeners.SliderListener('shapeLod');
+			listener.enter()
+				.log("console.log(this.id,'input value:',parseInt(this.value));")
+				.post("storeShape(parseInt(this.value));");
+			writeListener(listener);
+		} else if (isMousemoveInput('shapeLod')) {
+			canvasMousemoveListener.enter()
+				.newVarInt(options['shapeLod.input'],'shapeLod')
+				.cond("newShapeLod!=shapeLod")
+				.log("console.log('shapeLod input value:',newShapeLod);")
+				.post("storeShape(newShapeLod);");
+		}
 		['x','y','z'].forEach(function(d){
 			var D=d.toUpperCase();
 			var optName='rotate.'+d;
