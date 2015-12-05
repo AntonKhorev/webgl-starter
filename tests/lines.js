@@ -226,6 +226,19 @@ describe('Lines',function(){
 			"<b>World</b>"
 		]);
 	});
+	it("maps lines",function(){
+		var lines=new Lines(
+			"10 print 'hello world'",
+			"20 goto 10"
+		);
+		lines.map(function(line){
+			return line+" // !!!";
+		});
+		assert.deepEqual(lines.data,[
+			"10 print 'hello world' // !!!",
+			"20 goto 10 // !!!"
+		]);
+	});
 	*/
 	it('returns self after call to .a()',function(){
 		var lines=new Lines;

@@ -2,7 +2,7 @@ var Lines=require('./lines.js');
 var Vector=require('./vector.js');
 
 var GlslVector=function(varName,optName,components,options){
-	Vector.call(this,varName,optName,components,options);
+	Vector.apply(this,arguments);
 };
 GlslVector.prototype=Object.create(Vector.prototype);
 GlslVector.prototype.constructor=GlslVector;

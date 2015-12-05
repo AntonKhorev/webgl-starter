@@ -88,6 +88,10 @@ Lines.prototype.wrapEachLine=function(begin,end){
 	});
 	return this;
 };
+Lines.prototype.map=function(fn){
+	this.data=this.data.map(fn);
+	return this;
+};
 */
 Lines.prototype.join=function(indent){
 	return this.data.map(function(line){
