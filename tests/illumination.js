@@ -81,7 +81,7 @@ describe('Illumination',function(){
 			]);
 		});
 	});
-	context('with per vertex shading',function(){
+	context('with local shading',function(){
 		var illumination=new Illumination({
 			'materialScope':'vertex',
 			'materialData':'one',

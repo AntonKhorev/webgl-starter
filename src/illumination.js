@@ -3,6 +3,8 @@ var GlslVector=require('./glsl-vector.js');
 
 var Illumination=function(options){
 	this.options=options;
+	// options.materialScope=='global': constant or user input -> uniform
+	// options.materialScope!='global': colors in model data -> attribute
 	if (options.materialScope=='global' && options.materialData=='one' && options.light=='off') {
 		this.colorVector=new GlslVector('color','materialColor','rgba',options);
 	} else if (options.shader=='light') { // TODO remove options.shader references

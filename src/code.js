@@ -283,11 +283,6 @@ module.exports=function(options,i18n){
 					";"
 				);
 			}
-			if (options.shader=='vertex' || options.shader=='face') {
-				lines.a(
-					"interpolatedColor=color;"
-				);
-			}
 			*/
 			lines.a(
 				illumination.getGlslVertexOutputLines()
@@ -322,12 +317,6 @@ module.exports=function(options,i18n){
 			}
 			lines.a("varying vec3 interpolatedNormal;");
 		}
-		if (options.shader=='vertex' || options.shader=='face') {
-			lines.a(
-				"attribute vec4 color;",
-				"varying vec4 interpolatedColor;"
-			);
-		}
 		*/
 		lines.a(
 			illumination.getGlslVertexDeclarationLines(),
@@ -350,14 +339,7 @@ module.exports=function(options,i18n){
 			)
 		);
 		/*
-		if (options.shader=='vertex' || options.shader=='face') {
-			lines.a(
-				"varying vec4 interpolatedColor;",
-				"void main() {",
-				"	gl_FragColor=interpolatedColor;",
-				"}"
-			);
-		} else if (options.shader=='light') {
+		if (options.shader=='light') {
 			lines.a(
 				lightDirectionVector.getGlslDeclarationLines()
 			);
