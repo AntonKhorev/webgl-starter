@@ -235,6 +235,7 @@ module.exports=function(options,i18n){
 			lines.t(
 				";"
 			);
+			/*
 			if (options.shader=='light') {
 				if (options.projection=='perspective') {
 					lines.a(
@@ -287,6 +288,10 @@ module.exports=function(options,i18n){
 					"interpolatedColor=color;"
 				);
 			}
+			*/
+			lines.a(
+				illumination.getGlslVertexOutputLines()
+			);
 			return lines;
 		}
 
@@ -307,6 +312,7 @@ module.exports=function(options,i18n){
 		} else {
 			lines.a("attribute vec4 position;");
 		}
+		/*
 		if (options.shader=='light') {
 			if (options.projection=='perspective') {
 				lines.a("varying vec3 interpolatedView;");
@@ -322,7 +328,9 @@ module.exports=function(options,i18n){
 				"varying vec4 interpolatedColor;"
 			);
 		}
+		*/
 		lines.a(
+			illumination.getGlslVertexDeclarationLines(),
 			"void main() {",
 			generateMain().indent(),
 			"}"
@@ -334,15 +342,15 @@ module.exports=function(options,i18n){
 		lines.a(
 			"precision mediump float;"
 		);
-		if (options.shader=='single') {
-			lines.a(
-				illumination.getGlslFragmentDeclarationLines(),
-				illumination.getGlslFragmentOutputLines().wrap(
-					"void main() {",
-					"}"
-				)
-			);
-		} else if (options.shader=='vertex' || options.shader=='face') {
+		lines.a(
+			illumination.getGlslFragmentDeclarationLines(),
+			illumination.getGlslFragmentOutputLines().wrap(
+				"void main() {",
+				"}"
+			)
+		);
+		/*
+		if (options.shader=='vertex' || options.shader=='face') {
 			lines.a(
 				"varying vec4 interpolatedColor;",
 				"void main() {",
@@ -394,6 +402,7 @@ module.exports=function(options,i18n){
 				"}"
 			);
 		}
+		*/
 		return lines;
 	}
 	function generateHtmlControlMessageLines() {

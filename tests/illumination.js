@@ -14,6 +14,14 @@ describe('Illumination',function(){
 			'materialColor.b':0.5, 'materialColor.b.input':'constant', 'materialColor.b.min':0, 'materialColor.b.max':1,
 			'materialColor.a':1.0, 'materialColor.a.input':'constant', 'materialColor.a.min':0, 'materialColor.a.max':1
 		});
+		it("declares nothing for vertex shader",function(){
+			assert.deepEqual(illumination.getGlslVertexDeclarationLines().data,[
+			]);
+		});
+		it("outputs nothing for vertex shader",function(){
+			assert.deepEqual(illumination.getGlslVertexOutputLines().data,[
+			]);
+		});
 		it("declares nothing for fragment shader",function(){
 			assert.deepEqual(illumination.getGlslFragmentDeclarationLines().data,[
 			]);
@@ -41,6 +49,14 @@ describe('Illumination',function(){
 			'materialColor.b':0.5, 'materialColor.b.input':'constant', 'materialColor.b.min':0, 'materialColor.b.max':1,
 			'materialColor.a':1.0, 'materialColor.a.input':'constant', 'materialColor.a.min':0, 'materialColor.a.max':1
 		});
+		it("declares nothing for vertex shader",function(){
+			assert.deepEqual(illumination.getGlslVertexDeclarationLines().data,[
+			]);
+		});
+		it("outputs nothing for vertex shader",function(){
+			assert.deepEqual(illumination.getGlslVertexOutputLines().data,[
+			]);
+		});
 		it("declares 1 uniform float for fragment shader",function(){
 			assert.deepEqual(illumination.getGlslFragmentDeclarationLines().data,[
 				"uniform float colorR;"
@@ -60,6 +76,41 @@ describe('Illumination',function(){
 				"}",
 				"updateColor();",
 				"document.getElementById('materialColor.r').addEventListener('change',updateColor);"
+			]);
+			assert.deepEqual(canvasMousemoveListener.write(false,false).data,[
+			]);
+		});
+	});
+	context('with per vertex shading',function(){
+		var illumination=new Illumination({
+			'materialScope':'vertex',
+			'materialData':'one',
+			'light':'off',
+		});
+		it("declares color input/output for vertex shader",function(){
+			assert.deepEqual(illumination.getGlslVertexDeclarationLines().data,[
+				"attribute vec4 color;",
+				"varying vec4 interpolatedColor;"
+			]);
+		});
+		it("outputs color input for vertex shader",function(){
+			assert.deepEqual(illumination.getGlslVertexOutputLines().data,[
+				"interpolatedColor=color;"
+			]);
+		});
+		it("declares color input for fragment shader",function(){
+			assert.deepEqual(illumination.getGlslFragmentDeclarationLines().data,[
+				"varying vec4 interpolatedColor;"
+			]);
+		});
+		it("outputs color input for fragment shader",function(){
+			assert.deepEqual(illumination.getGlslFragmentOutputLines().data,[
+				"gl_FragColor=interpolatedColor;"
+			]);
+		});
+		it("returns empty js interface",function(){
+			var canvasMousemoveListener=new listeners.CanvasMousemoveListener;
+			assert.deepEqual(illumination.getJsInterfaceLines([false,false],canvasMousemoveListener).data,[
 			]);
 			assert.deepEqual(canvasMousemoveListener.write(false,false).data,[
 			]);
