@@ -33,8 +33,7 @@ module.exports=function(options,i18n){
 			options.light=='on',
 			options.materialScope=='vertex',
 			options.materialScope=='face',
-			illumination.getColorAttrNames(),
-			illumination.getColorAttrEnables(),
+			illumination.getColorAttrs(),
 			shapeLod
 		);
 	}

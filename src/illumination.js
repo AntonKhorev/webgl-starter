@@ -30,15 +30,21 @@ var Illumination=function(options){
 		this.lightDirectionVector=new GlslVector('lightDirection','lightDirection','xyz',options);
 	}*/
 };
-Illumination.prototype.getColorAttrNames=function(){
+Illumination.prototype.getColorAttrs=function(){
 	var options=this.options;
 	if (options.materialScope=='global') {
 		return [];
 	} else {
 		if (options.materialData=='one') {
-			return ["color"];
+			return [
+				{name:"color",enabled:true,weight:1.0}
+			];
 		} else {
-			return ["specularColor","diffuseColor","ambientColor"];
+			return [
+				{name:"specularColor",enabled:false,weight:0.4},
+				{name:"diffuseColor" ,enabled:false,weight:0.4},
+				{name:"ambientColor" ,enabled:true ,weight:0.2}
+			];
 		}
 	}
 };
@@ -48,9 +54,9 @@ Illumination.prototype.getColorAttrEnables=function(){
 		return [];
 	} else {
 		if (options.materialData=='one') {
-			return [true];
+			return [1.0];
 		} else {
-			return [false,false,true];
+			return [0.0,0.0,1.0];
 		}
 	}
 };

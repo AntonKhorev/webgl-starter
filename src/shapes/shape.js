@@ -1,12 +1,11 @@
 var Lines=require('../lines.js');
 
-var Shape=function(elementIndexBits,hasReflections,hasColorsPerVertex,hasColorsPerFace,colorAttrNames,colorAttrEnables){
+var Shape=function(elementIndexBits,hasReflections,hasColorsPerVertex,hasColorsPerFace,colorAttrs){
 	this.elementIndexBits=elementIndexBits; // 0 if don't want element arrays; 8, 16 or 32 bits per element index, limits lod of shape
 	this.hasNormals=(hasReflections && this.dim==3); // true = need normals, unless shape is flat
 	this.hasColorsPerVertex=hasColorsPerVertex;
 	this.hasColorsPerFace=hasColorsPerFace;
-	this.colorAttrNames=colorAttrNames; // array of color attribute names; examples: [] or ['color'] or ['specularColor','diffuseColor','ambientColor']
-	this.colorAttrEnables=colorAttrEnables; // array of booleans for each color attribute: true if enabled
+	this.colorAttrs=colorAttrs; // array of color attribute structs {name,enabled,weight}
 };
 Shape.prototype.dim=2;
 Shape.prototype.twoSided=true; // triangles can be viewed from both sides
@@ -15,7 +14,7 @@ Shape.prototype.usesElements=function(){
 	return this.elementIndexBits>0;
 };
 Shape.prototype.getNumbersPerVertex=function(){
-	return this.dim+(this.hasNormals?3:0)+this.colorAttrNames.length*3;
+	return this.dim+(this.hasNormals?3:0)+this.colorAttrs.length*3;
 };
 Shape.prototype.getElementIndexJsArray=function(){
 	return "Uint"+this.elementIndexBits+"Array";
@@ -92,7 +91,7 @@ Shape.prototype.writeInit=function(debugArrays){
 		}
 		offset+=size;
 	}.bind(this);
-	if (!this.hasNormals && this.colorAttrNames.length<=0) {
+	if (!this.hasNormals && this.colorAttrs.length<=0) {
 		lines.a(
 			"var positionLoc=gl.getAttribLocation(program,'position');",
 			"gl.vertexAttribPointer(positionLoc,"+this.dim+",gl.FLOAT,false,0,0);",
@@ -103,9 +102,9 @@ Shape.prototype.writeInit=function(debugArrays){
 		if (this.hasNormals) {
 			writeAttr('normal',true,3);
 		}
-		this.colorAttrNames.forEach(function(attr,i){
-			writeAttr(attr,this.colorAttrEnables[i],3);
-		},this);
+		this.colorAttrs.forEach(function(attr){
+			writeAttr(attr.name,attr.enabled,3);
+		});
 	}
 	return lines;
 };

@@ -15,9 +15,7 @@ describe('Illumination',function(){
 			'materialColor.a':1.0, 'materialColor.a.input':'constant', 'materialColor.a.min':0, 'materialColor.a.max':1
 		});
 		it("has empty color attr list",function(){
-			assert.deepEqual(illumination.getColorAttrNames(),[
-			]);
-			assert.deepEqual(illumination.getColorAttrEnables(),[
+			assert.deepEqual(illumination.getColorAttrs(),[
 			]);
 		});
 		it("declares nothing for vertex shader",function(){
@@ -56,9 +54,7 @@ describe('Illumination',function(){
 			'materialColor.a':1.0, 'materialColor.a.input':'constant', 'materialColor.a.min':0, 'materialColor.a.max':1
 		});
 		it("has empty color attr list",function(){
-			assert.deepEqual(illumination.getColorAttrNames(),[
-			]);
-			assert.deepEqual(illumination.getColorAttrEnables(),[
+			assert.deepEqual(illumination.getColorAttrs(),[
 			]);
 		});
 		it("declares nothing for vertex shader",function(){
@@ -100,11 +96,8 @@ describe('Illumination',function(){
 			'light':'off',
 		});
 		it("has color attr list with 1 enabled entry",function(){
-			assert.deepEqual(illumination.getColorAttrNames(),[
-				"color"
-			]);
-			assert.deepEqual(illumination.getColorAttrEnables(),[
-				true
+			assert.deepEqual(illumination.getColorAttrs(),[
+				{name:"color",enabled:true,weight:1.0}
 			]);
 		});
 		it("declares color input/output for vertex shader",function(){
@@ -152,9 +145,7 @@ describe('Illumination',function(){
 			'materialAmbientColor.b' :0.3, 'materialAmbientColor.b.input' :'constant', 'materialAmbientColor.b.min' :0, 'materialAmbientColor.b.max' :1
 		});
 		it("has empty color attr list",function(){
-			assert.deepEqual(illumination.getColorAttrNames(),[
-			]);
-			assert.deepEqual(illumination.getColorAttrEnables(),[
+			assert.deepEqual(illumination.getColorAttrs(),[
 			]);
 		});
 		it("declares nothing for vertex shader",function(){
@@ -270,11 +261,10 @@ describe('Illumination',function(){
 			'light':'off',
 		});
 		it("has color attr list with 2 disabled and 1 enabled entry",function(){
-			assert.deepEqual(illumination.getColorAttrNames(),[
-				"specularColor","diffuseColor","ambientColor"
-			]);
-			assert.deepEqual(illumination.getColorAttrEnables(),[
-				false,          false,         true
+			assert.deepEqual(illumination.getColorAttrs(),[
+				{name:"specularColor",enabled:false,weight:0.4},
+				{name:"diffuseColor" ,enabled:false,weight:0.4},
+				{name:"ambientColor" ,enabled:true ,weight:0.2}
 			]);
 		});
 		it("declares color input (ambient only) and 1 color output for vertex shader",function(){

@@ -9,17 +9,17 @@ Square.prototype=Object.create(Shape.prototype);
 Square.prototype.constructor=Square;
 Square.prototype.glPrimitive='TRIANGLE_FAN';
 Square.prototype.writeArrays=function(){
-	var colorgens=this.colorAttrNames.map(function(){
-		return new Colorgen;
+	var colorgens=this.colorAttrs.map(function(attr){
+		return new Colorgen(attr.weight);
 	});
 	var writeColorComments=function(){
-		return this.colorAttrNames.map(function(){
+		return this.colorAttrs.map(function(){
 			return "    r    g    b";
 		}).join("");
 	}.bind(this);
 	var colorDataForFace;
 	var writeColorDataForVertex=function(){
-		return this.colorAttrNames.map(function(_,i){
+		return this.colorAttrs.map(function(_,i){
 			return colorgens[i].getNextColorString();
 		}).join("");
 	}.bind(this);
