@@ -566,7 +566,9 @@ module.exports=function(options,i18n){
 				backgroundColorVector.getJsInterfaceLines(writeListenerArgs,canvasMousemoveListener)
 			);
 		}
-		illumination.getJsInterfaceLines(writeListenerArgs,canvasMousemoveListener);
+		lines.a(
+			illumination.getJsInterfaceLines(writeListenerArgs,canvasMousemoveListener)
+		);
 		if (options['shapeLod.input']=='slider') {
 			var listener=new listeners.SliderListener('shapeLod');
 			listener.enter()
