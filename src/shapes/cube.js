@@ -1,8 +1,8 @@
 var Lines=require('../lines.js');
 var Shape=require('./shape.js');
 
-var Cube=function(elementIndexBits,shaderType){
-	Shape.call(this,elementIndexBits,shaderType);
+var Cube=function(){
+	Shape.apply(this,arguments);
 };
 Cube.prototype=Object.create(Shape.prototype);
 Cube.prototype.constructor=Cube;

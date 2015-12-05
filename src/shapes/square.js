@@ -1,4 +1,5 @@
 var Lines=require('../lines.js');
+var Colorgen=require('../colorgen.js');
 var Shape=require('./shape.js');
 
 var Square=function(){
@@ -8,6 +9,9 @@ Square.prototype=Object.create(Shape.prototype);
 Square.prototype.constructor=Square;
 Square.prototype.glPrimitive='TRIANGLE_FAN';
 Square.prototype.writeArrays=function(){
+	var colorgens=this.colorAttrNames.map(function(){
+		return new Colorgen;
+	});
 	var writeColorComments=function(){
 		return this.colorAttrNames.map(function(){
 			return "    r    g    b";
@@ -15,10 +19,8 @@ Square.prototype.writeArrays=function(){
 	}.bind(this);
 	var colorDataForFace;
 	var writeColorDataForVertex=function(){
-		return this.colorAttrNames.map(function(){
-			return [1,2,3].map(function(){
-				return " "+Math.random().toFixed(1)+",";
-			}).join("");
+		return this.colorAttrNames.map(function(_,i){
+			return colorgens[i].getNextColorString();
 		}).join("");
 	}.bind(this);
 	var writeColorData=function(){
