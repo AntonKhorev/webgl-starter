@@ -1,4 +1,5 @@
 var Lines=require('../lines.js');
+var Colorgen=require('../colorgen.js');
 var Shape=require('./shape.js');
 
 var Cube=function(){
@@ -9,7 +10,16 @@ Cube.prototype.constructor=Cube;
 Cube.prototype.dim=3;
 Cube.prototype.twoSided=false;
 Cube.prototype.writeArrays=function(c,cv){
+	var colorgens=this.colorAttrs.map(function(attr){
+		return new Colorgen(attr.weight);
+	});
 	var nCubeVertices=8;
+	var cubeColors=[];
+	for (var i=0;i<nCubeVertices;i++) {
+		cubeColors.push(this.colorAttrs.map(function(_,i){
+			return colorgens[i].getNextColorString();
+		}).join(""));
+	}
 	var cubeVertexPositions=[
 		"-0.5,-0.5,-0.5,",
 		"+0.5,-0.5,-0.5,",
@@ -19,16 +29,6 @@ Cube.prototype.writeArrays=function(c,cv){
 		"+0.5,-0.5,+0.5,",
 		"-0.5,+0.5,+0.5,",
 		"+0.5,+0.5,+0.5,",
-	];
-	var cubeVertexColors=[
-		" 0.0, 0.0, 0.0,",
-		" 1.0, 0.0, 0.0,",
-		" 0.0, 1.0, 0.0,",
-		" 1.0, 1.0, 0.0,",
-		" 0.0, 0.0, 1.0,",
-		" 1.0, 0.0, 1.0,",
-		" 0.0, 1.0, 1.0,",
-		" 1.0, 1.0, 1.0,",
 	];
 	var nCubeFaces=6;
 	var cubeFaceNames=[
@@ -47,14 +47,6 @@ Cube.prototype.writeArrays=function(c,cv){
 		" 0.0, 0.0,-1.0,",
 		" 0.0, 0.0,+1.0,",
 	];
-	var cubeFaceColors=[
-		" 1.0, 0.0, 0.0,",
-		" 0.0, 1.0, 0.0,",
-		" 1.0, 1.0, 0.0,",
-		" 0.0, 0.0, 1.0,",
-		" 1.0, 0.0, 1.0,",
-		" 0.0, 1.0, 1.0,",
-	];
 	var cubeFaceVertices=[
 		[4, 6, 0, 2],
 		[1, 3, 5, 7],
@@ -66,31 +58,30 @@ Cube.prototype.writeArrays=function(c,cv){
 	var quadToTriangleMap=[0, 1, 2, 2, 1, 3];
 	var vertexLines=new Lines;
 	vertexLines.a("// x    y    z");
-	if (this.shaderType=='light') {
+	if (this.hasNormals) {
 		vertexLines.t("  n.x  n.y  n.z");
 	}
 	if (c) {
 		vertexLines.t("    r    g    b");
 	}
-	function appendVertex(iFace,iVertex,firstInFace) {
+	var appendVertex=function(iFace,iVertex,firstInFace) {
 		vertexLines.a(cubeVertexPositions[iVertex]);
-		if (this.shaderType=='light') {
+		if (this.hasNormals) {
 			vertexLines.t(cubeFaceNormals[iFace]);
 		}
-		if (this.shaderType=='vertex') {
-			vertexLines.t(cubeVertexColors[iVertex]);
-		}
-		if (this.shaderType=='face') {
-			vertexLines.t(cubeFaceColors[iFace]);
+		if (this.hasColorsPerVertex) {
+			vertexLines.t(cubeColors[iVertex]);
+		} else if (this.hasColorsPerFace) {
+			vertexLines.t(cubeColors[iFace]);
 		}
 		if (firstInFace) {
 			vertexLines.t(" // "+cubeFaceNames[iFace]+" face");
 		}
-	}
+	}.bind(this);
 	if (!this.usesElements()) {
 		for (var i=0;i<nCubeFaces;i++) {
 			quadToTriangleMap.forEach(function(j,k){
-				appendVertex.call(this,i,cubeFaceVertices[i][j],k==0);
+				appendVertex(i,cubeFaceVertices[i][j],k==0);
 			},this);
 		}
 		return new Lines(
