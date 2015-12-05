@@ -81,7 +81,7 @@ describe('Illumination',function(){
 			]);
 		});
 	});
-	context('with local shading',function(){
+	context('with local flat shading',function(){
 		var illumination=new Illumination({
 			'materialScope':'vertex',
 			'materialData':'one',
@@ -113,6 +113,166 @@ describe('Illumination',function(){
 			assert.deepEqual(illumination.getJsInterfaceLines([false,false],canvasMousemoveListener).data,[
 			]);
 			assert.deepEqual(canvasMousemoveListener.write(false,false).data,[
+			]);
+		});
+	});
+	context('with global ambient flat shading',function(){
+		var illumination=new Illumination({
+			'materialScope':'global',
+			'materialData':'sda',
+			'light':'off',
+			'materialSpecularColor.r':0.9, 'materialSpecularColor.r.input':'constant', 'materialSpecularColor.r.min':0, 'materialSpecularColor.r.max':1,
+			'materialSpecularColor.g':0.7, 'materialSpecularColor.g.input':'constant', 'materialSpecularColor.g.min':0, 'materialSpecularColor.g.max':1,
+			'materialSpecularColor.b':0.5, 'materialSpecularColor.b.input':'constant', 'materialSpecularColor.b.min':0, 'materialSpecularColor.b.max':1,
+			'materialDiffuseColor.r' :0.8, 'materialDiffuseColor.r.input' :'constant', 'materialDiffuseColor.r.min' :0, 'materialDiffuseColor.r.max' :1,
+			'materialDiffuseColor.g' :0.6, 'materialDiffuseColor.g.input' :'constant', 'materialDiffuseColor.g.min' :0, 'materialDiffuseColor.g.max' :1,
+			'materialDiffuseColor.b' :0.4, 'materialDiffuseColor.b.input' :'constant', 'materialDiffuseColor.b.min' :0, 'materialDiffuseColor.b.max' :1,
+			'materialAmbientColor.r' :0.7, 'materialAmbientColor.r.input' :'constant', 'materialAmbientColor.r.min' :0, 'materialAmbientColor.r.max' :1,
+			'materialAmbientColor.g' :0.5, 'materialAmbientColor.g.input' :'constant', 'materialAmbientColor.g.min' :0, 'materialAmbientColor.g.max' :1,
+			'materialAmbientColor.b' :0.3, 'materialAmbientColor.b.input' :'constant', 'materialAmbientColor.b.min' :0, 'materialAmbientColor.b.max' :1
+		});
+		it("declares nothing for vertex shader",function(){
+			assert.deepEqual(illumination.getGlslVertexDeclarationLines().data,[
+			]);
+		});
+		it("outputs nothing for vertex shader",function(){
+			assert.deepEqual(illumination.getGlslVertexOutputLines().data,[
+			]);
+		});
+		it("declares nothing for fragment shader",function(){
+			assert.deepEqual(illumination.getGlslFragmentDeclarationLines().data,[
+			]);
+		});
+		it("outputs constant literal for fragment shader",function(){
+			assert.deepEqual(illumination.getGlslFragmentOutputLines().data,[
+				"gl_FragColor=vec4(0.700,0.500,0.300,1.000);"
+			]);
+		});
+		it("returns empty js interface",function(){
+			var canvasMousemoveListener=new listeners.CanvasMousemoveListener;
+			assert.deepEqual(illumination.getJsInterfaceLines([false,false],canvasMousemoveListener).data,[
+			]);
+			assert.deepEqual(canvasMousemoveListener.write(false,false).data,[
+			]);
+		});
+	});
+	context('with global ambient flat shading and 2 slider inputs',function(){
+		var illumination=new Illumination({
+			'materialScope':'global',
+			'materialData':'sda',
+			'light':'off',
+			'materialSpecularColor.r':0.9, 'materialSpecularColor.r.input':'constant', 'materialSpecularColor.r.min':0, 'materialSpecularColor.r.max':1,
+			'materialSpecularColor.g':0.7, 'materialSpecularColor.g.input':'slider',   'materialSpecularColor.g.min':0, 'materialSpecularColor.g.max':1,
+			'materialSpecularColor.b':0.5, 'materialSpecularColor.b.input':'constant', 'materialSpecularColor.b.min':0, 'materialSpecularColor.b.max':1,
+			'materialDiffuseColor.r' :0.8, 'materialDiffuseColor.r.input' :'constant', 'materialDiffuseColor.r.min' :0, 'materialDiffuseColor.r.max' :1,
+			'materialDiffuseColor.g' :0.6, 'materialDiffuseColor.g.input' :'constant', 'materialDiffuseColor.g.min' :0, 'materialDiffuseColor.g.max' :1,
+			'materialDiffuseColor.b' :0.4, 'materialDiffuseColor.b.input' :'constant', 'materialDiffuseColor.b.min' :0, 'materialDiffuseColor.b.max' :1,
+			'materialAmbientColor.r' :0.7, 'materialAmbientColor.r.input' :'constant', 'materialAmbientColor.r.min' :0, 'materialAmbientColor.r.max' :1,
+			'materialAmbientColor.g' :0.5, 'materialAmbientColor.g.input' :'constant', 'materialAmbientColor.g.min' :0, 'materialAmbientColor.g.max' :1,
+			'materialAmbientColor.b' :0.3, 'materialAmbientColor.b.input' :'slider',   'materialAmbientColor.b.min' :0, 'materialAmbientColor.b.max' :1
+		});
+		it("declares nothing for vertex shader",function(){
+			assert.deepEqual(illumination.getGlslVertexDeclarationLines().data,[
+			]);
+		});
+		it("outputs nothing for vertex shader",function(){
+			assert.deepEqual(illumination.getGlslVertexOutputLines().data,[
+			]);
+		});
+		it("declares 2 uniform floats for fragment shader",function(){
+			assert.deepEqual(illumination.getGlslFragmentDeclarationLines().data,[
+				"uniform float specularColorG; // unused",
+				"uniform float ambientColorB;"
+			]);
+		});
+		it("outputs literal with 1 variable for fragment shader",function(){
+			assert.deepEqual(illumination.getGlslFragmentOutputLines().data,[
+				"gl_FragColor=vec4(0.700,0.500,ambientColorB,1.000);"
+			]);
+		});
+		it("returns 2 slider js interfaces",function(){
+			var canvasMousemoveListener=new listeners.CanvasMousemoveListener;
+			assert.deepEqual(illumination.getJsInterfaceLines([false,false],canvasMousemoveListener).data,[
+				"var specularColorGLoc=gl.getUniformLocation(program,'specularColorG');",
+				"function updateSpecularColor() {",
+				"	gl.uniform1f(specularColorGLoc,parseFloat(document.getElementById('materialSpecularColor.g').value));",
+				"}",
+				"updateSpecularColor();",
+				"document.getElementById('materialSpecularColor.g').addEventListener('change',updateSpecularColor);",
+				"var ambientColorBLoc=gl.getUniformLocation(program,'ambientColorB');",
+				"function updateAmbientColor() {",
+				"	gl.uniform1f(ambientColorBLoc,parseFloat(document.getElementById('materialAmbientColor.b').value));",
+				"}",
+				"updateAmbientColor();",
+				"document.getElementById('materialAmbientColor.b').addEventListener('change',updateAmbientColor);"
+			]);
+			assert.deepEqual(canvasMousemoveListener.write(false,false).data,[
+			]);
+		});
+	});
+	context('with global ambient flat shading and complete slider inputs',function(){
+		var illumination=new Illumination({
+			'materialScope':'global',
+			'materialData':'sda',
+			'light':'off',
+			'materialSpecularColor.r':0.9, 'materialSpecularColor.r.input':'slider',   'materialSpecularColor.r.min':0, 'materialSpecularColor.r.max':1,
+			'materialSpecularColor.g':0.7, 'materialSpecularColor.g.input':'slider',   'materialSpecularColor.g.min':0, 'materialSpecularColor.g.max':1,
+			'materialSpecularColor.b':0.5, 'materialSpecularColor.b.input':'slider',   'materialSpecularColor.b.min':0, 'materialSpecularColor.b.max':1,
+			'materialDiffuseColor.r' :0.8, 'materialDiffuseColor.r.input' :'slider',   'materialDiffuseColor.r.min' :0, 'materialDiffuseColor.r.max' :1,
+			'materialDiffuseColor.g' :0.6, 'materialDiffuseColor.g.input' :'slider',   'materialDiffuseColor.g.min' :0, 'materialDiffuseColor.g.max' :1,
+			'materialDiffuseColor.b' :0.4, 'materialDiffuseColor.b.input' :'slider',   'materialDiffuseColor.b.min' :0, 'materialDiffuseColor.b.max' :1,
+			'materialAmbientColor.r' :0.7, 'materialAmbientColor.r.input' :'slider',   'materialAmbientColor.r.min' :0, 'materialAmbientColor.r.max' :1,
+			'materialAmbientColor.g' :0.5, 'materialAmbientColor.g.input' :'slider',   'materialAmbientColor.g.min' :0, 'materialAmbientColor.g.max' :1,
+			'materialAmbientColor.b' :0.3, 'materialAmbientColor.b.input' :'slider',   'materialAmbientColor.b.min' :0, 'materialAmbientColor.b.max' :1
+		});
+		it("declares nothing for vertex shader",function(){
+			assert.deepEqual(illumination.getGlslVertexDeclarationLines().data,[
+			]);
+		});
+		it("outputs nothing for vertex shader",function(){
+			assert.deepEqual(illumination.getGlslVertexOutputLines().data,[
+			]);
+		});
+		it("declares 3 uniform vec3s for fragment shader",function(){
+			assert.deepEqual(illumination.getGlslFragmentDeclarationLines().data,[
+				"uniform vec3 specularColor; // unused",
+				"uniform vec3 diffuseColor; // unused",
+				"uniform vec3 ambientColor;"
+			]);
+		});
+		it("outputs literal with vec3 for fragment shader",function(){
+			assert.deepEqual(illumination.getGlslFragmentOutputLines().data,[
+				"gl_FragColor=vec4(ambientColor,1.000);"
+			]);
+		});
+	});
+	context('with local ambient flat shading',function(){
+		var illumination=new Illumination({
+			'materialScope':'vertex',
+			'materialData':'sda',
+			'light':'off',
+		});
+		it("declares 3 color inputs and 1 color output for vertex shader",function(){
+			assert.deepEqual(illumination.getGlslVertexDeclarationLines().data,[
+				"attribute vec4 specularColor; // unused",
+				"attribute vec4 diffuseColor; // unused",
+				"attribute vec4 ambientColor;",
+				"varying vec4 interpolatedColor;"
+			]);
+		});
+		it("outputs ambient color input for vertex shader",function(){
+			assert.deepEqual(illumination.getGlslVertexOutputLines().data,[
+				"interpolatedColor=ambientColor;"
+			]);
+		});
+		it("declares color input for fragment shader",function(){
+			assert.deepEqual(illumination.getGlslFragmentDeclarationLines().data,[
+				"varying vec4 interpolatedColor;"
+			]);
+		});
+		it("outputs color input for fragment shader",function(){
+			assert.deepEqual(illumination.getGlslFragmentOutputLines().data,[
+				"gl_FragColor=interpolatedColor;"
 			]);
 		});
 	});
