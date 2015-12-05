@@ -7,9 +7,9 @@ var Illumination=function(options){
 	// options.materialScope!='global': colors in model data -> attribute
 	if (options.materialScope=='global' && options.materialData=='one' && options.light=='off') {
 		this.colorVector=new GlslVector('color','materialColor','rgba',options);
-	} else if (options.shader=='light') { // TODO remove options.shader references
+	}/* else if (options.shader=='light') { // TODO remove options.shader references
 		this.lightDirectionVector=new GlslVector('lightDirection','lightDirection','xyz',options);
-	}
+	}*/
 };
 Illumination.prototype.getGlslVertexDeclarationLines=function(){
 	var options=this.options;
@@ -62,9 +62,9 @@ Illumination.prototype.getJsInterfaceLines=function(writeListenerArgs,canvasMous
 	var options=this.options;
 	if (options.materialScope=='global' && options.materialData=='one' && options.light=='off') {
 		return this.colorVector.getJsInterfaceLines(writeListenerArgs,canvasMousemoveListener);
-	} else if (this.options.shader=='light') { // TODO remove options.shader references
+	}/* else if (this.options.shader=='light') { // TODO remove options.shader references
 		return this.lightDirectionVector.getJsInterfaceLines(writeListenerArgs,canvasMousemoveListener);
-	} else {
+	}*/ else {
 		return new Lines;
 	}
 };

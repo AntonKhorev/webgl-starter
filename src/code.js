@@ -6,18 +6,6 @@ var GlslVector=require('./glsl-vector.js');
 var Illumination=require('./illumination.js');
 
 module.exports=function(options,i18n){
-	// temporary compatibility code {
-	if (options.materialScope=='global' && options.materialData=='one' && options.light=='off') {
-		options.shader='single';
-	} else if (options.materialScope=='vertex'/* && options.materialData=='one'*/ && options.light=='off') {
-		options.shader='vertex';
-	} else if (options.materialScope=='face'/* && options.materialData=='one'*/ && options.light=='off') {
-		options.shader='face';
-	} else if (options.light=='on') {
-		options.shader='light';
-	}
-	// }
-
 	function intOptionValue(name) {
 		return parseInt(options[name]);
 	}
@@ -97,7 +85,8 @@ module.exports=function(options,i18n){
 		);
 		var needAspectUniform=options.hasInputsFor('canvas');
 		var needAspectConstant=!needAspectUniform && options['canvas.width']!=options['canvas.height'];
-		var needTransformedPosition=options.shader=='light' && options.projection=='perspective';
+		//var needTransformedPosition=options.shader=='light' && options.projection=='perspective';
+		var needTransformedPosition=(options.light=='on' && options.projection=='perspective');
 
 		function generateMain() {
 			var lines=new Lines();
