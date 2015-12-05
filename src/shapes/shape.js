@@ -1,8 +1,11 @@
 var Lines=require('../lines.js');
 
-var Shape=function(elementIndexBits,shaderType){
+var Shape=function(elementIndexBits,hasReflections,hasColorsPerVertex,hasColorsPerFace,colorAttrs){
 	this.elementIndexBits=elementIndexBits; // 0 if don't want element arrays; 8, 16 or 32 bits per element index, limits lod of shape
-	this.shaderType=shaderType; // 'vertex' or 'face' for colors, 'light' for normals, anything else for no colors/normals
+	this.hasNormals=(hasReflections && this.dim==3); // true = need normals, unless shape is flat
+	this.hasColorsPerVertex=hasColorsPerVertex;
+	this.hasColorsPerFace=hasColorsPerFace;
+	this.colorAttrs=colorAttrs; // array of color attribute names; examples: [] or ['color'] or ['specularColor','diffuseColor','ambientColor']
 };
 Shape.prototype.dim=2;
 Shape.prototype.twoSided=true; // triangles can be viewed from both sides
@@ -10,17 +13,8 @@ Shape.prototype.glPrimitive='TRIANGLES';
 Shape.prototype.usesElements=function(){
 	return this.elementIndexBits>0;
 };
-Shape.prototype.getNumbersPerPosition=function(){
-	return this.dim;
-};
-Shape.prototype.getNumbersPerNormal=function(){
-	return (this.shaderType=='light' && this.dim==3) ? 3 : 0;
-};
-Shape.prototype.getNumbersPerColor=function(){
-	return (this.shaderType=='vertex' || this.shaderType=='face') ? 3 : 0;
-};
 Shape.prototype.getNumbersPerVertex=function(){
-	return this.getNumbersPerPosition()+this.getNumbersPerNormal()+this.getNumbersPerColor();
+	return this.dim+(this.hasNormals?3:0)+this.colorAttrs.length*3;
 };
 Shape.prototype.getElementIndexJsArray=function(){
 	return "Uint"+this.elementIndexBits+"Array";
@@ -57,17 +51,15 @@ Shape.prototype.writeBufferData=function(){
 	}
 	return lines;
 };
-Shape.prototype.writeArraysAndBufferData=function(debugArrays,c,cv){
+Shape.prototype.writeArraysAndBufferData=function(debugArrays){
 	return new Lines(
-		this.writeArrays(c,cv),
+		this.writeArrays(),
 		this.writeDebug(debugArrays),
 		this.writeBufferData()
 	);
 };
 // public fn for init
 Shape.prototype.writeInit=function(debugArrays){
-	var c=(this.shaderType=='vertex' || this.shaderType=='face');
-	var cv=this.shaderType=='vertex';
 	var lines=new Lines;
 	lines.a(
 		"gl.bindBuffer(gl.ARRAY_BUFFER,gl.createBuffer());"
@@ -78,46 +70,35 @@ Shape.prototype.writeInit=function(debugArrays){
 		);
 	}
 	lines.a(
-		this.writeArraysAndBufferData(debugArrays,c,cv),
-		"var positionLoc=gl.getAttribLocation(program,'position');"
+		this.writeArraysAndBufferData(debugArrays)
 	);
-	if (c) {
+	var offset=0;
+	function writeAttr(attr,size) {
 		lines.a(
+			"var "+attr+"Loc=gl.getAttribLocation(program,'"+attr+"');",
 			"gl.vertexAttribPointer(",
-			"	positionLoc,"+this.dim+",gl.FLOAT,false,",
-			"	Float32Array.BYTES_PER_ELEMENT*"+(this.dim+3)+",",
-			"	Float32Array.BYTES_PER_ELEMENT*0",
+			"	"+attr+"Loc,"+size+",gl.FLOAT,false,",
+			"	Float32Array.BYTES_PER_ELEMENT*"+this.getNumbersPerVertex()+",",
+			"	Float32Array.BYTES_PER_ELEMENT*"+offset,
 			");",
-			"gl.enableVertexAttribArray(positionLoc);",
-			"var colorLoc=gl.getAttribLocation(program,'color');",
-			"gl.vertexAttribPointer(",
-			"	colorLoc,3,gl.FLOAT,false,",
-			"	Float32Array.BYTES_PER_ELEMENT*"+(this.dim+3)+",",
-			"	Float32Array.BYTES_PER_ELEMENT*"+this.dim,
-			");",
-			"gl.enableVertexAttribArray(colorLoc);"
+			"gl.enableVertexAttribArray("+attr+"Loc);"
 		);
-	} else if (this.dim>2 && this.shaderType=='light') {
+		offset+=size;
+	}
+	if (!this.hasNormals && this.colorAttrs.length<=0) {
 		lines.a(
-			"gl.vertexAttribPointer(",
-			"	positionLoc,"+this.dim+",gl.FLOAT,false,",
-			"	Float32Array.BYTES_PER_ELEMENT*"+(this.dim+3)+",",
-			"	Float32Array.BYTES_PER_ELEMENT*0",
-			");",
-			"gl.enableVertexAttribArray(positionLoc);",
-			"var normalLoc=gl.getAttribLocation(program,'normal');",
-			"gl.vertexAttribPointer(",
-			"	normalLoc,3,gl.FLOAT,false,",
-			"	Float32Array.BYTES_PER_ELEMENT*"+(this.dim+3)+",",
-			"	Float32Array.BYTES_PER_ELEMENT*"+this.dim,
-			");",
-			"gl.enableVertexAttribArray(normalLoc);"
-		);
-	} else {
-		lines.a(
+			"var positionLoc=gl.getAttribLocation(program,'position');",
 			"gl.vertexAttribPointer(positionLoc,"+this.dim+",gl.FLOAT,false,0,0);",
 			"gl.enableVertexAttribArray(positionLoc);"
 		);
+	} else {
+		writeAttr.call(this,'position',this.dim);
+		if (this.hasNormals) {
+			writeAttr.call(this,'normal',3);
+		}
+		this.colorAttrs.forEach(function(attr){
+			writeAttr.call(this,attr,3);
+		},this);
 	}
 	return lines;
 };

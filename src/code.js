@@ -29,16 +29,31 @@ module.exports=function(options,i18n){
 
 	function makeShape() {
 		var className=options.shape.charAt(0).toUpperCase()+options.shape.slice(1);
+		var colorAttrs=[];
+		if (options.materialScope!='global') {
+			if (options.materialData=='one') {
+				colorAttrs=['color'];
+			} else if (options.materialData=='sda') {
+				colorAttrs=['specularColor','diffuseColor','ambientColor'];
+			}
+		}
+		var shapeLod=undefined;
 		if (options.shapeLod!==undefined) {
-			return new shapes[className](parseInt(options.elements),options.shader,{
+			shapeLod={
 				value: intOptionValue('shapeLod'),
 				changes: options['shapeLod.input']!='constant',
 				min: intOptionValue('shapeLod.min'),
 				max: intOptionValue('shapeLod.max')
-			});
-		} else {
-			return new shapes[className](parseInt(options.elements),options.shader);
-		}
+			}
+		};
+		return new shapes[className](
+			parseInt(options.elements),
+			options.light=='on',
+			options.materialScope=='vertex',
+			options.materialScope=='face',
+			colorAttrs,
+			shapeLod
+		);
 	}
 	var shape=makeShape();
 	if (options.background=='solid') {
