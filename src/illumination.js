@@ -30,6 +30,30 @@ var Illumination=function(options){
 		this.lightDirectionVector=new GlslVector('lightDirection','lightDirection','xyz',options);
 	}*/
 };
+Illumination.prototype.getColorAttrNames=function(){
+	var options=this.options;
+	if (options.materialScope=='global') {
+		return [];
+	} else {
+		if (options.materialData=='one') {
+			return ["color"];
+		} else {
+			return ["specularColor","diffuseColor","ambientColor"];
+		}
+	}
+};
+Illumination.prototype.getColorAttrEnables=function(){
+	var options=this.options;
+	if (options.materialScope=='global') {
+		return [];
+	} else {
+		if (options.materialData=='one') {
+			return [true];
+		} else {
+			return [false,false,true];
+		}
+	}
+};
 Illumination.prototype.getGlslVertexDeclarationLines=function(){
 	var options=this.options;
 	if (options.materialScope!='global') {
@@ -40,8 +64,6 @@ Illumination.prototype.getGlslVertexDeclarationLines=function(){
 			);
 		} else {
 			return new Lines(
-				//"attribute vec4 specularColor; // unused",
-				//"attribute vec4 diffuseColor; // unused",
 				"attribute vec4 ambientColor;",
 				"varying vec4 interpolatedColor;"
 			);
@@ -72,11 +94,7 @@ Illumination.prototype.getGlslFragmentDeclarationLines=function(){
 		if (options.materialData=='one') {
 			return this.colorVector.getGlslDeclarationLines();
 		} else {
-			return new Lines(
-				//this.specularColorVector.getGlslDeclarationLines(),
-				//this.diffuseColorVector.getGlslDeclarationLines(),
-				this.ambientColorVector.getGlslDeclarationLines()
-			);
+			return this.ambientColorVector.getGlslDeclarationLines();
 		}
 	} else {
 		return new Lines(
@@ -108,11 +126,7 @@ Illumination.prototype.getJsInterfaceLines=function(writeListenerArgs,canvasMous
 		if (options.materialData=='one') {
 			return this.colorVector.getJsInterfaceLines(writeListenerArgs,canvasMousemoveListener);
 		} else {
-			return new Lines(
-				//this.specularColorVector.getJsInterfaceLines(writeListenerArgs,canvasMousemoveListener),
-				//this.diffuseColorVector.getJsInterfaceLines(writeListenerArgs,canvasMousemoveListener),
-				this.ambientColorVector.getJsInterfaceLines(writeListenerArgs,canvasMousemoveListener)
-			);
+			return this.ambientColorVector.getJsInterfaceLines(writeListenerArgs,canvasMousemoveListener);
 		}
 	} else {
 		return new Lines;

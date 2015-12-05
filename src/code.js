@@ -16,16 +16,9 @@ module.exports=function(options,i18n){
 		return ['mousemovex','mousemovey'].indexOf(options[name+'.input'])>=0;
 	}
 
+	var illumination=new Illumination(options);
 	function makeShape() {
 		var className=options.shape.charAt(0).toUpperCase()+options.shape.slice(1);
-		var colorAttrs=[];
-		if (options.materialScope!='global') {
-			if (options.materialData=='one') {
-				colorAttrs=['color'];
-			} else if (options.materialData=='sda') {
-				colorAttrs=['specularColor','diffuseColor','ambientColor'];
-			}
-		}
 		var shapeLod=undefined;
 		if (options.shapeLod!==undefined) {
 			shapeLod={
@@ -40,7 +33,8 @@ module.exports=function(options,i18n){
 			options.light=='on',
 			options.materialScope=='vertex',
 			options.materialScope=='face',
-			colorAttrs,
+			illumination.getColorAttrNames(),
+			illumination.getColorAttrEnables(),
 			shapeLod
 		);
 	}
@@ -48,7 +42,6 @@ module.exports=function(options,i18n){
 	if (options.background=='solid') {
 		var backgroundColorVector=new CallVector('backgroundColor','backgroundColor','rgba',options,'gl.clearColor',[0,0,0,0]);
 	}
-	var illumination=new Illumination(options);
 
 	function generateHtmlStyleLines() {
 		var lines=new Lines;

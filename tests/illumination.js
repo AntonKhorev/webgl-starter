@@ -14,6 +14,12 @@ describe('Illumination',function(){
 			'materialColor.b':0.5, 'materialColor.b.input':'constant', 'materialColor.b.min':0, 'materialColor.b.max':1,
 			'materialColor.a':1.0, 'materialColor.a.input':'constant', 'materialColor.a.min':0, 'materialColor.a.max':1
 		});
+		it("has empty color attr list",function(){
+			assert.deepEqual(illumination.getColorAttrNames(),[
+			]);
+			assert.deepEqual(illumination.getColorAttrEnables(),[
+			]);
+		});
 		it("declares nothing for vertex shader",function(){
 			assert.deepEqual(illumination.getGlslVertexDeclarationLines().data,[
 			]);
@@ -48,6 +54,12 @@ describe('Illumination',function(){
 			'materialColor.g':0.7, 'materialColor.g.input':'constant', 'materialColor.g.min':0, 'materialColor.g.max':1,
 			'materialColor.b':0.5, 'materialColor.b.input':'constant', 'materialColor.b.min':0, 'materialColor.b.max':1,
 			'materialColor.a':1.0, 'materialColor.a.input':'constant', 'materialColor.a.min':0, 'materialColor.a.max':1
+		});
+		it("has empty color attr list",function(){
+			assert.deepEqual(illumination.getColorAttrNames(),[
+			]);
+			assert.deepEqual(illumination.getColorAttrEnables(),[
+			]);
 		});
 		it("declares nothing for vertex shader",function(){
 			assert.deepEqual(illumination.getGlslVertexDeclarationLines().data,[
@@ -86,6 +98,14 @@ describe('Illumination',function(){
 			'materialScope':'vertex',
 			'materialData':'one',
 			'light':'off',
+		});
+		it("has color attr list with 1 enabled entry",function(){
+			assert.deepEqual(illumination.getColorAttrNames(),[
+				"color"
+			]);
+			assert.deepEqual(illumination.getColorAttrEnables(),[
+				true
+			]);
 		});
 		it("declares color input/output for vertex shader",function(){
 			assert.deepEqual(illumination.getGlslVertexDeclarationLines().data,[
@@ -130,6 +150,12 @@ describe('Illumination',function(){
 			'materialAmbientColor.r' :0.7, 'materialAmbientColor.r.input' :'constant', 'materialAmbientColor.r.min' :0, 'materialAmbientColor.r.max' :1,
 			'materialAmbientColor.g' :0.5, 'materialAmbientColor.g.input' :'constant', 'materialAmbientColor.g.min' :0, 'materialAmbientColor.g.max' :1,
 			'materialAmbientColor.b' :0.3, 'materialAmbientColor.b.input' :'constant', 'materialAmbientColor.b.min' :0, 'materialAmbientColor.b.max' :1
+		});
+		it("has empty color attr list",function(){
+			assert.deepEqual(illumination.getColorAttrNames(),[
+			]);
+			assert.deepEqual(illumination.getColorAttrEnables(),[
+			]);
 		});
 		it("declares nothing for vertex shader",function(){
 			assert.deepEqual(illumination.getGlslVertexDeclarationLines().data,[
@@ -179,9 +205,8 @@ describe('Illumination',function(){
 			assert.deepEqual(illumination.getGlslVertexOutputLines().data,[
 			]);
 		});
-		it("declares 2 uniform floats for fragment shader",function(){
+		it("declares uniform float (skipping unused specular color) for fragment shader",function(){
 			assert.deepEqual(illumination.getGlslFragmentDeclarationLines().data,[
-				"uniform float specularColorG; // unused",
 				"uniform float ambientColorB;"
 			]);
 		});
@@ -190,15 +215,9 @@ describe('Illumination',function(){
 				"gl_FragColor=vec4(0.700,0.500,ambientColorB,1.000);"
 			]);
 		});
-		it("returns 2 slider js interfaces",function(){
+		it("returns slider js interface (skipping unused specular color)",function(){
 			var canvasMousemoveListener=new listeners.CanvasMousemoveListener;
 			assert.deepEqual(illumination.getJsInterfaceLines([false,false],canvasMousemoveListener).data,[
-				"var specularColorGLoc=gl.getUniformLocation(program,'specularColorG');",
-				"function updateSpecularColor() {",
-				"	gl.uniform1f(specularColorGLoc,parseFloat(document.getElementById('materialSpecularColor.g').value));",
-				"}",
-				"updateSpecularColor();",
-				"document.getElementById('materialSpecularColor.g').addEventListener('change',updateSpecularColor);",
 				"var ambientColorBLoc=gl.getUniformLocation(program,'ambientColorB');",
 				"function updateAmbientColor() {",
 				"	gl.uniform1f(ambientColorBLoc,parseFloat(document.getElementById('materialAmbientColor.b').value));",
@@ -233,10 +252,8 @@ describe('Illumination',function(){
 			assert.deepEqual(illumination.getGlslVertexOutputLines().data,[
 			]);
 		});
-		it("declares 3 uniform vec3s for fragment shader",function(){
+		it("declares uniform vec3 (skipping unused specular and diffuse colors) for fragment shader",function(){
 			assert.deepEqual(illumination.getGlslFragmentDeclarationLines().data,[
-				"uniform vec3 specularColor; // unused",
-				"uniform vec3 diffuseColor; // unused",
 				"uniform vec3 ambientColor;"
 			]);
 		});
@@ -252,10 +269,16 @@ describe('Illumination',function(){
 			'materialData':'sda',
 			'light':'off',
 		});
-		it("declares 3 color inputs and 1 color output for vertex shader",function(){
+		it("has color attr list with 2 disabled and 1 enabled entry",function(){
+			assert.deepEqual(illumination.getColorAttrNames(),[
+				"specularColor","diffuseColor","ambientColor"
+			]);
+			assert.deepEqual(illumination.getColorAttrEnables(),[
+				false,          false,         true
+			]);
+		});
+		it("declares color input (ambient only) and 1 color output for vertex shader",function(){
 			assert.deepEqual(illumination.getGlslVertexDeclarationLines().data,[
-				"attribute vec4 specularColor; // unused",
-				"attribute vec4 diffuseColor; // unused",
 				"attribute vec4 ambientColor;",
 				"varying vec4 interpolatedColor;"
 			]);
