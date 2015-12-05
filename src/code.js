@@ -3,7 +3,7 @@ var listeners=require('./listeners.js');
 var shapes=require('./shapes.js');
 var CallVector=require('./call-vector.js');
 var GlslVector=require('./glsl-vector.js');
-var Coloring=require('./coloring.js');
+var Illumination=require('./illumination.js');
 
 module.exports=function(options,i18n){
 	// temporary compatibility code {
@@ -60,14 +60,7 @@ module.exports=function(options,i18n){
 	if (options.background=='solid') {
 		var backgroundColorVector=new CallVector('backgroundColor','backgroundColor','rgba',options,'gl.clearColor',[0,0,0,0]);
 	}
-	/*
-	if (options.shader=='single') {
-		var colorVector=new GlslVector('color','materialColor','rgba',options);
-	} else if (options.shader=='light') {
-		var lightDirectionVector=new GlslVector('lightDirection','lightDirection','xyz',options);
-	}
-	*/
-	var coloring=new Coloring(options);
+	var illumination=new Illumination(options);
 
 	function generateHtmlStyleLines() {
 		var lines=new Lines;
@@ -342,17 +335,9 @@ module.exports=function(options,i18n){
 			"precision mediump float;"
 		);
 		if (options.shader=='single') {
-			/*
 			lines.a(
-				colorVector.getGlslDeclarationLines(),
-				"void main() {",
-				"	gl_FragColor="+colorVector.getGlslValue()+";",
-				"}"
-			);
-			*/
-			lines.a(
-				coloring.getGlslFragmentDeclarationLines(),
-				coloring.getGlslFragmentOutputLines().wrap(
+				illumination.getGlslFragmentDeclarationLines(),
+				illumination.getGlslFragmentOutputLines().wrap(
 					"void main() {",
 					"}"
 				)
@@ -581,18 +566,7 @@ module.exports=function(options,i18n){
 				backgroundColorVector.getJsInterfaceLines(writeListenerArgs,canvasMousemoveListener)
 			);
 		}
-		/*
-		if (options.shader=='single') {
-			lines.a(
-				colorVector.getJsInterfaceLines(writeListenerArgs,canvasMousemoveListener)
-			);
-		} else if (options.shader=='light') {
-			lines.a(
-				lightDirectionVector.getJsInterfaceLines(writeListenerArgs,canvasMousemoveListener)
-			);
-		}
-		*/
-		coloring.getJsInterfaceLines(writeListenerArgs,canvasMousemoveListener);
+		illumination.getJsInterfaceLines(writeListenerArgs,canvasMousemoveListener);
 		if (options['shapeLod.input']=='slider') {
 			var listener=new listeners.SliderListener('shapeLod');
 			listener.enter()

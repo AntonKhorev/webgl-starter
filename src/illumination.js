@@ -1,23 +1,25 @@
 var Lines=require('./lines.js');
 var GlslVector=require('./glsl-vector.js');
 
-var Coloring=function(options){
+var Illumination=function(options){
 	this.options=options;
-	if (options.shader=='single') {
+	if (options.materialScope=='global' && options.materialData=='one' && options.light=='off') {
 		this.colorVector=new GlslVector('color','materialColor','rgba',options);
 	} else if (options.shader=='light') {
 		this.lightDirectionVector=new GlslVector('lightDirection','lightDirection','xyz',options);
 	}
 };
-Coloring.prototype.getGlslFragmentDeclarationLines=function(){
-	if (this.options.shader=='single') {
+Illumination.prototype.getGlslFragmentDeclarationLines=function(){
+	var options=this.options;
+	if (options.materialScope=='global' && options.materialData=='one' && options.light=='off') {
 		return this.colorVector.getGlslDeclarationLines();
 	} else {
 		return new Lines;
 	}
 };
-Coloring.prototype.getGlslFragmentOutputLines=function(){
-	if (this.options.shader=='single') {
+Illumination.prototype.getGlslFragmentOutputLines=function(){
+	var options=this.options;
+	if (options.materialScope=='global' && options.materialData=='one' && options.light=='off') {
 		return new Lines(
 			"gl_FragColor="+this.colorVector.getGlslValue()+";"
 		);
@@ -25,8 +27,9 @@ Coloring.prototype.getGlslFragmentOutputLines=function(){
 		return new Lines;
 	}
 };
-Coloring.prototype.getJsInterfaceLines=function(writeListenerArgs,canvasMousemoveListener){
-	if (this.options.shader=='single') {
+Illumination.prototype.getJsInterfaceLines=function(writeListenerArgs,canvasMousemoveListener){
+	var options=this.options;
+	if (options.materialScope=='global' && options.materialData=='one' && options.light=='off') {
 		return this.colorVector.getJsInterfaceLines(writeListenerArgs,canvasMousemoveListener);
 	} else if (this.options.shader=='light') {
 		return this.lightDirectionVector.getJsInterfaceLines(writeListenerArgs,canvasMousemoveListener);
@@ -35,4 +38,4 @@ Coloring.prototype.getJsInterfaceLines=function(writeListenerArgs,canvasMousemov
 	}
 };
 
-module.exports=Coloring;
+module.exports=Illumination;
