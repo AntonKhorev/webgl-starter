@@ -9,7 +9,7 @@ Square.prototype=Object.create(Shape.prototype);
 Square.prototype.constructor=Square;
 Square.prototype.glPrimitive='TRIANGLE_FAN';
 Square.prototype.writeArrays=function(){
-	var colorgen=new Colorgen(this.colorAttrs);
+	var colorgen=new Colorgen(this.colorAttrs,0);
 	var colorDataForFace;
 	var writeColorData=function(){
 		if (this.hasColorsPerFace && !this.hasColorsPerVertex) {

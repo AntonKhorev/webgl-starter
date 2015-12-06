@@ -10,7 +10,20 @@ Cube.prototype.constructor=Cube;
 Cube.prototype.dim=3;
 Cube.prototype.twoSided=false;
 Cube.prototype.writeArrays=function(){
-	var colorgen=new Colorgen(this.colorAttrs);
+	var colorgen=new Colorgen(
+		this.colorAttrs,
+		0, // TODO remove 'clean' colors after bilinear interp is implemented
+		this.hasColorsPerFace?undefined:[
+			[0.0, 0.0, 0.0],
+			[1.0, 0.0, 0.0],
+			[0.0, 1.0, 0.0],
+			[1.0, 1.0, 0.0],
+			[0.0, 0.0, 1.0],
+			[1.0, 0.0, 1.0],
+			[0.0, 1.0, 1.0],
+			[1.0, 1.0, 1.0],
+		]
+	);
 	var nCubeVertices=8;
 	var cubeColors=[];
 	for (var i=0;i<nCubeVertices;i++) {
