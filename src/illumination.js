@@ -3,10 +3,13 @@ var GlslVector=require('./glsl-vector.js');
 
 var Illumination=function(options){
 	this.options=options;
+	// possible options checks:
 	// options.materialScope=='global': constant or user input -> uniform
 	// options.materialScope!='global': colors in model data -> attribute
 	// options.materialData=='one': one color
 	// options.materialData!='one': s/d/a colors
+	// options.light=='on'
+	// options.light!='on'
 	if (options.materialScope=='global') {
 		if (options.materialData=='one') {
 			this.colorVector=new GlslVector('color','materialColor','rgba',options);
@@ -26,9 +29,9 @@ var Illumination=function(options){
 			this.ambientColorVector =new GlslVector('ambientColor' ,'materialAmbientColor' ,'rgba',extendedOptions);
 		}
 	}
-	/* else if (options.shader=='light') { // TODO remove options.shader references
+	if (options.light=='on') {
 		this.lightDirectionVector=new GlslVector('lightDirection','lightDirection','xyz',options);
-	}*/
+	}
 };
 Illumination.prototype.getColorAttrs=function(){
 	var options=this.options;
@@ -48,83 +51,82 @@ Illumination.prototype.getColorAttrs=function(){
 		}
 	}
 };
-Illumination.prototype.getColorAttrEnables=function(){
-	var options=this.options;
-	if (options.materialScope=='global') {
-		return [];
-	} else {
-		if (options.materialData=='one') {
-			return [1.0];
-		} else {
-			return [0.0,0.0,1.0];
-		}
-	}
-};
 Illumination.prototype.getGlslVertexDeclarationLines=function(){
 	var options=this.options;
+	var lines=new Lines;
+	if (options.light=='on') {
+		lines.a("varying vec3 interpolatedNormal;");
+	}
 	if (options.materialScope!='global') {
 		if (options.materialData=='one') {
-			return new Lines(
-				"attribute vec4 color;",
-				"varying vec4 interpolatedColor;"
-			);
+			lines.a("attribute vec4 color;");
 		} else {
-			return new Lines(
-				"attribute vec4 ambientColor;",
-				"varying vec4 interpolatedColor;"
-			);
+			lines.a("attribute vec4 ambientColor;");
 		}
-	} else {
-		return new Lines;
+		lines.a("varying vec4 interpolatedColor;");
 	}
+	return lines;
 };
 Illumination.prototype.getGlslVertexOutputLines=function(){
 	var options=this.options;
+	var lines=new Lines;
+	if (options.light=='on') {
+		lines.a("interpolatedNormal=vec3(0.0,0.0,1.0);");
+	}
 	if (options.materialScope!='global') {
 		if (options.materialData=='one') {
-			return new Lines(
-				"interpolatedColor=color;"
-			);
+			lines.a("interpolatedColor=color;");
 		} else {
-			return new Lines(
-				"interpolatedColor=ambientColor;"
-			);
+			lines.a("interpolatedColor=ambientColor;");
 		}
-	} else {
-		return new Lines;
 	}
+	return lines;
 };
 Illumination.prototype.getGlslFragmentDeclarationLines=function(){
 	var options=this.options;
+	var lines=new Lines;
+	if (options.light=='on') {
+		lines.a("varying vec3 interpolatedNormal;");
+	}
 	if (options.materialScope=='global') {
 		if (options.materialData=='one') {
-			return this.colorVector.getGlslDeclarationLines();
+			lines.a(this.colorVector.getGlslDeclarationLines());
 		} else {
-			return this.ambientColorVector.getGlslDeclarationLines();
+			lines.a(this.ambientColorVector.getGlslDeclarationLines());
 		}
 	} else {
-		return new Lines(
-			"varying vec4 interpolatedColor;"
-		);
+		lines.a("varying vec4 interpolatedColor;");
 	}
+	return lines;
 };
 Illumination.prototype.getGlslFragmentOutputLines=function(){
 	var options=this.options;
+	var lines=new Lines;
+	var colorRGB,colorA,colorRGBA;
 	if (options.materialScope=='global') {
-		if (options.materialData=='one') {
-			return new Lines(
-				"gl_FragColor="+this.colorVector.getGlslValue()+";"
-			);
-		} else {
-			return new Lines(
-				"gl_FragColor="+this.ambientColorVector.getGlslValue()+";"
-			);
-		}
-	} else {
-		return new Lines(
-			"gl_FragColor=interpolatedColor;"
+		var vector=(options.materialData=='one'
+			? this.colorVector
+			: this.ambientColorVector
 		);
+		colorRGB=vector.getGlslComponentsValue('rgb');
+		colorA=vector.getGlslComponentsValue('a');
+		colorRGBA=vector.getGlslValue();
+	} else {
+		colorRGB="interpolatedColor.rgb";
+		colorA="interpolatedColor.a";
+		colorRGBA="interpolatedColor";
 	}
+	if (options.light=='on') {
+		lines.a(
+			"vec3 N=normalize(interpolatedNormal);",
+			"if (!gl_FrontFacing) N=-N;",
+			"vec3 L=normalize(vec3(-1.000,+1.000,+1.000));",
+			"gl_FragColor=vec4("+colorRGB+"*max(0.0,dot(L,N)),"+colorA+");"
+		);
+	} else {
+		lines.a("gl_FragColor="+colorRGBA+";");
+	}
+	return lines;
 };
 Illumination.prototype.getJsInterfaceLines=function(writeListenerArgs,canvasMousemoveListener){
 	var options=this.options;

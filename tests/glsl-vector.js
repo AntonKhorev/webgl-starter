@@ -19,6 +19,11 @@ describe('GlslVector',function(){
 				"vec3(+1.000,+2.000,+3.000)"
 			);
 		});
+		it('returns constant vec2 components',function(){
+			assert.equal(vector.getGlslComponentsValue('yz'),
+				"vec2(+2.000,+3.000)"
+			);
+		});
 		it('returns empty js interface',function(){
 			assert.deepEqual(vector.getJsInterfaceLines([false,false]).data,[
 			]);
@@ -37,6 +42,11 @@ describe('GlslVector',function(){
 		it('returns constant vec3 with one component as value',function(){
 			assert.equal(vector.getGlslValue(),
 				"vec3(+2.000)"
+			);
+		});
+		it('returns constant vec2 with one component',function(){
+			assert.equal(vector.getGlslComponentsValue('yz'),
+				"vec2(+2.000)"
 			);
 		});
 		it('returns empty js interface',function(){
@@ -58,6 +68,16 @@ describe('GlslVector',function(){
 		it('returns vec3 made of float and constants as value',function(){
 			assert.equal(vector.getGlslValue(),
 				"vec3(fooX,+2.000,+3.000)"
+			);
+		});
+		it('returns vec2 of float and constant as xy components',function(){
+			assert.equal(vector.getGlslComponentsValue('xy'),
+				"vec2(fooX,+2.000)"
+			);
+		});
+		it('returns float as x component',function(){
+			assert.equal(vector.getGlslComponentsValue('x'),
+				"fooX"
 			);
 		});
 		it('returns interface with 1 location and 1 simple listener',function(){
@@ -91,6 +111,21 @@ describe('GlslVector',function(){
 		it('returns vec3 made of vec2 and constant as value',function(){
 			assert.equal(vector.getGlslValue(),
 				"vec3(foo,+3.000)"
+			);
+		});
+		it('returns original vec2',function(){
+			assert.equal(vector.getGlslComponentsValue('xy'),
+				"foo"
+			);
+		});
+		it('returns original vec2 with swizzling',function(){
+			assert.equal(vector.getGlslComponentsValue('yx'),
+				"foo.yx"
+			);
+		});
+		it('returns original vec2 component and constant',function(){
+			assert.equal(vector.getGlslComponentsValue('yz'),
+				"vec2(foo.y,+3.000)"
 			);
 		});
 		it('returns interface with 1 location and 2 simple listeners',function(){

@@ -27,14 +27,14 @@ GlslVector.prototype.getGlslDeclarationLines=function(){
 };
 GlslVector.prototype.getGlslValue=function(){
 	var vecType="vec"+this.values.length;
-	function varComponentMap(c,i) {
+	varComponentMap=function(c,i) {
 		if (this.inputs[i]=='constant') {
 			return this.formatValue(this.values[i]);
 		} else {
 			return this.varNameC(c);
 		}
-	}
-	var vs=this.components.map(varComponentMap,this);
+	}.bind(this);
+	var vs=this.components.map(varComponentMap);
 	if (this.modeConstant) {
 		var equalValues=vs.every(function(v){
 			return v==vs[0];
@@ -52,6 +52,25 @@ GlslVector.prototype.getGlslValue=function(){
 		vs.unshift(this.varName);
 	}
 	return vecType+"("+vs.join(",")+")";
+};
+GlslVector.prototype.getGlslComponentsValue=function(selectedComponents){
+	var inOrder=true;
+	var inNVars=true;
+	for (var j=0;j<selectedComponents.length;j++) {
+		var c=selectedComponents.charAt(j);
+		var i=this.components.indexOf(c);
+		inOrder=(inOrder && i==j);
+		inNVars=(inNVars && i<this.nVars);
+	}
+	if (this.modeVector && inNVars) {
+		if (inOrder && selectedComponents.length==this.nVars) {
+			return this.varName;
+		} else {
+			return this.varName+"."+selectedComponents;
+		}
+	} else {
+		return "vec"+selectedComponents.length+"(TODO)";
+	}
 };
 // private:
 GlslVector.prototype.writeJsInterfaceGlslLines=function(){

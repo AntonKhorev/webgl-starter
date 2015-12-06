@@ -69,7 +69,7 @@ Vector.prototype.componentValue=function(c,i){
 }
 // public:
 Vector.prototype.getJsInterfaceLines=function(writeListenerArgs,canvasMousemoveListener){
-	function writeManyListenersLines() {
+	var writeManyListenersLines=function(){
 		var lines=new Lines;
 		this.components.forEach(function(c,i){
 			if (this.inputs[i]!='slider') return;
@@ -82,8 +82,8 @@ Vector.prototype.getJsInterfaceLines=function(writeListenerArgs,canvasMousemoveL
 			);
 		},this);
 		return lines;
-	}
-	function writeOneListenerLines() {
+	}.bind(this);
+	var writeOneListenerLines=function(){
 		var listener=new listeners.MultipleSliderListener("[id^=\""+this.optName+".\"]");
 		listener.enter()
 			.log("console.log(this.id,'input value:',parseFloat(this.value));")
@@ -91,13 +91,13 @@ Vector.prototype.getJsInterfaceLines=function(writeListenerArgs,canvasMousemoveL
 		return new Lines(
 			listener.write.apply(listener,writeListenerArgs)
 		);
-	}
+	}.bind(this);
 	if (this.modeConstant) {
 		return new Lines;
 	}
 	var lines=new Lines;
-	var manyListenersLines=writeManyListenersLines.call(this);
-	var oneListenerLines=writeOneListenerLines.call(this);
+	var manyListenersLines=writeManyListenersLines();
+	var oneListenerLines=writeOneListenerLines();
 	lines.a(
 		this.writeJsInterfaceGlslLines()
 	);
