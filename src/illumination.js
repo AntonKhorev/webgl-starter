@@ -51,10 +51,13 @@ Illumination.prototype.getColorAttrs=function(){
 		}
 	}
 };
-Illumination.prototype.getGlslVertexDeclarationLines=function(){
+Illumination.prototype.getGlslVertexDeclarationLines=function(hasNormalAttr){
 	var options=this.options;
 	var lines=new Lines;
 	if (options.light=='on') {
+		if (hasNormalAttr) {
+			lines.a("attribute vec3 normal;");
+		}
 		lines.a("varying vec3 interpolatedNormal;");
 	}
 	if (options.materialScope!='global') {
@@ -67,11 +70,16 @@ Illumination.prototype.getGlslVertexDeclarationLines=function(){
 	}
 	return lines;
 };
-Illumination.prototype.getGlslVertexOutputLines=function(normalTransformLines){
+Illumination.prototype.getGlslVertexOutputLines=function(hasNormalAttr,normalTransformLines){
 	var options=this.options;
 	var lines=new Lines;
 	if (options.light=='on') {
-		lines.a("interpolatedNormal=vec3(0.0,0.0,1.0)");
+		lines.a("interpolatedNormal=");
+		if (hasNormalAttr) {
+			lines.t("normal");
+		} else {
+			lines.t("vec3(0.0,0.0,1.0)");
+		}
 		lines.t(normalTransformLines);
 		lines.t(";");
 	}

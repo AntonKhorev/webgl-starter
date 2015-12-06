@@ -19,11 +19,11 @@ describe('Illumination',function(){
 			]);
 		});
 		it("declares nothing for vertex shader",function(){
-			assert.deepEqual(illumination.getGlslVertexDeclarationLines().data,[
+			assert.deepEqual(illumination.getGlslVertexDeclarationLines(false).data,[
 			]);
 		});
 		it("outputs nothing for vertex shader",function(){
-			assert.deepEqual(illumination.getGlslVertexOutputLines(new Lines("")).data,[
+			assert.deepEqual(illumination.getGlslVertexOutputLines(false,new Lines("")).data,[
 			]);
 		});
 		it("declares nothing for fragment shader",function(){
@@ -58,11 +58,11 @@ describe('Illumination',function(){
 			]);
 		});
 		it("declares nothing for vertex shader",function(){
-			assert.deepEqual(illumination.getGlslVertexDeclarationLines().data,[
+			assert.deepEqual(illumination.getGlslVertexDeclarationLines(false).data,[
 			]);
 		});
 		it("outputs nothing for vertex shader",function(){
-			assert.deepEqual(illumination.getGlslVertexOutputLines(new Lines("")).data,[
+			assert.deepEqual(illumination.getGlslVertexOutputLines(false,new Lines("")).data,[
 			]);
 		});
 		it("declares 1 uniform float for fragment shader",function(){
@@ -101,13 +101,13 @@ describe('Illumination',function(){
 			]);
 		});
 		it("declares color input/output for vertex shader",function(){
-			assert.deepEqual(illumination.getGlslVertexDeclarationLines().data,[
+			assert.deepEqual(illumination.getGlslVertexDeclarationLines(false).data,[
 				"attribute vec4 color;",
 				"varying vec4 interpolatedColor;"
 			]);
 		});
 		it("outputs color input for vertex shader",function(){
-			assert.deepEqual(illumination.getGlslVertexOutputLines(new Lines("")).data,[
+			assert.deepEqual(illumination.getGlslVertexOutputLines(false,new Lines("")).data,[
 				"interpolatedColor=color;"
 			]);
 		});
@@ -149,11 +149,11 @@ describe('Illumination',function(){
 			]);
 		});
 		it("declares nothing for vertex shader",function(){
-			assert.deepEqual(illumination.getGlslVertexDeclarationLines().data,[
+			assert.deepEqual(illumination.getGlslVertexDeclarationLines(false).data,[
 			]);
 		});
 		it("outputs nothing for vertex shader",function(){
-			assert.deepEqual(illumination.getGlslVertexOutputLines(new Lines("")).data,[
+			assert.deepEqual(illumination.getGlslVertexOutputLines(false,new Lines("")).data,[
 			]);
 		});
 		it("declares nothing for fragment shader",function(){
@@ -189,11 +189,11 @@ describe('Illumination',function(){
 			'materialAmbientColor.b' :0.3, 'materialAmbientColor.b.input' :'slider',   'materialAmbientColor.b.min' :0, 'materialAmbientColor.b.max' :1
 		});
 		it("declares nothing for vertex shader",function(){
-			assert.deepEqual(illumination.getGlslVertexDeclarationLines().data,[
+			assert.deepEqual(illumination.getGlslVertexDeclarationLines(false).data,[
 			]);
 		});
 		it("outputs nothing for vertex shader",function(){
-			assert.deepEqual(illumination.getGlslVertexOutputLines(new Lines("")).data,[
+			assert.deepEqual(illumination.getGlslVertexOutputLines(false,new Lines("")).data,[
 			]);
 		});
 		it("declares uniform float (skipping unused specular color) for fragment shader",function(){
@@ -236,11 +236,11 @@ describe('Illumination',function(){
 			'materialAmbientColor.b' :0.3, 'materialAmbientColor.b.input' :'slider',   'materialAmbientColor.b.min' :0, 'materialAmbientColor.b.max' :1
 		});
 		it("declares nothing for vertex shader",function(){
-			assert.deepEqual(illumination.getGlslVertexDeclarationLines().data,[
+			assert.deepEqual(illumination.getGlslVertexDeclarationLines(false).data,[
 			]);
 		});
 		it("outputs nothing for vertex shader",function(){
-			assert.deepEqual(illumination.getGlslVertexOutputLines(new Lines("")).data,[
+			assert.deepEqual(illumination.getGlslVertexOutputLines(false,new Lines("")).data,[
 			]);
 		});
 		it("declares uniform vec3 (skipping unused specular and diffuse colors) for fragment shader",function(){
@@ -268,13 +268,13 @@ describe('Illumination',function(){
 			]);
 		});
 		it("declares color input (ambient only) and 1 color output for vertex shader",function(){
-			assert.deepEqual(illumination.getGlslVertexDeclarationLines().data,[
+			assert.deepEqual(illumination.getGlslVertexDeclarationLines(false).data,[
 				"attribute vec4 ambientColor;",
 				"varying vec4 interpolatedColor;"
 			]);
 		});
 		it("outputs ambient color input for vertex shader",function(){
-			assert.deepEqual(illumination.getGlslVertexOutputLines(new Lines("")).data,[
+			assert.deepEqual(illumination.getGlslVertexOutputLines(false,new Lines("")).data,[
 				"interpolatedColor=ambientColor;"
 			]);
 		});
@@ -307,12 +307,18 @@ describe('Illumination',function(){
 			]);
 		});
 		it("declares normal for vertex shader",function(){
-			assert.deepEqual(illumination.getGlslVertexDeclarationLines().data,[
+			assert.deepEqual(illumination.getGlslVertexDeclarationLines(false).data,[
 				"varying vec3 interpolatedNormal;" // TODO optimize this out after case w/ transforms passes
 			]);
 		});
+		it("declares shape normal and output normal for vertex shader",function(){
+			assert.deepEqual(illumination.getGlslVertexDeclarationLines(true).data,[
+				"attribute vec3 normal;",
+				"varying vec3 interpolatedNormal;"
+			]);
+		});
 		it("outputs normal for vertex shader",function(){
-			assert.deepEqual(illumination.getGlslVertexOutputLines(new Lines("")).data,[
+			assert.deepEqual(illumination.getGlslVertexOutputLines(false,new Lines("")).data,[
 				"interpolatedNormal=vec3(0.0,0.0,1.0);"
 			]);
 		});
@@ -324,10 +330,15 @@ describe('Illumination',function(){
 				"	magic",
 				")"
 			);
-			assert.deepEqual(illumination.getGlslVertexOutputLines(tr).data,[
+			assert.deepEqual(illumination.getGlslVertexOutputLines(false,tr).data,[
 				"interpolatedNormal=vec3(0.0,0.0,1.0)*do(",
 				"	magic",
 				");"
+			]);
+		});
+		it("outputs shape normal for vertex shader",function(){
+			assert.deepEqual(illumination.getGlslVertexOutputLines(true,new Lines("")).data,[
+				"interpolatedNormal=normal;"
 			]);
 		});
 		it("declares normal for fragment shader",function(){
@@ -369,12 +380,12 @@ describe('Illumination',function(){
 			]);
 		});
 		it("declares normal for vertex shader",function(){
-			assert.deepEqual(illumination.getGlslVertexDeclarationLines().data,[
+			assert.deepEqual(illumination.getGlslVertexDeclarationLines(false).data,[
 				"varying vec3 interpolatedNormal;" // TODO optimize this out after case w/ transforms passes
 			]);
 		});
 		it("outputs normal for vertex shader",function(){
-			assert.deepEqual(illumination.getGlslVertexOutputLines(new Lines("")).data,[
+			assert.deepEqual(illumination.getGlslVertexOutputLines(false,new Lines("")).data,[
 				"interpolatedNormal=vec3(0.0,0.0,1.0);"
 			]);
 		});
