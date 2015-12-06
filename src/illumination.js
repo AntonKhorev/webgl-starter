@@ -67,11 +67,13 @@ Illumination.prototype.getGlslVertexDeclarationLines=function(){
 	}
 	return lines;
 };
-Illumination.prototype.getGlslVertexOutputLines=function(){
+Illumination.prototype.getGlslVertexOutputLines=function(normalTransformLines){
 	var options=this.options;
 	var lines=new Lines;
 	if (options.light=='on') {
-		lines.a("interpolatedNormal=vec3(0.0,0.0,1.0);");
+		lines.a("interpolatedNormal=vec3(0.0,0.0,1.0)");
+		lines.t(normalTransformLines);
+		lines.t(";");
 	}
 	if (options.materialScope!='global') {
 		if (options.materialData=='one') {

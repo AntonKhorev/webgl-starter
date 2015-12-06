@@ -233,6 +233,16 @@ module.exports=function(options,i18n){
 					);
 				}
 				options.transformOrder.forEach(function(transformName){
+					// see writeNormalTransformLines()
+				});
+				lines.t(
+					";"
+				);
+			}
+			*/
+			var writeNormalTransformLines=function(){
+				var lines=new Lines("");
+				options.transformOrder.forEach(function(transformName){
 					if (!options.needsTransform(transformName)) {
 						return;
 					}
@@ -260,13 +270,10 @@ module.exports=function(options,i18n){
 						]
 					}[transformName]);
 				});
-				lines.t(
-					";"
-				);
-			}
-			*/
+				return lines;
+			};
 			lines.a(
-				illumination.getGlslVertexOutputLines()
+				illumination.getGlslVertexOutputLines(writeNormalTransformLines())
 			);
 			return lines;
 		}

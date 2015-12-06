@@ -1,7 +1,7 @@
 var assert=require('assert');
-
-var Illumination=require('../src/illumination.js');
+var Lines=require('../src/lines.js');
 var listeners=require('../src/listeners.js');
+var Illumination=require('../src/illumination.js');
 
 describe('Illumination',function(){
 	context('with global flat shading',function(){
@@ -23,7 +23,7 @@ describe('Illumination',function(){
 			]);
 		});
 		it("outputs nothing for vertex shader",function(){
-			assert.deepEqual(illumination.getGlslVertexOutputLines().data,[
+			assert.deepEqual(illumination.getGlslVertexOutputLines(new Lines("")).data,[
 			]);
 		});
 		it("declares nothing for fragment shader",function(){
@@ -62,7 +62,7 @@ describe('Illumination',function(){
 			]);
 		});
 		it("outputs nothing for vertex shader",function(){
-			assert.deepEqual(illumination.getGlslVertexOutputLines().data,[
+			assert.deepEqual(illumination.getGlslVertexOutputLines(new Lines("")).data,[
 			]);
 		});
 		it("declares 1 uniform float for fragment shader",function(){
@@ -107,7 +107,7 @@ describe('Illumination',function(){
 			]);
 		});
 		it("outputs color input for vertex shader",function(){
-			assert.deepEqual(illumination.getGlslVertexOutputLines().data,[
+			assert.deepEqual(illumination.getGlslVertexOutputLines(new Lines("")).data,[
 				"interpolatedColor=color;"
 			]);
 		});
@@ -153,7 +153,7 @@ describe('Illumination',function(){
 			]);
 		});
 		it("outputs nothing for vertex shader",function(){
-			assert.deepEqual(illumination.getGlslVertexOutputLines().data,[
+			assert.deepEqual(illumination.getGlslVertexOutputLines(new Lines("")).data,[
 			]);
 		});
 		it("declares nothing for fragment shader",function(){
@@ -193,7 +193,7 @@ describe('Illumination',function(){
 			]);
 		});
 		it("outputs nothing for vertex shader",function(){
-			assert.deepEqual(illumination.getGlslVertexOutputLines().data,[
+			assert.deepEqual(illumination.getGlslVertexOutputLines(new Lines("")).data,[
 			]);
 		});
 		it("declares uniform float (skipping unused specular color) for fragment shader",function(){
@@ -240,7 +240,7 @@ describe('Illumination',function(){
 			]);
 		});
 		it("outputs nothing for vertex shader",function(){
-			assert.deepEqual(illumination.getGlslVertexOutputLines().data,[
+			assert.deepEqual(illumination.getGlslVertexOutputLines(new Lines("")).data,[
 			]);
 		});
 		it("declares uniform vec3 (skipping unused specular and diffuse colors) for fragment shader",function(){
@@ -274,7 +274,7 @@ describe('Illumination',function(){
 			]);
 		});
 		it("outputs ambient color input for vertex shader",function(){
-			assert.deepEqual(illumination.getGlslVertexOutputLines().data,[
+			assert.deepEqual(illumination.getGlslVertexOutputLines(new Lines("")).data,[
 				"interpolatedColor=ambientColor;"
 			]);
 		});
@@ -312,8 +312,22 @@ describe('Illumination',function(){
 			]);
 		});
 		it("outputs normal for vertex shader",function(){
-			assert.deepEqual(illumination.getGlslVertexOutputLines().data,[
+			assert.deepEqual(illumination.getGlslVertexOutputLines(new Lines("")).data,[
 				"interpolatedNormal=vec3(0.0,0.0,1.0);"
+			]);
+		});
+		it("outputs transformed normal for vertex shader",function(){
+			var tr=new Lines;
+			tr.a("");
+			tr.t(
+				"*do(",
+				"	magic",
+				")"
+			);
+			assert.deepEqual(illumination.getGlslVertexOutputLines(tr).data,[
+				"interpolatedNormal=vec3(0.0,0.0,1.0)*do(",
+				"	magic",
+				");"
 			]);
 		});
 		it("declares normal for fragment shader",function(){
@@ -360,7 +374,7 @@ describe('Illumination',function(){
 			]);
 		});
 		it("outputs normal for vertex shader",function(){
-			assert.deepEqual(illumination.getGlslVertexOutputLines().data,[
+			assert.deepEqual(illumination.getGlslVertexOutputLines(new Lines("")).data,[
 				"interpolatedNormal=vec3(0.0,0.0,1.0);"
 			]);
 		});
