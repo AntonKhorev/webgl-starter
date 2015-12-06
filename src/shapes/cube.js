@@ -9,16 +9,12 @@ Cube.prototype=Object.create(Shape.prototype);
 Cube.prototype.constructor=Cube;
 Cube.prototype.dim=3;
 Cube.prototype.twoSided=false;
-Cube.prototype.writeArrays=function(c,cv){
-	var colorgens=this.colorAttrs.map(function(attr){
-		return new Colorgen(attr.weight);
-	});
+Cube.prototype.writeArrays=function(){
+	var colorgen=new Colorgen(this.colorAttrs);
 	var nCubeVertices=8;
 	var cubeColors=[];
 	for (var i=0;i<nCubeVertices;i++) {
-		cubeColors.push(this.colorAttrs.map(function(_,i){
-			return colorgens[i].getNextColorString();
-		}).join(""));
+		cubeColors.push(colorgen.getNextColorString());
 	}
 	var cubeVertexPositions=[
 		"-0.5,-0.5,-0.5,",
@@ -61,9 +57,7 @@ Cube.prototype.writeArrays=function(c,cv){
 	if (this.hasNormals) {
 		vertexLines.t("  n.x  n.y  n.z");
 	}
-	if (c) {
-		vertexLines.t("    r    g    b");
-	}
+	vertexLines.t(colorgen.getHeaderString());
 	var appendVertex=function(iFace,iVertex,firstInFace) {
 		vertexLines.a(cubeVertexPositions[iVertex]);
 		if (this.hasNormals) {
@@ -82,7 +76,7 @@ Cube.prototype.writeArrays=function(c,cv){
 		for (var i=0;i<nCubeFaces;i++) {
 			quadToTriangleMap.forEach(function(j,k){
 				appendVertex(i,cubeFaceVertices[i][j],k==0);
-			},this);
+			});
 		}
 		return new Lines(
 			"var nVertices=36;",
@@ -91,12 +85,12 @@ Cube.prototype.writeArrays=function(c,cv){
 				"]);"
 			)
 		);
-	} else if (this.shaderType=='face' || this.shaderType=='light') {
+	} else if (this.hasColorsPerFace || this.hasNormals) {
 		// elements, face data
 		for (var i=0;i<nCubeFaces;i++) {
 			cubeFaceVertices[i].forEach(function(j,k){
-				appendVertex.call(this,i,j,k==0);
-			},this);
+				appendVertex(i,j,k==0);
+			});
 		}
 		return new Lines(
 			vertexLines.wrap(
@@ -117,8 +111,8 @@ Cube.prototype.writeArrays=function(c,cv){
 		// elements, no face data
 		for (var i=0;i<nCubeVertices;i++) {
 			vertexLines.a(cubeVertexPositions[i]);
-			if (c) {
-				vertexLines.t(cubeVertexColors[i]);
+			if (this.hasColorsPerVertex) {
+				vertexLines.t(cubeColors[i]);
 			}
 		}
 		var elementLines=new Lines;
