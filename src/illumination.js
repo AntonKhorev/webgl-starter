@@ -120,7 +120,7 @@ Illumination.prototype.getGlslFragmentOutputLines=function(){
 		lines.a(
 			"vec3 N=normalize(interpolatedNormal);",
 			"if (!gl_FrontFacing) N=-N;",
-			"vec3 L=normalize(vec3(-1.000,+1.000,+1.000));",
+			"vec3 L=normalize("+this.lightDirectionVector.getGlslValue()+");",
 			"gl_FragColor=vec4("+colorRGB+"*max(0.0,dot(L,N)),"+colorA+");"
 		);
 	} else {
