@@ -54,22 +54,44 @@ GlslVector.prototype.getGlslValue=function(){
 	return vecType+"("+vs.join(",")+")";
 };
 GlslVector.prototype.getGlslComponentsValue=function(selectedComponents){
-	var inOrder=true;
-	var inNVars=true;
+	var results=[]; // [[isConstant,componentLetterOrNumber]]
+	var showResult=function(result){
+		if (result[0]) {
+			return this.formatValue(this.values[result[1]]);
+		} else {
+			if (this.modeVector) {
+				return this.varName+"."+result[1];
+			} else {
+				return this.varNameC(result[1]);
+			}
+		}
+	}.bind(this);
 	for (var j=0;j<selectedComponents.length;j++) {
 		var c=selectedComponents.charAt(j);
 		var i=this.components.indexOf(c);
-		inOrder=(inOrder && i==j);
-		inNVars=(inNVars && i<this.nVars);
+		if (this.inputs[i]=='constant') {
+			results.push([true,i]);
+		} else {
+			if (this.modeVector && results.length>0) {
+				prevResult=results.pop();
+				if (prevResult[0]) {
+					results.push(prevResult,[false,c]); // prev is constant, don't merge
+				} else {
+					results.push([prevResult[0],prevResult[1]+c]); // merge
+				}
+			} else {
+				results.push([false,c]);
+			}
+		}
 	}
-	if (this.modeVector && inNVars) {
-		if (inOrder && selectedComponents.length==this.nVars) {
+	if (results.length==1) {
+		if (this.modeVector && selectedComponents==this.components.join('')) {
 			return this.varName;
 		} else {
-			return this.varName+"."+selectedComponents;
+			return showResult(results[0]);
 		}
 	} else {
-		return "vec"+selectedComponents.length+"(TODO)";
+		return "vec"+selectedComponents.length+"("+results.map(showResult).join(",")+")";
 	}
 };
 // private:
