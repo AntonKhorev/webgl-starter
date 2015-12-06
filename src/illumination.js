@@ -86,7 +86,10 @@ Illumination.prototype.getGlslFragmentDeclarationLines=function(){
 	var options=this.options;
 	var lines=new Lines;
 	if (options.light=='on') {
-		lines.a("varying vec3 interpolatedNormal;");
+		lines.a(
+			this.lightDirectionVector.getGlslDeclarationLines(),
+			"varying vec3 interpolatedNormal;"
+		);
 	}
 	if (options.materialScope=='global') {
 		if (options.materialData=='one') {
@@ -130,18 +133,18 @@ Illumination.prototype.getGlslFragmentOutputLines=function(){
 };
 Illumination.prototype.getJsInterfaceLines=function(writeListenerArgs,canvasMousemoveListener){
 	var options=this.options;
+	var lines=new Lines;
 	if (options.materialScope=='global') {
 		if (options.materialData=='one') {
-			return this.colorVector.getJsInterfaceLines(writeListenerArgs,canvasMousemoveListener);
+			lines.a(this.colorVector.getJsInterfaceLines(writeListenerArgs,canvasMousemoveListener));
 		} else {
-			return this.ambientColorVector.getJsInterfaceLines(writeListenerArgs,canvasMousemoveListener);
+			lines.a(this.ambientColorVector.getJsInterfaceLines(writeListenerArgs,canvasMousemoveListener));
 		}
-	} else {
-		return new Lines;
 	}
-	/* else if (this.options.shader=='light') { // TODO remove options.shader references
-		return this.lightDirectionVector.getJsInterfaceLines(writeListenerArgs,canvasMousemoveListener);
-	}*/
+	if (options.light=='on') {
+		lines.a(this.lightDirectionVector.getJsInterfaceLines(writeListenerArgs,canvasMousemoveListener));
+	}
+	return lines;
 };
 
 module.exports=Illumination;

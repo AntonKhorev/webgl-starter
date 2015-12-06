@@ -337,4 +337,59 @@ describe('Illumination',function(){
 			]);
 		});
 	});
+	context('with global color and light input',function(){
+		var illumination=new Illumination({
+			'materialScope':'global',
+			'materialData':'one',
+			'light':'on',
+			'materialColor.r':0.9, 'materialColor.r.input':'constant', 'materialColor.r.min':0, 'materialColor.r.max':1,
+			'materialColor.g':0.7, 'materialColor.g.input':'constant', 'materialColor.g.min':0, 'materialColor.g.max':1,
+			'materialColor.b':0.5, 'materialColor.b.input':'constant', 'materialColor.b.min':0, 'materialColor.b.max':1,
+			'materialColor.a':1.0, 'materialColor.a.input':'constant', 'materialColor.a.min':0, 'materialColor.a.max':1,
+			'lightDirection.x':+2.0, 'lightDirection.x.input':'slider'  , 'lightDirection.x.min':-4, 'lightDirection.x.max':+4,
+			'lightDirection.y':-1.5, 'lightDirection.y.input':'constant', 'lightDirection.y.min':-4, 'lightDirection.y.max':+4,
+			'lightDirection.z':+0.5, 'lightDirection.z.input':'constant', 'lightDirection.z.min':-4, 'lightDirection.z.max':+4
+		});
+		it("has empty color attr list",function(){
+			assert.deepEqual(illumination.getColorAttrs(),[
+			]);
+		});
+		it("declares normal for vertex shader",function(){
+			assert.deepEqual(illumination.getGlslVertexDeclarationLines().data,[
+				"varying vec3 interpolatedNormal;" // TODO optimize this out after case w/ transforms passes
+			]);
+		});
+		it("outputs normal for vertex shader",function(){
+			assert.deepEqual(illumination.getGlslVertexOutputLines().data,[
+				"interpolatedNormal=vec3(0.0,0.0,1.0);"
+			]);
+		});
+		it("declares normal for fragment shader",function(){
+			assert.deepEqual(illumination.getGlslFragmentDeclarationLines().data,[
+				"uniform float lightDirectionX;",
+				"varying vec3 interpolatedNormal;"
+			]);
+		});
+		it("outputs diffuse-only lighting for fragment shader",function(){
+			assert.deepEqual(illumination.getGlslFragmentOutputLines().data,[
+				"vec3 N=normalize(interpolatedNormal);",
+				"if (!gl_FrontFacing) N=-N;",
+				"vec3 L=normalize(vec3(lightDirectionX,-1.500,+0.500));",
+				"gl_FragColor=vec4(vec3(0.900,0.700,0.500)*max(0.0,dot(L,N)),1.000);"
+			]);
+		});
+		it("returns light direction slider js interface",function(){
+			var canvasMousemoveListener=new listeners.CanvasMousemoveListener;
+			assert.deepEqual(illumination.getJsInterfaceLines([false,false],canvasMousemoveListener).data,[
+				"var lightDirectionXLoc=gl.getUniformLocation(program,'lightDirectionX');",
+				"function updateLightDirection() {",
+				"	gl.uniform1f(lightDirectionXLoc,parseFloat(document.getElementById('lightDirection.x').value));",
+				"}",
+				"updateLightDirection();",
+				"document.getElementById('lightDirection.x').addEventListener('change',updateLightDirection);"
+			]);
+			assert.deepEqual(canvasMousemoveListener.write(false,false).data,[
+			]);
+		});
+	});
 });
