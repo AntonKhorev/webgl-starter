@@ -13,6 +13,10 @@ var Illumination=function(options){
 	if (options.materialScope=='global') {
 		if (options.materialData=='one') {
 			this.colorVector=new GlslVector('color','materialColor','rgba',options);
+		} else if (options.light=='on') {
+			this.specularColorVector=new GlslVector('specularColor','materialSpecularColor','rgb',options);
+			this.diffuseColorVector =new GlslVector('diffuseColor' ,'materialDiffuseColor' ,'rgb',options);
+			this.ambientColorVector =new GlslVector('ambientColor' ,'materialAmbientColor' ,'rgb',options);
 		} else {
 			var ExtendedOptions=function(){
 				['Specular','Diffuse','Ambient'].forEach(function(colorType){
@@ -125,7 +129,7 @@ Illumination.prototype.getGlslFragmentOutputLines=function(){
 		colorA=vector.getGlslComponentsValue('a');
 		colorRGBA=vector.getGlslValue();
 	} else {
-		colorRGB="interpolatedColor.rgb";
+		colorRGB="interpolatedColor.rgb"; // TODO don't pass it as vec4 if light is on
 		colorA="interpolatedColor.a";
 		colorRGBA="interpolatedColor";
 	}
@@ -133,9 +137,24 @@ Illumination.prototype.getGlslFragmentOutputLines=function(){
 		lines.a(
 			"vec3 N=normalize(interpolatedNormal);",
 			"if (!gl_FrontFacing) N=-N;",
-			"vec3 L=normalize("+this.lightDirectionVector.getGlslValue()+");",
-			"gl_FragColor=vec4("+colorRGB+"*max(0.0,dot(L,N)),"+colorA+");"
+			"vec3 L=normalize("+this.lightDirectionVector.getGlslValue()+");"
 		);
+		if (options.materialData=='one') {
+			lines.a(
+				"gl_FragColor=vec4("+colorRGB+"*max(0.0,dot(L,N)),"+colorA+");"
+			);
+		} else {
+			lines.a(
+				"vec3 V=vec3(0.0,0.0,1.0);", // TODO pass view for perspective proj
+				"vec3 H=normalize(L+V);",
+				"float shininess=100.0;",
+				"gl_FragColor=vec4(",
+				"	+"+this.specularColorVector.getGlslValue()+"*pow(max(0.0,dot(H,N)),shininess)",
+				"	+"+this.diffuseColorVector.getGlslValue()+"*max(0.0,dot(L,N))",
+				"	+"+this.ambientColorVector.getGlslValue(),
+				",1.0);"
+			);
+		}
 	} else {
 		lines.a("gl_FragColor="+colorRGBA+";");
 	}
