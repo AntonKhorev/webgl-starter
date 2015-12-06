@@ -66,6 +66,13 @@ GlslVector.prototype.getGlslComponentsValue=function(selectedComponents){
 			}
 		}
 	}.bind(this);
+	var allSameConstant=function(){
+		if (!results[0][0]) return false;
+		var cmp=this.formatValue(this.values[results[0][1]]);
+		return results.every(function(result){
+			return result[0] && this.formatValue(this.values[result[1]])==cmp;
+		},this);
+	}.bind(this);
 	for (var j=0;j<selectedComponents.length;j++) {
 		var c=selectedComponents.charAt(j);
 		var i=this.components.indexOf(c);
@@ -91,7 +98,11 @@ GlslVector.prototype.getGlslComponentsValue=function(selectedComponents){
 			return showResult(results[0]);
 		}
 	} else {
-		return "vec"+selectedComponents.length+"("+results.map(showResult).join(",")+")";
+		if (allSameConstant()) {
+			return "vec"+selectedComponents.length+"("+showResult(results[0])+")";
+		} else {
+			return "vec"+selectedComponents.length+"("+results.map(showResult).join(",")+")";
+		}
 	}
 };
 // private:
