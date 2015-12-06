@@ -85,7 +85,7 @@ GlslVector.prototype.getGlslComponentsValue=function(selectedComponents){
 		}
 	}
 	if (results.length==1) {
-		if (this.modeVector && selectedComponents==this.components.join('')) {
+		if (this.modeVector && selectedComponents==this.components.slice(0,this.nVars).join('')) {
 			return this.varName;
 		} else {
 			return showResult(results[0]);

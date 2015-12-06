@@ -113,17 +113,17 @@ describe('GlslVector',function(){
 				"vec3(foo,+3.000)"
 			);
 		});
-		it('returns original vec2',function(){
+		it('returns original vec2 as components',function(){
 			assert.equal(vector.getGlslComponentsValue('xy'),
 				"foo"
 			);
 		});
-		it('returns original vec2 with swizzling',function(){
+		it('returns original vec2 with swizzling as components',function(){
 			assert.equal(vector.getGlslComponentsValue('yx'),
 				"foo.yx"
 			);
 		});
-		it('returns original vec2 component and constant',function(){
+		it('returns original vec2 component and constant as components',function(){
 			assert.equal(vector.getGlslComponentsValue('yz'),
 				"vec2(foo.y,+3.000)"
 			);
