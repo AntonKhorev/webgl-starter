@@ -1,8 +1,8 @@
 var Lines=require('../lines.js');
 var LodShape=require('./lodshape.js');
 
-var Gasket=function(elementIndexBits,shaderType,lod){
-	LodShape.call(this,elementIndexBits,shaderType,lod);
+var Gasket=function(elementIndexBits,hasReflections,hasColorsPerVertex,hasColorsPerFace,colorAttrs,lod){
+	LodShape.apply(this,arguments);
 };
 Gasket.prototype=Object.create(LodShape.prototype);
 Gasket.prototype.constructor=Gasket;
@@ -15,15 +15,15 @@ Gasket.prototype.getFaceVertexCount=function(lodSymbol){
 Gasket.prototype.getTotalVertexCount=function(lodSymbol){
 	return "Math.pow(3,"+lodSymbol+")*3";
 };
-Gasket.prototype.writeStoreShape=function(c,cv){
-	function writePushVertex() {
+Gasket.prototype.writeStoreShape=function(){
+	var writePushVertex=function(){
 		var lines=new Lines;
 		lines.a(
 			"vertices[nextIndexIntoVertices++]=p[0];",
 			"vertices[nextIndexIntoVertices++]=p[1];"
 		);
-		if (c) {
-			if (!this.usesElements() || this.shaderType=='face') {
+		if (this.hasColorsPerVertex || this.hasColorsPerFace) {
+			if (!this.usesElements() || this.hasColorsPerFace) {
 				lines.a(
 					"var c=colors[nextIndexIntoColors];"
 				);
@@ -32,6 +32,7 @@ Gasket.prototype.writeStoreShape=function(c,cv){
 					"var c=colors[nextElement%colors.length];"
 				);
 			}
+			// TODO more than 3 color components
 			lines.a(
 				"vertices[nextIndexIntoVertices++]=c[0];",
 				"vertices[nextIndexIntoVertices++]=c[1];",
@@ -42,7 +43,7 @@ Gasket.prototype.writeStoreShape=function(c,cv){
 			lines.a(
 				"return nextElement++;"
 			);
-		} else if (this.shaderType=='vertex') {
+		} else if (this.hasColorsPerVertex) {
 			lines.a(
 				"nextIndexIntoColors=(nextIndexIntoColors+1)%colors.length;"
 			);
@@ -51,14 +52,14 @@ Gasket.prototype.writeStoreShape=function(c,cv){
 			"function pushVertex(p) {",
 			"}"
 		);
-	}
-	function writeTriangle() {
+	}.bind(this);
+	var writeTriangle=function(){
 		var lines=new Lines;
 		lines.a(
 			"if (depth<=0) {"
 		);
 		if (!this.usesElements()) {
-			if (this.shaderType=='face') {
+			if (this.hasColorsPerFace) {
 				lines.a(
 					"	pushVertex(p0);",
 					"	pushVertex(p1);",
@@ -73,7 +74,7 @@ Gasket.prototype.writeStoreShape=function(c,cv){
 				);
 			}
 		} else {
-			if (this.shaderType=='face') {
+			if (this.hasColorsPerFace) {
 				lines.a(
 					"	pushElement(pushVertex(p0));",
 					"	pushElement(pushVertex(p1));",
@@ -104,7 +105,7 @@ Gasket.prototype.writeStoreShape=function(c,cv){
 				"	triangle(depth-1,p1,p12,p01);",
 				"	triangle(depth-1,p2,p20,p12);"
 			);
-		} else if (this.shaderType=='face') {
+		} else if (this.hasColorsPerFace) {
 			lines.a(
 				"	var es0=triangle(depth-1,p0,p01,p20);",
 				"	var es1=triangle(depth-1,p1,p12,p01);",
@@ -121,7 +122,7 @@ Gasket.prototype.writeStoreShape=function(c,cv){
 		lines.a(
 			"}"
 		);
-		if (!this.usesElements() || this.shaderType=='face') {
+		if (!this.usesElements() || this.hasColorsPerFace) {
 			return lines.wrap(
 				"function triangle(depth,p0,p1,p2) {",
 				"}"
@@ -132,8 +133,8 @@ Gasket.prototype.writeStoreShape=function(c,cv){
 				"}"
 			);
 		}
-	}
-	function writeInitialTriangleCall() {
+	}.bind(this);
+	var writeInitialTriangleCall=function(){
 		var lines=new Lines;
 		lines.a(
 			"shapeLod,",
@@ -141,7 +142,7 @@ Gasket.prototype.writeStoreShape=function(c,cv){
 			"[-Math.sin(2/3*Math.PI),Math.cos(2/3*Math.PI)],",
 			"[-Math.sin(4/3*Math.PI),Math.cos(4/3*Math.PI)]"
 		);
-		if (this.usesElements() && this.shaderType!='face') {
+		if (this.usesElements() && this.hasColorsPerFace) {
 			lines.t(
 				",","[null,null,null]"
 			);
@@ -150,18 +151,18 @@ Gasket.prototype.writeStoreShape=function(c,cv){
 			"triangle(",
 			");"
 		);
-	}
+	}.bind(this);
 	var lines=new Lines;
 	lines.a(
 		"var nextIndexIntoVertices=0;"
 	);
 	if (this.usesElements()) {
-	lines.a(
+		lines.a(
 			"var nextIndexIntoElements=0;",
 			"var nextElement=0;"
 		);
 	}
-	if (c) {
+	if (this.hasColorsPerVertex || this.hasColorsPerFace) {
 		lines.a(
 			"// p = position, c = color, e = element, es = elements",
 			"var colors=[",
@@ -171,7 +172,7 @@ Gasket.prototype.writeStoreShape=function(c,cv){
 			"	[1.0, 1.0, 0.0],",
 			"];"
 		);
-		if (!this.usesElements() || this.shaderType=='face') {
+		if (!this.usesElements() || this.hasColorsPerFace) {
 			lines.a(
 				"var nextIndexIntoColors=0;"
 			);
@@ -181,9 +182,7 @@ Gasket.prototype.writeStoreShape=function(c,cv){
 			"// p = position, e = element, es = elements"
 		);
 	}
-	lines.a(
-		writePushVertex.call(this)
-	);
+	lines.a(writePushVertex());
 	if (this.usesElements()) {
 		lines.a(
 			"function pushElement(e) {",
@@ -198,8 +197,8 @@ Gasket.prototype.writeStoreShape=function(c,cv){
 		"		(pa[1]+pb[1])/2,",
 		"	];",
 		"}",
-		writeTriangle.call(this),
-		writeInitialTriangleCall.call(this)
+		writeTriangle(),
+		writeInitialTriangleCall()
 	);
 	return lines;
 }

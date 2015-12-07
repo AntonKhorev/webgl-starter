@@ -1,8 +1,8 @@
 var Lines=require('../lines.js');
 var Shape=require('./shape.js');
 
-var LodShape=function(elementIndexBits,shaderType,lod){
-	Shape.call(this,elementIndexBits,shaderType);
+var LodShape=function(elementIndexBits,hasReflections,hasColorsPerVertex,hasColorsPerFace,colorAttrs,lod){
+	Shape.call(this,elementIndexBits,hasReflections,hasColorsPerVertex,hasColorsPerFace,colorAttrs);
 	this.lod=lod;
 	var maxLod=this.getMaxPossibleLod();
 	if (this.lod.value>maxLod) this.lod.value=maxLod;
@@ -14,7 +14,7 @@ LodShape.prototype.getMaxPossibleLod=function(){ // due to element index type
 	if (!this.usesElements() || this.elementIndexBits>=31) { // 1<<31 is a negative number, can't compare with it
 		return this.lod.max; // no need to limit lod if elements are not used or index type is large enough
 	}
-	var nVerticesFn = this.shaderType=='face'
+	var nVerticesFn = this.hasColorsPerFace
 		? this.getFaceVertexCount
 		: this.getDistinctVertexCount;
 	var indexLimit=1<<this.elementIndexBits;
@@ -29,9 +29,9 @@ LodShape.prototype.getMaxPossibleLod=function(){ // due to element index type
 // abstract LodShape.prototype.getDistinctVertexCount=function(lodSymbol){}; // # of distinct vertices where one vertex can be shared between different faces and output primitives
 // abstract LodShape.prototype.getFaceVertexCount=function(lodSymbol){}; // # of distinct (vertex,face) pairs that still can be shared between output primitives
 // abstract LodShape.prototype.getTotalVertexCount=function(lodSymbol){}; // # of vertices in output primitives = # of elements when element arrays are in use
-// abstract LodShape.prototype.writeStoreShape=function(c,cv){};
-LodShape.prototype.writeArraysAndBufferData=function(debugArrays,c,cv){
-	var nVerticesFn = this.shaderType=='face'
+// abstract LodShape.prototype.writeStoreShape=function(){};
+LodShape.prototype.writeArraysAndBufferData=function(debugArrays){
+	var nVerticesFn = this.hasColorsPerFace
 		? this.getFaceVertexCount
 		: this.getDistinctVertexCount;
 	var lines=new Lines;
@@ -87,7 +87,7 @@ LodShape.prototype.writeArraysAndBufferData=function(debugArrays,c,cv){
 		}
 	}
 	lines.a(
-		this.writeStoreShape(c,cv).indent(),
+		this.writeStoreShape().indent(),
 		this.writeBufferData().indent(),
 		"}"
 	);

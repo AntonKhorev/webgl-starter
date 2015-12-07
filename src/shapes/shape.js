@@ -3,7 +3,7 @@ var Lines=require('../lines.js');
 var Shape=function(elementIndexBits,hasReflections,hasColorsPerVertex,hasColorsPerFace,colorAttrs){
 	this.elementIndexBits=elementIndexBits; // 0 if don't want element arrays; 8, 16 or 32 bits per element index, limits lod of shape
 	this.hasNormals=(hasReflections && this.dim==3); // true = need normals, unless shape is flat
-	this.hasColorsPerVertex=hasColorsPerVertex;
+	this.hasColorsPerVertex=hasColorsPerVertex; // TODO support for both hasColorsPerVertex and hasColorsPerFace == true
 	this.hasColorsPerFace=hasColorsPerFace;
 	this.colorAttrs=colorAttrs; // array of color attribute structs {name,enabled,weight}
 };
