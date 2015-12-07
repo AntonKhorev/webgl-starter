@@ -14,30 +14,32 @@ Hat.prototype.writeMeshInit=function(){
 };
 Hat.prototype.writeMeshVertex=function(){
 	var lines=new Lines;
+	var iv=0;
 	lines.a(
 		"var r2=(x*x+y*y)/2;",
 		"var A=Math.exp(-r2)/Math.PI;",
 		"var z=A*(1-r2);",
-		"vertices[vertexOffset+0]=x*xyScale;",
-		"vertices[vertexOffset+1]=y*xyScale;",
-		"vertices[vertexOffset+2]=z;"
+		"vertices[vertexOffset+"+(iv++)+"]=x*xyScale;",
+		"vertices[vertexOffset+"+(iv++)+"]=y*xyScale;",
+		"vertices[vertexOffset+"+(iv++)+"]=z;"
 	);
 	if (this.hasNormals) {
 		lines.a(
 			"var normal=normalize([(z+A)*x/xyScale,(z+A)*y/xyScale,1]);",
-			"vertices[vertexOffset+3]=normal[0];",
-			"vertices[vertexOffset+4]=normal[1];",
-			"vertices[vertexOffset+5]=normal[2];"
+			"vertices[vertexOffset+"+(iv++)+"]=normal[0];",
+			"vertices[vertexOffset+"+(iv++)+"]=normal[1];",
+			"vertices[vertexOffset+"+(iv++)+"]=normal[2];"
 		);
-	} else if (this.hasColorsPerVertex || this.hasColorsPerFace) {
+	}
+	if (this.hasColorsPerVertex || this.hasColorsPerFace) {
 		lines.a(
 			((!this.usesElements() && !this.hasColorsPerFace)
 				?"var ic=((i+di)&1)*2+((j+dj)&1);"
 				:"var ic=(i&1)*2+(j&1);"
 			),
-			"vertices[vertexOffset+3]=colors[ic][0];",
-			"vertices[vertexOffset+4]=colors[ic][1];",
-			"vertices[vertexOffset+5]=colors[ic][2];"
+			"colors[ic].forEach(function(cc,icc){",
+			"	vertices[vertexOffset+"+(iv++)+"+icc]=cc;",
+			"});"
 		);
 	}
 	return lines;

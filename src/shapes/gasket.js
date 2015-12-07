@@ -33,8 +33,8 @@ Gasket.prototype.writeStoreShape=function(){
 				);
 			}
 			lines.t(
-				".forEach(function(c){",
-				"	vertices[nextIndexIntoVertices++]=c;",
+				".forEach(function(cc){",
+				"	vertices[nextIndexIntoVertices++]=cc;",
 				"});"
 			);
 		}
@@ -162,7 +162,7 @@ Gasket.prototype.writeStoreShape=function(){
 		);
 	}
 	if (this.hasColorsPerVertex || this.hasColorsPerFace) {
-		lines.a("// p = position, c = color, e = element, es = elements");
+		lines.a("// p = position, cc = color component, e = element, es = elements");
 		lines.a(this.writeColorData());
 		if (!this.usesElements() || this.hasColorsPerFace) {
 			lines.a(
