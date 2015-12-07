@@ -2,7 +2,7 @@ var Lines=require('../lines.js');
 var Colorgen=require('../colorgen.js');
 var Shape=require('./shape.js');
 
-var Square=function(){
+var Square=function(elementIndexBits,hasReflections,hasColorsPerVertex,hasColorsPerFace,colorAttrs){
 	Shape.apply(this,arguments);
 };
 Square.prototype=Object.create(Shape.prototype);
