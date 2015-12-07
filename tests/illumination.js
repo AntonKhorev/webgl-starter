@@ -33,11 +33,11 @@ describe('Illumination',function(){
 			]);
 		});
 		it("declares nothing for fragment shader",function(){
-			assert.deepEqual(illumination.getGlslFragmentDeclarationLines().data,[
+			assert.deepEqual(illumination.getGlslFragmentDeclarationLines(true).data,[
 			]);
 		});
 		it("outputs constant literal for fragment shader",function(){
-			assert.deepEqual(illumination.getGlslFragmentOutputLines(false).data,[
+			assert.deepEqual(illumination.getGlslFragmentOutputLines(true,false).data,[
 				"gl_FragColor=vec4(0.900,0.700,0.500,1.000);"
 			]);
 		});
@@ -78,12 +78,12 @@ describe('Illumination',function(){
 			]);
 		});
 		it("declares 1 uniform float for fragment shader",function(){
-			assert.deepEqual(illumination.getGlslFragmentDeclarationLines().data,[
+			assert.deepEqual(illumination.getGlslFragmentDeclarationLines(true).data,[
 				"uniform float colorR;"
 			]);
 		});
 		it("outputs literal with 1 variable for fragment shader",function(){
-			assert.deepEqual(illumination.getGlslFragmentOutputLines(false).data,[
+			assert.deepEqual(illumination.getGlslFragmentOutputLines(true,false).data,[
 				"gl_FragColor=vec4(colorR,0.700,0.500,1.000);"
 			]);
 		});
@@ -130,12 +130,12 @@ describe('Illumination',function(){
 			]);
 		});
 		it("declares color input for fragment shader",function(){
-			assert.deepEqual(illumination.getGlslFragmentDeclarationLines().data,[
+			assert.deepEqual(illumination.getGlslFragmentDeclarationLines(true).data,[
 				"varying vec4 interpolatedColor;"
 			]);
 		});
 		it("outputs color input for fragment shader",function(){
-			assert.deepEqual(illumination.getGlslFragmentOutputLines(false).data,[
+			assert.deepEqual(illumination.getGlslFragmentOutputLines(true,false).data,[
 				"gl_FragColor=interpolatedColor;"
 			]);
 		});
@@ -181,11 +181,11 @@ describe('Illumination',function(){
 			]);
 		});
 		it("declares nothing for fragment shader",function(){
-			assert.deepEqual(illumination.getGlslFragmentDeclarationLines().data,[
+			assert.deepEqual(illumination.getGlslFragmentDeclarationLines(true).data,[
 			]);
 		});
 		it("outputs constant literal for fragment shader",function(){
-			assert.deepEqual(illumination.getGlslFragmentOutputLines(false).data,[
+			assert.deepEqual(illumination.getGlslFragmentOutputLines(true,false).data,[
 				"gl_FragColor=vec4(0.700,0.500,0.300,1.000);"
 			]);
 		});
@@ -227,12 +227,12 @@ describe('Illumination',function(){
 			]);
 		});
 		it("declares uniform float (skipping unused specular color) for fragment shader",function(){
-			assert.deepEqual(illumination.getGlslFragmentDeclarationLines().data,[
+			assert.deepEqual(illumination.getGlslFragmentDeclarationLines(true).data,[
 				"uniform float ambientColorB;"
 			]);
 		});
 		it("outputs literal with 1 variable for fragment shader",function(){
-			assert.deepEqual(illumination.getGlslFragmentOutputLines(false).data,[
+			assert.deepEqual(illumination.getGlslFragmentOutputLines(true,false).data,[
 				"gl_FragColor=vec4(0.700,0.500,ambientColorB,1.000);"
 			]);
 		});
@@ -280,12 +280,12 @@ describe('Illumination',function(){
 			]);
 		});
 		it("declares uniform vec3 (skipping unused specular and diffuse colors) for fragment shader",function(){
-			assert.deepEqual(illumination.getGlslFragmentDeclarationLines().data,[
+			assert.deepEqual(illumination.getGlslFragmentDeclarationLines(true).data,[
 				"uniform vec3 ambientColor;"
 			]);
 		});
 		it("outputs literal with vec3 for fragment shader",function(){
-			assert.deepEqual(illumination.getGlslFragmentOutputLines(false).data,[
+			assert.deepEqual(illumination.getGlslFragmentOutputLines(true,false).data,[
 				"gl_FragColor=vec4(ambientColor,1.000);"
 			]);
 		});
@@ -321,12 +321,12 @@ describe('Illumination',function(){
 			]);
 		});
 		it("declares color input for fragment shader",function(){
-			assert.deepEqual(illumination.getGlslFragmentDeclarationLines().data,[
+			assert.deepEqual(illumination.getGlslFragmentDeclarationLines(true).data,[
 				"varying vec4 interpolatedColor;"
 			]);
 		});
 		it("outputs color input for fragment shader",function(){
-			assert.deepEqual(illumination.getGlslFragmentOutputLines(false).data,[
+			assert.deepEqual(illumination.getGlslFragmentOutputLines(true,false).data,[
 				"gl_FragColor=interpolatedColor;"
 			]);
 		});
@@ -400,12 +400,17 @@ describe('Illumination',function(){
 			]);
 		});
 		it("declares normal for fragment shader",function(){
-			assert.deepEqual(illumination.getGlslFragmentDeclarationLines().data,[
+			assert.deepEqual(illumination.getGlslFragmentDeclarationLines(true).data,[
+				"varying vec3 interpolatedNormal;"
+			]);
+		});
+		it("declares normal (and no view) for fragment shader",function(){
+			assert.deepEqual(illumination.getGlslFragmentDeclarationLines(false).data,[
 				"varying vec3 interpolatedNormal;"
 			]);
 		});
 		it("outputs diffuse-only lighting for fragment shader",function(){
-			assert.deepEqual(illumination.getGlslFragmentOutputLines(false).data,[
+			assert.deepEqual(illumination.getGlslFragmentOutputLines(true,false).data,[
 				"vec3 N=normalize(interpolatedNormal);",
 				"vec3 L=normalize(vec3(+2.000,-1.500,+0.500));",
 				"gl_FragColor=vec4(vec3(0.900,0.700,0.500)*max(0.0,dot(L,N)),1.000);"
@@ -453,13 +458,13 @@ describe('Illumination',function(){
 			]);
 		});
 		it("declares normal for fragment shader",function(){
-			assert.deepEqual(illumination.getGlslFragmentDeclarationLines().data,[
+			assert.deepEqual(illumination.getGlslFragmentDeclarationLines(true).data,[
 				"uniform float lightDirectionX;",
 				"varying vec3 interpolatedNormal;"
 			]);
 		});
 		it("outputs diffuse-only lighting for fragment shader",function(){
-			assert.deepEqual(illumination.getGlslFragmentOutputLines(false).data,[
+			assert.deepEqual(illumination.getGlslFragmentOutputLines(true,false).data,[
 				"vec3 N=normalize(interpolatedNormal);",
 				"vec3 L=normalize(vec3(lightDirectionX,-1.500,+0.500));",
 				"gl_FragColor=vec4(vec3(0.900,0.700,0.500)*max(0.0,dot(L,N)),1.000);"
@@ -530,12 +535,18 @@ describe('Illumination',function(){
 			]);
 		});
 		it("declares normal for fragment shader",function(){
-			assert.deepEqual(illumination.getGlslFragmentDeclarationLines().data,[
+			assert.deepEqual(illumination.getGlslFragmentDeclarationLines(true).data,[
+				"varying vec3 interpolatedNormal;"
+			]);
+		});
+		it("declares view and normal for fragment shader",function(){
+			assert.deepEqual(illumination.getGlslFragmentDeclarationLines(false).data,[
+				"varying vec3 interpolatedView;",
 				"varying vec3 interpolatedNormal;"
 			]);
 		});
 		it("outputs phong shading for fragment shader",function(){
-			assert.deepEqual(illumination.getGlslFragmentOutputLines(false).data,[
+			assert.deepEqual(illumination.getGlslFragmentOutputLines(true,false).data,[
 				"vec3 N=normalize(interpolatedNormal);",
 				"vec3 L=normalize(vec3(+2.000,-1.500,+0.500));",
 				"vec3 V=vec3(0.0,0.0,1.0);",
@@ -548,8 +559,22 @@ describe('Illumination',function(){
 				",1.0);"
 			]);
 		});
+		it("outputs phong shading for fragment shader",function(){
+			assert.deepEqual(illumination.getGlslFragmentOutputLines(false,false).data,[
+				"vec3 N=normalize(interpolatedNormal);",
+				"vec3 L=normalize(vec3(+2.000,-1.500,+0.500));",
+				"vec3 V=normalize(interpolatedView);",
+				"vec3 H=normalize(L+V);",
+				"float shininess=100.0;",
+				"gl_FragColor=vec4(",
+				"	+vec3(0.900,0.700,0.500)*pow(max(0.0,dot(H,N)),shininess)",
+				"	+vec3(0.800,0.600,0.400)*max(0.0,dot(L,N))",
+				"	+vec3(0.700,0.500,0.300)",
+				",1.0);"
+			]);
+		});
 		it("outputs phong shading + normal flip for fragment shader",function(){
-			assert.deepEqual(illumination.getGlslFragmentOutputLines(true).data,[
+			assert.deepEqual(illumination.getGlslFragmentOutputLines(true,true).data,[
 				"vec3 N=normalize(interpolatedNormal);",
 				"if (!gl_FrontFacing) N=-N;",
 				"vec3 L=normalize(vec3(+2.000,-1.500,+0.500));",
@@ -610,13 +635,13 @@ describe('Illumination',function(){
 			]);
 		});
 		it("declares normal and color component for fragment shader",function(){
-			assert.deepEqual(illumination.getGlslFragmentDeclarationLines().data,[
+			assert.deepEqual(illumination.getGlslFragmentDeclarationLines(true).data,[
 				"varying vec3 interpolatedNormal;",
 				"uniform float specularColorR;",
 			]);
 		});
 		it("outputs phong shading for fragment shader",function(){
-			assert.deepEqual(illumination.getGlslFragmentOutputLines(false).data,[
+			assert.deepEqual(illumination.getGlslFragmentOutputLines(true,false).data,[
 				"vec3 N=normalize(interpolatedNormal);",
 				"vec3 L=normalize(vec3(+2.000,-1.500,+0.500));",
 				"vec3 V=vec3(0.0,0.0,1.0);",
@@ -685,7 +710,7 @@ describe('Illumination',function(){
 			]);
 		});
 		it("declares normal and 3 color inputs for fragment shader",function(){
-			assert.deepEqual(illumination.getGlslFragmentDeclarationLines().data,[
+			assert.deepEqual(illumination.getGlslFragmentDeclarationLines(true).data,[
 				"varying vec3 interpolatedNormal;",
 				"varying vec3 interpolatedSpecularColor;",
 				"varying vec3 interpolatedDiffuseColor;",
@@ -693,7 +718,7 @@ describe('Illumination',function(){
 			]);
 		});
 		it("outputs phong shading for fragment shader",function(){
-			assert.deepEqual(illumination.getGlslFragmentOutputLines(false).data,[
+			assert.deepEqual(illumination.getGlslFragmentOutputLines(true,false).data,[
 				"vec3 N=normalize(interpolatedNormal);",
 				"vec3 L=normalize(vec3(+2.000,-1.500,+0.500));",
 				"vec3 V=vec3(0.0,0.0,1.0);",

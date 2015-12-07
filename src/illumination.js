@@ -126,9 +126,12 @@ Illumination.prototype.getGlslVertexOutputLines=function(eyeAtInfinity,hasNormal
 	}
 	return lines;
 };
-Illumination.prototype.getGlslFragmentDeclarationLines=function(){
+Illumination.prototype.getGlslFragmentDeclarationLines=function(eyeAtInfinity){
 	var options=this.options;
 	var lines=new Lines;
+	if (this.wantsTransformedPosition(eyeAtInfinity)) {
+		lines.a("varying vec3 interpolatedView;");
+	}
 	if (options.light=='on') {
 		lines.a(
 			this.lightDirectionVector.getGlslDeclarationLines(),
@@ -158,7 +161,7 @@ Illumination.prototype.getGlslFragmentDeclarationLines=function(){
 	}
 	return lines;
 };
-Illumination.prototype.getGlslFragmentOutputLines=function(twoSided){
+Illumination.prototype.getGlslFragmentOutputLines=function(eyeAtInfinity,twoSided){
 	var options=this.options;
 	var lines=new Lines;
 	var colorRGB,colorA,colorRGBA;
@@ -186,8 +189,12 @@ Illumination.prototype.getGlslFragmentOutputLines=function(twoSided){
 				"gl_FragColor=vec4("+colorRGB+"*max(0.0,dot(L,N)),"+colorA+");"
 			);
 		} else {
+			if (this.wantsTransformedPosition(eyeAtInfinity)) {
+				lines.a("vec3 V=normalize(interpolatedView);");
+			} else {
+				lines.a("vec3 V=vec3(0.0,0.0,1.0);");
+			}
 			lines.a(
-				"vec3 V=vec3(0.0,0.0,1.0);", // TODO pass view for perspective proj
 				"vec3 H=normalize(L+V);",
 				"float shininess=100.0;"
 			);

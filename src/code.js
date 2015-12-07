@@ -279,34 +279,17 @@ module.exports=function(options,i18n){
 	}
 	function generateFragmentShaderLines() {
 		var lines=new Lines;
+		var eyeAtInfinity=options.projection=='ortho';
 		lines.a(
 			"precision mediump float;"
 		);
 		lines.a(
-			illumination.getGlslFragmentDeclarationLines(),
-			illumination.getGlslFragmentOutputLines(shape.twoSided).wrap(
+			illumination.getGlslFragmentDeclarationLines(eyeAtInfinity),
+			illumination.getGlslFragmentOutputLines(eyeAtInfinity,shape.twoSided).wrap(
 				"void main() {",
 				"}"
 			)
 		);
-		/*
-		if (options.shader=='light') {
-			if (options.projection=='perspective') {
-				lines.a(
-					"varying vec3 interpolatedView;"
-				);
-			}
-			if (options.projection=='ortho') {
-				lines.a(
-					"	vec3 V=vec3( 0.0, 0.0,+1.0);"
-				);
-			} else if (options.projection=='perspective') {
-				lines.a(
-					"	vec3 V=normalize(interpolatedView);"
-				);
-			}
-		}
-		*/
 		return lines;
 	}
 	function generateHtmlControlMessageLines() {
