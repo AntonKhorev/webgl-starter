@@ -8,7 +8,7 @@ module.exports=function(id){ // fake temporary i18n
 		'options.background.none': 'None (transparent)',
 		'options.background.solid': 'Solid color',
 		'options.materialScope': 'Material color',
-		'options.materialScope.global': 'One for whole shape',
+		'options.materialScope.global': 'Set for whole shape',
 		'options.materialScope.vertex': 'Set for each shape vertex',
 		'options.materialScope.face': 'Set for each shape face',
 		'options.materialData': 'Material color data',

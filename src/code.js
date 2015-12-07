@@ -77,8 +77,8 @@ module.exports=function(options,i18n){
 		);
 		var needAspectUniform=options.hasInputsFor('canvas');
 		var needAspectConstant=!needAspectUniform && options['canvas.width']!=options['canvas.height'];
-		var needTransformedPosition=(options.light=='on' && options.projection=='perspective');
-
+		var eyeAtInfinity=options.projection=='ortho';
+		var needTransformedPosition=illumination.wantsTransformedPosition(eyeAtInfinity);
 		function generateMain() {
 			var lines=new Lines();
 			['x','y','z'].forEach(function(d){
@@ -215,15 +215,6 @@ module.exports=function(options,i18n){
 			lines.t(
 				";"
 			);
-			/*
-			if (options.shader=='light') {
-				if (options.projection=='perspective') {
-					lines.a(
-						"interpolatedView=-vec3(transformedPosition);" // for specular highlights
-					);
-				}
-			}
-			*/
 			var writeNormalTransformLines=function(){
 				var lines=new Lines("");
 				options.transformOrder.forEach(function(transformName){
@@ -257,11 +248,10 @@ module.exports=function(options,i18n){
 				return lines;
 			};
 			lines.a(
-				illumination.getGlslVertexOutputLines(shape.hasNormals,writeNormalTransformLines())
+				illumination.getGlslVertexOutputLines(eyeAtInfinity,shape.hasNormals,writeNormalTransformLines())
 			);
 			return lines;
 		}
-
 		var lines=new Lines();
 		if (needAspectUniform) {
 			lines.a("uniform float aspect;");
@@ -279,15 +269,8 @@ module.exports=function(options,i18n){
 		} else {
 			lines.a("attribute vec4 position;");
 		}
-		/*
-		if (options.shader=='light') {
-			if (options.projection=='perspective') {
-				lines.a("varying vec3 interpolatedView;"); // for specular highlights
-			}
-		}
-		*/
 		lines.a(
-			illumination.getGlslVertexDeclarationLines(shape.dim>2),
+			illumination.getGlslVertexDeclarationLines(eyeAtInfinity,shape.dim>2),
 			"void main() {",
 			generateMain().indent(),
 			"}"

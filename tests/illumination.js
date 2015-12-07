@@ -18,12 +18,18 @@ describe('Illumination',function(){
 			assert.deepEqual(illumination.getColorAttrs(),[
 			]);
 		});
+		it("doesn't want transformed position for finite view distance",function(){
+			assert.equal(illumination.wantsTransformedPosition(false),false);
+		});
+		it("doesn't want transformed position for infinite view distance",function(){
+			assert.equal(illumination.wantsTransformedPosition(true),false);
+		});
 		it("declares nothing for vertex shader",function(){
-			assert.deepEqual(illumination.getGlslVertexDeclarationLines(false).data,[
+			assert.deepEqual(illumination.getGlslVertexDeclarationLines(true,false).data,[
 			]);
 		});
 		it("outputs nothing for vertex shader",function(){
-			assert.deepEqual(illumination.getGlslVertexOutputLines(false,new Lines("")).data,[
+			assert.deepEqual(illumination.getGlslVertexOutputLines(true,false,new Lines("")).data,[
 			]);
 		});
 		it("declares nothing for fragment shader",function(){
@@ -57,12 +63,18 @@ describe('Illumination',function(){
 			assert.deepEqual(illumination.getColorAttrs(),[
 			]);
 		});
+		it("doesn't want transformed position for finite view distance",function(){
+			assert.equal(illumination.wantsTransformedPosition(false),false);
+		});
+		it("doesn't want transformed position for infinite view distance",function(){
+			assert.equal(illumination.wantsTransformedPosition(true),false);
+		});
 		it("declares nothing for vertex shader",function(){
-			assert.deepEqual(illumination.getGlslVertexDeclarationLines(false).data,[
+			assert.deepEqual(illumination.getGlslVertexDeclarationLines(true,false).data,[
 			]);
 		});
 		it("outputs nothing for vertex shader",function(){
-			assert.deepEqual(illumination.getGlslVertexOutputLines(false,new Lines("")).data,[
+			assert.deepEqual(illumination.getGlslVertexOutputLines(true,false,new Lines("")).data,[
 			]);
 		});
 		it("declares 1 uniform float for fragment shader",function(){
@@ -100,14 +112,20 @@ describe('Illumination',function(){
 				{name:"color",enabled:true,weight:1.0}
 			]);
 		});
+		it("doesn't want transformed position for finite view distance",function(){
+			assert.equal(illumination.wantsTransformedPosition(false),false);
+		});
+		it("doesn't want transformed position for infinite view distance",function(){
+			assert.equal(illumination.wantsTransformedPosition(true),false);
+		});
 		it("declares color input/output for vertex shader",function(){
-			assert.deepEqual(illumination.getGlslVertexDeclarationLines(false).data,[
+			assert.deepEqual(illumination.getGlslVertexDeclarationLines(true,false).data,[
 				"attribute vec4 color;",
 				"varying vec4 interpolatedColor;"
 			]);
 		});
 		it("outputs color input for vertex shader",function(){
-			assert.deepEqual(illumination.getGlslVertexOutputLines(false,new Lines("")).data,[
+			assert.deepEqual(illumination.getGlslVertexOutputLines(true,false,new Lines("")).data,[
 				"interpolatedColor=color;"
 			]);
 		});
@@ -148,12 +166,18 @@ describe('Illumination',function(){
 			assert.deepEqual(illumination.getColorAttrs(),[
 			]);
 		});
+		it("doesn't want transformed position for finite view distance",function(){
+			assert.equal(illumination.wantsTransformedPosition(false),false);
+		});
+		it("doesn't want transformed position for infinite view distance",function(){
+			assert.equal(illumination.wantsTransformedPosition(true),false);
+		});
 		it("declares nothing for vertex shader",function(){
-			assert.deepEqual(illumination.getGlslVertexDeclarationLines(false).data,[
+			assert.deepEqual(illumination.getGlslVertexDeclarationLines(true,false).data,[
 			]);
 		});
 		it("outputs nothing for vertex shader",function(){
-			assert.deepEqual(illumination.getGlslVertexOutputLines(false,new Lines("")).data,[
+			assert.deepEqual(illumination.getGlslVertexOutputLines(true,false,new Lines("")).data,[
 			]);
 		});
 		it("declares nothing for fragment shader",function(){
@@ -189,11 +213,17 @@ describe('Illumination',function(){
 			'materialAmbientColor.b' :0.3, 'materialAmbientColor.b.input' :'slider',   'materialAmbientColor.b.min' :0, 'materialAmbientColor.b.max' :1
 		});
 		it("declares nothing for vertex shader",function(){
-			assert.deepEqual(illumination.getGlslVertexDeclarationLines(false).data,[
+			assert.deepEqual(illumination.getGlslVertexDeclarationLines(true,false).data,[
 			]);
 		});
+		it("doesn't want transformed position for finite view distance",function(){
+			assert.equal(illumination.wantsTransformedPosition(false),false);
+		});
+		it("doesn't want transformed position for infinite view distance",function(){
+			assert.equal(illumination.wantsTransformedPosition(true),false);
+		});
 		it("outputs nothing for vertex shader",function(){
-			assert.deepEqual(illumination.getGlslVertexOutputLines(false,new Lines("")).data,[
+			assert.deepEqual(illumination.getGlslVertexOutputLines(true,false,new Lines("")).data,[
 			]);
 		});
 		it("declares uniform float (skipping unused specular color) for fragment shader",function(){
@@ -236,11 +266,17 @@ describe('Illumination',function(){
 			'materialAmbientColor.b' :0.3, 'materialAmbientColor.b.input' :'slider',   'materialAmbientColor.b.min' :0, 'materialAmbientColor.b.max' :1
 		});
 		it("declares nothing for vertex shader",function(){
-			assert.deepEqual(illumination.getGlslVertexDeclarationLines(false).data,[
+			assert.deepEqual(illumination.getGlslVertexDeclarationLines(true,false).data,[
 			]);
 		});
+		it("doesn't want transformed position for finite view distance",function(){
+			assert.equal(illumination.wantsTransformedPosition(false),false);
+		});
+		it("doesn't want transformed position for infinite view distance",function(){
+			assert.equal(illumination.wantsTransformedPosition(true),false);
+		});
 		it("outputs nothing for vertex shader",function(){
-			assert.deepEqual(illumination.getGlslVertexOutputLines(false,new Lines("")).data,[
+			assert.deepEqual(illumination.getGlslVertexOutputLines(true,false,new Lines("")).data,[
 			]);
 		});
 		it("declares uniform vec3 (skipping unused specular and diffuse colors) for fragment shader",function(){
@@ -267,14 +303,20 @@ describe('Illumination',function(){
 				{name:"ambientColor" ,enabled:true ,weight:0.2}
 			]);
 		});
+		it("doesn't want transformed position for finite view distance",function(){
+			assert.equal(illumination.wantsTransformedPosition(false),false);
+		});
+		it("doesn't want transformed position for infinite view distance",function(){
+			assert.equal(illumination.wantsTransformedPosition(true),false);
+		});
 		it("declares color input (ambient only) and 1 color output for vertex shader",function(){
-			assert.deepEqual(illumination.getGlslVertexDeclarationLines(false).data,[
+			assert.deepEqual(illumination.getGlslVertexDeclarationLines(true,false).data,[
 				"attribute vec4 ambientColor;",
 				"varying vec4 interpolatedColor;"
 			]);
 		});
 		it("outputs ambient color input for vertex shader",function(){
-			assert.deepEqual(illumination.getGlslVertexOutputLines(false,new Lines("")).data,[
+			assert.deepEqual(illumination.getGlslVertexOutputLines(true,false,new Lines("")).data,[
 				"interpolatedColor=ambientColor;"
 			]);
 		});
@@ -306,19 +348,35 @@ describe('Illumination',function(){
 			assert.deepEqual(illumination.getColorAttrs(),[
 			]);
 		});
+		it("doesn't want transformed position for finite view distance",function(){
+			assert.equal(illumination.wantsTransformedPosition(false),false);
+		});
+		it("doesn't want transformed position for infinite view distance",function(){
+			assert.equal(illumination.wantsTransformedPosition(true),false);
+		});
 		it("declares normal for vertex shader",function(){
-			assert.deepEqual(illumination.getGlslVertexDeclarationLines(false).data,[
+			assert.deepEqual(illumination.getGlslVertexDeclarationLines(true,false).data,[
+				"varying vec3 interpolatedNormal;" // TODO optimize this out after case w/ transforms passes
+			]);
+		});
+		it("declares normal (and no view) for vertex shader",function(){
+			assert.deepEqual(illumination.getGlslVertexDeclarationLines(false,false).data,[
 				"varying vec3 interpolatedNormal;" // TODO optimize this out after case w/ transforms passes
 			]);
 		});
 		it("declares shape normal and output normal for vertex shader",function(){
-			assert.deepEqual(illumination.getGlslVertexDeclarationLines(true).data,[
+			assert.deepEqual(illumination.getGlslVertexDeclarationLines(true,true).data,[
 				"attribute vec3 normal;",
 				"varying vec3 interpolatedNormal;"
 			]);
 		});
 		it("outputs normal for vertex shader",function(){
-			assert.deepEqual(illumination.getGlslVertexOutputLines(false,new Lines("")).data,[
+			assert.deepEqual(illumination.getGlslVertexOutputLines(true,false,new Lines("")).data,[
+				"interpolatedNormal=vec3(0.0,0.0,1.0);"
+			]);
+		});
+		it("outputs normal (and no view) for vertex shader",function(){
+			assert.deepEqual(illumination.getGlslVertexOutputLines(false,false,new Lines("")).data,[
 				"interpolatedNormal=vec3(0.0,0.0,1.0);"
 			]);
 		});
@@ -330,14 +388,14 @@ describe('Illumination',function(){
 				"	magic",
 				")"
 			);
-			assert.deepEqual(illumination.getGlslVertexOutputLines(false,tr).data,[
+			assert.deepEqual(illumination.getGlslVertexOutputLines(true,false,tr).data,[
 				"interpolatedNormal=vec3(0.0,0.0,1.0)*do(",
 				"	magic",
 				");"
 			]);
 		});
 		it("outputs shape normal for vertex shader",function(){
-			assert.deepEqual(illumination.getGlslVertexOutputLines(true,new Lines("")).data,[
+			assert.deepEqual(illumination.getGlslVertexOutputLines(true,true,new Lines("")).data,[
 				"interpolatedNormal=normal;"
 			]);
 		});
@@ -378,13 +436,19 @@ describe('Illumination',function(){
 			assert.deepEqual(illumination.getColorAttrs(),[
 			]);
 		});
+		it("doesn't want transformed position for finite view distance",function(){
+			assert.equal(illumination.wantsTransformedPosition(false),false);
+		});
+		it("doesn't want transformed position for infinite view distance",function(){
+			assert.equal(illumination.wantsTransformedPosition(true),false);
+		});
 		it("declares normal for vertex shader",function(){
-			assert.deepEqual(illumination.getGlslVertexDeclarationLines(false).data,[
+			assert.deepEqual(illumination.getGlslVertexDeclarationLines(true,false).data,[
 				"varying vec3 interpolatedNormal;" // TODO optimize this out after case w/ transforms passes
 			]);
 		});
 		it("outputs normal for vertex shader",function(){
-			assert.deepEqual(illumination.getGlslVertexOutputLines(false,new Lines("")).data,[
+			assert.deepEqual(illumination.getGlslVertexOutputLines(true,false,new Lines("")).data,[
 				"interpolatedNormal=vec3(0.0,0.0,1.0);"
 			]);
 		});
@@ -437,13 +501,31 @@ describe('Illumination',function(){
 			assert.deepEqual(illumination.getColorAttrs(),[
 			]);
 		});
+		it("wants transformed position for finite view distance",function(){
+			assert.equal(illumination.wantsTransformedPosition(false),true);
+		});
+		it("doesn't want transformed position for infinite view distance",function(){
+			assert.equal(illumination.wantsTransformedPosition(true),false);
+		});
 		it("declares normal for vertex shader",function(){
-			assert.deepEqual(illumination.getGlslVertexDeclarationLines(false).data,[
+			assert.deepEqual(illumination.getGlslVertexDeclarationLines(true,false).data,[
+				"varying vec3 interpolatedNormal;" // TODO optimize this out after case w/ transforms passes
+			]);
+		});
+		it("declares view and normal for vertex shader",function(){
+			assert.deepEqual(illumination.getGlslVertexDeclarationLines(false,false).data,[
+				"varying vec3 interpolatedView;",
 				"varying vec3 interpolatedNormal;" // TODO optimize this out after case w/ transforms passes
 			]);
 		});
 		it("outputs normal for vertex shader",function(){
-			assert.deepEqual(illumination.getGlslVertexOutputLines(false,new Lines("")).data,[
+			assert.deepEqual(illumination.getGlslVertexOutputLines(true,false,new Lines("")).data,[
+				"interpolatedNormal=vec3(0.0,0.0,1.0);"
+			]);
+		});
+		it("outputs view and normal for vertex shader",function(){
+			assert.deepEqual(illumination.getGlslVertexOutputLines(false,false,new Lines("")).data,[
+				"interpolatedView=-transformedPosition.xyz;",
 				"interpolatedNormal=vec3(0.0,0.0,1.0);"
 			]);
 		});
@@ -511,13 +593,19 @@ describe('Illumination',function(){
 			assert.deepEqual(illumination.getColorAttrs(),[
 			]);
 		});
+		it("wants transformed position for finite view distance",function(){
+			assert.equal(illumination.wantsTransformedPosition(false),true);
+		});
+		it("doesn't want transformed position for infinite view distance",function(){
+			assert.equal(illumination.wantsTransformedPosition(true),false);
+		});
 		it("declares normal for vertex shader",function(){
-			assert.deepEqual(illumination.getGlslVertexDeclarationLines(false).data,[
+			assert.deepEqual(illumination.getGlslVertexDeclarationLines(true,false).data,[
 				"varying vec3 interpolatedNormal;" // TODO optimize this out after case w/ transforms passes
 			]);
 		});
 		it("outputs normal for vertex shader",function(){
-			assert.deepEqual(illumination.getGlslVertexOutputLines(false,new Lines("")).data,[
+			assert.deepEqual(illumination.getGlslVertexOutputLines(true,false,new Lines("")).data,[
 				"interpolatedNormal=vec3(0.0,0.0,1.0);"
 			]);
 		});
@@ -571,8 +659,14 @@ describe('Illumination',function(){
 				{name:"ambientColor" ,enabled:true,weight:0.2}
 			]);
 		});
+		it("wants transformed position for finite view distance",function(){
+			assert.equal(illumination.wantsTransformedPosition(false),true);
+		});
+		it("doesn't want transformed position for infinite view distance",function(){
+			assert.equal(illumination.wantsTransformedPosition(true),false);
+		});
 		it("declares 3 color inputs/outputs for vertex shader",function(){
-			assert.deepEqual(illumination.getGlslVertexDeclarationLines(false).data,[
+			assert.deepEqual(illumination.getGlslVertexDeclarationLines(true,false).data,[
 				"varying vec3 interpolatedNormal;",
 				"attribute vec3 specularColor;",
 				"attribute vec3 diffuseColor;",
@@ -583,7 +677,7 @@ describe('Illumination',function(){
 			]);
 		});
 		it("outputs normal and 3 color inputs for vertex shader",function(){
-			assert.deepEqual(illumination.getGlslVertexOutputLines(false,new Lines("")).data,[
+			assert.deepEqual(illumination.getGlslVertexOutputLines(true,false,new Lines("")).data,[
 				"interpolatedNormal=vec3(0.0,0.0,1.0);",
 				"interpolatedSpecularColor=specularColor;",
 				"interpolatedDiffuseColor=diffuseColor;",

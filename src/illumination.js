@@ -55,9 +55,16 @@ Illumination.prototype.getColorAttrs=function(){
 		}
 	}
 };
-Illumination.prototype.getGlslVertexDeclarationLines=function(hasNormalAttr){
+Illumination.prototype.wantsTransformedPosition=function(eyeAtInfinity){
+	var options=this.options;
+	return !eyeAtInfinity && options.light=='on' && options.materialData!='one';
+};
+Illumination.prototype.getGlslVertexDeclarationLines=function(eyeAtInfinity,hasNormalAttr){
 	var options=this.options;
 	var lines=new Lines;
+	if (this.wantsTransformedPosition(eyeAtInfinity)) {
+		lines.a("varying vec3 interpolatedView;");
+	}
 	if (options.light=='on') {
 		if (hasNormalAttr) {
 			lines.a("attribute vec3 normal;");
@@ -86,9 +93,12 @@ Illumination.prototype.getGlslVertexDeclarationLines=function(hasNormalAttr){
 	}
 	return lines;
 };
-Illumination.prototype.getGlslVertexOutputLines=function(hasNormalAttr,normalTransformLines){
+Illumination.prototype.getGlslVertexOutputLines=function(eyeAtInfinity,hasNormalAttr,normalTransformLines){
 	var options=this.options;
 	var lines=new Lines;
+	if (this.wantsTransformedPosition(eyeAtInfinity)) {
+		lines.a("interpolatedView=-transformedPosition.xyz;");
+	}
 	if (options.light=='on') {
 		lines.a("interpolatedNormal=");
 		if (hasNormalAttr) {
