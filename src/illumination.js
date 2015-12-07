@@ -109,6 +109,10 @@ Illumination.prototype.getGlslFragmentDeclarationLines=function(){
 		if (options.materialData=='one') {
 			lines.a(this.colorVector.getGlslDeclarationLines());
 		} else {
+			if (options.light=='on') {
+				lines.a(this.specularColorVector.getGlslDeclarationLines());
+				lines.a(this.diffuseColorVector.getGlslDeclarationLines());
+			}
 			lines.a(this.ambientColorVector.getGlslDeclarationLines());
 		}
 	} else {
@@ -167,6 +171,10 @@ Illumination.prototype.getJsInterfaceLines=function(writeListenerArgs,canvasMous
 		if (options.materialData=='one') {
 			lines.a(this.colorVector.getJsInterfaceLines(writeListenerArgs,canvasMousemoveListener));
 		} else {
+			if (options.light=='on') {
+				lines.a(this.specularColorVector.getJsInterfaceLines(writeListenerArgs,canvasMousemoveListener));
+				lines.a(this.diffuseColorVector.getJsInterfaceLines(writeListenerArgs,canvasMousemoveListener));
+			}
 			lines.a(this.ambientColorVector.getJsInterfaceLines(writeListenerArgs,canvasMousemoveListener));
 		}
 	}
