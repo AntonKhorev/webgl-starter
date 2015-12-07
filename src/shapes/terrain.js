@@ -1,13 +1,13 @@
 var Lines=require('../lines.js');
 var Mesh=require('./mesh.js');
 
-var Terrain=function(elementIndexBits,shaderType,lod){
-	Mesh.call(this,elementIndexBits,shaderType,lod);
+var Terrain=function(elementIndexBits,hasReflections,hasColorsPerVertex,hasColorsPerFace,colorAttrs,lod){
+	Mesh.apply(this,arguments);
 };
 Terrain.prototype=Object.create(Mesh.prototype);
 Terrain.prototype.constructor=Terrain;
 Terrain.prototype.writeMeshInit=function(){
-	var noFaces=(this.usesElements()&&this.shaderType!='face');
+	var noFaces=(this.usesElements() && !this.hasColorsPerFace);
 	var lines=new Lines;
 	lines.a(
 		"var xyRange=1/Math.sqrt(2);",
@@ -68,8 +68,8 @@ Terrain.prototype.writeMeshInit=function(){
 	}
 	return lines;
 };
-Terrain.prototype.writeMeshVertex=function(c,cv){
-	var noFaces=(this.usesElements()&&this.shaderType!='face');
+Terrain.prototype.writeMeshVertex=function(){
+	var noFaces=(this.usesElements() && !this.hasColorsPerFace);
 	var lines=new Lines;
 	lines.a(
 		"vertices[vertexOffset+0]=x;",
@@ -79,7 +79,8 @@ Terrain.prototype.writeMeshVertex=function(c,cv){
 			:"vertices[vertexOffset+2]=vertices[zOffset((i+di)&mask,(j+dj)&mask)];"
 		)
 	);
-	if (this.getNumbersPerNormal()) {
+	var iv=3;
+	if (this.hasNormals) {
 		lines.a(
 			"var d=4*xyRange/res;",
 			"var normal=normalize([",
@@ -92,21 +93,12 @@ Terrain.prototype.writeMeshVertex=function(c,cv){
 				:"	(vertices[zOffset((i+di-1)&mask,(j+dj)&mask)]-vertices[zOffset((i+di+1)&mask,(j+dj)&mask)])/d,"
 			),
 			"1]);",
-			"vertices[vertexOffset+3]=normal[0];",
-			"vertices[vertexOffset+4]=normal[1];",
-			"vertices[vertexOffset+5]=normal[2];"
-		);
-	} else if (c) {
-		lines.a(
-			((!this.usesElements() && this.shaderType!='face')
-				?"var ic=((i+di)&1)*2+((j+dj)&1);"
-				:"var ic=(i&1)*2+(j&1);"
-			),
-			"vertices[vertexOffset+3]=colors[ic][0];",
-			"vertices[vertexOffset+4]=colors[ic][1];",
-			"vertices[vertexOffset+5]=colors[ic][2];"
+			"vertices[vertexOffset+"+(iv++)+"]=normal[0];",
+			"vertices[vertexOffset+"+(iv++)+"]=normal[1];",
+			"vertices[vertexOffset+"+(iv++)+"]=normal[2];"
 		);
 	}
+	lines.a(this.writeMeshVertexColors(iv));
 	return lines;
 };
 

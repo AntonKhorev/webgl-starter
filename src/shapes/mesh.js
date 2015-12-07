@@ -16,6 +16,21 @@ Mesh.prototype.getFaceVertexCount=function(lodSymbol){
 Mesh.prototype.getTotalVertexCount=function(lodSymbol){
 	return "Math.pow((1<<"+lodSymbol+"),2)*6";
 };
+Mesh.prototype.writeMeshVertexColors=function(iv){
+	if (this.hasColorsPerVertex || this.hasColorsPerFace) {
+		return new Lines(
+			((!this.usesElements() && !this.hasColorsPerFace)
+				?"var ic=((i+di)&1)*2+((j+dj)&1);"
+				:"var ic=(i&1)*2+(j&1);"
+			),
+			"colors[ic].forEach(function(cc,icc){",
+			"	vertices[vertexOffset+"+iv+"+icc]=cc;",
+			"});"
+		);
+	} else {
+		return new Lines;
+	}
+};
 // abstract Mesh.prototype.writeMeshInit=function(){};
 // abstract Mesh.prototype.writeMeshVertex=function(){};
 Mesh.prototype.writeStoreShape=function(){

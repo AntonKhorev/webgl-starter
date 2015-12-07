@@ -31,17 +31,7 @@ Hat.prototype.writeMeshVertex=function(){
 			"vertices[vertexOffset+"+(iv++)+"]=normal[2];"
 		);
 	}
-	if (this.hasColorsPerVertex || this.hasColorsPerFace) {
-		lines.a(
-			((!this.usesElements() && !this.hasColorsPerFace)
-				?"var ic=((i+di)&1)*2+((j+dj)&1);"
-				:"var ic=(i&1)*2+(j&1);"
-			),
-			"colors[ic].forEach(function(cc,icc){",
-			"	vertices[vertexOffset+"+(iv++)+"+icc]=cc;",
-			"});"
-		);
-	}
+	lines.a(this.writeMeshVertexColors(iv));
 	return lines;
 };
 
