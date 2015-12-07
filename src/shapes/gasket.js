@@ -25,24 +25,16 @@ Gasket.prototype.writeStoreShape=function(){
 		if (this.hasColorsPerVertex || this.hasColorsPerFace) {
 			if (!this.usesElements() || this.hasColorsPerFace) {
 				lines.a(
-					"var c=colors[nextIndexIntoColors];"
+					"colors[nextIndexIntoColors]"
 				);
 			} else {
 				lines.a(
-					"var c=colors[nextElement%colors.length];"
+					"colors[nextElement%colors.length]"
 				);
 			}
-			// TODO more than 3 color components
-			/*
-			lines.a(
-				"vertices[nextIndexIntoVertices++]=c[0];",
-				"vertices[nextIndexIntoVertices++]=c[1];",
-				"vertices[nextIndexIntoVertices++]=c[2];"
-			);
-			*/
-			lines.a(
-				"c.forEach(function(cc){",
-				"	vertices[nextIndexIntoVertices++]=cc;",
+			lines.t(
+				".forEach(function(c){",
+				"	vertices[nextIndexIntoVertices++]=c;",
 				"});"
 			);
 		}
@@ -149,7 +141,7 @@ Gasket.prototype.writeStoreShape=function(){
 			"[-Math.sin(2/3*Math.PI),Math.cos(2/3*Math.PI)],",
 			"[-Math.sin(4/3*Math.PI),Math.cos(4/3*Math.PI)]"
 		);
-		if (this.usesElements() && this.hasColorsPerFace) {
+		if (this.usesElements() && !this.hasColorsPerFace) {
 			lines.t(
 				",","[null,null,null]"
 			);
