@@ -1,8 +1,8 @@
 var Lines=require('../lines.js');
 var LodShape=require('./lodshape.js');
 
-var Mesh=function(elementIndexBits,shaderType,lod){
-	LodShape.call(this,elementIndexBits,shaderType,lod);
+var Mesh=function(elementIndexBits,hasReflections,hasColorsPerVertex,hasColorsPerFace,colorAttrs,lod){
+	LodShape.apply(this,arguments);
 };
 Mesh.prototype=Object.create(LodShape.prototype);
 Mesh.prototype.constructor=Mesh;
@@ -17,8 +17,8 @@ Mesh.prototype.getTotalVertexCount=function(lodSymbol){
 	return "Math.pow((1<<"+lodSymbol+"),2)*6";
 };
 // abstract Mesh.prototype.writeMeshInit=function(){};
-// abstract Mesh.prototype.writeMeshVertex=function(c,cv){};
-Mesh.prototype.writeStoreShape=function(c,cv){
+// abstract Mesh.prototype.writeMeshVertex=function(){};
+Mesh.prototype.writeStoreShape=function(){
 	var lines=new Lines;
 	lines.a(
 		"var res=(1<<shapeLod);"
@@ -29,7 +29,7 @@ Mesh.prototype.writeStoreShape=function(c,cv){
 			"	return (i*res+j)*6+k;",
 			"}"
 		);
-	} else if (this.shaderType=='face') {
+	} else if (this.hasColorsPerFace) {
 		lines.a(
 			"function vertexElement(i,j,k) {",
 			"	return (i*res+j)*4+k;",
@@ -42,7 +42,7 @@ Mesh.prototype.writeStoreShape=function(c,cv){
 			"}"
 		);
 	}
-	if (this.getNumbersPerNormal()) {
+	if (this.hasNormals) {
 		lines.a(
 			"function normalize(v) {",
 			"	var l=Math.sqrt(v[0]*v[0]+v[1]*v[1]+v[2]*v[2]);",
@@ -50,15 +50,8 @@ Mesh.prototype.writeStoreShape=function(c,cv){
 			"}"
 		);
 	}
-	if (c) {
-		lines.a(
-			"var colors=[",
-			"	[1.0, 1.0, 0.0],",
-			"	[1.0, 0.0, 0.0],",
-			"	[0.0, 1.0, 0.0],",
-			"	[0.0, 0.0, 1.0],",
-			"];"
-		);
+	if (this.hasColorsPerVertex || this.hasColorsPerFace) {
+		lines.a(this.writeColorData());
 	}
 	lines.a(
 		this.writeMeshInit()
@@ -73,12 +66,12 @@ Mesh.prototype.writeStoreShape=function(c,cv){
 			"			var y=(i+di)/res*xyRange*2-xyRange;",
 			"			var x=(j+dj)/res*xyRange*2-xyRange;",
 			"			var vertexOffset=vertexElement(i,j,k)*"+this.getNumbersPerVertex()+";",
-			this.writeMeshVertex(c,cv).indent(3),
+			this.writeMeshVertex().indent(3),
 			"		}",
 			"	}",
 			"}"
 		);
-	} else if (this.shaderType=='face') {
+	} else if (this.hasColorsPerFace) {
 		lines.a(
 			"var i,j;",
 			"for (i=0;i<res;i++) {",
@@ -89,7 +82,7 @@ Mesh.prototype.writeStoreShape=function(c,cv){
 			"			var y=(i+di)/res*xyRange*2-xyRange;",
 			"			var x=(j+dj)/res*xyRange*2-xyRange;",
 			"			var vertexOffset=vertexElement(i,j,k)*"+this.getNumbersPerVertex()+";",
-			this.writeMeshVertex(c,cv).indent(3),
+			this.writeMeshVertex().indent(3),
 			"		}",
 			"	}",
 			"}",
@@ -113,7 +106,7 @@ Mesh.prototype.writeStoreShape=function(c,cv){
 			"	for (j=0;j<=res;j++) {",
 			"		var x=j/res*xyRange*2-xyRange;",
 			"		var vertexOffset=vertexElement(i,j)*"+this.getNumbersPerVertex()+";",
-			this.writeMeshVertex(c,cv).indent(2),
+			this.writeMeshVertex().indent(2),
 			"	}",
 			"}",
 			"for (i=0;i<res;i++) {",

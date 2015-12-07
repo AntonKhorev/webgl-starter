@@ -1,4 +1,5 @@
 var Lines=require('../lines.js');
+var Colorgen=require('../colorgen.js');
 var Shape=require('./shape.js');
 
 var LodShape=function(elementIndexBits,hasReflections,hasColorsPerVertex,hasColorsPerFace,colorAttrs,lod){
@@ -25,6 +26,17 @@ LodShape.prototype.getMaxPossibleLod=function(){ // due to element index type
 		}
 	}
 	// TODO fail here
+};
+LodShape.prototype.writeColorData=function(){
+	var lines=new Lines;
+	var colorgen=new Colorgen(this.colorAttrs,0);
+	for (var i=0;i<4;i++) {
+		lines.a("["+colorgen.getNextColorString().slice(1,-1)+"],");
+	}
+	return lines.wrap(
+		"var colors=[",
+		"];"
+	);
 };
 // abstract LodShape.prototype.getDistinctVertexCount=function(lodSymbol){}; // # of distinct vertices where one vertex can be shared between different faces and output primitives
 // abstract LodShape.prototype.getFaceVertexCount=function(lodSymbol){}; // # of distinct (vertex,face) pairs that still can be shared between output primitives

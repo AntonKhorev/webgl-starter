@@ -1,5 +1,4 @@
 var Lines=require('../lines.js');
-var Colorgen=require('../colorgen.js');
 var LodShape=require('./lodshape.js');
 
 var Gasket=function(elementIndexBits,hasReflections,hasColorsPerVertex,hasColorsPerFace,colorAttrs,lod){
@@ -17,14 +16,6 @@ Gasket.prototype.getTotalVertexCount=function(lodSymbol){
 	return "Math.pow(3,"+lodSymbol+")*3";
 };
 Gasket.prototype.writeStoreShape=function(){
-	var writeColorData=function(){
-		var lines=new Lines;
-		var colorgen=new Colorgen(this.colorAttrs,0);
-		for (var i=0;i<4;i++) {
-			lines.a("["+colorgen.getNextColorString().slice(1,-1)+"],");
-		}
-		return lines;
-	}.bind(this);
 	var writePushVertex=function(){
 		var lines=new Lines;
 		lines.a(
@@ -179,23 +170,8 @@ Gasket.prototype.writeStoreShape=function(){
 		);
 	}
 	if (this.hasColorsPerVertex || this.hasColorsPerFace) {
-		/*
-		lines.a(
-			"// p = position, c = color, e = element, es = elements",
-			"var colors=[",
-			"	[1.0, 0.0, 0.0],",
-			"	[0.0, 1.0, 0.0],",
-			"	[0.0, 0.0, 1.0],",
-			"	[1.0, 1.0, 0.0],",
-			"];"
-		);
-		*/
 		lines.a("// p = position, c = color, e = element, es = elements");
-		lines.a(writeColorData().wrap(
-			"var colors=[",
-			"];"
-		));
-
+		lines.a(this.writeColorData());
 		if (!this.usesElements() || this.hasColorsPerFace) {
 			lines.a(
 				"var nextIndexIntoColors=0;"
