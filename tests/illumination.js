@@ -544,4 +544,63 @@ describe('Illumination',function(){
 			]);
 		});
 	});
+	context('with local phong shading',function(){
+		var illumination=new Illumination({
+			'materialScope':'vertex',
+			'materialData':'sda',
+			'light':'on',
+			'lightDirection.x':+2.0, 'lightDirection.x.input':'constant', 'lightDirection.x.min':-4, 'lightDirection.x.max':+4,
+			'lightDirection.y':-1.5, 'lightDirection.y.input':'constant', 'lightDirection.y.min':-4, 'lightDirection.y.max':+4,
+			'lightDirection.z':+0.5, 'lightDirection.z.input':'constant', 'lightDirection.z.min':-4, 'lightDirection.z.max':+4
+		});
+		it("has color attr list with 3 enabled entries",function(){
+			assert.deepEqual(illumination.getColorAttrs(),[
+				{name:"specularColor",enabled:true,weight:0.4},
+				{name:"diffuseColor" ,enabled:true,weight:0.4},
+				{name:"ambientColor" ,enabled:true,weight:0.2}
+			]);
+		});
+		it("declares 3 color inputs/outputs for vertex shader",function(){
+			assert.deepEqual(illumination.getGlslVertexDeclarationLines(false).data,[
+				"varying vec3 interpolatedNormal;",
+				"attribute vec3 specularColor;",
+				"attribute vec3 diffuseColor;",
+				"attribute vec3 ambientColor;",
+				"varying vec3 interpolatedSpecularColor;",
+				"varying vec3 interpolatedDiffuseColor;",
+				"varying vec3 interpolatedAmbientColor;"
+			]);
+		});
+		it("outputs normal and 3 color inputs for vertex shader",function(){
+			assert.deepEqual(illumination.getGlslVertexOutputLines(false,new Lines("")).data,[
+				"interpolatedNormal=vec3(0.0,0.0,1.0);",
+				"interpolatedSpecularColor=specularColor;",
+				"interpolatedDiffuseColor=diffuseColor;",
+				"interpolatedAmbientColor=ambientColor;"
+			]);
+		});
+		it("declares normal and 3 color inputs for fragment shader",function(){
+			assert.deepEqual(illumination.getGlslFragmentDeclarationLines().data,[
+				"varying vec3 interpolatedNormal;",
+				"varying vec3 interpolatedSpecularColor;",
+				"varying vec3 interpolatedDiffuseColor;",
+				"varying vec3 interpolatedAmbientColor;"
+			]);
+		});
+		it("outputs phong shading for fragment shader",function(){
+			assert.deepEqual(illumination.getGlslFragmentOutputLines().data,[
+				"vec3 N=normalize(interpolatedNormal);",
+				"if (!gl_FrontFacing) N=-N;",
+				"vec3 L=normalize(vec3(+2.000,-1.500,+0.500));",
+				"vec3 V=vec3(0.0,0.0,1.0);",
+				"vec3 H=normalize(L+V);",
+				"float shininess=100.0;",
+				"gl_FragColor=vec4(",
+				"	+interpolatedSpecularColor*pow(max(0.0,dot(H,N)),shininess)",
+				"	+interpolatedDiffuseColor*max(0.0,dot(L,N))",
+				"	+interpolatedAmbientColor",
+				",1.0);"
+			]);
+		});
+	});
 });
