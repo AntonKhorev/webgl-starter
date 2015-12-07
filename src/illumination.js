@@ -148,7 +148,7 @@ Illumination.prototype.getGlslFragmentDeclarationLines=function(){
 	}
 	return lines;
 };
-Illumination.prototype.getGlslFragmentOutputLines=function(){
+Illumination.prototype.getGlslFragmentOutputLines=function(twoSided){
 	var options=this.options;
 	var lines=new Lines;
 	var colorRGB,colorA,colorRGBA;
@@ -166,11 +166,11 @@ Illumination.prototype.getGlslFragmentOutputLines=function(){
 		colorRGBA="interpolatedColor";
 	}
 	if (options.light=='on') {
-		lines.a(
-			"vec3 N=normalize(interpolatedNormal);",
-			"if (!gl_FrontFacing) N=-N;",
-			"vec3 L=normalize("+this.lightDirectionVector.getGlslValue()+");"
-		);
+		lines.a("vec3 N=normalize(interpolatedNormal);");
+		if (twoSided) {
+			lines.a("if (!gl_FrontFacing) N=-N;");
+		}
+		lines.a("vec3 L=normalize("+this.lightDirectionVector.getGlslValue()+");");
 		if (options.materialData=='one') {
 			lines.a(
 				"gl_FragColor=vec4("+colorRGB+"*max(0.0,dot(L,N)),"+colorA+");"

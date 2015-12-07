@@ -301,29 +301,18 @@ module.exports=function(options,i18n){
 		);
 		lines.a(
 			illumination.getGlslFragmentDeclarationLines(),
-			illumination.getGlslFragmentOutputLines().wrap(
+			illumination.getGlslFragmentOutputLines(shape.twoSided).wrap(
 				"void main() {",
 				"}"
 			)
 		);
 		/*
 		if (options.shader=='light') {
-			lines.a(
-				lightDirectionVector.getGlslDeclarationLines()
-			);
 			if (options.projection=='perspective') {
 				lines.a(
 					"varying vec3 interpolatedView;"
 				);
 			}
-			lines.a(
-				"varying vec3 interpolatedNormal;",
-				"void main() {",
-				"	vec3 ambientColor=vec3(0.2,0.2,0.2);",
-				"	vec3 diffuseColor=vec3(0.4,0.4,0.4);",
-				"	vec3 specularColor=vec3(0.4,0.4,0.4);",
-				"	float shininess=100.0;"
-			);
 			if (options.projection=='ortho') {
 				lines.a(
 					"	vec3 V=vec3( 0.0, 0.0,+1.0);"
@@ -333,24 +322,6 @@ module.exports=function(options,i18n){
 					"	vec3 V=normalize(interpolatedView);"
 				);
 			}
-			lines.a(
-				"	vec3 N=normalize(interpolatedNormal);"
-			);
-			if (shape.twoSided) {
-				lines.a(
-					"	if (!gl_FrontFacing) N=-N;"
-				);
-			}
-			lines.a(
-				"	vec3 L=normalize("+lightDirectionVector.getGlslValue()+");",
-				"	vec3 H=normalize(L+V);",
-				"	gl_FragColor=vec4(",
-				"		ambientColor",
-				"		+diffuseColor*max(0.0,dot(L,N))",
-				"		+specularColor*pow(max(0.0,dot(H,N)),shininess)",
-				"	,1.0);",
-				"}"
-			);
 		}
 		*/
 		return lines;
