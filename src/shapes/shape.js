@@ -72,25 +72,48 @@ Shape.prototype.writeInit=function(debugArrays){
 	lines.a(
 		this.writeArraysAndBufferData(debugArrays)
 	);
-	var offset=0;
-	var writeAttr=function(attrName,attrEnabled,size){
-		if (attrEnabled) {
-			lines.a(
-				"var "+attrName+"Loc=gl.getAttribLocation(program,'"+attrName+"');",
-				"gl.vertexAttribPointer(",
-				"	"+attrName+"Loc,"+size+",gl.FLOAT,false,",
-				"	Float32Array.BYTES_PER_ELEMENT*"+this.getNumbersPerVertex()+",",
-				"	Float32Array.BYTES_PER_ELEMENT*"+offset,
-				");",
-				"gl.enableVertexAttribArray("+attrName+"Loc);"
-			);
-		} else {
-			lines.a(
-				"// attribute "+attrName+" disabled"
-			);
+	var writeVertexAttribArrays=function(attrs){
+		var allEnabled=true;
+		var arrayLines=new Lines;
+		attrs.forEach(function(attr){
+			var size=attr[0];
+			var name=attr[1];
+			var enabled=attr[2];
+			if (enabled) {
+				arrayLines.a("["+size+",'"+name+"'],");
+			} else {
+				arrayLines.a("["+size+",null], // attribute "+name+" disabled");
+				allEnabled=false;
+			}
+		})
+		var foreachEnableLines=new Lines(
+			"var loc=gl.getAttribLocation(program,name);",
+			"gl.vertexAttribPointer(",
+			"	loc,size,gl.FLOAT,false,",
+			"	Float32Array.BYTES_PER_ELEMENT*bufferStride,",
+			"	Float32Array.BYTES_PER_ELEMENT*bufferOffset",
+			");",
+			"gl.enableVertexAttribArray(loc);"
+		);
+		if (!allEnabled) {
+			foreachEnableLines.wrap("if (name!==null) {","}");
 		}
-		offset+=size;
+		var foreachLines=new Lines(
+			"var size=attr[0];",
+			"var name=attr[1];",
+			foreachEnableLines,
+			"bufferOffset+=size;"
+		);
+		lines.a(
+			"var bufferStride="+this.getNumbersPerVertex()+";",
+			"var bufferOffset=0;",
+			arrayLines.wrap("[","]")
+		);
+		lines.t(
+			foreachLines.wrap(".forEach(function(attr){","});")
+		);
 	}.bind(this);
+
 	if (!this.hasNormals && this.colorAttrs.length<=0) {
 		lines.a(
 			"var positionLoc=gl.getAttribLocation(program,'position');",
@@ -98,13 +121,14 @@ Shape.prototype.writeInit=function(debugArrays){
 			"gl.enableVertexAttribArray(positionLoc);"
 		);
 	} else {
-		writeAttr('position',true,this.dim);
-		if (this.hasNormals) {
-			writeAttr('normal',true,3);
-		}
-		this.colorAttrs.forEach(function(attr){
-			writeAttr(attr.name,attr.enabled,3);
-		});
+		writeVertexAttribArrays(
+			[[this.dim,'position',true]].concat(
+				this.hasNormals?[[3,'normal',true]]:[],
+				this.colorAttrs.map(function(attr){
+					return [3,attr.name,attr.enabled];
+				})
+			)
+		);
 	}
 	return lines;
 };
