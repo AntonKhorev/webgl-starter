@@ -7,6 +7,7 @@
 This is a javascript library intended to be used on a web page that contains a *WebGL* example generator and provides the user interface for it.
 The user interface consists of dropdown selectors and numeric inputs to tune the generated code, which is presented below the inputs.
 The generated code is another web page that is supposed to be either saved by the user or opened in a new browser window.
+The code looks as if it was hand-written.
 
 ## Usage
 
@@ -83,6 +84,7 @@ Some of the examples used here are based on:
 1. [*Interactive Computer Graphics with WebGL* course][esangel-course] by Edward Angel
 2. Edward Angel, Dave Shreiner. *Interactive Computer Graphics, A top-down approach with WebGL*: [source code examples][esangel-code] from this book
 3. [Mozilla Developer Network WebGL tutorial][mdn]
+4. Code samples in [*Blinn–Phong shading model* Wikipedia article](https://en.wikipedia.org/w/index.php?title=Blinn%E2%80%93Phong_shading_model&oldid=689232543)
 
 [demo-en-base]: http://antonkhorev.github.io/webgl-starter/en/base/
 [lib-css]: http://antonkhorev.github.io/webgl-starter/lib/webgl-starter.css
