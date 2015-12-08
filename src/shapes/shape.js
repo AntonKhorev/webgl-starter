@@ -73,6 +73,11 @@ Shape.prototype.writeInit=function(debugArrays){
 		this.writeArraysAndBufferData(debugArrays)
 	);
 	var writeVertexAttribArrays=function(attrs){
+		var cmpSize=attrs[0][0];
+		var allSameSize=attrs.every(function(attr){
+			var size=attr[0];
+			return size==cmpSize;
+		});
 		var allEnabled=true;
 		var arrayLines=new Lines;
 		attrs.forEach(function(attr){
@@ -80,29 +85,45 @@ Shape.prototype.writeInit=function(debugArrays){
 			var name=attr[1];
 			var enabled=attr[2];
 			if (enabled) {
-				arrayLines.a("["+size+",'"+name+"'],");
+				arrayLines.a(allSameSize
+					? "'"+name+"',"
+					: "["+size+",'"+name+"'],"
+				);
 			} else {
-				arrayLines.a("["+size+",null], // attribute "+name+" disabled");
+				arrayLines.a(allSameSize
+					? "null,"
+					: "["+size+",null],"
+				);
+				arrayLines.t(" // attribute "+name+" disabled");
 				allEnabled=false;
 			}
 		})
 		var foreachEnableLines=new Lines(
-			"var loc=gl.getAttribLocation(program,name);",
+			"var attrLoc=gl.getAttribLocation(program,attrName);",
 			"gl.vertexAttribPointer(",
-			"	loc,size,gl.FLOAT,false,",
+			"	attrLoc,attrSize,gl.FLOAT,false,",
 			"	Float32Array.BYTES_PER_ELEMENT*bufferStride,",
 			"	Float32Array.BYTES_PER_ELEMENT*bufferOffset",
 			");",
-			"gl.enableVertexAttribArray(loc);"
+			"gl.enableVertexAttribArray(attrLoc);"
 		);
 		if (!allEnabled) {
 			foreachEnableLines.wrap("if (name!==null) {","}");
 		}
-		var foreachLines=new Lines(
-			"var size=attr[0];",
-			"var name=attr[1];",
+		var foreachLines=new Lines();
+		if (allSameSize) {
+			foreachLines.a(
+				"var attrSize="+cmpSize+";"
+			);
+		} else {
+			foreachLines.a(
+				"var attrSize=attr[0];",
+				"var attrName=attr[1];"
+			);
+		}
+		foreachLines.a(
 			foreachEnableLines,
-			"bufferOffset+=size;"
+			"bufferOffset+=attrSize;"
 		);
 		lines.a(
 			"var bufferStride="+this.getNumbersPerVertex()+";",
@@ -110,10 +131,9 @@ Shape.prototype.writeInit=function(debugArrays){
 			arrayLines.wrap("[","]")
 		);
 		lines.t(
-			foreachLines.wrap(".forEach(function(attr){","});")
+			foreachLines.wrap(".forEach(function("+(allSameSize?"attrName":"attr")+"){","});")
 		);
 	}.bind(this);
-
 	if (!this.hasNormals && this.colorAttrs.length<=0) {
 		lines.a(
 			"var positionLoc=gl.getAttribLocation(program,'position');",
