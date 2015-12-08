@@ -10,6 +10,7 @@ var Illumination=function(options){
 	// options.materialData!='one': s/d/a colors
 	// options.light=='off'
 	// options.light!='off'
+	// options.light=='blinn'
 	if (options.materialScope=='global') {
 		if (options.materialData=='one') {
 			this.colorVector=new GlslVector('color','materialColor','rgba',options);
@@ -196,18 +197,24 @@ Illumination.prototype.getGlslFragmentOutputLines=function(eyeAtInfinity,twoSide
 			} else {
 				lines.a("vec3 V=vec3(0.0,0.0,1.0);");
 			}
-			lines.a(
-				"vec3 H=normalize(L+V);",
-				"float shininess=100.0;"
-			);
+			var specularDotArgs="H,N";
+			var shininessCorrection="";
+			if (options.light=='blinn') {
+				lines.a("vec3 H=normalize(L+V);");
+			} else {
+				lines.a("vec3 R=reflect(-L,N);");
+				specularDotArgs="R,V";
+				shininessCorrection="/4.0";
+			}
+			lines.a("float shininess=100.0;");
 			lines.a((options.materialScope=='global'
 				? new Lines(
-					"+"+this.specularColorVector.getGlslValue()+"*pow(max(0.0,dot(H,N)),shininess)",
+					"+"+this.specularColorVector.getGlslValue()+"*pow(max(0.0,dot("+specularDotArgs+")),shininess"+shininessCorrection+")",
 					"+"+this.diffuseColorVector.getGlslValue()+"*max(0.0,dot(L,N))",
 					"+"+this.ambientColorVector.getGlslValue()
 				)
 				: new Lines(
-					"+interpolatedSpecularColor*pow(max(0.0,dot(H,N)),shininess)",
+					"+interpolatedSpecularColor*pow(max(0.0,dot("+specularDotArgs+")),shininess"+shininessCorrection+")",
 					"+interpolatedDiffuseColor*max(0.0,dot(L,N))",
 					"+interpolatedAmbientColor"
 				)

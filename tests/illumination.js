@@ -484,7 +484,7 @@ describe('Illumination',function(){
 			]);
 		});
 	});
-	context('with global phong shading',function(){
+	context('with global blinn-phong shading',function(){
 		var illumination=new Illumination({
 			'materialScope':'global',
 			'materialData':'sda',
@@ -573,7 +573,7 @@ describe('Illumination',function(){
 				",1.0);"
 			]);
 		});
-		it("outputs phong shading + normal flip for fragment shader",function(){
+		it("outputs blinn-phong shading + normal flip for fragment shader",function(){
 			assert.deepEqual(illumination.getGlslFragmentOutputLines(true,true).data,[
 				"vec3 N=normalize(interpolatedNormal);",
 				"if (!gl_FrontFacing) N=-N;",
@@ -596,7 +596,7 @@ describe('Illumination',function(){
 			]);
 		});
 	});
-	context('with global phong shading with input',function(){
+	context('with global blinn-phong shading with input',function(){
 		var illumination=new Illumination({
 			'materialScope':'global',
 			'materialData':'sda',
@@ -640,7 +640,7 @@ describe('Illumination',function(){
 				"uniform float specularColorR;",
 			]);
 		});
-		it("outputs phong shading for fragment shader",function(){
+		it("outputs blinn-phong shading for fragment shader",function(){
 			assert.deepEqual(illumination.getGlslFragmentOutputLines(true,false).data,[
 				"vec3 N=normalize(interpolatedNormal);",
 				"vec3 L=normalize(vec3(+2.000,-1.500,+0.500));",
@@ -668,7 +668,7 @@ describe('Illumination',function(){
 			]);
 		});
 	});
-	context('with local phong shading',function(){
+	context('with local blinn-phong shading',function(){
 		var illumination=new Illumination({
 			'materialScope':'vertex',
 			'materialData':'sda',
@@ -717,7 +717,7 @@ describe('Illumination',function(){
 				"varying vec3 interpolatedAmbientColor;"
 			]);
 		});
-		it("outputs phong shading for fragment shader",function(){
+		it("outputs blinn-phong shading for fragment shader",function(){
 			assert.deepEqual(illumination.getGlslFragmentOutputLines(true,false).data,[
 				"vec3 N=normalize(interpolatedNormal);",
 				"vec3 L=normalize(vec3(+2.000,-1.500,+0.500));",
@@ -726,6 +726,30 @@ describe('Illumination',function(){
 				"float shininess=100.0;",
 				"gl_FragColor=vec4(",
 				"	+interpolatedSpecularColor*pow(max(0.0,dot(H,N)),shininess)",
+				"	+interpolatedDiffuseColor*max(0.0,dot(L,N))",
+				"	+interpolatedAmbientColor",
+				",1.0);"
+			]);
+		});
+	});
+	context('with local phong shading',function(){
+		var illumination=new Illumination({
+			'materialScope':'vertex',
+			'materialData':'sda',
+			'light':'phong',
+			'lightDirection.x':+2.0, 'lightDirection.x.input':'constant', 'lightDirection.x.min':-4, 'lightDirection.x.max':+4,
+			'lightDirection.y':-1.5, 'lightDirection.y.input':'constant', 'lightDirection.y.min':-4, 'lightDirection.y.max':+4,
+			'lightDirection.z':+0.5, 'lightDirection.z.input':'constant', 'lightDirection.z.min':-4, 'lightDirection.z.max':+4
+		});
+		it("outputs phong shading for fragment shader",function(){
+			assert.deepEqual(illumination.getGlslFragmentOutputLines(true,false).data,[
+				"vec3 N=normalize(interpolatedNormal);",
+				"vec3 L=normalize(vec3(+2.000,-1.500,+0.500));",
+				"vec3 V=vec3(0.0,0.0,1.0);",
+				"vec3 R=reflect(-L,N);",
+				"float shininess=100.0;",
+				"gl_FragColor=vec4(",
+				"	+interpolatedSpecularColor*pow(max(0.0,dot(R,V)),shininess/4.0)",
 				"	+interpolatedDiffuseColor*max(0.0,dot(L,N))",
 				"	+interpolatedAmbientColor",
 				",1.0);"
