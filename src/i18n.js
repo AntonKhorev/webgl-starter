@@ -26,9 +26,10 @@ module.exports=function(id){ // fake temporary i18n
 		'options.elements.8': 'with 8-bit index',
 		'options.elements.16': 'with 16-bit index',
 		'options.elements.32': 'with 32-bit index',
-		'options.light': 'Light',
+		'options.light': 'Light', // directional if on
 		'options.light.off': 'off',
-		'options.light.on': 'on', // directional
+		'options.light.phong': 'on with Phong reflections', // wp: Phong reflection model
+		'options.light.blinn': 'on with Blinn–Phong reflections', // wp: Blinn–Phong shading model
 		'options.projection': 'Projection',
 		'options.projection.ortho': 'orthogonal',
 		'options.projection.perspective': 'perspective',

@@ -335,7 +335,7 @@ describe('Illumination',function(){
 		var illumination=new Illumination({
 			'materialScope':'global',
 			'materialData':'one',
-			'light':'on',
+			'light':'blinn',
 			'materialColor.r':0.9, 'materialColor.r.input':'constant', 'materialColor.r.min':0, 'materialColor.r.max':1,
 			'materialColor.g':0.7, 'materialColor.g.input':'constant', 'materialColor.g.min':0, 'materialColor.g.max':1,
 			'materialColor.b':0.5, 'materialColor.b.input':'constant', 'materialColor.b.min':0, 'materialColor.b.max':1,
@@ -428,7 +428,7 @@ describe('Illumination',function(){
 		var illumination=new Illumination({
 			'materialScope':'global',
 			'materialData':'one',
-			'light':'on',
+			'light':'blinn',
 			'materialColor.r':0.9, 'materialColor.r.input':'constant', 'materialColor.r.min':0, 'materialColor.r.max':1,
 			'materialColor.g':0.7, 'materialColor.g.input':'constant', 'materialColor.g.min':0, 'materialColor.g.max':1,
 			'materialColor.b':0.5, 'materialColor.b.input':'constant', 'materialColor.b.min':0, 'materialColor.b.max':1,
@@ -488,7 +488,7 @@ describe('Illumination',function(){
 		var illumination=new Illumination({
 			'materialScope':'global',
 			'materialData':'sda',
-			'light':'on',
+			'light':'blinn',
 			'materialSpecularColor.r':0.9, 'materialSpecularColor.r.input':'constant', 'materialSpecularColor.r.min':0, 'materialSpecularColor.r.max':1,
 			'materialSpecularColor.g':0.7, 'materialSpecularColor.g.input':'constant', 'materialSpecularColor.g.min':0, 'materialSpecularColor.g.max':1,
 			'materialSpecularColor.b':0.5, 'materialSpecularColor.b.input':'constant', 'materialSpecularColor.b.min':0, 'materialSpecularColor.b.max':1,
@@ -600,7 +600,7 @@ describe('Illumination',function(){
 		var illumination=new Illumination({
 			'materialScope':'global',
 			'materialData':'sda',
-			'light':'on',
+			'light':'blinn',
 			'materialSpecularColor.r':0.9, 'materialSpecularColor.r.input':'slider',   'materialSpecularColor.r.min':0, 'materialSpecularColor.r.max':1,
 			'materialSpecularColor.g':0.7, 'materialSpecularColor.g.input':'constant', 'materialSpecularColor.g.min':0, 'materialSpecularColor.g.max':1,
 			'materialSpecularColor.b':0.5, 'materialSpecularColor.b.input':'constant', 'materialSpecularColor.b.min':0, 'materialSpecularColor.b.max':1,
@@ -672,7 +672,7 @@ describe('Illumination',function(){
 		var illumination=new Illumination({
 			'materialScope':'vertex',
 			'materialData':'sda',
-			'light':'on',
+			'light':'blinn',
 			'lightDirection.x':+2.0, 'lightDirection.x.input':'constant', 'lightDirection.x.min':-4, 'lightDirection.x.max':+4,
 			'lightDirection.y':-1.5, 'lightDirection.y.input':'constant', 'lightDirection.y.min':-4, 'lightDirection.y.max':+4,
 			'lightDirection.z':+0.5, 'lightDirection.z.input':'constant', 'lightDirection.z.min':-4, 'lightDirection.z.max':+4

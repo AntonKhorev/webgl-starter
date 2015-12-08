@@ -30,7 +30,7 @@ module.exports=function(options,i18n){
 		};
 		return new shapes[className](
 			parseInt(options.elements),
-			options.light=='on',
+			options.light!='off',
 			options.materialScope=='vertex',
 			options.materialScope=='face',
 			illumination.getColorAttrs(),

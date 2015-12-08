@@ -97,7 +97,7 @@ OptionsBlueprint.prototype.generalOptions=[
 	new Option('materialData',['one','sda']),
 	new Option('shape',['square','triangle','gasket','cube','hat','terrain']),
 	new Option('elements',['0','8','16','32']),
-	new Option('light',['off','on']),
+	new Option('light',['off','phong','blinn']),
 	//new Option('lightData',['none','one','sda'],'sda',{light:['on']}),
 	new Option('projection',['ortho','perspective']),
 ];
@@ -121,9 +121,9 @@ OptionsBlueprint.prototype.inputOptions=[
 	new FloatInputOption('materialAmbientColor.r' ,[0,1],0.2,{materialScope:['global'],materialData:['sda']}),
 	new FloatInputOption('materialAmbientColor.g' ,[0,1],0.2,{materialScope:['global'],materialData:['sda']}),
 	new FloatInputOption('materialAmbientColor.b' ,[0,1],0.2,{materialScope:['global'],materialData:['sda']}),
-	new FloatInputOption('lightDirection.x',[-4,+4],-1,{light:['on']}),
-	new FloatInputOption('lightDirection.y',[-4,+4],+1,{light:['on']}),
-	new FloatInputOption('lightDirection.z',[-4,+4],+1,{light:['on']}),
+	new FloatInputOption('lightDirection.x',[-4,+4],-1,{light:['phong','blinn']}),
+	new FloatInputOption('lightDirection.y',[-4,+4],+1,{light:['phong','blinn']}),
+	new FloatInputOption('lightDirection.z',[-4,+4],+1,{light:['phong','blinn']}),
 	new IntInputOption('shapeLod',[0,10],6,{shape:['gasket','hat','terrain']}),
 ];
 OptionsBlueprint.prototype.transformOptions=[];

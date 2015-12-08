@@ -8,12 +8,12 @@ var Illumination=function(options){
 	// options.materialScope!='global': colors in model data -> attribute
 	// options.materialData=='one': one color
 	// options.materialData!='one': s/d/a colors
-	// options.light=='on'
-	// options.light!='on'
+	// options.light=='off'
+	// options.light!='off'
 	if (options.materialScope=='global') {
 		if (options.materialData=='one') {
 			this.colorVector=new GlslVector('color','materialColor','rgba',options);
-		} else if (options.light=='on') {
+		} else if (options.light!='off') {
 			this.specularColorVector=new GlslVector('specularColor','materialSpecularColor','rgb',options);
 			this.diffuseColorVector =new GlslVector('diffuseColor' ,'materialDiffuseColor' ,'rgb',options);
 			this.ambientColorVector =new GlslVector('ambientColor' ,'materialAmbientColor' ,'rgb',options);
@@ -33,7 +33,7 @@ var Illumination=function(options){
 			this.ambientColorVector =new GlslVector('ambientColor' ,'materialAmbientColor' ,'rgba',extendedOptions);
 		}
 	}
-	if (options.light=='on') {
+	if (options.light!='off') {
 		this.lightDirectionVector=new GlslVector('lightDirection','lightDirection','xyz',options);
 	}
 };
@@ -48,16 +48,16 @@ Illumination.prototype.getColorAttrs=function(){
 			];
 		} else {
 			return [
-				{name:"specularColor",enabled:options.light=='on',weight:0.4},
-				{name:"diffuseColor" ,enabled:options.light=='on',weight:0.4},
-				{name:"ambientColor" ,enabled:true               ,weight:0.2}
+				{name:"specularColor",enabled:options.light!='off',weight:0.4},
+				{name:"diffuseColor" ,enabled:options.light!='off',weight:0.4},
+				{name:"ambientColor" ,enabled:true                ,weight:0.2}
 			];
 		}
 	}
 };
 Illumination.prototype.wantsTransformedPosition=function(eyeAtInfinity){
 	var options=this.options;
-	return !eyeAtInfinity && options.light=='on' && options.materialData!='one';
+	return !eyeAtInfinity && options.light!='off' && options.materialData!='one';
 };
 Illumination.prototype.getGlslVertexDeclarationLines=function(eyeAtInfinity,hasNormalAttr){
 	var options=this.options;
@@ -65,7 +65,7 @@ Illumination.prototype.getGlslVertexDeclarationLines=function(eyeAtInfinity,hasN
 	if (this.wantsTransformedPosition(eyeAtInfinity)) {
 		lines.a("varying vec3 interpolatedView;");
 	}
-	if (options.light=='on') {
+	if (options.light!='off') {
 		if (hasNormalAttr) {
 			lines.a("attribute vec3 normal;");
 		}
@@ -76,7 +76,10 @@ Illumination.prototype.getGlslVertexDeclarationLines=function(eyeAtInfinity,hasN
 			lines.a("attribute vec4 color;");
 			lines.a("varying vec4 interpolatedColor;");
 		} else {
-			if (options.light=='on') {
+			if (options.light=='off') {
+				lines.a("attribute vec4 ambientColor;");
+				lines.a("varying vec4 interpolatedColor;");
+			} else {
 				lines.a(
 					"attribute vec3 specularColor;",
 					"attribute vec3 diffuseColor;",
@@ -85,9 +88,6 @@ Illumination.prototype.getGlslVertexDeclarationLines=function(eyeAtInfinity,hasN
 					"varying vec3 interpolatedDiffuseColor;",
 					"varying vec3 interpolatedAmbientColor;"
 				);
-			} else {
-				lines.a("attribute vec4 ambientColor;");
-				lines.a("varying vec4 interpolatedColor;");
 			}
 		}
 	}
@@ -99,7 +99,7 @@ Illumination.prototype.getGlslVertexOutputLines=function(eyeAtInfinity,hasNormal
 	if (this.wantsTransformedPosition(eyeAtInfinity)) {
 		lines.a("interpolatedView=-transformedPosition.xyz;");
 	}
-	if (options.light=='on') {
+	if (options.light!='off') {
 		lines.a("interpolatedNormal=");
 		if (hasNormalAttr) {
 			lines.t("normal");
@@ -113,14 +113,14 @@ Illumination.prototype.getGlslVertexOutputLines=function(eyeAtInfinity,hasNormal
 		if (options.materialData=='one') {
 			lines.a("interpolatedColor=color;");
 		} else {
-			if (options.light=='on') {
+			if (options.light=='off') {
+				lines.a("interpolatedColor=ambientColor;");
+			} else {
 				lines.a(
 					"interpolatedSpecularColor=specularColor;",
 					"interpolatedDiffuseColor=diffuseColor;",
 					"interpolatedAmbientColor=ambientColor;"
 				);
-			} else {
-				lines.a("interpolatedColor=ambientColor;");
 			}
 		}
 	}
@@ -132,7 +132,7 @@ Illumination.prototype.getGlslFragmentDeclarationLines=function(eyeAtInfinity){
 	if (this.wantsTransformedPosition(eyeAtInfinity)) {
 		lines.a("varying vec3 interpolatedView;");
 	}
-	if (options.light=='on') {
+	if (options.light!='off') {
 		lines.a(
 			this.lightDirectionVector.getGlslDeclarationLines(),
 			"varying vec3 interpolatedNormal;"
@@ -142,14 +142,14 @@ Illumination.prototype.getGlslFragmentDeclarationLines=function(eyeAtInfinity){
 		if (options.materialData=='one') {
 			lines.a(this.colorVector.getGlslDeclarationLines());
 		} else {
-			if (options.light=='on') {
+			if (options.light!='off') {
 				lines.a(this.specularColorVector.getGlslDeclarationLines());
 				lines.a(this.diffuseColorVector.getGlslDeclarationLines());
 			}
 			lines.a(this.ambientColorVector.getGlslDeclarationLines());
 		}
 	} else {
-		if (options.materialData=='one' || options.light!='on') {
+		if (options.materialData=='one' || options.light=='off') {
 			lines.a("varying vec4 interpolatedColor;");
 		} else {
 			lines.a(
@@ -178,7 +178,9 @@ Illumination.prototype.getGlslFragmentOutputLines=function(eyeAtInfinity,twoSide
 		colorA="interpolatedColor.a";
 		colorRGBA="interpolatedColor";
 	}
-	if (options.light=='on') {
+	if (options.light=='off') {
+		lines.a("gl_FragColor="+colorRGBA+";");
+	} else {
 		lines.a("vec3 N=normalize(interpolatedNormal);");
 		if (twoSided) {
 			lines.a("if (!gl_FrontFacing) N=-N;");
@@ -214,8 +216,6 @@ Illumination.prototype.getGlslFragmentOutputLines=function(eyeAtInfinity,twoSide
 				",1.0);"
 			));
 		}
-	} else {
-		lines.a("gl_FragColor="+colorRGBA+";");
 	}
 	return lines;
 };
@@ -226,14 +226,14 @@ Illumination.prototype.getJsInterfaceLines=function(writeListenerArgs,canvasMous
 		if (options.materialData=='one') {
 			lines.a(this.colorVector.getJsInterfaceLines(writeListenerArgs,canvasMousemoveListener));
 		} else {
-			if (options.light=='on') {
+			if (options.light!='off') {
 				lines.a(this.specularColorVector.getJsInterfaceLines(writeListenerArgs,canvasMousemoveListener));
 				lines.a(this.diffuseColorVector.getJsInterfaceLines(writeListenerArgs,canvasMousemoveListener));
 			}
 			lines.a(this.ambientColorVector.getJsInterfaceLines(writeListenerArgs,canvasMousemoveListener));
 		}
 	}
-	if (options.light=='on') {
+	if (options.light!='off') {
 		lines.a(this.lightDirectionVector.getJsInterfaceLines(writeListenerArgs,canvasMousemoveListener));
 	}
 	return lines;
