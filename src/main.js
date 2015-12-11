@@ -68,9 +68,7 @@ $(function(){
 			var $rangeSpan,$rangeMinInput,$rangeMaxInput;
 			var availableInputTypes=option.availableInputTypes;
 			if (withGamepad) {
-				availableInputTypes=availableInputTypes.concat([
-					'gamepad0','gamepad1','gamepad2','gamepad3'
-				]);
+				availableInputTypes=availableInputTypes.concat(option.availableGamepadInputTypes);
 			}
 			function inputListener(that) {
 				if (this.checkValidity()) {
@@ -131,6 +129,10 @@ $(function(){
 							} else {
 								$rangeSpan.show();
 							}
+						}
+						if (withGamepad) {
+							$options.find("[data-option='"+option.name+'.speed'+"']")
+								.toggle(option.availableGamepadInputTypes.indexOf(this.value)<0);
 						}
 						updateCode();
 					})

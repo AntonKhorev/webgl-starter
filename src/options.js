@@ -30,6 +30,7 @@ var InputOption=function(name,rangeOfValues,defaultValue,visibilityData){
 InputOption.prototype=Object.create(Option.prototype);
 InputOption.prototype.constructor=InputOption;
 InputOption.prototype.availableInputTypes=['constant','slider','mousemovex','mousemovey'];
+InputOption.prototype.availableGamepadInputTypes=['gamepad0','gamepad1','gamepad2','gamepad3'];
 InputOption.prototype.getMin=function(){
 	return this.availableValues[0];
 };
@@ -179,6 +180,12 @@ var OptionsInstance=function(blueprint){
 					this[option.name+'.min']=blueprint[option.name+'.min'];
 					this[option.name+'.max']=blueprint[option.name+'.max'];
 				}
+			}
+		},this);
+		blueprint.transforms.forEach(function(transform){
+			if (InputOption.prototype.availableGamepadInputTypes.indexOf(this[transform.name+'.input'])>=0) {
+				this[transform.name+'.speed']=0;
+				this[transform.name+'.speed.input']='constant';
 			}
 		},this);
 	},this);
