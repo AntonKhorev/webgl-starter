@@ -541,8 +541,23 @@ module.exports=function(options,i18n){
 					var D=d.toUpperCase();
 					var optName='rotate.'+d;
 					var varName='rotate'+D;
-					if (options[optName+'.speed']!=0 || options[optName+'.speed.input']!='constant') {
-						if (options[optName+'.speed.input']=='constant' && options[optName+'.input']=='constant') {
+					var VarName=varName.charAt(0).toUpperCase()+varName.slice(1);
+					var hasGamepadInput=options.inputOptions[0].availableGamepadInputTypes.indexOf(options[optName+'.input'])>=0;
+					if (hasGamepadInput || options[optName+'.speed']!=0 || options[optName+'.speed.input']!='constant') {
+						if (hasGamepadInput) {
+							// no time needed branch
+							var axis=0;
+							var match=options[optName+'.input'].match(/\d/);
+							if (match) axis=match[0];
+							lines.a(
+								"var min"+VarName+"="+floatOptionValue(optName+'.min')+";",
+								"var max"+VarName+"="+floatOptionValue(optName+'.max')+";",
+								"var "+varName+"="+floatOptionValue(optName)+";",
+								"if (gamepad) {",
+								"	"+varName+"=min"+VarName+"+(max"+VarName+"-min"+VarName+")*(gamepad.axes["+axis+"]+1)/2;",
+								"}"
+							);
+						} else if (options[optName+'.speed.input']=='constant' && options[optName+'.input']=='constant') {
 							// no rotation state branch
 							needStartTime=true;
 							lines.a(
@@ -601,6 +616,18 @@ module.exports=function(options,i18n){
 			if (options.background=='solid') {
 				lines.a(
 					"gl.clear(gl.COLOR_BUFFER_BIT);"
+				);
+			}
+			if (options.hasGamepadInputs()) {
+				lines.a(
+					"var gamepad;",
+					"var gamepads=(navigator.getGamepads ? navigator.getGamepads() : []);",
+					"for (var i=0;i<gamepads.length;i++) {",
+					"	if (gamepads[i]) {",
+					"		gamepad=gamepads[i];",
+					"		break;",
+					"	}",
+					"}"
 				);
 			}
 			lines.a(

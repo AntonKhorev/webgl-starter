@@ -223,6 +223,13 @@ OptionsInstance.prototype.hasSliderInputs=function(){
 		return this[option.name+'.input']=='slider';
 	},this);
 };
+OptionsInstance.prototype.hasGamepadInputs=function(){
+	return this.inputOptions.some(function(option){
+		return option.availableGamepadInputTypes.indexOf(this[option.name+'.input'])>=0;
+	},this) || this.transformOptions.some(function(option){
+		return option.availableGamepadInputTypes.indexOf(this[option.name+'.input'])>=0;
+	},this);
+};
 OptionsInstance.prototype.hasInputsFor=function(prefix){
 	return this.getInputsFor(prefix).length>0;
 };
@@ -236,7 +243,10 @@ OptionsInstance.prototype.isAnimated=function(){
 		return name.indexOf(suffix,name.length-suffix.length)!==-1;
 	};
 	return this.transformOptions.some(function(option){
-		return endsWith(option.name,'.speed') && (this[option.name]!=0 || this[option.name+'.input']!='constant');
+		return (option instanceof InputOption) && (
+			(endsWith(option.name,'.speed') && (this[option.name]!=0 || this[option.name+'.input']!='constant')) || // has input with nonzero speed
+			(option.availableGamepadInputTypes.indexOf(this[option.name+'.input'])>=0) // has gamepad input which needs to be polled
+		);
 	},this);
 };
 OptionsInstance.prototype.needsUniform=function(prefix){
