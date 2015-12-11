@@ -63,7 +63,10 @@ module.exports=function(id){ // fake temporary i18n
 		'options.*.input.slider': 'slider',
 		'options.*.input.mousemovex': 'mouse x axis',
 		'options.*.input.mousemovey': 'mouse y axis',
-		'options.*.input.animated': 'animated',
+		'options.*.input.gamepad0': 'gamepad 0 axis',
+		'options.*.input.gamepad1': 'gamepad 1 axis',
+		'options.*.input.gamepad2': 'gamepad 2 axis',
+		'options.*.input.gamepad3': 'gamepad 3 axis',
 		'options.*.range': 'with range',
 
 		'options.transform': 'Transforms',

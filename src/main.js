@@ -60,12 +60,18 @@ $(function(){
 			}
 			return $option;
 		}
-		function writeInputOption(option,withRange) {
+		function writeInputOption(option,withRange,withGamepad) {
 			var id=generateId();
 			var inputId=generateId();
 			var $sliderInput,$numberInput;
 			var $inputSelect;
 			var $rangeSpan,$rangeMinInput,$rangeMaxInput;
+			var availableInputTypes=option.availableInputTypes;
+			if (withGamepad) {
+				availableInputTypes=availableInputTypes.concat([
+					'gamepad0','gamepad1','gamepad2','gamepad3'
+				]);
+			}
 			function inputListener(that) {
 				if (this.checkValidity()) {
 					that.val(this.value);
@@ -114,7 +120,7 @@ $(function(){
 				.append("<label for='"+inputId+"'>"+i18n('options.*.input')+":</label> ")
 				.append(
 					$inputSelect=$("<select id='"+inputId+"'>").append(
-						option.availableInputTypes.map(function(availableInputType){
+						availableInputTypes.map(function(availableInputType){
 							return $("<option>").val(availableInputType).html(i18n('options.*.input.'+availableInputType))
 						})
 					).val(options[option.name+'.input']).change(function(){
@@ -231,7 +237,7 @@ $(function(){
 			).append(
 				$("<fieldset>").append("<legend>"+i18n('options.input')+"</legend>").append(
 					options.inputOptions.map(function(option){
-						return writeInputOption(option,true)
+						return writeInputOption(option,true,false)
 					})
 				)
 			).append(
@@ -239,8 +245,8 @@ $(function(){
 					$transforms=$("<div>").append(
 						options.transforms.map(function(transform){
 							return $("<div class='transform' data-transform='"+transform.name+"'>").append(
-								transform.options.map(function(option){
-									return writeInputOption(option,false)
+								transform.options.map(function(option,i){
+									return writeInputOption(option,false,i==0) // gamepad only for value (not speed) option
 								})
 							);
 						})
