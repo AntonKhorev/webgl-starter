@@ -77,7 +77,7 @@ gulp.task('watch',function(){
 });
 
 gulp.task('test',function(){
-	gulp.src('tests/*.js')
+	gulp.src('tests/**/*.js')
 		.pipe(mocha());
 });
 

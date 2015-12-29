@@ -1,5 +1,5 @@
 var assert=require('assert');
-var Options=require('../src/options.js');
+var Options=require('../src/obsolete-options.js');
 
 var VisiCheck=function(){
 	this.visible=true;
