@@ -23,9 +23,9 @@ class Options {
 					return ctorArgDescription;
 				}
 			});
-			return new (Function.prototype.bind.apply(Option[className],ctorArgs));
+			return new (Function.prototype.bind.apply(Option[className],[null].concat(ctorArgs)));
 		};
-		this.root=Option.Root(
+		this.root=new Option.Root(
 			this.entriesDescription.map(makeEntry)
 		);
 	}

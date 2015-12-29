@@ -42,7 +42,7 @@ class Base {
 	init(contents,defaultValue) {}
 }
 
-class Value extends Base {
+class Input extends Base {
 	init(availableValues,defaultValue) {
 		this.availableValues=availableValues;
 		if (defaultValue!==undefined) {
@@ -53,9 +53,38 @@ class Value extends Base {
 	}
 }
 
+class Select extends Input {
+	//init(availableValues,defaultValue) {
+	//	super.init(availableValues,defaultValue);
+	//}
+	get inputEntries() {
+		const option=this;
+		return [{
+			get id() {
+				return option.name;
+			},
+			get value() {
+				return option.defaultValue;
+			}
+		}];
+	}
+}
+
 class Collection extends Base {
+	init(entries) {
+		this.entries=entries;
+	}
+}
+
+class Root extends Collection {
+}
+
+class Group extends Collection {
 }
 
 exports.Base=Base;
-exports.Value=Value;
+exports.Input=Input;
+exports.Select=Select;
 exports.Collection=Collection;
+exports.Root=Root;
+exports.Group=Group;

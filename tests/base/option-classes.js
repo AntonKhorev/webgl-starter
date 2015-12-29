@@ -3,7 +3,7 @@
 const assert=require('assert');
 const Option=require('../../src/base/option-classes.js');
 
-describe("Option.Base",()=>{
+describe("Base/Option.Base",()=>{
 	it("receives name argument",()=>{
 		class C extends Option.Base {
 		}
