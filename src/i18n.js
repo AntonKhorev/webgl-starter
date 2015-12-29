@@ -68,6 +68,8 @@ module.exports=function(id){ // fake temporary i18n
 		'options.*.input.gamepad2': 'gamepad 2 axis',
 		'options.*.input.gamepad3': 'gamepad 3 axis',
 		'options.*.range': 'with range',
+		'options.*.speed.add': 'Add speed',
+		'options.*.speed.remove': 'Remove speed',
 
 		'options.transform': 'Transforms',
 		'options.rotate.x': 'Angle of rotation around x axis',

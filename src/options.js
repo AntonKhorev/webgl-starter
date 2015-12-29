@@ -1,3 +1,5 @@
+// obsolete code TODO remove
+
 var Option=function(name,availableValues,defaultValue,visibilityData){
 	this.name=name;
 	this.availableValues=availableValues; // for range its [min,max,step]
@@ -23,13 +25,19 @@ Option.prototype.isVisible=function(options){
 Option.prototype.isVisibilityAffectedBy=function(changedOption){
 	return this.visibilityData[changedOption.name]!==undefined;
 };
+Option.prototype.reset=function(options){
+	options[this.name]=this.defaultValue;
+};
+Option.prototype.copy=function(dstOptions,srcOptions){
+	dstOptions[this.name]=srcOptions[this.name];
+};
 
 var InputOption=function(name,rangeOfValues,defaultValue,visibilityData){
-	Option.call(this,name,rangeOfValues,defaultValue,visibilityData);
+	Option.apply(this,arguments);
 };
 InputOption.prototype=Object.create(Option.prototype);
 InputOption.prototype.constructor=InputOption;
-InputOption.prototype.availableInputTypes=['constant','slider','mousemovex','mousemovey'];
+InputOption.prototype.availableInputTypes=['constant','slider','mousemovex','mousemovey',];
 InputOption.prototype.availableGamepadInputTypes=['gamepad0','gamepad1','gamepad2','gamepad3'];
 InputOption.prototype.getMin=function(){
 	return this.availableValues[0];
@@ -45,12 +53,34 @@ InputOption.prototype.getMaxLabel=function(value){
 	if (value===undefined) value=this.getMax();
 	return value.toString().replace('-','−');
 };
+InputOption.prototype.needRange=function(options){ // range for value; speed always needs range
+	return false;
+};
+InputOption.prototype.needSpeed=function(options){
+	return false;
+};
+InputOption.prototype.reset=function(options){
+	Option.prototype.reset.call(this,options);
+	options[this.name+'.input']='constant';
+	options[this.name+'.min']=this.getMin();
+	options[this.name+'.max']=this.getMax();
+	options[this.name+'.speed']=0;
+	options[this.name+'.speed.input']='constant';
+	options[this.name+'.speed.min']=this.getMinSpeed();
+	options[this.name+'.speed.max']=this.getMaxSpeed();
+};
+InputOption.prototype.copy=function(dstOptions,srcOptions){
+	Option.prototype.copy.call(this,dstOptions,srcOptions);
+	dstOptions[this.name+'.min']=srcOptions[this.name+'.input']=='constant'?this.getMin():srcOptions[this.name+'.min'];
+	dstOptions[this.name+'.max']=srcOptions[this.name+'.input']=='constant'?this.getMin():srcOptions[this.name+'.max'];
+};
 
 var FloatInputOption=function(name,rangeOfValues,defaultValue,visibilityData){
-	InputOption.call(this,name,rangeOfValues,defaultValue,visibilityData);
+	InputOption.apply(this,arguments);
 };
 FloatInputOption.prototype=Object.create(InputOption.prototype);
 FloatInputOption.prototype.constructor=FloatInputOption;
+FloatInputOption.prototype.availableInputTypes=InputOption.prototype.availableInputTypes.concat(InputOption.prototype.availableGamepadInputTypes);
 FloatInputOption.prototype.getStep=function(){
 	return 'any';
 };
@@ -63,9 +93,19 @@ FloatInputOption.prototype.getSetupStep=function(){
 		return '0.001';
 	}
 };
+FloatInputOption.prototype.needSpeed=function(options){
+	return false;
+};
+FloatInputOption.prototype.reset=function(options){
+	InputOption.prototype.reset.call(this,options);
+	options[this.name+'.speed']=0;
+	options[this.name+'.speed.input']='constant';
+	options[this.name+'.speed.min']=this.getMin()*2;
+	options[this.name+'.speed.max']=this.getMax()*2;
+};
 
 var IntInputOption=function(name,rangeOfValues,defaultValue,visibilityData){
-	InputOption.call(this,name,rangeOfValues,defaultValue,visibilityData);
+	InputOption.apply(this,arguments);
 };
 IntInputOption.prototype=Object.create(InputOption.prototype);
 IntInputOption.prototype.constructor=IntInputOption;
@@ -77,7 +117,7 @@ IntInputOption.prototype.getSetupStep=function(){
 };
 
 var CanvasIntInputOption=function(name,rangeOfValues,defaultValue,visibilityData){
-	IntInputOption.call(this,name,rangeOfValues,defaultValue,visibilityData);
+	IntInputOption.apply(this,arguments);
 };
 CanvasIntInputOption.prototype=Object.create(IntInputOption.prototype);
 CanvasIntInputOption.prototype.constructor=CanvasIntInputOption;
@@ -127,18 +167,8 @@ OptionsBlueprint.prototype.inputOptions=[
 	new FloatInputOption('lightDirection.z',[-4,+4],+1,{light:['phong','blinn']}),
 	new IntInputOption('shapeLod',[0,10],6,{shape:['gasket','hat','terrain']}),
 ];
-OptionsBlueprint.prototype.transformOptions=[];
-OptionsBlueprint.prototype.transforms=[];
-['rotate.x','rotate.y','rotate.z'].forEach(function(name){
-	// TODO make default angle/speed something like 0.2*360 when able to add/delete transforms
-	var valueOption=new FloatInputOption(name,[-180,180],0);
-	var speedOption=new FloatInputOption(name+'.speed',[-360,360],0);
-	OptionsBlueprint.prototype.transformOptions.push(valueOption);
-	OptionsBlueprint.prototype.transformOptions.push(speedOption);
-	OptionsBlueprint.prototype.transforms.push({
-		name:name,
-		options:[valueOption,speedOption]
-	});
+OptionsBlueprint.prototype.transformOptions=['rotate.x','rotate.y','rotate.z'].map(function(name){
+	return new FloatInputOption(name,[-180,180],0);
 });
 OptionsBlueprint.prototype.debugOptions=[
 	new DebugOption('debugShaders',true),
@@ -152,12 +182,7 @@ OptionsBlueprint.prototype.groupNames=['generalOptions','inputOptions','transfor
 OptionsBlueprint.prototype.reset=function(){
 	this.groupNames.forEach(function(groupName){
 		this[groupName].forEach(function(option){
-			this[option.name]=option.defaultValue;
-			if (groupName=='inputOptions' || groupName=='transformOptions') {
-				this[option.name+'.input']='constant';
-				this[option.name+'.min']=option.getMin();
-				this[option.name+'.max']=option.getMax();
-			}
+			option.reset(this);
 		},this);
 	},this);
 	this.transformOrder=this.transforms.map(function(transform){
@@ -174,20 +199,15 @@ var OptionsInstance=function(blueprint){
 		blueprint[groupName].forEach(function(option){
 			if (option.isVisible(blueprint)) {
 				this[groupName].push(option);
-				this[option.name]=blueprint[option.name];
-				if (groupName=='inputOptions' || groupName=='transformOptions') {
-					this[option.name+'.input']=blueprint[option.name+'.input'];
-					this[option.name+'.min']=blueprint[option.name+'.min'];
-					this[option.name+'.max']=blueprint[option.name+'.max'];
-				}
+				option.copy(this,blueprint);
 			}
 		},this);
-		blueprint.transforms.forEach(function(transform){
-			if (InputOption.prototype.availableGamepadInputTypes.indexOf(this[transform.name+'.input'])>=0) {
-				this[transform.name+'.speed']=0;
-				this[transform.name+'.speed.input']='constant';
-			}
-		},this);
+		//blueprint.transforms.forEach(function(transform){
+		//	if (InputOption.prototype.availableGamepadInputTypes.indexOf(this[transform.name+'.input'])>=0) {
+		//		this[transform.name+'.speed']=0;
+		//		this[transform.name+'.speed.input']='constant';
+		//	}
+		//},this);
 	},this);
 	this.transformOrder=blueprint.transformOrder;
 };
