@@ -3,40 +3,57 @@
 // abstract classes
 
 class Base {
-	constructor(fullName) {
+	constructor(isVisible,fullName) {
+		this.isVisible=isVisible;
 		this.fullName=fullName;
+		this._$=null;
+	}
+	get $() {
+		return this._$;
+	}
+	set $($) {
+		this._$=$;
+		if ($) $.toggle(this.isVisible());
 	}
 }
 
 class Input extends Base {
-	constructor(fullName,availableValues,defaultValue) {
-		super(fullName);
+	constructor(isVisible,fullName,availableValues,defaultValue) {
+		super(isVisible,fullName);
 		if (defaultValue!==undefined) {
 			this.defaultValue=defaultValue;
 		} else {
 			this.defaultValue=availableValues[0];
 		}
+		this._value=this.defaultValue;
+	}
+	get value() {
+		return this._value;
+	}
+	set value(value) {
+		this._value=value;
+		// TODO toggle visibility
 	}
 }
 
 class FactorInput extends Input {
-	constructor(fullName,availableValues,defaultValue) {
-		super(fullName,availableValues,defaultValue);
+	constructor(isVisible,fullName,availableValues,defaultValue) {
+		super(isVisible,fullName,availableValues,defaultValue);
 		this.availableValues=availableValues;
 	}
 }
 
 class RangeInput extends Input {
-	constructor(fullName,availableRange,defaultValue) {
-		super(fullName,availableRange,defaultValue);
+	constructor(isVisible,fullName,availableRange,defaultValue) {
+		super(isVisible,fullName,availableRange,defaultValue);
 		this.availableMin=availableRange[0];
 		this.availableMax=availableRange[1];
 	}
 }
 
 class Collection extends Base {
-	constructor(fullName,entries) {
-		super(fullName);
+	constructor(isVisible,fullName,entries) {
+		super(isVisible,fullName);
 		this.entries=entries;
 	}
 }
@@ -44,22 +61,8 @@ class Collection extends Base {
 // concrete classes
 
 class Select extends FactorInput {
-	constructor(fullName,availableValues,defaultValue) {
-		super(fullName,availableValues,defaultValue);
-	}
-	get inputEntries() {
-		const option=this;
-		return [{
-			get fullName() {
-				return option.fullName;
-			},
-			get value() {
-				return option.defaultValue;
-			},
-			get availableValues() {
-				return option.availableValues;
-			},
-		}];
+	constructor(isVisible,fullName,availableValues,defaultValue) {
+		super(isVisible,fullName,availableValues,defaultValue);
 	}
 }
 

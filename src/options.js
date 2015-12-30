@@ -24,11 +24,11 @@ class Options extends BaseOptions {
 			['Group','background',[
 				['Select','type',['none','solid']],
 				['Group','color',[
-					['LiveFloat','r',[0,1],1],
-					['LiveFloat','g',[0,1],1],
-					['LiveFloat','b',[0,1],1],
-					['LiveFloat','a',[0,1],1],
-				]/*,{'background.type':'solid'}*/],
+					['LiveFloat','r',[0,1,-1,+1],1],
+					['LiveFloat','g',[0,1,-1,+1],1],
+					['LiveFloat','b',[0,1,-1,+1],1],
+					['LiveFloat','a',[0,1,-1,+1],1],
+				],{'background.type':'solid'}],
 			]],
 			['Group','material',[
 				['Select','scope',['global','vertex','face']],

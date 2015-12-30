@@ -5,42 +5,26 @@ const imports=require('./base/option-classes.js');
 const RangeInput=imports.RangeInput;
 
 class LiveInt extends RangeInput {
-	get inputEntries() {
-		const option=this;
-		return [{
-			get fullName() {
-				return option.fullName;
-			},
-			get value() {
-				return option.defaultValue;
-			},
-			get availableMin() {
-				return option.availableMin;
-			},
-			get availableMax() {
-				return option.availableMax;
-			},
-		}];
-	}
 }
 
 class LiveFloat extends RangeInput {
-	get inputEntries() {
+	constructor(isVisible,fullName,availableRange,defaultValue) {
+		super(isVisible,fullName,availableRange,defaultValue);
+		this.availableSpeedMin=availableRange[2];
+		this.availableSpeedMax=availableRange[3];
+		this._speed$=null;
+		this._addSpeed=false;
+	}
+	get addSpeed() {
+		return this._addSpeed;
+	}
+	set addSpeed(addSpeed) {
+		this._addSpeed=addSpeed;
+		if (this._speed$) this._speed$.toggle(addSpeed);
+	}
+	get speed() {
 		const option=this;
-		return [{
-			get fullName() {
-				return option.fullName;
-			},
-			get value() {
-				return option.defaultValue;
-			},
-			get availableMin() {
-				return option.availableMin;
-			},
-			get availableMax() {
-				return option.availableMax;
-			},
-		},{
+		return {
 			get fullName() {
 				return option.fullName+'.speed';
 			},
@@ -48,12 +32,19 @@ class LiveFloat extends RangeInput {
 				return 0;
 			},
 			get availableMin() {
-				return option.availableMin;
+				return option.availableSpeedMin;
 			},
 			get availableMax() {
-				return option.availableMax;
+				return option.availableSpeedMax;
 			},
-		}];
+			get $() {
+				return option._speed$;
+			},
+			set $($) {
+				option._speed$=$;
+				if (option._speed$) option._speed$.toggle(option._addSpeed);
+			}
+		};
 	}
 }
 

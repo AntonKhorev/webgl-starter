@@ -3,9 +3,14 @@
 class Options {
 	constructor() {
 		const Option=this.optionClasses;
+		const optionByFullName={};
 		const makeEntry=(description,fullNamePath)=>{
 			const className=description[0];
+			if (Option[className]===undefined) {
+				throw new Error(`invalid option type '${className}'`);
+			}
 			const name=description[1];
+			const fullName=fullNamePath+name;
 			const ctorArgsDescription=description.slice(2);
 			let contents=[];
 			let defaultValue;
@@ -26,7 +31,7 @@ class Options {
 					if (nArrays==0) {
 						contents=arg.map(x=>{
 							if (Array.isArray(x)) {
-								return makeEntry(x,fullNamePath+name+'.'); // nested option
+								return makeEntry(x,fullName+'.'); // nested option
 							} else {
 								return x; // available value / value range boundary
 							}
@@ -46,10 +51,21 @@ class Options {
 					throw new Error("unknown argument type");
 				}
 			}
-			const ctorArgs=[null,fullNamePath+name,contents,defaultValue,visibilityData];
-			return new (Function.prototype.bind.apply(Option[className],ctorArgs));
+			const isVisible=()=>{
+				for (let testName in visibilityData) {
+					const value=optionByFullName[testName].value;
+					if (visibilityData[testName].indexOf(value)<0) {
+						return false;
+					}
+				}
+				return true;
+			};
+			const ctorArgs=[null,isVisible,fullName,contents,defaultValue];
+			const option=new (Function.prototype.bind.apply(Option[className],ctorArgs));
+			optionByFullName[fullName]=option;
+			return option;
 		};
-		this.root=new Option.Root(null,this.entriesDescription.map(description=>makeEntry(description,'')));
+		this.root=new Option.Root(()=>true,null,this.entriesDescription.map(description=>makeEntry(description,'')));
 	}
 	// methods to be redefined by subclasses
 	// TODO make them static?

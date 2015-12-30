@@ -28,14 +28,11 @@ describe("Base/Options",()=>{
 			const fullNames=['foobar','letter'];
 			const values=['foo','c'];
 			const availableValues=[['foo','bar','baz'],['a','b','c','d','e']];
-			options.root.entries.forEach((entry,i)=>{
-				assert(entry instanceof Option.Select,"option entry type isn't Select");
-				entry.inputEntries.forEach((inputEntry,n)=>{
-					assert.equal(n,0,"more than one input entry");
-					assert.equal(inputEntry.fullName,fullNames[i]);
-					assert.equal(inputEntry.value,values[i]);
-					assert.deepEqual(inputEntry.availableValues,availableValues[i]);
-				});
+			options.root.entries.forEach((option,i)=>{
+				assert(option instanceof Option.Select,"option entry type isn't Select");
+				assert.equal(option.fullName,fullNames[i]);
+				assert.equal(option.value,values[i]);
+				assert.deepEqual(option.availableValues,availableValues[i]);
 			});
 		});
 	});
@@ -71,17 +68,14 @@ describe("Base/Options",()=>{
 				[['foo','bar','baz'],['a','b','c','d','e']],
 				[['nothing','something']]
 			];
-			options.root.entries.forEach((entry,i)=>{
-				assert(entry instanceof Option.Group,"option entry type isn't Group");
-				assert.equal(entry.fullName,fullGroupNames[i]);
-				entry.entries.forEach((entry,j)=>{
-					assert(entry instanceof Option.Select,"option entry type isn't Select");
-					entry.inputEntries.forEach((inputEntry,n)=>{
-						assert.equal(n,0,"more than one input entry");
-						assert.equal(inputEntry.fullName,fullNames[i][j]);
-						assert.equal(inputEntry.value,values[i][j]);
-						assert.deepEqual(inputEntry.availableValues,availableValues[i][j]);
-					});
+			options.root.entries.forEach((option,i)=>{
+				assert(option instanceof Option.Group,"option entry type isn't Group");
+				assert.equal(option.fullName,fullGroupNames[i]);
+				option.entries.forEach((option,j)=>{
+					assert(option instanceof Option.Select,"option entry type isn't Select");
+					assert.equal(option.fullName,fullNames[i][j]);
+					assert.equal(option.value,values[i][j]);
+					assert.deepEqual(option.availableValues,availableValues[i][j]);
 				});
 			});
 		});

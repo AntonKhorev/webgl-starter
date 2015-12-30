@@ -285,58 +285,66 @@ $(function(){
 		*/
 		function writeOption(option) {
 			if (option instanceof Option.Root) {
-				return $("<div>").append(
+				return option.$=$("<div>").append(
 					option.entries.map(writeOption)
 				);
 			} else if (option instanceof Option.Group) {
-				return $("<fieldset>").append("<legend>"+i18n('options.'+option.fullName)+"</legend>").append(
+				return option.$=$("<fieldset>").append("<legend>"+i18n('options.'+option.fullName)+"</legend>").append(
 					option.entries.map(writeOption)
 				);
 			} else if (option instanceof Option.Select) {
-				return $("<div>").append(
-					option.inputEntries.map(inputEntry=>{
-						const id=generateId();
-						const $inputEntry=$("<div>")
-							.append("<label for='"+id+"'>"+i18n('options.'+inputEntry.fullName)+":</label>")
-							.append(" ")
-							.append(
-								$("<select id='"+id+"'>").append(
-									inputEntry.availableValues.map(function(availableValue){
-										return $("<option>").val(availableValue).html(i18n('options.'+inputEntry.fullName+'.'+availableValue))
-									})
-								).val(inputEntry.value)/*.change(()=>{
-									inputEntry.value=this.value;
-									updateCode();
-								})*/
-							);
-						if (inputEntry.name=='elements') {
-							$inputEntry.append(" "+i18n('message.elements'));
-						}
-						return $inputEntry;
-					})
-				);
+				const id=generateId();
+				option.$=$("<div>")
+					.append("<label for='"+id+"'>"+i18n('options.'+option.fullName)+":</label>")
+					.append(" ")
+					.append(
+						$("<select id='"+id+"'>").append(
+							option.availableValues.map(function(availableValue){
+								return $("<option>").val(availableValue).html(i18n('options.'+option.fullName+'.'+availableValue))
+							})
+						).val(option.value)/*.change(()=>{
+							option.value=this.value;
+							updateCode();
+						})*/
+					);
+				if (option.name=='elements') {
+					option.$.append(" "+i18n('message.elements'));
+				}
+				return option.$;
 			} else if (option instanceof Option.RangeInput) {
-				return $("<div>").append(
-					option.inputEntries.map(inputEntry=>{
-						const id=generateId();
-						let $sliderInput;
-						return $("<div>").append("<label for='"+id+"'>"+i18n('options.'+inputEntry.fullName)+":</label>")
-							.append(" ")
-							.append(" <span class='min'>"+i18n('options.'+inputEntry.fullName+'.value',inputEntry.availableMin)+"</span> ")
-							.append(
-								$sliderInput=$("<input type='range' id='"+id+"'>")
-									.attr('min',inputEntry.availableMin)
-									.attr('max',inputEntry.availableMax)
-									// .attr('step',option.getSetupStep()) // TODO, not required for ints
-									.val(inputEntry.value)
-									//.on('input change',function(){
-									//	inputListener.call(this,$numberInput);
-									//})
-							)
-							.append(" <span class='max'>"+i18n('options.'+inputEntry.fullName+'.value',inputEntry.availableMax)+"</span> ")
-						;
-					})
-				);
+				const writeOption=option=>{
+					const id=generateId();
+					let $sliderInput;
+					return $("<div>").append("<label for='"+id+"'>"+i18n('options.'+option.fullName)+":</label>")
+						.append(" ")
+						.append(" <span class='min'>"+i18n('options.'+option.fullName+'.value',option.availableMin)+"</span> ")
+						.append(
+							$sliderInput=$("<input type='range' id='"+id+"'>")
+								.attr('min',option.availableMin)
+								.attr('max',option.availableMax)
+								// .attr('step',option.getSetupStep()) // TODO, not required for ints
+								.val(option.value)
+								//.on('input change',function(){
+								//	inputListener.call(this,$numberInput);
+								//})
+						)
+						.append(" <span class='max'>"+i18n('options.'+option.fullName+'.value',option.availableMax)+"</span> ")
+					;
+				};
+				option.$=writeOption(option);
+				if (option instanceof Option.LiveFloat) {
+					option.$.append(
+						$("<label> add speed</label>").prepend( // TODO i18n
+							$("<input type='checkbox'>")
+								.prop('checked',option.addSpeed)
+								.change(function(){
+									option.addSpeed=this.checked;
+								})
+						)
+					);
+					option.$.append(" ").append(option.speed.$=writeOption(option.speed));
+				}
+				return option.$;
 			}
 		}
 		function writeButtons() {
