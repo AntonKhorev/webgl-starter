@@ -1,4 +1,3 @@
-var fs=require('fs'); // TODO replace with module
 var gulp=require('gulp');
 var reload=require('require-reload')(require);
 var notify=require('gulp-notify');
@@ -69,7 +68,9 @@ gulp.task('js',function(){
 		.pipe(sourcemaps.init({
 			loadMaps: true
 		}))
-		.pipe(wrapJS(fs.readFileSync('src/base/babel-helpers-wrapper.js','utf8')))
+		.pipe(wrapJS(
+			reload('./src/base/babel-helpers-wrapper.js')()
+		))
 		.pipe(uglify())
 		.pipe(sourcemaps.write('.',{
 			sourceRoot: '.'
