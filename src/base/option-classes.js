@@ -1,49 +1,14 @@
 'use strict';
 
 class Base {
-	constructor() {
-		let name,contents,defaultValue,visibilityData;
-		let nScalars=0;
-		let nArrays=0;
-		let nObjects=0;
-		this.visibilityData={};
-		for (let i=0;i<arguments.length;i++) {
-			let arg=arguments[i];
-			if (typeof arg == 'string' || typeof arg == 'number' || typeof arg == 'boolean') {
-				if (nScalars==0) {
-					this.name=arg;
-				} else if (nScalars==1) {
-					defaultValue=arg;
-				} else {
-					throw new Error("too many scalar arguments");
-				}
-				nScalars++;
-			} else if (Array.isArray(arg)) {
-				if (nArrays==0) {
-					contents=arg;
-				} else {
-					throw new Error("too many array arguments");
-				}
-				nArrays++;
-			} else if (arg instanceof Object) {
-				if (nObjects==0) {
-					this.visibilityData=arg;
-				} else {
-					throw new Error("too many array arguments");
-				}
-				nObjects++;
-			} else {
-				throw new Error("unknown argument type");
-			}
-		}
-		this.init(contents,defaultValue);
+	constructor(name) {
+		this.name=name;
 	}
-	// to be redefined
-	init(contents,defaultValue) {}
 }
 
 class Input extends Base {
-	init(availableValues,defaultValue) {
+	constructor(name,availableValues,defaultValue) {
+		super(name);
 		this.availableValues=availableValues;
 		if (defaultValue!==undefined) {
 			this.defaultValue=defaultValue;
@@ -54,9 +19,9 @@ class Input extends Base {
 }
 
 class Select extends Input {
-	//init(availableValues,defaultValue) {
-	//	super.init(availableValues,defaultValue);
-	//}
+	constructor(name,availableValues,defaultValue) {
+		super(name,availableValues,defaultValue);
+	}
 	get inputEntries() {
 		const option=this;
 		return [{
@@ -71,7 +36,8 @@ class Select extends Input {
 }
 
 class Collection extends Base {
-	init(entries) {
+	constructor(name,entries) {
+		super(name);
 		this.entries=entries;
 	}
 }

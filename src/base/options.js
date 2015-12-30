@@ -6,28 +6,52 @@ class Options {
 		const makeEntry=description=>{
 			const className=description[0];
 			const ctorArgsDescription=description.slice(1);
-			const ctorArgs=ctorArgsDescription.map(ctorArgDescription=>{
-				if (Array.isArray(ctorArgDescription)) {
-					// array arg
-					return ctorArgDescription.map(x=>{
-						if (Array.isArray(x)) {
-							// nested option
-							return makeEntry(x);
-						} else {
-							// available value / value range boundary
-							return x;
-						}
-					});
+			let name;
+			let contents=[];
+			let defaultValue;
+			let visibilityData={};
+			let nScalars=0;
+			let nArrays=0;
+			let nObjects=0;
+			for (let i=0;i<ctorArgsDescription.length;i++) {
+				let arg=ctorArgsDescription[i];
+				if (typeof arg == 'string' || typeof arg == 'number' || typeof arg == 'boolean') {
+					if (nScalars==0) {
+						name=arg;
+					} else if (nScalars==1) {
+						defaultValue=arg;
+					} else {
+						throw new Error("too many scalar arguments");
+					}
+					nScalars++;
+				} else if (Array.isArray(arg)) {
+					if (nArrays==0) {
+						contents=arg.map(x=>{
+							if (Array.isArray(x)) {
+								return makeEntry(x); // nested option
+							} else {
+								return x; // available value / value range boundary
+							}
+						});
+					} else {
+						throw new Error("too many array arguments");
+					}
+					nArrays++;
+				} else if (arg instanceof Object) {
+					if (nObjects==0) {
+						visibilityData=arg;
+					} else {
+						throw new Error("too many array arguments");
+					}
+					nObjects++;
 				} else {
-					// name / default value / scope arg - don't need to process
-					return ctorArgDescription;
+					throw new Error("unknown argument type");
 				}
-			});
-			return new (Function.prototype.bind.apply(Option[className],[null].concat(ctorArgs)));
+			}
+			const ctorArgs=[null,name,contents,defaultValue,visibilityData];
+			return new (Function.prototype.bind.apply(Option[className],ctorArgs));
 		};
-		this.root=new Option.Root(
-			this.entriesDescription.map(makeEntry)
-		);
+		this.root=new Option.Root(null,this.entriesDescription.map(makeEntry));
 	}
 	// methods to be redefined by subclasses
 	// TODO make them static?
