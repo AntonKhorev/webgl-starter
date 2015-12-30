@@ -322,7 +322,7 @@ $(function(){
 							$sliderInput=$("<input type='range' id='"+id+"'>")
 								.attr('min',option.availableMin)
 								.attr('max',option.availableMax)
-								// .attr('step',option.getSetupStep()) // TODO, not required for ints
+								.attr('step',option.step)
 								.val(option.value)
 								//.on('input change',function(){
 								//	inputListener.call(this,$numberInput);

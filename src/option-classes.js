@@ -5,6 +5,9 @@ const imports=require('./base/option-classes.js');
 const RangeInput=imports.RangeInput;
 
 class LiveInt extends RangeInput {
+	get step() {
+		return 1;
+	}
 }
 
 class LiveFloat extends RangeInput {
@@ -37,6 +40,9 @@ class LiveFloat extends RangeInput {
 			get availableMax() {
 				return option.availableSpeedMax;
 			},
+			get step() {
+				return option.step;
+			},
 			get $() {
 				return option._speed$;
 			},
@@ -45,6 +51,15 @@ class LiveFloat extends RangeInput {
 				if (option._speed$) option._speed$.toggle(option._addSpeed);
 			}
 		};
+	}
+	get step() {
+		if (this.availableMax>=100) {
+			return '0.1';
+		} else if (this.availableMax>=10) {
+			return '0.01';
+		} else {
+			return '0.001';
+		}
 	}
 }
 
