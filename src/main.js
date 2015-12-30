@@ -315,7 +315,7 @@ $(function(){
 						return $inputEntry;
 					})
 				);
-			} else if (option instanceof Option.LiveInt) {
+			} else if (option instanceof Option.RangeInput) {
 				return $("<div>").append(
 					option.inputEntries.map(inputEntry=>{
 						const id=generateId();

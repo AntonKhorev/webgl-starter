@@ -11,19 +11,38 @@ module.exports=function(id,n){ // fake temporary i18n
 			return word+'s';
 		}
 	}
+	const plainValue=x=>number(x);
+	const pixelValue=n=>number(n)+" <abbr title='"+plural(n,'pixel')+"'>px</abbr>";
 	const strings={
 		'message.hljs': "<a href='https://highlightjs.org/'>highlight.js</a> (hosted on cdnjs.cloudflare.com) is not loaded. Syntax highlighting is disabled.",
 		'message.elements': "choosing 8- or 16-bit index may limit available shape detail levels",
 
 		'options.canvas': "Canvas",
 		'options.canvas.width': "Canvas width",
-		'options.canvas.width.value': n=>number(n)+" <abbr title='"+plural(n,'pixel')+"'>px</abbr>",
+		'options.canvas.width.value': pixelValue,
 		'options.canvas.height': "Canvas height",
-		'options.canvas.height.value': n=>number(n)+" <abbr title='"+plural(n,'pixel')+"'>px</abbr>",
+		'options.canvas.height.value': pixelValue,
 		'options.background': "Background",
 		'options.background.type': "Background type",
 		'options.background.type.none': "none (transparent)",
 		'options.background.type.solid': "solid color",
+		'options.background.color': "Background color",
+		'options.background.color.r': 'Background color red component',
+		'options.background.color.g': 'Background color green component',
+		'options.background.color.b': 'Background color blue component',
+		'options.background.color.a': 'Background color alpha component',
+		'options.background.color.r.value': plainValue,
+		'options.background.color.g.value': plainValue,
+		'options.background.color.b.value': plainValue,
+		'options.background.color.a.value': plainValue,
+		'options.background.color.r.speed': 'Background color red speed',
+		'options.background.color.g.speed': 'Background color green speed',
+		'options.background.color.b.speed': 'Background color blue speed',
+		'options.background.color.a.speed': 'Background color alpha speed',
+		'options.background.color.r.speed.value': plainValue,
+		'options.background.color.g.speed.value': plainValue,
+		'options.background.color.b.speed.value': plainValue,
+		'options.background.color.a.speed.value': plainValue,
 		'options.material': "Material",
 		'options.material.scope': "Set material color for objects",
 		'options.material.scope.global': "entire scene",
@@ -54,10 +73,6 @@ module.exports=function(id,n){ // fake temporary i18n
 		'options.projection.perspective': 'perspective',
 
 		'options.input': 'Input options',
-		'options.backgroundColor.r': 'Background color red component',
-		'options.backgroundColor.g': 'Background color green component',
-		'options.backgroundColor.b': 'Background color blue component',
-		'options.backgroundColor.a': 'Background color alpha component',
 		'options.materialColor.r': 'Material color red component',
 		'options.materialColor.g': 'Material color green component',
 		'options.materialColor.b': 'Material color blue component',
@@ -111,21 +126,10 @@ module.exports=function(id,n){ // fake temporary i18n
 		'controls.type.mousemovex': 'Move the mouse pointer horizontally over the canvas',
 		'controls.type.mousemovey': 'Move the mouse pointer vertically over the canvas',
 		'controls.to': 'to update',
-		/*
-		// TODO
-		'controls.value.background.solid.color.r': 'Background color red component',
-		'controls.value.background.solid.color.g': 'Background color green component',
-		'controls.value.background.solid.color.b': 'Background color blue component',
-		'controls.value.background.solid.color.a': 'Background color alpha component',
-		'controls.value.shader.single.color.r': 'Fragment color red component',
-		'controls.value.shader.single.color.g': 'Fragment color green component',
-		'controls.value.shader.single.color.b': 'Fragment color blue component',
-		'controls.value.shader.single.color.a': 'Fragment color alpha component',
-		'controls.value.shape.gasket.depth': 'Sierpinski gasket recursion depth',
-		'controls.value.animation.rotation.speed': 'Z axis rotation speed',
-		*/
 	};
-	if (typeof strings[id] == 'string') {
+	if (strings[id]===undefined) {
+		throw new Error("undefined string "+id);
+	} if (typeof strings[id] == 'string') {
 		return strings[id];
 	} else {
 		return strings[id](n);
