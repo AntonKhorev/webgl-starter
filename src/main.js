@@ -285,10 +285,6 @@ $(function(){
 										$rangeSpan.show();
 									}
 								}
-								if (withGamepad) {
-									$options.find("[data-option='"+option.name+'.speed'+"']")
-										.toggle(option.availableGamepadInputTypes.indexOf(this.value)<0);
-								}
 								*/
 							})
 						);
@@ -297,7 +293,7 @@ $(function(){
 				option.$=writeOption(option);
 				if (option instanceof Option.LiveFloat) {
 					option.$.append(
-						$("<label> add speed</label>").prepend( // TODO i18n
+						option.$addSpeed=$("<label> add speed</label>").prepend( // TODO i18n
 							$("<input type='checkbox'>")
 								.prop('checked',option.addSpeed)
 								.change(function(){

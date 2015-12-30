@@ -36,6 +36,22 @@ class LiveFloat extends LiveNumber {
 		this.availableSpeedMax=availableRange[3];
 		this._speed$=null;
 		this._addSpeed=false;
+		this._$addSpeed=null;
+	}
+	updateSpeedVisibility() {
+		const notGamepad=['gamepad0','gamepad1','gamepad2','gamepad3'].indexOf(this._input)<0;
+		if (this._speed$) this._speed$.toggle(
+			this._addSpeed && notGamepad
+		);
+		if (this._$addSpeed) this._$addSpeed.toggle(notGamepad);
+	}
+	get input() {
+		return this._input;
+	}
+	set input(input) {
+		this._input=input;
+		this.updateSpeedVisibility();
+		this.updateCallback();
 	}
 	get addSpeed() {
 		return this._addSpeed;
@@ -93,9 +109,16 @@ class LiveFloat extends LiveNumber {
 			},
 			set $($) {
 				option._speed$=$;
-				if (option._speed$) option._speed$.toggle(option._addSpeed);
+				option.updateSpeedVisibility();
 			}
 		};
+	}
+	get $addSpeed() {
+		return this._$addSpeed;
+	}
+	set $addSpeed($addSpeed) {
+		this._$addSpeed=$addSpeed;
+		this.updateSpeedVisibility();
 	}
 }
 
