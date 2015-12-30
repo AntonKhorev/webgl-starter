@@ -13,6 +13,7 @@ class LiveInt extends RangeInput {
 class LiveFloat extends RangeInput {
 	constructor(isVisible,updateCallback,fullName,availableRange,defaultValue) {
 		super(isVisible,updateCallback,fullName,availableRange,defaultValue);
+		this._speedValue=0;
 		this.availableSpeedMin=availableRange[2];
 		this.availableSpeedMax=availableRange[3];
 		this._speed$=null;
@@ -32,7 +33,11 @@ class LiveFloat extends RangeInput {
 				return option.fullName+'.speed';
 			},
 			get value() {
-				return 0;
+				return option._speedValue;
+			},
+			set value(value) {
+				option._speedValue=value;
+				option.updateCallback();
 			},
 			get availableMin() {
 				return option.availableSpeedMin;

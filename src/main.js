@@ -313,22 +313,35 @@ $(function(){
 				return option.$;
 			} else if (option instanceof Option.RangeInput) {
 				const writeOption=option=>{
+					const setInputAttrs=($input,getOtherInput)=>{
+						return $input
+							.attr('min',option.availableMin)
+							.attr('max',option.availableMax)
+							.attr('step',option.step)
+							.val(option.value)
+							.on('input change',function(){
+								if (this.checkValidity()) {
+									const $that=getOtherInput();
+									$that.val(this.value);
+									option.value=parseFloat(this.value);
+									//updateCode();
+								}
+							})
+						;
+					};
 					const id=generateId();
-					let $sliderInput;
+					let $sliderInput,$numberInput;
 					return $("<div>").append("<label for='"+id+"'>"+i18n('options.'+option.fullName)+":</label>")
-						.append(" ")
-						.append(" <span class='min'>"+i18n('options.'+option.fullName+'.value',option.availableMin)+"</span> ")
-						.append(
-							$sliderInput=$("<input type='range' id='"+id+"'>")
-								.attr('min',option.availableMin)
-								.attr('max',option.availableMax)
-								.attr('step',option.step)
-								.val(option.value)
-								//.on('input change',function(){
-								//	inputListener.call(this,$numberInput);
-								//})
-						)
-						.append(" <span class='max'>"+i18n('options.'+option.fullName+'.value',option.availableMax)+"</span> ")
+						.append(" <span class='min'>"+i18n(`options.${option.fullName}.value`,option.availableMin)+"</span> ")
+						.append($sliderInput=setInputAttrs(
+							$("<input type='range' id='"+id+"'>"),
+							()=>$numberInput
+						))
+						.append(" <span class='max'>"+i18n(`options.${option.fullName}.value`,option.availableMax)+"</span> ")
+						.append($numberInput=setInputAttrs(
+							$("<input type='number' required>"),
+							()=>$sliderInput
+						))
 					;
 				};
 				option.$=writeOption(option);
