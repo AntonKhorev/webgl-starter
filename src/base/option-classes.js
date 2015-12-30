@@ -1,5 +1,7 @@
 'use strict';
 
+// abstract classes
+
 class Base {
 	constructor(fullName) {
 		this.fullName=fullName;
@@ -9,7 +11,6 @@ class Base {
 class Input extends Base {
 	constructor(fullName,availableValues,defaultValue) {
 		super(fullName);
-		this.availableValues=availableValues;
 		if (defaultValue!==undefined) {
 			this.defaultValue=defaultValue;
 		} else {
@@ -18,7 +19,31 @@ class Input extends Base {
 	}
 }
 
-class Select extends Input {
+class FactorInput extends Input {
+	constructor(fullName,availableValues,defaultValue) {
+		super(fullName,availableValues,defaultValue);
+		this.availableValues=availableValues;
+	}
+}
+
+class RangeInput extends Input {
+	constructor(fullName,availableRange,defaultValue) {
+		super(fullName,availableRange,defaultValue);
+		this.availableMin=availableRange[0];
+		this.availableMax=availableRange[1];
+	}
+}
+
+class Collection extends Base {
+	constructor(fullName,entries) {
+		super(fullName);
+		this.entries=entries;
+	}
+}
+
+// concrete classes
+
+class Select extends FactorInput {
 	constructor(fullName,availableValues,defaultValue) {
 		super(fullName,availableValues,defaultValue);
 	}
@@ -38,13 +63,6 @@ class Select extends Input {
 	}
 }
 
-class Collection extends Base {
-	constructor(fullName,entries) {
-		super(fullName);
-		this.entries=entries;
-	}
-}
-
 class Root extends Collection {
 }
 
@@ -53,7 +71,9 @@ class Group extends Collection {
 
 exports.Base=Base;
 exports.Input=Input;
-exports.Select=Select;
+exports.FactorInput=FactorInput;
+exports.RangeInput=RangeInput;
 exports.Collection=Collection;
+exports.Select=Select;
 exports.Root=Root;
 exports.Group=Group;

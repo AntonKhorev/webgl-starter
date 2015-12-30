@@ -6,7 +6,7 @@ function generateId() {
 }
 
 var i18n=require('./i18n.js');
-var Option=require('./base/option-classes.js');
+var Option=require('./option-classes.js');
 var Options=require('./options.js');
 //var generateCode=require('./code.js');
 
@@ -313,6 +313,28 @@ $(function(){
 							$inputEntry.append(" "+i18n('message.elements'));
 						}
 						return $inputEntry;
+					})
+				);
+			} else if (option instanceof Option.LiveInt) {
+				return $("<div>").append(
+					option.inputEntries.map(inputEntry=>{
+						const id=generateId();
+						let $sliderInput;
+						return $("<div>").append("<label for='"+id+"'>"+i18n('options.'+inputEntry.fullName)+":</label>")
+							.append(" ")
+							.append(" <span class='min'>"+i18n('options.'+inputEntry.fullName+'.value',inputEntry.availableMin)+"</span> ")
+							.append(
+								$sliderInput=$("<input type='range' id='"+id+"'>")
+									.attr('min',inputEntry.availableMin)
+									.attr('max',inputEntry.availableMax)
+									// .attr('step',option.getSetupStep()) // TODO, not required for ints
+									.val(inputEntry.value)
+									//.on('input change',function(){
+									//	inputListener.call(this,$numberInput);
+									//})
+							)
+							.append(" <span class='max'>"+i18n('options.'+inputEntry.fullName+'.value',inputEntry.availableMax)+"</span> ")
+						;
 					})
 				);
 			}

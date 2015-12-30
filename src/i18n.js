@@ -1,10 +1,13 @@
 'use strict';
 
-module.exports=function(id){ // fake temporary i18n
-	return {
+module.exports=function(id,n){ // fake temporary i18n
+	const strings={
 		'message.hljs': "<a href='https://highlightjs.org/'>highlight.js</a> (hosted on cdnjs.cloudflare.com) is not loaded. Syntax highlighting is disabled.",
 		'message.elements': "choosing 8- or 16-bit index may limit available shape detail levels",
 
+		'options.canvas': 'Canvas',
+		'options.canvas.width': 'Canvas width',
+		'options.canvas.height': 'Canvas height',
 		'options.background': 'Background',
 		'options.background.type': 'Background type',
 		'options.background.type.none': 'none (transparent)',
@@ -39,8 +42,6 @@ module.exports=function(id){ // fake temporary i18n
 		'options.projection.perspective': 'perspective',
 
 		'options.input': 'Input options',
-		'options.canvas.width': 'Canvas width',
-		'options.canvas.height': 'Canvas height',
 		'options.backgroundColor.r': 'Background color red component',
 		'options.backgroundColor.g': 'Background color green component',
 		'options.backgroundColor.b': 'Background color blue component',
@@ -111,5 +112,10 @@ module.exports=function(id){ // fake temporary i18n
 		'controls.value.shape.gasket.depth': 'Sierpinski gasket recursion depth',
 		'controls.value.animation.rotation.speed': 'Z axis rotation speed',
 		*/
-	}[id];
+	};
+	if (n===undefined) {
+		return strings[id];
+	} else {
+		return '('+n+')'; // TODO
+	}
 };

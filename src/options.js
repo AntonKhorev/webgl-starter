@@ -12,14 +12,15 @@ OptionsInfo.prototype.ColorOptionGroup=(function(OptionGroup){
 })(BaseOptionsInfo.prototype.OptionGroup);
 */
 class Options extends BaseOptions {
+	get optionClasses() {
+		return require('./option-classes.js');
+	}
 	get entriesDescription() {
 		return [
-			/*
 			['Group','canvas',[
 				['LiveInt','width',[1,1024],512], // TODO remove mouse from inputs by subclassing LiveIntInputOption -> LiveCanvasIntInputOption
 				['LiveInt','height',[1,1024],512],
 			]],
-			*/
 			['Group','background',[
 				['Select','type',['none','solid']],
 				/*
