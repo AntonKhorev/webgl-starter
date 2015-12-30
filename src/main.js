@@ -5,7 +5,7 @@ function generateId() {
 
 var i18n=require('./i18n.js');
 var Options=require('./options.js');
-var generateCode=require('./code.js');
+//var generateCode=require('./code.js');
 
 function getHtmlDataUri(html) {
 	// with base64: https://developer.mozilla.org/en-US/docs/Web/API/WindowBase64/btoa
@@ -23,6 +23,7 @@ $(function(){
 		var codeUpdateTimeoutId=null;
 		var codeUpdateDelay=200;
 
+		/*
 		function showHideSuboptionInputs(changedOption) {
 			options.inputOptions.forEach(function(affectedOption){
 				if (affectedOption.isVisibilityAffectedBy(changedOption)) {
@@ -278,6 +279,10 @@ $(function(){
 				);
 			});
 		}
+		*/
+		function writeOptions() {
+			return $("<div>TODO options</div>");
+		}
 		function writeButtons() {
 			return $("<div>").append(
 				$("<a download='source.html'><button type='button'>Save source code</button></a>").click(function(){
@@ -296,9 +301,10 @@ $(function(){
 		}
 
 		$container.empty().append($options=writeOptions());
-		hideSuboptionInputs();
+		//hideSuboptionInputs();
 		$container.append(writeButtons()).append(
-			$("<pre>").append($code=$("<code>").text(generateCode(options.fix(),i18n)))
+			//$("<pre>").append($code=$("<code>").text(generateCode(options.fix(),i18n)))
+			$("<pre>").append($code=$("<code>").text("TODO code"))
 		);
 		if (window.hljs) {
 			hljs.highlightBlock($code[0]);

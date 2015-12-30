@@ -1,10 +1,7 @@
-var BaseOptionsInfo=require('./base-options-info.js');
+'use strict';
 
-var OptionsInfo=function(){
-	BaseOptionsInfo.apply(this,arguments);
-};
-OptionsInfo.prototype=Object.create(BaseOptionsInfo.prototype);
-OptionsInfo.prototype.constructor=OptionsInfo;
+var BaseOptions=require('./base/options.js');
+
 /*
 // TODO LiveColor
 OptionsInfo.prototype.ColorOptionGroup=(function(OptionGroup){
@@ -14,24 +11,37 @@ OptionsInfo.prototype.ColorOptionGroup=(function(OptionGroup){
 	return ColorOptionGroup;
 })(BaseOptionsInfo.prototype.OptionGroup);
 */
-// TODO have json instead...
-OptionsInfo.prototype.structure=[
-	['Group','canvas',[
-		['LiveInt','width',[1,1024],512], // TODO remove mouse from inputs by subclassing LiveIntInputOption -> LiveCanvasIntInputOption
-		['LiveInt','height',[1,1024],512],
-	]],
-	['Group','background',[
-		['Select','type',['none','solid']],
-		['Group','color',[
-			['LiveFloat','r',[0,1],1],
-			['LiveFloat','g',[0,1],1],
-			['LiveFloat','b',[0,1],1],
-			['LiveFloat','a',[0,1],1],
-		],{'background.type':'solid'}],
-	]],
-	// TODO
-];
-// ...instead of this
+class Options extends BaseOptions {
+	get entriesDescription() {
+		return [
+			/*
+			['Group','canvas',[
+				['LiveInt','width',[1,1024],512], // TODO remove mouse from inputs by subclassing LiveIntInputOption -> LiveCanvasIntInputOption
+				['LiveInt','height',[1,1024],512],
+			]],
+			*/
+			['Group','background',[
+				['Select','type',['none','solid']],
+				/*
+				['Group','color',[
+					['LiveFloat','r',[0,1],1],
+					['LiveFloat','g',[0,1],1],
+					['LiveFloat','b',[0,1],1],
+					['LiveFloat','a',[0,1],1],
+				],{'background.type':'solid'}],
+				*/
+			]],
+			['Group','material',[
+				['Select','scope',['global','vertex','face']],
+				['Select','data',['one','sda']]
+				// TODO
+			]],
+			// TODO
+		];
+	}
+}
+// TODO have json instead of this
+/*
 OptionsInfo.prototype.makeEntries=function(){
 	return new this.OptionRoot([
 		new this.OptionGroup('canvas',[
@@ -103,5 +113,6 @@ OptionsInfo.prototype.makeEntries=function(){
 		])
 	]);
 };
+*/
 
-module.exports=OptionsInfo;
+module.exports=Options;

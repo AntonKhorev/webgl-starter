@@ -1,3 +1,4 @@
+var fs=require('fs'); // TODO replace with module
 var gulp=require('gulp');
 var reload=require('require-reload')(require);
 var notify=require('gulp-notify');
@@ -6,6 +7,7 @@ var browserify=require('browserify');
 var source=require('vinyl-source-stream');
 var buffer=require('vinyl-buffer');
 var sourcemaps=require('gulp-sourcemaps');
+var wrapJS=require('gulp-wrap-js');
 var uglify=require('gulp-uglify');
 var less=require('gulp-less');
 var autoprefixer=require('gulp-autoprefixer');
@@ -56,6 +58,10 @@ gulp.task('js',function(){
 		entries: 'src/main.js',
 		debug: true
 	})
+		.transform('babelify',{
+			presets:['es2015-loose'],
+			plugins:['external-helpers-2'],
+		})
 		.bundle()
 		.on('error',handleErrors)
 		.pipe(source('webgl-starter.js'))
@@ -63,6 +69,7 @@ gulp.task('js',function(){
 		.pipe(sourcemaps.init({
 			loadMaps: true
 		}))
+		.pipe(wrapJS(fs.readFileSync('src/base/babel-helpers-wrapper.js','utf8')))
 		.pipe(uglify())
 		.pipe(sourcemaps.write('.',{
 			sourceRoot: '.'
