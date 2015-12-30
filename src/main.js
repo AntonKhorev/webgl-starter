@@ -302,10 +302,10 @@ $(function(){
 							option.availableValues.map(function(availableValue){
 								return $("<option>").val(availableValue).html(i18n('options.'+option.fullName+'.'+availableValue))
 							})
-						).val(option.value)/*.change(()=>{
+						).val(option.value).change(function(){
 							option.value=this.value;
-							updateCode();
-						})*/
+							//updateCode(); // TODO callback for options
+						})
 					);
 				if (option.name=='elements') {
 					option.$.append(" "+i18n('message.elements'));

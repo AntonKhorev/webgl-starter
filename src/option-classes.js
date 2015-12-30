@@ -8,8 +8,8 @@ class LiveInt extends RangeInput {
 }
 
 class LiveFloat extends RangeInput {
-	constructor(isVisible,fullName,availableRange,defaultValue) {
-		super(isVisible,fullName,availableRange,defaultValue);
+	constructor(isVisible,updateCallback,fullName,availableRange,defaultValue) {
+		super(isVisible,updateCallback,fullName,availableRange,defaultValue);
 		this.availableSpeedMin=availableRange[2];
 		this.availableSpeedMax=availableRange[3];
 		this._speed$=null;

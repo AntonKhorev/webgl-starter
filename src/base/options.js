@@ -4,6 +4,7 @@ class Options {
 	constructor() {
 		const Option=this.optionClasses;
 		const optionByFullName={};
+		const optionsWithVisibilityAffectedByFullName={};
 		const makeEntry=(description,fullNamePath)=>{
 			const className=description[0];
 			if (Option[className]===undefined) {
@@ -60,12 +61,25 @@ class Options {
 				}
 				return true;
 			};
-			const ctorArgs=[null,isVisible,fullName,contents,defaultValue];
+			const updateCallback=()=>{
+				if (optionsWithVisibilityAffectedByFullName[fullName]!==undefined) {
+					optionsWithVisibilityAffectedByFullName[fullName].forEach(option=>{
+						option.updateVisibility();
+					});
+				}
+			};
+			const ctorArgs=[null,isVisible,updateCallback,fullName,contents,defaultValue];
 			const option=new (Function.prototype.bind.apply(Option[className],ctorArgs));
 			optionByFullName[fullName]=option;
+			for (let testName in visibilityData) {
+				if (optionsWithVisibilityAffectedByFullName[testName]===undefined) {
+					optionsWithVisibilityAffectedByFullName[testName]=[];
+				}
+				optionsWithVisibilityAffectedByFullName[testName].push(option);
+			}
 			return option;
 		};
-		this.root=new Option.Root(()=>true,null,this.entriesDescription.map(description=>makeEntry(description,'')));
+		this.root=new Option.Root(()=>true,()=>{},null,this.entriesDescription.map(description=>makeEntry(description,'')));
 	}
 	// methods to be redefined by subclasses
 	// TODO make them static?

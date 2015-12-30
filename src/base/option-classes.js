@@ -3,8 +3,9 @@
 // abstract classes
 
 class Base {
-	constructor(isVisible,fullName) {
+	constructor(isVisible,updateCallback,fullName) {
 		this.isVisible=isVisible;
+		this.updateCallback=updateCallback;
 		this.fullName=fullName;
 		this._$=null;
 	}
@@ -13,13 +14,16 @@ class Base {
 	}
 	set $($) {
 		this._$=$;
-		if ($) $.toggle(this.isVisible());
+		this.updateVisibility();
+	}
+	updateVisibility() {
+		if (this.$) this.$.toggle(this.isVisible());
 	}
 }
 
 class Input extends Base {
-	constructor(isVisible,fullName,availableValues,defaultValue) {
-		super(isVisible,fullName);
+	constructor(isVisible,updateCallback,fullName,availableValues,defaultValue) {
+		super(isVisible,updateCallback,fullName);
 		if (defaultValue!==undefined) {
 			this.defaultValue=defaultValue;
 		} else {
@@ -32,28 +36,28 @@ class Input extends Base {
 	}
 	set value(value) {
 		this._value=value;
-		// TODO toggle visibility
+		this.updateCallback();
 	}
 }
 
 class FactorInput extends Input {
-	constructor(isVisible,fullName,availableValues,defaultValue) {
-		super(isVisible,fullName,availableValues,defaultValue);
+	constructor(isVisible,updateCallback,fullName,availableValues,defaultValue) {
+		super(isVisible,updateCallback,fullName,availableValues,defaultValue);
 		this.availableValues=availableValues;
 	}
 }
 
 class RangeInput extends Input {
-	constructor(isVisible,fullName,availableRange,defaultValue) {
-		super(isVisible,fullName,availableRange,defaultValue);
+	constructor(isVisible,updateCallback,fullName,availableRange,defaultValue) {
+		super(isVisible,updateCallback,fullName,availableRange,defaultValue);
 		this.availableMin=availableRange[0];
 		this.availableMax=availableRange[1];
 	}
 }
 
 class Collection extends Base {
-	constructor(isVisible,fullName,entries) {
-		super(isVisible,fullName);
+	constructor(isVisible,updateCallback,fullName,entries) {
+		super(isVisible,updateCallback,fullName);
 		this.entries=entries;
 	}
 }
@@ -61,8 +65,8 @@ class Collection extends Base {
 // concrete classes
 
 class Select extends FactorInput {
-	constructor(isVisible,fullName,availableValues,defaultValue) {
-		super(isVisible,fullName,availableValues,defaultValue);
+	constructor(isVisible,updateCallback,fullName,availableValues,defaultValue) {
+		super(isVisible,updateCallback,fullName,availableValues,defaultValue);
 	}
 }
 
