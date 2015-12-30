@@ -3,10 +3,10 @@
 class Options {
 	constructor() {
 		const Option=this.optionClasses;
-		const makeEntry=description=>{
+		const makeEntry=(description,idPath)=>{
 			const className=description[0];
-			const ctorArgsDescription=description.slice(1);
-			let name;
+			const name=description[1];
+			const ctorArgsDescription=description.slice(2);
 			let contents=[];
 			let defaultValue;
 			let visibilityData={};
@@ -17,8 +17,6 @@ class Options {
 				let arg=ctorArgsDescription[i];
 				if (typeof arg == 'string' || typeof arg == 'number' || typeof arg == 'boolean') {
 					if (nScalars==0) {
-						name=arg;
-					} else if (nScalars==1) {
 						defaultValue=arg;
 					} else {
 						throw new Error("too many scalar arguments");
@@ -28,7 +26,7 @@ class Options {
 					if (nArrays==0) {
 						contents=arg.map(x=>{
 							if (Array.isArray(x)) {
-								return makeEntry(x); // nested option
+								return makeEntry(x,idPath+name+'.'); // nested option
 							} else {
 								return x; // available value / value range boundary
 							}
@@ -48,10 +46,10 @@ class Options {
 					throw new Error("unknown argument type");
 				}
 			}
-			const ctorArgs=[null,name,contents,defaultValue,visibilityData];
+			const ctorArgs=[null,idPath+name,contents,defaultValue,visibilityData];
 			return new (Function.prototype.bind.apply(Option[className],ctorArgs));
 		};
-		this.root=new Option.Root(null,this.entriesDescription.map(makeEntry));
+		this.root=new Option.Root(null,this.entriesDescription.map(description=>makeEntry(description,'')));
 	}
 	// methods to be redefined by subclasses
 	// TODO make them static?

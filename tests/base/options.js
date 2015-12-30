@@ -29,10 +29,50 @@ describe("Base/Options",()=>{
 			const values=['foo','c'];
 			options.root.entries.forEach((entry,i)=>{
 				assert(entry instanceof Option.Select,"option entry type isn't Select");
-				entry.inputEntries.forEach((inputEntry,j)=>{
-					assert.equal(j,0,"more than one input entry");
+				entry.inputEntries.forEach((inputEntry,n)=>{
+					assert.equal(n,0,"more than one input entry");
 					assert.equal(inputEntry.id,ids[i]);
 					assert.equal(inputEntry.value,values[i]);
+				});
+			});
+		});
+	});
+	context("groups and selects",()=>{
+		class TestOptions extends Options {
+			get entriesDescription() {
+				return [
+					['Group','silly',[
+						['Select','foobar',['foo','bar','baz']],
+						['Select','letter',['a','b','c','d','e'],'c'],
+					]],
+					['Group','stupid',[
+						['Select','what',['nothing','something']],
+					]],
+				];
+			}
+		};
+		const options=new TestOptions;
+		it("has root",()=>{
+			assert(options.root instanceof Option.Root);
+		});
+		it("traverses entries",()=>{
+			const ids=[
+				['silly.foobar','silly.letter'],
+				['stupid.what'],
+			];
+			const values=[
+				['foo','c'],
+				['nothing']
+			];
+			options.root.entries.forEach((entry,i)=>{
+				assert(entry instanceof Option.Group,"option entry type isn't Group");
+				entry.entries.forEach((entry,j)=>{
+					assert(entry instanceof Option.Select,"option entry type isn't Select");
+					entry.inputEntries.forEach((inputEntry,n)=>{
+						assert.equal(n,0,"more than one input entry");
+						assert.equal(inputEntry.id,ids[i][j]);
+						assert.equal(inputEntry.value,values[i][j]);
+					});
 				});
 			});
 		});

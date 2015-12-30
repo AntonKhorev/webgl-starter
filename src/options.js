@@ -6,6 +6,7 @@ var OptionsInfo=function(){
 OptionsInfo.prototype=Object.create(BaseOptionsInfo.prototype);
 OptionsInfo.prototype.constructor=OptionsInfo;
 /*
+// TODO LiveColor
 OptionsInfo.prototype.ColorOptionGroup=(function(OptionGroup){
 	var ColorOptionGroup=function(){
 		// TODO
