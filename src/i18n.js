@@ -1,25 +1,37 @@
 'use strict';
 
 module.exports=function(id,n){ // fake temporary i18n
+	function number(n) {
+		return n.toString().replace('-','−');
+	}
+	function plural(n,word) {
+		if (n==1) {
+			return word;
+		} else {
+			return word+'s';
+		}
+	}
 	const strings={
 		'message.hljs': "<a href='https://highlightjs.org/'>highlight.js</a> (hosted on cdnjs.cloudflare.com) is not loaded. Syntax highlighting is disabled.",
 		'message.elements': "choosing 8- or 16-bit index may limit available shape detail levels",
 
-		'options.canvas': 'Canvas',
-		'options.canvas.width': 'Canvas width',
-		'options.canvas.height': 'Canvas height',
-		'options.background': 'Background',
-		'options.background.type': 'Background type',
-		'options.background.type.none': 'none (transparent)',
-		'options.background.type.solid': 'solid color',
-		'options.material': 'Material',
-		'options.material.scope': 'Set material color for objects',
-		'options.material.scope.global': 'entire scene',
-		'options.material.scope.vertex': 'shape vertices',
-		'options.material.scope.face': 'shape faces',
-		'options.material.data': 'For each object have',
-		'options.material.data.one': 'one color',
-		'options.material.data.sda': 'specular/diffuse/ambient colors',
+		'options.canvas': "Canvas",
+		'options.canvas.width': "Canvas width",
+		'options.canvas.width.value': n=>number(n)+" <abbr title='"+plural(n,'pixel')+"'>px</abbr>",
+		'options.canvas.height': "Canvas height",
+		'options.canvas.height.value': n=>number(n)+" <abbr title='"+plural(n,'pixel')+"'>px</abbr>",
+		'options.background': "Background",
+		'options.background.type': "Background type",
+		'options.background.type.none': "none (transparent)",
+		'options.background.type.solid': "solid color",
+		'options.material': "Material",
+		'options.material.scope': "Set material color for objects",
+		'options.material.scope.global': "entire scene",
+		'options.material.scope.vertex': "shape vertices",
+		'options.material.scope.face': "shape faces",
+		'options.material.data': "For each object have",
+		'options.material.data.one': "one color",
+		'options.material.data.sda': "specular/diffuse/ambient colors",
 		// TODO review strings below
 		'options.shape': 'Shape to draw',
 		'options.shape.square': 'square',
@@ -113,9 +125,9 @@ module.exports=function(id,n){ // fake temporary i18n
 		'controls.value.animation.rotation.speed': 'Z axis rotation speed',
 		*/
 	};
-	if (n===undefined) {
+	if (typeof strings[id] == 'string') {
 		return strings[id];
 	} else {
-		return '('+n+')'; // TODO
+		return strings[id](n);
 	}
 };
