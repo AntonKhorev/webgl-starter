@@ -30,7 +30,10 @@ class Select extends Input {
 			},
 			get value() {
 				return option.defaultValue;
-			}
+			},
+			get availableValues() {
+				return option.availableValues;
+			},
 		}];
 	}
 }

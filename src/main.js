@@ -4,6 +4,7 @@ function generateId() {
 }
 
 var i18n=require('./i18n.js');
+var Option=require('./base/option-classes.js');
 var Options=require('./options.js');
 //var generateCode=require('./code.js');
 
@@ -280,8 +281,39 @@ $(function(){
 			});
 		}
 		*/
-		function writeOptions() {
-			return $("<div>TODO options</div>");
+		function writeOption(option) {
+			if (option instanceof Option.Root) {
+				return $("<div>").append(
+					option.entries.map(writeOption)
+				);
+			} else if (option instanceof Option.Group) {
+				return $("<fieldset>").append("<legend>"+i18n('options.'+option.id)+"</legend>").append(
+					option.entries.map(writeOption)
+				);
+			} else if (option instanceof Option.Select) {
+				return $("<div>").append(
+					option.inputEntries.map(inputEntry=>{
+						const id=generateId();
+						const $inputEntry=$("<div>")
+							.append("<label for='"+id+"'>"+i18n('options.'+inputEntry.id)+":</label>") // TODO rename inputEntry.id to inputEntry.fullName
+							.append(" ")
+							.append(
+								$("<select id='"+id+"'>").append(
+									inputEntry.availableValues.map(function(availableValue){
+										return $("<option>").val(availableValue).html(i18n('options.'+inputEntry.id+'.'+availableValue))
+									})
+								).val(inputEntry.value)/*.change(()=>{
+									inputEntry.value=this.value;
+									updateCode();
+								})*/
+							);
+						if (inputEntry.name=='elements') {
+							$inputEntry.append(" "+i18n('message.elements'));
+						}
+						return $inputEntry;
+					})
+				);
+			}
 		}
 		function writeButtons() {
 			return $("<div>").append(
@@ -300,7 +332,7 @@ $(function(){
 			)
 		}
 
-		$container.empty().append($options=writeOptions());
+		$container.empty().append($options=writeOption(options.root));
 		//hideSuboptionInputs();
 		$container.append(writeButtons()).append(
 			//$("<pre>").append($code=$("<code>").text(generateCode(options.fix(),i18n)))

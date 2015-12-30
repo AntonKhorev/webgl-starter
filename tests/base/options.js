@@ -27,12 +27,14 @@ describe("Base/Options",()=>{
 		it("traverses entries",()=>{
 			const ids=['foobar','letter'];
 			const values=['foo','c'];
+			const availableValues=[['foo','bar','baz'],['a','b','c','d','e']];
 			options.root.entries.forEach((entry,i)=>{
 				assert(entry instanceof Option.Select,"option entry type isn't Select");
 				entry.inputEntries.forEach((inputEntry,n)=>{
 					assert.equal(n,0,"more than one input entry");
 					assert.equal(inputEntry.id,ids[i]);
 					assert.equal(inputEntry.value,values[i]);
+					assert.deepEqual(inputEntry.availableValues,availableValues[i]);
 				});
 			});
 		});
@@ -64,6 +66,10 @@ describe("Base/Options",()=>{
 				['foo','c'],
 				['nothing']
 			];
+			const availableValues=[
+				[['foo','bar','baz'],['a','b','c','d','e']],
+				[['nothing','something']]
+			];
 			options.root.entries.forEach((entry,i)=>{
 				assert(entry instanceof Option.Group,"option entry type isn't Group");
 				entry.entries.forEach((entry,j)=>{
@@ -72,6 +78,7 @@ describe("Base/Options",()=>{
 						assert.equal(n,0,"more than one input entry");
 						assert.equal(inputEntry.id,ids[i][j]);
 						assert.equal(inputEntry.value,values[i][j]);
+						assert.deepEqual(inputEntry.availableValues,availableValues[i][j]);
 					});
 				});
 			});
