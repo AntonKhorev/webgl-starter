@@ -1,3 +1,5 @@
+'use strict';
+
 module.exports=function(id){ // fake temporary i18n
 	return {
 		'message.hljs': "<a href='https://highlightjs.org/'>highlight.js</a> (hosted on cdnjs.cloudflare.com) is not loaded. Syntax highlighting is disabled.",

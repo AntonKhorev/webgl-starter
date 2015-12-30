@@ -1,3 +1,5 @@
+'use strict';
+
 var idCounter=0;
 function generateId() {
 	return 'webgl-starter-id-'+(idCounter++);
@@ -287,7 +289,7 @@ $(function(){
 					option.entries.map(writeOption)
 				);
 			} else if (option instanceof Option.Group) {
-				return $("<fieldset>").append("<legend>"+i18n('options.'+option.id)+"</legend>").append(
+				return $("<fieldset>").append("<legend>"+i18n('options.'+option.fullName)+"</legend>").append(
 					option.entries.map(writeOption)
 				);
 			} else if (option instanceof Option.Select) {
@@ -295,12 +297,12 @@ $(function(){
 					option.inputEntries.map(inputEntry=>{
 						const id=generateId();
 						const $inputEntry=$("<div>")
-							.append("<label for='"+id+"'>"+i18n('options.'+inputEntry.id)+":</label>") // TODO rename inputEntry.id to inputEntry.fullName
+							.append("<label for='"+id+"'>"+i18n('options.'+inputEntry.fullName)+":</label>")
 							.append(" ")
 							.append(
 								$("<select id='"+id+"'>").append(
 									inputEntry.availableValues.map(function(availableValue){
-										return $("<option>").val(availableValue).html(i18n('options.'+inputEntry.id+'.'+availableValue))
+										return $("<option>").val(availableValue).html(i18n('options.'+inputEntry.fullName+'.'+availableValue))
 									})
 								).val(inputEntry.value)/*.change(()=>{
 									inputEntry.value=this.value;

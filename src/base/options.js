@@ -3,7 +3,7 @@
 class Options {
 	constructor() {
 		const Option=this.optionClasses;
-		const makeEntry=(description,idPath)=>{
+		const makeEntry=(description,fullNamePath)=>{
 			const className=description[0];
 			const name=description[1];
 			const ctorArgsDescription=description.slice(2);
@@ -26,7 +26,7 @@ class Options {
 					if (nArrays==0) {
 						contents=arg.map(x=>{
 							if (Array.isArray(x)) {
-								return makeEntry(x,idPath+name+'.'); // nested option
+								return makeEntry(x,fullNamePath+name+'.'); // nested option
 							} else {
 								return x; // available value / value range boundary
 							}
@@ -46,7 +46,7 @@ class Options {
 					throw new Error("unknown argument type");
 				}
 			}
-			const ctorArgs=[null,idPath+name,contents,defaultValue,visibilityData];
+			const ctorArgs=[null,fullNamePath+name,contents,defaultValue,visibilityData];
 			return new (Function.prototype.bind.apply(Option[className],ctorArgs));
 		};
 		this.root=new Option.Root(null,this.entriesDescription.map(description=>makeEntry(description,'')));

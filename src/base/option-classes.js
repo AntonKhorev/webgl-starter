@@ -1,14 +1,14 @@
 'use strict';
 
 class Base {
-	constructor(id) {
-		this.id=id;
+	constructor(fullName) {
+		this.fullName=fullName;
 	}
 }
 
 class Input extends Base {
-	constructor(id,availableValues,defaultValue) {
-		super(id);
+	constructor(fullName,availableValues,defaultValue) {
+		super(fullName);
 		this.availableValues=availableValues;
 		if (defaultValue!==undefined) {
 			this.defaultValue=defaultValue;
@@ -19,14 +19,14 @@ class Input extends Base {
 }
 
 class Select extends Input {
-	constructor(id,availableValues,defaultValue) {
-		super(id,availableValues,defaultValue);
+	constructor(fullName,availableValues,defaultValue) {
+		super(fullName,availableValues,defaultValue);
 	}
 	get inputEntries() {
 		const option=this;
 		return [{
-			get id() {
-				return option.id;
+			get fullName() {
+				return option.fullName;
 			},
 			get value() {
 				return option.defaultValue;
@@ -39,8 +39,8 @@ class Select extends Input {
 }
 
 class Collection extends Base {
-	constructor(id,entries) {
-		super(id);
+	constructor(fullName,entries) {
+		super(fullName);
 		this.entries=entries;
 	}
 }
