@@ -22,6 +22,7 @@ module.exports=function(id,n){ // fake temporary i18n
 		'options.canvas.width.value': pixelValue,
 		'options.canvas.height': "Canvas height",
 		'options.canvas.height.value': pixelValue,
+
 		'options.background': "Background",
 		'options.background.type': "Background type",
 		'options.background.type.none': "none (transparent)",
@@ -43,6 +44,7 @@ module.exports=function(id,n){ // fake temporary i18n
 		'options.background.color.g.speed.value': plainValue,
 		'options.background.color.b.speed.value': plainValue,
 		'options.background.color.a.speed.value': plainValue,
+
 		'options.material': "Material",
 		'options.material.scope': "Set material color for objects",
 		'options.material.scope.global': "entire scene",
@@ -51,6 +53,17 @@ module.exports=function(id,n){ // fake temporary i18n
 		'options.material.data': "For each object have",
 		'options.material.data.one': "one color",
 		'options.material.data.sda': "specular/diffuse/ambient colors",
+
+		'inputs': 'Input method',
+		'inputs.constant': 'none',
+		'inputs.slider': 'slider',
+		'inputs.mousemovex': 'mouse x axis',
+		'inputs.mousemovey': 'mouse y axis',
+		'inputs.gamepad0': 'gamepad 0 axis',
+		'inputs.gamepad1': 'gamepad 1 axis',
+		'inputs.gamepad2': 'gamepad 2 axis',
+		'inputs.gamepad3': 'gamepad 3 axis',
+
 		// TODO review strings below
 		'options.shape': 'Shape to draw',
 		'options.shape.square': 'square',
@@ -72,7 +85,6 @@ module.exports=function(id,n){ // fake temporary i18n
 		'options.projection.ortho': 'orthogonal',
 		'options.projection.perspective': 'perspective',
 
-		'options.input': 'Input options',
 		'options.materialColor.r': 'Material color red component',
 		'options.materialColor.g': 'Material color green component',
 		'options.materialColor.b': 'Material color blue component',
@@ -90,15 +102,6 @@ module.exports=function(id,n){ // fake temporary i18n
 		'options.lightDirection.y': 'Light direction y component',
 		'options.lightDirection.z': 'Light direction z component',
 		'options.shapeLod': 'Shape detail level', // recursion depth for fractal shapes
-		'options.*.input': 'Input method',
-		'options.*.input.constant': 'none',
-		'options.*.input.slider': 'slider',
-		'options.*.input.mousemovex': 'mouse x axis',
-		'options.*.input.mousemovey': 'mouse y axis',
-		'options.*.input.gamepad0': 'gamepad 0 axis',
-		'options.*.input.gamepad1': 'gamepad 1 axis',
-		'options.*.input.gamepad2': 'gamepad 2 axis',
-		'options.*.input.gamepad3': 'gamepad 3 axis',
 		'options.*.range': 'with range',
 		'options.*.speed.add': 'Add speed',
 		'options.*.speed.remove': 'Remove speed',

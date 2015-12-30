@@ -4,16 +4,34 @@ const imports=require('./base/option-classes.js');
 
 const RangeInput=imports.RangeInput;
 
-class LiveInt extends RangeInput {
-	get step() {
-		return 1;
+class LiveNumber extends RangeInput {
+	constructor(isVisible,updateCallback,fullName,availableRange,defaultValue) {
+		super(isVisible,updateCallback,fullName,availableRange,defaultValue);
+		this._input='constant';
+	}
+	get input() {
+		return this._input;
+	}
+	set input(input) {
+		this._input=input;
+		this.updateCallback();
 	}
 }
 
-class LiveFloat extends RangeInput {
+class LiveInt extends LiveNumber {
+	get step() {
+		return 1;
+	}
+	get availableInputTypes() {
+		return ['constant','slider'];
+	}
+}
+
+class LiveFloat extends LiveNumber {
 	constructor(isVisible,updateCallback,fullName,availableRange,defaultValue) {
 		super(isVisible,updateCallback,fullName,availableRange,defaultValue);
 		this._speedValue=0;
+		this._speedInput='constant';
 		this.availableSpeedMin=availableRange[2];
 		this.availableSpeedMax=availableRange[3];
 		this._speed$=null;
@@ -25,6 +43,18 @@ class LiveFloat extends RangeInput {
 	set addSpeed(addSpeed) {
 		this._addSpeed=addSpeed;
 		if (this._speed$) this._speed$.toggle(addSpeed);
+	}
+	get step() {
+		if (this.availableMax>=100) {
+			return '0.1';
+		} else if (this.availableMax>=10) {
+			return '0.01';
+		} else {
+			return '0.001';
+		}
+	}
+	get availableInputTypes() {
+		return ['constant','slider','mousemovex','mousemovey','gamepad0','gamepad1','gamepad2','gamepad3'];
 	}
 	get speed() {
 		const option=this;
@@ -39,6 +69,13 @@ class LiveFloat extends RangeInput {
 				option._speedValue=value;
 				option.updateCallback();
 			},
+			get input() {
+				return option._speedInput;
+			},
+			set input(input) {
+				option._speedInput=input;
+				option.updateCallback();
+			},
 			get availableMin() {
 				return option.availableSpeedMin;
 			},
@@ -47,6 +84,9 @@ class LiveFloat extends RangeInput {
 			},
 			get step() {
 				return option.step;
+			},
+			get availableInputTypes() {
+				return option.availableInputTypes;
 			},
 			get $() {
 				return option._speed$;
@@ -57,20 +97,12 @@ class LiveFloat extends RangeInput {
 			}
 		};
 	}
-	get step() {
-		if (this.availableMax>=100) {
-			return '0.1';
-		} else if (this.availableMax>=10) {
-			return '0.01';
-		} else {
-			return '0.001';
-		}
-	}
 }
 
 module.exports={};
 for (let c in imports) {
 	module.exports[c]=imports[c];
 }
+module.exports.LiveNumber=LiveNumber;
 module.exports.LiveInt=LiveInt;
 module.exports.LiveFloat=LiveFloat;

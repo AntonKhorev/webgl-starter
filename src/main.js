@@ -39,22 +39,7 @@ $(function(){
 		options.updateCallback=updateCode;
 		/*
 		function writeInputOption(option,withRange,withGamepad) {
-			var id=generateId();
-			var inputId=generateId();
-			var $sliderInput,$numberInput;
-			var $inputSelect;
 			var $rangeSpan,$rangeMinInput,$rangeMaxInput;
-			var availableInputTypes=option.availableInputTypes;
-			if (withGamepad) {
-				availableInputTypes=availableInputTypes.concat(option.availableGamepadInputTypes);
-			}
-			function inputListener(that) {
-				if (this.checkValidity()) {
-					that.val(this.value);
-					options[option.name]=parseFloat(this.value);
-					updateCode();
-				}
-			}
 			function minMaxInput(minOrMax) {
 				return $("<input type='number' required>")
 					.attr('min',option.getMin())
@@ -69,30 +54,6 @@ $(function(){
 					});
 			}
 			var $optionDiv=$("<div data-option='"+option.name+"'>")
-				.append("<label for='"+id+"'>"+i18n('options.'+option.name)+":</label>")
-				.append(" <span class='min'>"+option.getMinLabel()+"</span> ")
-				.append(
-					$sliderInput=$("<input type='range' id='"+id+"'>")
-						.attr('min',option.getMin())
-						.attr('max',option.getMax())
-						.attr('step',option.getSetupStep())
-						.val(options[option.name])
-						.on('input change',function(){
-							inputListener.call(this,$numberInput);
-						})
-				)
-				.append(" <span class='max'>"+option.getMaxLabel()+"</span> ")
-				.append(
-					$numberInput=$("<input type='number' required>")
-						.attr('min',option.getMin())
-						.attr('max',option.getMax())
-						.attr('step',option.getSetupStep())
-						.val(options[option.name])
-						.on('input change',function(){
-							inputListener.call(this,$sliderInput);
-						})
-				)
-				.append(" ")
 				.append("<label for='"+inputId+"'>"+i18n('options.*.input')+":</label> ")
 				.append(
 					$inputSelect=$("<select id='"+inputId+"'>").append(
@@ -277,7 +238,7 @@ $(function(){
 					option.$.append(" "+i18n('message.elements'));
 				}
 				return option.$;
-			} else if (option instanceof Option.RangeInput) {
+			} else if (option instanceof Option.LiveNumber) {
 				const writeOption=option=>{
 					const setInputAttrs=($input,getOtherInput)=>{
 						return $input
@@ -295,7 +256,8 @@ $(function(){
 						;
 					};
 					const id=generateId();
-					let $sliderInput,$numberInput;
+					const inputSelectId=generateId();
+					let $sliderInput,$numberInput,$inputSelect;
 					return $("<div>").append("<label for='"+id+"'>"+i18n('options.'+option.fullName)+":</label>")
 						.append(" <span class='min'>"+i18n(`options.${option.fullName}.value`,option.availableMin)+"</span> ")
 						.append($sliderInput=setInputAttrs(
@@ -307,6 +269,29 @@ $(function(){
 							$("<input type='number' required>"),
 							()=>$sliderInput
 						))
+						.append(" <label for='"+inputSelectId+"'>"+i18n('inputs')+":</label> ")
+						.append(
+							$inputSelect=$("<select id='"+inputSelectId+"'>").append(
+								option.availableInputTypes.map(availableInputType=>
+									$("<option>").val(availableInputType).html(i18n('inputs.'+availableInputType))
+								)
+							).val(option.input).change(function(){
+								option.input=this.value;
+								/*
+								if (withRange) {
+									if (this.value=='constant') {
+										$rangeSpan.hide();
+									} else {
+										$rangeSpan.show();
+									}
+								}
+								if (withGamepad) {
+									$options.find("[data-option='"+option.name+'.speed'+"']")
+										.toggle(option.availableGamepadInputTypes.indexOf(this.value)<0);
+								}
+								*/
+							})
+						);
 					;
 				};
 				option.$=writeOption(option);
