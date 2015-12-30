@@ -2,6 +2,7 @@
 
 class Options {
 	constructor() {
+		this.updateCallback=null; // general update callback for stuff like regenerating the code
 		const Option=this.optionClasses;
 		const optionByFullName={};
 		const optionsWithVisibilityAffectedByFullName={};
@@ -67,6 +68,7 @@ class Options {
 						option.updateVisibility();
 					});
 				}
+				if (this.updateCallback) this.updateCallback();
 			};
 			const ctorArgs=[null,isVisible,updateCallback,fullName,contents,defaultValue];
 			const option=new (Function.prototype.bind.apply(Option[className],ctorArgs));

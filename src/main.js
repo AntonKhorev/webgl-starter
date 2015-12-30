@@ -25,45 +25,19 @@ $(function(){
 		var options=new Options();
 		var codeUpdateTimeoutId=null;
 		var codeUpdateDelay=200;
-
-		/*
-		function showHideSuboptionInputs(changedOption) {
-			options.inputOptions.forEach(function(affectedOption){
-				if (affectedOption.isVisibilityAffectedBy(changedOption)) {
-					$options.find("[data-option='"+affectedOption.name+"']").toggle(
-						affectedOption.isVisible(options)
-					);
-				}
-			});
-		}
+		//
+		let ucc=0;
 		function updateCode() {
 			clearTimeout(codeUpdateTimeoutId);
 			codeUpdateTimeoutId=setTimeout(function(){
-				$code.text(generateCode(options.fix(),i18n));
+				//$code.text(generateCode(options.fix(),i18n));
+				$code.text("TODO update code #"+(++ucc));
+				//
 				if (window.hljs) hljs.highlightBlock($code[0]);
 			},codeUpdateDelay);
 		}
-		function writeGeneralOption(option) {
-			var id=generateId();
-			var $option=$("<div>")
-				.append("<label for='"+id+"'>"+i18n('options.'+option.name)+":</label>")
-				.append(" ")
-				.append(
-					$("<select id='"+id+"'>").append(
-						option.availableValues.map(function(availableValue){
-							return $("<option>").val(availableValue).html(i18n('options.'+option.name+'.'+availableValue))
-						})
-					).val(options[option.name]).change(function(){
-						options[option.name]=this.value;
-						showHideSuboptionInputs(option);
-						updateCode();
-					})
-				);
-			if (option.name=='elements') {
-				$option.append(" "+i18n('message.elements'));
-			}
-			return $option;
-		}
+		options.updateCallback=updateCode;
+		/*
 		function writeInputOption(option,withRange,withGamepad) {
 			var id=generateId();
 			var inputId=generateId();
@@ -275,13 +249,6 @@ $(function(){
 			});
 			return $options;
 		}
-		function hideSuboptionInputs() {
-			options.inputOptions.forEach(function(affectedOption){
-				$options.find("[data-option='"+affectedOption.name+"']").toggle(
-					affectedOption.isVisible(options)
-				);
-			});
-		}
 		*/
 		function writeOption(option) {
 			if (option instanceof Option.Root) {
@@ -304,7 +271,6 @@ $(function(){
 							})
 						).val(option.value).change(function(){
 							option.value=this.value;
-							//updateCode(); // TODO callback for options
 						})
 					);
 				if (option.name=='elements') {
@@ -324,7 +290,6 @@ $(function(){
 									const $that=getOtherInput();
 									$that.val(this.value);
 									option.value=parseFloat(this.value);
-									//updateCode();
 								}
 							})
 						;
@@ -376,9 +341,7 @@ $(function(){
 				" these buttons don't work in Internet Explorer, copy-paste the code manually"
 			)
 		}
-
 		$container.empty().append($options=writeOption(options.root));
-		//hideSuboptionInputs();
 		$container.append(writeButtons()).append(
 			//$("<pre>").append($code=$("<code>").text(generateCode(options.fix(),i18n)))
 			$("<pre>").append($code=$("<code>").text("TODO code"))
