@@ -8,12 +8,28 @@ class LiveNumber extends RangeInput {
 	constructor(isVisible,updateCallback,fullName,availableRange,defaultValue) {
 		super(isVisible,updateCallback,fullName,availableRange,defaultValue);
 		this._input='constant';
+		this._min=this.availableMin;
+		this._max=this.availableMax;
 	}
 	get input() {
 		return this._input;
 	}
 	set input(input) {
 		this._input=input;
+		this.updateCallback();
+	}
+	get min() {
+		return this._min;
+	}
+	set min(min) {
+		this._min=min;
+		this.updateCallback();
+	}
+	get max() {
+		return this._max;
+	}
+	set max(max) {
+		this._max=max;
 		this.updateCallback();
 	}
 }
@@ -32,10 +48,10 @@ class LiveFloat extends LiveNumber {
 		super(isVisible,updateCallback,fullName,availableRange,defaultValue);
 		this._speedValue=0;
 		this._speedInput='constant';
-		this.availableSpeedMin=availableRange[2];
-		this.availableSpeedMax=availableRange[3];
-		this._speed$=null;
+		this._speedMin=this._speedAvailableMin=availableRange[2];
+		this._speedMax=this._speedAvailableMax=availableRange[3];
 		this._addSpeed=false;
+		this._speed$=null;
 		this._$addSpeed=null;
 	}
 	updateSpeedVisibility() {
@@ -45,6 +61,7 @@ class LiveFloat extends LiveNumber {
 		);
 		if (this._$addSpeed) this._$addSpeed.toggle(notGamepad);
 	}
+	// TODO can't use super setters/getters... is it a Babel issue?
 	get input() {
 		return this._input;
 	}
@@ -93,10 +110,24 @@ class LiveFloat extends LiveNumber {
 				option.updateCallback();
 			},
 			get availableMin() {
-				return option.availableSpeedMin;
+				return option._speedAvailableMin;
 			},
 			get availableMax() {
-				return option.availableSpeedMax;
+				return option._speedAvailableMax;
+			},
+			get min() {
+				return option._speedMin;
+			},
+			set min(min) {
+				option._speedMin=min;
+				option.updateCallback();
+			},
+			get max() {
+				return option._speedMax;
+			},
+			set max(max) {
+				option._speedMax=max;
+				option.updateCallback();
 			},
 			get step() {
 				return option.step;

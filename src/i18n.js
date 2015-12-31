@@ -54,15 +54,17 @@ module.exports=function(id,n){ // fake temporary i18n
 		'options.material.data.one': "one color",
 		'options.material.data.sda': "specular/diffuse/ambient colors",
 
-		'inputs': 'Input method',
-		'inputs.constant': 'none',
-		'inputs.slider': 'slider',
-		'inputs.mousemovex': 'mouse x axis',
-		'inputs.mousemovey': 'mouse y axis',
-		'inputs.gamepad0': 'gamepad 0 axis',
-		'inputs.gamepad1': 'gamepad 1 axis',
-		'inputs.gamepad2': 'gamepad 2 axis',
-		'inputs.gamepad3': 'gamepad 3 axis',
+		'ui.inputs': "Input method",
+		'ui.inputs.constant': "none",
+		'ui.inputs.slider': "slider",
+		'ui.inputs.mousemovex': "mouse x axis",
+		'ui.inputs.mousemovey': "mouse y axis",
+		'ui.inputs.gamepad0': "gamepad 0 axis",
+		'ui.inputs.gamepad1': "gamepad 1 axis",
+		'ui.inputs.gamepad2': "gamepad 2 axis",
+		'ui.inputs.gamepad3': "gamepad 3 axis",
+		'ui.addSpeed': "Add speed",
+		'ui.range': "with range",
 
 		// TODO review strings below
 		'options.shape': 'Shape to draw',
@@ -102,9 +104,6 @@ module.exports=function(id,n){ // fake temporary i18n
 		'options.lightDirection.y': 'Light direction y component',
 		'options.lightDirection.z': 'Light direction z component',
 		'options.shapeLod': 'Shape detail level', // recursion depth for fractal shapes
-		'options.*.range': 'with range',
-		'options.*.speed.add': 'Add speed',
-		'options.*.speed.remove': 'Remove speed',
 
 		'options.transform': 'Transforms',
 		'options.rotate.x': 'Angle of rotation around x axis',

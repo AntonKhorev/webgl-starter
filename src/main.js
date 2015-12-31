@@ -40,42 +40,7 @@ $(function(){
 		/*
 		function writeInputOption(option,withRange,withGamepad) {
 			var $rangeSpan,$rangeMinInput,$rangeMaxInput;
-			function minMaxInput(minOrMax) {
-				return $("<input type='number' required>")
-					.attr('min',option.getMin())
-					.attr('max',option.getMax())
-					.attr('step',option.getSetupStep())
-					.val(options[option.name+'.'+minOrMax])
-					.on('input change',function(){
-						if (this.checkValidity()) {
-							options[option.name+'.'+minOrMax]=parseFloat(this.value);
-							updateCode();
-						}
-					});
-			}
-			var $optionDiv=$("<div data-option='"+option.name+"'>")
-				.append("<label for='"+inputId+"'>"+i18n('options.*.input')+":</label> ")
-				.append(
-					$inputSelect=$("<select id='"+inputId+"'>").append(
-						availableInputTypes.map(function(availableInputType){
-							return $("<option>").val(availableInputType).html(i18n('options.*.input.'+availableInputType))
-						})
-					).val(options[option.name+'.input']).change(function(){
-						options[option.name+'.input']=this.value;
-						if (withRange) {
-							if (this.value=='constant') {
-								$rangeSpan.hide();
-							} else {
-								$rangeSpan.show();
-							}
-						}
-						if (withGamepad) {
-							$options.find("[data-option='"+option.name+'.speed'+"']")
-								.toggle(option.availableGamepadInputTypes.indexOf(this.value)<0);
-						}
-						updateCode();
-					})
-				);
+			var $optionDiv=$("<div data-option='"+option.name+"'>");
 			if (withRange) {
 				$optionDiv.append(" ").append(
 					$rangeSpan=$("<span class='range'>")
@@ -240,40 +205,46 @@ $(function(){
 				return option.$;
 			} else if (option instanceof Option.LiveNumber) {
 				const writeOption=option=>{
-					const setInputAttrs=($input,getOtherInput)=>{
-						return $input
-							.attr('min',option.availableMin)
-							.attr('max',option.availableMax)
-							.attr('step',option.step)
-							.val(option.value)
-							.on('input change',function(){
-								if (this.checkValidity()) {
-									const $that=getOtherInput();
-									$that.val(this.value);
-									option.value=parseFloat(this.value);
-								}
-							})
-						;
-					};
+					const setInputAttrs=$input=>$input
+						.attr('min',option.availableMin)
+						.attr('max',option.availableMax)
+						.attr('step',option.step);
+					const setInputAttrsAndListeners=($input,getOtherInput)=>setInputAttrs($input)
+						.val(option.value)
+						.on('input change',function(){
+							if (this.checkValidity()) {
+								const $that=getOtherInput();
+								$that.val(this.value);
+								option.value=parseFloat(this.value);
+							}
+						});
+					const writeMinMaxInput=minOrMax=>setInputAttrs($("<input type='number' required>"))
+						.val(option[minOrMax])
+						.on('input change',function(){
+							if (this.checkValidity()) {
+								option[minOrMax]=parseFloat(this.value);
+							}
+						});
 					const id=generateId();
 					const inputSelectId=generateId();
-					let $sliderInput,$numberInput,$inputSelect;
+					let $sliderInput,$numberInput,$rangeSpan;
+					let $rangeMinInput,$rangeMaxInput;
 					return $("<div>").append("<label for='"+id+"'>"+i18n('options.'+option.fullName)+":</label>")
 						.append(" <span class='min'>"+i18n(`options.${option.fullName}.value`,option.availableMin)+"</span> ")
-						.append($sliderInput=setInputAttrs(
+						.append($sliderInput=setInputAttrsAndListeners(
 							$("<input type='range' id='"+id+"'>"),
 							()=>$numberInput
 						))
 						.append(" <span class='max'>"+i18n(`options.${option.fullName}.value`,option.availableMax)+"</span> ")
-						.append($numberInput=setInputAttrs(
+						.append($numberInput=setInputAttrsAndListeners(
 							$("<input type='number' required>"),
 							()=>$sliderInput
 						))
-						.append(" <label for='"+inputSelectId+"'>"+i18n('inputs')+":</label> ")
+						.append(" <label for='"+inputSelectId+"'>"+i18n('ui.inputs')+":</label> ")
 						.append(
-							$inputSelect=$("<select id='"+inputSelectId+"'>").append(
+							$("<select id='"+inputSelectId+"'>").append(
 								option.availableInputTypes.map(availableInputType=>
-									$("<option>").val(availableInputType).html(i18n('inputs.'+availableInputType))
+									$("<option>").val(availableInputType).html(i18n('ui.inputs.'+availableInputType))
 								)
 							).val(option.input).change(function(){
 								option.input=this.value;
@@ -287,7 +258,20 @@ $(function(){
 								}
 								*/
 							})
+						)
+						.append(" ")
+						.append(
+							option.$range=$("<span class='range'>")
+								.append(i18n('ui.range')+" ")
+								.append($rangeMinInput=writeMinMaxInput('min'))
+								.append(" .. ")
+								.append($rangeMaxInput=writeMinMaxInput('max'))
 						);
+						/*
+						if ($inputSelect.val()=='constant') {
+							$rangeSpan.hide();
+						}
+						*/
 					;
 				};
 				option.$=writeOption(option);
