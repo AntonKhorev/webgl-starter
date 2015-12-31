@@ -3,6 +3,7 @@
 const imports=require('./base/option-classes.js');
 
 const RangeInput=imports.RangeInput;
+const Group=imports.Group;
 
 class LiveNumber extends RangeInput {
 	constructor(isVisible,updateCallback,fullName,availableRange,defaultValue) {
@@ -160,6 +161,15 @@ class LiveFloat extends LiveNumber {
 	}
 }
 
+class LiveColor extends Group {
+	constructor(isVisible,updateCallback,fullName,colorComponentDefaultValues) {
+		const cs='rgba';
+		super(isVisible,updateCallback,fullName,colorComponentDefaultValues.map(
+			(defaultValue,i)=>new LiveFloat(()=>true,updateCallback,fullName+'.'+cs.charAt(i),[0,1,-1,+1],defaultValue)
+		));
+	}
+}
+
 module.exports={};
 for (let c in imports) {
 	module.exports[c]=imports[c];
@@ -167,3 +177,4 @@ for (let c in imports) {
 module.exports.LiveNumber=LiveNumber;
 module.exports.LiveInt=LiveInt;
 module.exports.LiveFloat=LiveFloat;
+module.exports.LiveColor=LiveColor;

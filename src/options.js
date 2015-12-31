@@ -2,15 +2,6 @@
 
 var BaseOptions=require('./base/options.js');
 
-/*
-// TODO LiveColor
-OptionsInfo.prototype.ColorOptionGroup=(function(OptionGroup){
-	var ColorOptionGroup=function(){
-		// TODO
-	};
-	return ColorOptionGroup;
-})(BaseOptionsInfo.prototype.OptionGroup);
-*/
 class Options extends BaseOptions {
 	get optionClasses() {
 		return require('./option-classes.js');
@@ -23,16 +14,12 @@ class Options extends BaseOptions {
 			]],
 			['Group','background',[
 				['Select','type',['none','solid']],
-				['Group','color',[
-					['LiveFloat','r',[0,1,-1,+1],1],
-					['LiveFloat','g',[0,1,-1,+1],1],
-					['LiveFloat','b',[0,1,-1,+1],1],
-					['LiveFloat','a',[0,1,-1,+1],1],
-				],{'background.type':'solid'}],
+				['LiveColor','color',[1,1,1,1],{'background.type':'solid'}],
 			]],
 			['Group','material',[
-				['Select','scope',['global','vertex','face']],
-				['Select','data',['one','sda']]
+				['Select','scope',['global','vertex','face']], // partly related to shape
+				['Select','data',['one','sda']], // partly related to shape
+				['LiveColor','color',[1,0,0,1],{'material.scope':'global','material.data':'one'}],
 				// TODO
 			]],
 			// TODO
@@ -43,22 +30,7 @@ class Options extends BaseOptions {
 /*
 OptionsInfo.prototype.makeEntries=function(){
 	return new this.OptionRoot([
-		new this.OptionGroup('canvas',[
-			new LiveIntOption('width',[1,1024],512), // TODO remove mouse from inputs by subclassing LiveIntInputOption -> LiveCanvasIntInputOption
-			new LiveIntOption('height',[1,1024],512),
-		]),
-		new this.OptionGroup('background',[
-			new this.SelectOption('type',['none','solid']),
-			new this.OptionGroup('color',[
-				new LiveFloatOption('r',[0,1],1),
-				new LiveFloatOption('g',[0,1],1),
-				new LiveFloatOption('b',[0,1],1),
-				new LiveFloatOption('a',[0,1],1),
-			],{'background.type':'solid'})
-		]),
 		new this.OptionGroup('material',[
-			new this.SelectOption('scope',['global','vertex','face']), // partly related to shape
-			new this.SelectOption('data',['one','sda']), // partly related to shape
 			new this.OptionGroup('color',[
 				new this.LiveFloatOption('r',[0,1],1),
 				new this.LiveFloatOption('g',[0,1],0),

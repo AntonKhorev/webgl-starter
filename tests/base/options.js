@@ -4,6 +4,34 @@ const assert=require('assert');
 const Option=require('../../src/base/option-classes.js');
 const Options=require('../../src/base/options.js');
 
+/*
+// unused for now
+var VisiCheck=function(){
+	this.visible=true;
+};
+VisiCheck.prototype.toggle=function(visibility){
+	if (visibility===true || visibility===false) {
+		this.visible=visibility;
+	} else {
+		throw "visibility value neither true nor false";
+	}
+};
+
+describe("Visibility test utility",function(){
+	it("works",function(){
+		var $=new VisiCheck;
+		assert($.visible);
+		$.toggle(false);
+		assert(!$.visible);
+		$.toggle(true);
+		assert($.visible);
+		assert.throws(function(){
+			$.toggle();
+		});
+	});
+});
+*/
+
 describe("Base/Options",()=>{
 	context("empty",()=>{
 		const options=new Options;
