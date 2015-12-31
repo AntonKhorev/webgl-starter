@@ -79,6 +79,8 @@ const dataStrings={
 	'options.transforms.projection': "Projection",
 	'options.transforms.projection.ortho': "orthogonal",
 	'options.transforms.projection.perspective': "perspective",
+	'options.transforms.model': "Model transform",
+	'options.transforms.model.rotate{X,Y,Z}': "Add rotation around {x,y,z} axis",
 
 	'options.debug': "Debug options",
 	'options.debug.shaders': "Log shader compilation errors",

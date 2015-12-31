@@ -82,6 +82,20 @@ class Root extends Collection {
 class Group extends Collection {
 }
 
+class Array extends Base {
+	constructor(isVisible,updateCallback,fullName,availableTypes,availableConstructors) {
+		super(isVisible,updateCallback,fullName);
+		this.availableTypes=availableTypes;
+		this.availableConstructors=availableConstructors;
+		this.entries=[];
+	}
+	addEntry(type) {
+		const entry=this.availableConstructors[type]();
+		this.entries.push(entry);
+		return entry;
+	}
+}
+
 exports.Base=Base;
 exports.Input=Input;
 exports.Checkbox=Checkbox;
@@ -91,3 +105,4 @@ exports.Collection=Collection;
 exports.Select=Select;
 exports.Root=Root;
 exports.Group=Group;
+exports.Array=Array;

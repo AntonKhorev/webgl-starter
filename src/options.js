@@ -39,14 +39,11 @@ class Options extends BaseOptions {
 			]],
 			['Group','transforms',[
 				['Select','projection',['ortho','perspective']],
-				/*
-				// TODO
 				['Array','model',[
 					['LiveFloat','rotateX',[-180,180],0],
 					['LiveFloat','rotateY',[-180,180],0],
 					['LiveFloat','rotateZ',[-180,180],0],
 				]],
-				*/
 			]],
 			['Group','debug',[
 				['Checkbox','shaders',true],

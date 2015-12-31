@@ -234,6 +234,20 @@ $(function(){
 					option.$.append(" ").append(option.speed.$=writeOption(option.speed));
 				}
 				return option.$;
+			} else if (option instanceof Option.Array) {
+				return option.$=$("<fieldset>").append("<legend>"+i18n('options.'+option.fullName)+"</legend>")
+					.append(
+						$("<div>")
+							.append(option.entries.map(writeOption))
+							// TODO delete buttons
+					)
+					.append(
+						$("<div>")
+							.append(option.availableTypes.map(type=>
+								$("<button type='button'>")
+									.html(i18n('options.'+option.fullName+'.'+type))
+							))
+					);
 			}
 		}
 		function writeButtons() {
