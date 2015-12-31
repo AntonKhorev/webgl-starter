@@ -44,6 +44,11 @@ const dataStrings={
 	'options.material.color.{r,g,b,a}.value': plainValue,
 	'options.material.color.{r,g,b,a}.speed': "Material color {red,green,blue,alpha} speed",
 	'options.material.color.{r,g,b,a}.speed.value': plainValue,
+	'options.material.{specular,diffuse,ambient}Color': "Material {specular,diffuse,ambient} color",
+	'options.material.{specular,diffuse,ambient}Color.{r,g,b}': "{Specular,Diffuse,Ambient} color {red,green,blue} component",
+	'options.material.{specular,diffuse,ambient}Color.{r,g,b}.value': plainValue,
+	'options.material.{specular,diffuse,ambient}Color.{r,g,b}.speed': "Material {specular,diffuse,ambient} color {red,green,blue,alpha} speed",
+	'options.material.{specular,diffuse,ambient}Color.{r,g,b}.speed.value': plainValue,
 
 	'ui.inputs': "Input method",
 	'ui.inputs.constant': "none",
@@ -75,15 +80,6 @@ const dataStrings={
 	'options.projection.ortho': 'orthogonal',
 	'options.projection.perspective': 'perspective',
 
-	'options.materialSpecularColor.r': 'Specular color red component',
-	'options.materialSpecularColor.g': 'Specular color green component',
-	'options.materialSpecularColor.b': 'Specular color blue component',
-	'options.materialDiffuseColor.r': 'Diffuse color red component',
-	'options.materialDiffuseColor.g': 'Diffuse color green component',
-	'options.materialDiffuseColor.b': 'Diffuse color blue component',
-	'options.materialAmbientColor.r': 'Ambient color red component',
-	'options.materialAmbientColor.g': 'Ambient color green component',
-	'options.materialAmbientColor.b': 'Ambient color blue component',
 	'options.lightDirection.x': 'Light direction x component',
 	'options.lightDirection.y': 'Light direction y component',
 	'options.lightDirection.z': 'Light direction z component',
@@ -116,29 +112,31 @@ const dataStrings={
 
 const strings={};
 const expandRegexp=/^([^{]*)\{([^}]*)\}(.*)$/;
-for (let id in dataStrings) {
-	const string=dataStrings[id];
+function expandIdAndString(id,string) {
 	let match;
 	if (match=expandRegexp.exec(id)) {
 		const idStart=match[1];
 		const idMids=match[2].split(',');
 		const idEnd=match[3];
-		if ((typeof string == 'string') && (match=expandRegexp.exec(string))) {
+		if ((typeof string=='string') && (match=expandRegexp.exec(string))) {
 			const stringStart=match[1];
 			const stringMids=match[2].split(',');
 			const stringEnd=match[3];
 			idMids.forEach((idMid,i)=>{
 				const stringMid=stringMids[i];
-				strings[idStart+idMid+idEnd]=stringStart+stringMid+stringEnd;
+				expandIdAndString(idStart+idMid+idEnd,stringStart+stringMid+stringEnd);
 			});
 		} else {
 			idMids.forEach(idMid=>{
-				strings[idStart+idMid+idEnd]=string;
+				expandIdAndString(idStart+idMid+idEnd,string);
 			});
 		}
 	} else {
 		strings[id]=string;
 	}
+}
+for (let id in dataStrings) {
+	expandIdAndString(id,dataStrings[id]);
 }
 
 module.exports=function(id,n){

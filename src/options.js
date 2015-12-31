@@ -20,7 +20,9 @@ class Options extends BaseOptions {
 				['Select','scope',['global','vertex','face']], // partly related to shape
 				['Select','data',['one','sda']], // partly related to shape
 				['LiveColor','color',[1,0,0,1],{'material.scope':'global','material.data':'one'}],
-				// TODO
+				['LiveColor','specularColor',[0.4,0.4,0.4],{'material.scope':'global','material.data':'sda'}],
+				['LiveColor','diffuseColor' ,[0.4,0.4,0.4],{'material.scope':'global','material.data':'sda'}],
+				['LiveColor','ambientColor' ,[0.2,0.2,0.2],{'material.scope':'global','material.data':'sda'}],
 			]],
 			// TODO
 		];
@@ -30,29 +32,6 @@ class Options extends BaseOptions {
 /*
 OptionsInfo.prototype.makeEntries=function(){
 	return new this.OptionRoot([
-		new this.OptionGroup('material',[
-			new this.OptionGroup('color',[
-				new this.LiveFloatOption('r',[0,1],1),
-				new this.LiveFloatOption('g',[0,1],0),
-				new this.LiveFloatOption('b',[0,1],0),
-				new this.LiveFloatOption('a',[0,1],1),
-			],{'material.scope':'global','material.data':'one'}),
-			new this.OptionGroup('specularColor',[
-				new this.LiveFloatOption('r',[0,1],0.4),
-				new this.LiveFloatOption('g',[0,1],0.4),
-				new this.LiveFloatOption('b',[0,1],0.4),
-			],{'material.scope':'global','material.data':'sda'}),
-			new this.OptionGroup('diffuseColor',[
-				new this.LiveFloatOption('r',[0,1],0.4),
-				new this.LiveFloatOption('g',[0,1],0.4),
-				new this.LiveFloatOption('b',[0,1],0.4),
-			],{'material.scope':'global','material.data':'sda'}),
-			new this.OptionGroup('ambientColor',[
-				new this.LiveFloatOption('r',[0,1],0.2),
-				new this.LiveFloatOption('g',[0,1],0.2),
-				new this.LiveFloatOption('b',[0,1],0.2),
-			],{'material.scope':'global','material.data':'sda'})
-		]),
 		new this.OptionGroup('light',[
 			new this.SelectOption('type',['off','phong','blinn']),
 			new this.OptionGroup('direction',[
