@@ -52,6 +52,12 @@ class LiveInt extends LiveNumber {
 		return 1;
 	}
 	get availableInputTypes() {
+		return ['constant','slider','mousemovex','mousemovey'];
+	}
+}
+
+class CanvasLiveInt extends LiveInt {
+	get availableInputTypes() {
 		return ['constant','slider'];
 	}
 }
@@ -177,5 +183,6 @@ for (let c in imports) {
 }
 module.exports.LiveNumber=LiveNumber;
 module.exports.LiveInt=LiveInt;
+module.exports.CanvasLiveInt=CanvasLiveInt;
 module.exports.LiveFloat=LiveFloat;
 module.exports.LiveColor=LiveColor;

@@ -61,6 +61,20 @@ const dataStrings={
 	'options.light.direction.{x,y,z}.speed': "Light direction {x,y,z} speed",
 	'options.light.direction.{x,y,z}.speed.value': plainValue,
 
+	'options.shape': "Shape",
+	'options.shape.type': "Shape to draw",
+	'options.shape.type.square': "square",
+	'options.shape.type.triangle': "triangle",
+	'options.shape.type.gasket': "Sierpinski gasket", // wp: Sierpinski triangle
+	'options.shape.type.cube': "cube",
+	'options.shape.type.hat': "Mexican hat function", // wp: Mexican hat wavelet
+	'options.shape.type.terrain': "diamond-square fractal terrain", // wp: Diamond-square algorithm
+	'options.shape.elements': "Element array",
+	'options.shape.elements.0': "not used",
+	'options.shape.elements.{8,16,32}': "with {8,16,32}-bit index",
+	'options.shape.lod': "Shape detail level", // recursion depth for fractal shapes
+	'options.shape.lod.value': plainValue,
+
 	'ui.inputs': "Input method",
 	'ui.inputs.constant': "none",
 	'ui.inputs.slider': "slider",
@@ -71,23 +85,9 @@ const dataStrings={
 	'ui.addSpeed': "Add speed",
 
 	// TODO review strings below
-	'options.shape': 'Shape to draw',
-	'options.shape.square': 'square',
-	'options.shape.triangle': 'triangle',
-	'options.shape.gasket': 'Sierpinski gasket', // wp: Sierpinski triangle
-	'options.shape.cube': 'cube',
-	'options.shape.hat': 'Mexican hat function', // wp: Mexican hat wavelet
-	'options.shape.terrain': 'diamond-square fractal terrain', // wp: Diamond-square algorithm
-	'options.elements': 'Element array',
-	'options.elements.0': 'not used',
-	'options.elements.8': 'with 8-bit index',
-	'options.elements.16': 'with 16-bit index',
-	'options.elements.32': 'with 32-bit index',
 	'options.projection': 'Projection',
 	'options.projection.ortho': 'orthogonal',
 	'options.projection.perspective': 'perspective',
-
-	'options.shapeLod': 'Shape detail level', // recursion depth for fractal shapes
 
 	'options.transform': 'Transforms',
 	'options.rotate.x': 'Angle of rotation around x axis',

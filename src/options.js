@@ -9,8 +9,8 @@ class Options extends BaseOptions {
 	get entriesDescription() {
 		return [
 			['Group','canvas',[
-				['LiveInt','width',[1,1024],512], // TODO remove mouse from inputs by subclassing LiveIntInputOption -> LiveCanvasIntInputOption
-				['LiveInt','height',[1,1024],512],
+				['CanvasLiveInt','width',[1,1024],512],
+				['CanvasLiveInt','height',[1,1024],512],
 			]],
 			['Group','background',[
 				['Select','type',['none','solid']],
@@ -32,6 +32,11 @@ class Options extends BaseOptions {
 					['LiveFloat','z',[-4,+4,-4,+4],+1],
 				],{'light.type':['phong','blinn']}],
 			]],
+			['Group','shape',[
+				['Select','type',['square','triangle','gasket','cube','hat','terrain']],
+				['Select','elements',['0','8','16','32']],
+				['LiveInt','lod',[0,10],6,{'shape.type':['gasket','hat','terrain']}],
+			]],
 			// TODO
 		];
 	}
@@ -40,11 +45,6 @@ class Options extends BaseOptions {
 /*
 OptionsInfo.prototype.makeEntries=function(){
 	return new this.OptionRoot([
-		new this.OptionGroup('shape',[
-			new this.SelectOption('type',['square','triangle','gasket','cube','hat','terrain']),
-			new this.SelectOption('elements',['0','8','16','32']),
-			new this.LiveIntNumberOption('lod',[0,10],6,{'shape.type':['gasket','hat','terrain']}),
-		]),
 		new this.OptionGroup('transforms',[
 			new this.SelectOption('projection',['ortho','perspective']),
 			new this.OptionArray('model',[
