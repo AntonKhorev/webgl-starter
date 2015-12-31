@@ -80,7 +80,8 @@ class LiveFloat extends LiveNumber {
 	}
 	set addSpeed(addSpeed) {
 		this._addSpeed=addSpeed;
-		if (this._speed$) this._speed$.toggle(addSpeed);
+		this.updateInternalVisibility();
+		this.updateCallback();
 	}
 	get step() {
 		if (this.availableMax>=100) {
