@@ -37,32 +37,27 @@ class Options extends BaseOptions {
 				['Select','elements',['0','8','16','32']],
 				['LiveInt','lod',[0,10],6,{'shape.type':['gasket','hat','terrain']}],
 			]],
-			// TODO
+			['Group','transforms',[
+				['Select','projection',['ortho','perspective']],
+				/*
+				// TODO
+				['Array','model',[
+					['LiveFloat','rotateX',[-180,180],0],
+					['LiveFloat','rotateY',[-180,180],0],
+					['LiveFloat','rotateZ',[-180,180],0],
+				]],
+				*/
+			]],
+			['Group','debug',[
+				['Checkbox','shaders',true],
+				['Checkbox','arrays'],
+				['Checkbox','inputs'], // TODO hide if no inputs?
+			]],
+			['Group','formatting',[
+				['Select','indent',['tab','2','4','8']],
+			]],
 		];
 	}
 }
-// TODO have json instead of this
-/*
-OptionsInfo.prototype.makeEntries=function(){
-	return new this.OptionRoot([
-		new this.OptionGroup('transforms',[
-			new this.SelectOption('projection',['ortho','perspective']),
-			new this.OptionArray('model',[
-				new this.LiveFloatOption('rotateX',[-180,180],0),
-				new this.LiveFloatOption('rotateY',[-180,180],0),
-				new this.LiveFloatOption('rotateZ',[-180,180],0),
-			])
-		]),
-		new this.OptionGroup('debug',[
-			new this.CheckboxOption('shaders',true),
-			new this.CheckboxOption('arrays'),
-			new this.CheckboxOption('inputs'), // TODO hide if no inputs?
-		]),
-		new this.OptionGroup('formatting',[
-			new this.SelectOption('indent',['tab','2','4','8']),
-		])
-	]);
-};
-*/
 
 module.exports=Options;

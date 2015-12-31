@@ -75,6 +75,21 @@ const dataStrings={
 	'options.shape.lod': "Shape detail level", // recursion depth for fractal shapes
 	'options.shape.lod.value': plainValue,
 
+	'options.transforms': "Transforms",
+	'options.transforms.projection': "Projection",
+	'options.transforms.projection.ortho': "orthogonal",
+	'options.transforms.projection.perspective': "perspective",
+
+	'options.debug': "Debug options",
+	'options.debug.shaders': "Log shader compilation errors",
+	'options.debug.arrays': "Log allocated array sizes",
+	'options.debug.inputs': "Log input values",
+
+	'options.formatting': "Code formatting options",
+	'options.formatting.indent': "Indent",
+	'options.formatting.indent.tab': "tab",
+	'options.formatting.indent.{2,4,8}': "{2,4,8} spaces",
+
 	'ui.inputs': "Input method",
 	'ui.inputs.constant': "none",
 	'ui.inputs.slider': "slider",
@@ -85,29 +100,13 @@ const dataStrings={
 	'ui.addSpeed': "Add speed",
 
 	// TODO review strings below
-	'options.projection': 'Projection',
-	'options.projection.ortho': 'orthogonal',
-	'options.projection.perspective': 'perspective',
 
-	'options.transform': 'Transforms',
 	'options.rotate.x': 'Angle of rotation around x axis',
 	'options.rotate.x.speed': 'Speed of rotation around x axis',
 	'options.rotate.y': 'Angle of rotation around y axis',
 	'options.rotate.y.speed': 'Speed of rotation around y axis',
 	'options.rotate.z': 'Angle of rotation around z axis',
 	'options.rotate.z.speed': 'Speed of rotation around z axis',
-
-	'options.debug': 'Debug options',
-	'options.debugShaders': 'Log shader compilation errors',
-	'options.debugArrays': 'Log allocated array sizes',
-	'options.debugInputs': 'Log input values',
-
-	'options.formatting': 'Code formatting options',
-	'options.indent': 'Indent',
-	'options.indent.tab': 'tab',
-	'options.indent.2': '2 spaces',
-	'options.indent.4': '4 spaces',
-	'options.indent.8': '8 spaces',
 
 	'controls.type.mousemovex': 'Move the mouse pointer horizontally over the canvas',
 	'controls.type.mousemovey': 'Move the mouse pointer vertically over the canvas',

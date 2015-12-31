@@ -64,6 +64,12 @@ class Collection extends Base {
 
 // concrete classes
 
+class Checkbox extends Input {
+	constructor(isVisible,updateCallback,fullName,_,defaultValue) {
+		super(isVisible,updateCallback,fullName,_,!!defaultValue);
+	}
+}
+
 class Select extends FactorInput {
 	constructor(isVisible,updateCallback,fullName,availableValues,defaultValue) {
 		super(isVisible,updateCallback,fullName,availableValues,defaultValue);
@@ -78,6 +84,7 @@ class Group extends Collection {
 
 exports.Base=Base;
 exports.Input=Input;
+exports.Checkbox=Checkbox;
 exports.FactorInput=FactorInput;
 exports.RangeInput=RangeInput;
 exports.Collection=Collection;

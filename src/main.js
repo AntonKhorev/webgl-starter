@@ -38,19 +38,6 @@ $(function(){
 		}
 		options.updateCallback=updateCode;
 		/*
-		function writeDebugOption(option) {
-			var id=generateId();
-			return $("<div>")
-				.append(
-					$("<input type='checkbox' id='"+id+"'>")
-						.prop('checked',options[option.name])
-						.change(function(){
-							options[option.name]=$(this).prop('checked');
-							updateCode();
-						})
-				)
-				.append(" <label for='"+id+"'>"+i18n('options.'+option.name)+"</label>");
-		}
 		function makeSortable($sortableRoot,callback) {
 			// have to make drag handler 'draggable', not the whole item
 			// because inputs and labels don't like to be inside 'draggable'
@@ -109,16 +96,6 @@ $(function(){
 		function writeOptions() {
 			var $transforms;
 			var $options=$("<div>").append(
-				$("<fieldset>").append("<legend>"+i18n('options.general')+"</legend>").append(
-					options.generalOptions.map(writeGeneralOption)
-				)
-			).append(
-				$("<fieldset>").append("<legend>"+i18n('options.input')+"</legend>").append(
-					options.inputOptions.map(function(option){
-						return writeInputOption(option,true,false)
-					})
-				)
-			).append(
 				$("<fieldset>").append("<legend>"+i18n('options.transform')+"</legend>").append(
 					$transforms=$("<div>").append(
 						options.transforms.map(function(transform){
@@ -129,14 +106,6 @@ $(function(){
 							);
 						})
 					)
-				)
-			).append(
-				$("<fieldset>").append("<legend>"+i18n('options.debug')+"</legend>").append(
-					options.debugOptions.map(writeDebugOption)
-				)
-			).append(
-				$("<fieldset>").append("<legend>"+i18n('options.formatting')+"</legend>").append(
-					options.formattingOptions.map(writeGeneralOption)
 				)
 			);
 			makeSortable($transforms,function(){
@@ -157,6 +126,17 @@ $(function(){
 				return option.$=$("<fieldset>").append("<legend>"+i18n('options.'+option.fullName)+"</legend>").append(
 					option.entries.map(writeOption)
 				);
+			} else if (option instanceof Option.Checkbox) {
+				const id=generateId();
+				return option.$=$("<div>")
+					.append(
+						$("<input type='checkbox' id='"+id+"'>")
+							.prop('checked',option.value)
+							.change(function(){
+								option.value=$(this).prop('checked');
+							})
+					)
+					.append(" <label for='"+id+"'>"+i18n('options.'+option.fullName)+"</label>");
 			} else if (option instanceof Option.Select) {
 				const id=generateId();
 				option.$=$("<div>")
