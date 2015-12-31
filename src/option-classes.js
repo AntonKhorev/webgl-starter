@@ -99,6 +99,9 @@ class LiveFloat extends LiveNumber {
 			get fullName() {
 				return option.fullName+'.speed';
 			},
+			get defaultValue() {
+				return 0;
+			},
 			get value() {
 				return option._speedValue;
 			},

@@ -63,8 +63,9 @@ module.exports=function(id,n){ // fake temporary i18n
 		'ui.inputs.gamepad1': "gamepad 1 axis",
 		'ui.inputs.gamepad2': "gamepad 2 axis",
 		'ui.inputs.gamepad3': "gamepad 3 axis",
-		'ui.addSpeed': "Add speed",
 		'ui.range': "with range",
+		'ui.reset': "Reset",
+		'ui.addSpeed': "Add speed",
 
 		// TODO review strings below
 		'options.shape': 'Shape to draw',

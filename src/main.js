@@ -38,22 +38,6 @@ $(function(){
 		}
 		options.updateCallback=updateCode;
 		/*
-		function writeInputOption(option,withRange,withGamepad) {
-			var $rangeSpan,$rangeMinInput,$rangeMaxInput;
-			var $optionDiv=$("<div data-option='"+option.name+"'>");
-			$optionDiv.append(" ")
-				.append(
-					$("<button type='button'>Reset</button>").click(function(){
-						if (withRange) {
-							$rangeMinInput.val(option.getMin());
-							$rangeMaxInput.val(option.getMax());
-						}
-						$sliderInput.val(option.defaultValue).change();
-						$inputSelect.val('constant').change();
-					})
-				);
-			return $optionDiv;
-		}
 		function writeDebugOption(option) {
 			var id=generateId();
 			return $("<div>")
@@ -215,7 +199,7 @@ $(function(){
 						});
 					const id=generateId();
 					const inputSelectId=generateId();
-					let $sliderInput,$numberInput,$rangeSpan;
+					let $sliderInput,$numberInput,$inputSelect;
 					let $rangeMinInput,$rangeMaxInput;
 					return $("<div>").append("<label for='"+id+"'>"+i18n('options.'+option.fullName)+":</label>")
 						.append(" <span class='min'>"+i18n(`options.${option.fullName}.value`,option.availableMin)+"</span> ")
@@ -230,7 +214,7 @@ $(function(){
 						))
 						.append(" <label for='"+inputSelectId+"'>"+i18n('ui.inputs')+":</label> ")
 						.append(
-							$("<select id='"+inputSelectId+"'>").append(
+							$inputSelect=$("<select id='"+inputSelectId+"'>").append(
 								option.availableInputTypes.map(availableInputType=>
 									$("<option>").val(availableInputType).html(i18n('ui.inputs.'+availableInputType))
 								)
@@ -245,13 +229,21 @@ $(function(){
 								.append($rangeMinInput=writeMinMaxInput('min'))
 								.append(" .. ")
 								.append($rangeMaxInput=writeMinMaxInput('max'))
+						)
+						.append(" ")
+						.append(
+							$("<button type='button'>"+i18n('ui.reset')+"</button>").click(function(){
+								$sliderInput.val(option.defaultValue).change();
+								$inputSelect.val('constant').change();
+								$rangeMinInput.val(option.availableMin).change();
+								$rangeMaxInput.val(option.availableMax).change();
+							})
 						);
-					;
 				};
 				option.$=writeOption(option);
 				if (option instanceof Option.LiveFloat) {
 					option.$.append(
-						option.$addSpeed=$("<label> add speed</label>").prepend( // TODO i18n
+						option.$addSpeed=$("<label> "+i18n('ui.addSpeed')+"</label>").prepend(
 							$("<input type='checkbox'>")
 								.prop('checked',option.addSpeed)
 								.change(function(){
