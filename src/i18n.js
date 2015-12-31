@@ -50,6 +50,17 @@ const dataStrings={
 	'options.material.{specular,diffuse,ambient}Color.{r,g,b}.speed': "Material {specular,diffuse,ambient} color {red,green,blue,alpha} speed",
 	'options.material.{specular,diffuse,ambient}Color.{r,g,b}.speed.value': plainValue,
 
+	'options.light': "Light", // directional if on
+	'options.light.type': "Light type",
+	'options.light.type.off': "off",
+	'options.light.type.phong': "on with Phong reflections", // wp: Phong reflection model
+	'options.light.type.blinn': "on with Blinn–Phong reflections", // wp: Blinn–Phong shading model
+	'options.light.direction': "Light direction",
+	'options.light.direction.{x,y,z}': "Light direction {x,y,z} component",
+	'options.light.direction.{x,y,z}.value': plainValue,
+	'options.light.direction.{x,y,z}.speed': "Light direction {x,y,z} speed",
+	'options.light.direction.{x,y,z}.speed.value': plainValue,
+
 	'ui.inputs': "Input method",
 	'ui.inputs.constant': "none",
 	'ui.inputs.slider': "slider",
@@ -72,17 +83,10 @@ const dataStrings={
 	'options.elements.8': 'with 8-bit index',
 	'options.elements.16': 'with 16-bit index',
 	'options.elements.32': 'with 32-bit index',
-	'options.light': 'Light', // directional if on
-	'options.light.off': 'off',
-	'options.light.phong': 'on with Phong reflections', // wp: Phong reflection model
-	'options.light.blinn': 'on with Blinn–Phong reflections', // wp: Blinn–Phong shading model
 	'options.projection': 'Projection',
 	'options.projection.ortho': 'orthogonal',
 	'options.projection.perspective': 'perspective',
 
-	'options.lightDirection.x': 'Light direction x component',
-	'options.lightDirection.y': 'Light direction y component',
-	'options.lightDirection.z': 'Light direction z component',
 	'options.shapeLod': 'Shape detail level', // recursion depth for fractal shapes
 
 	'options.transform': 'Transforms',

@@ -24,6 +24,14 @@ class Options extends BaseOptions {
 				['LiveColor','diffuseColor' ,[0.4,0.4,0.4],{'material.scope':'global','material.data':'sda'}],
 				['LiveColor','ambientColor' ,[0.2,0.2,0.2],{'material.scope':'global','material.data':'sda'}],
 			]],
+			['Group','light',[
+				['Select','type',['off','phong','blinn']],
+				['Group','direction',[
+					['LiveFloat','x',[-4,+4,-4,+4],-1],
+					['LiveFloat','y',[-4,+4,-4,+4],+1],
+					['LiveFloat','z',[-4,+4,-4,+4],+1],
+				],{'light.type':['phong','blinn']}],
+			]],
 			// TODO
 		];
 	}
@@ -32,14 +40,6 @@ class Options extends BaseOptions {
 /*
 OptionsInfo.prototype.makeEntries=function(){
 	return new this.OptionRoot([
-		new this.OptionGroup('light',[
-			new this.SelectOption('type',['off','phong','blinn']),
-			new this.OptionGroup('direction',[
-				new this.LiveFloatOption('x',[-4,+4],-1),
-				new this.LiveFloatOption('y',[-4,+4],+1),
-				new this.LiveFloatOption('z',[-4,+4],+1),
-			],{'light.type':['phong','blinn']})
-		]),
 		new this.OptionGroup('shape',[
 			new this.SelectOption('type',['square','triangle','gasket','cube','hat','terrain']),
 			new this.SelectOption('elements',['0','8','16','32']),
