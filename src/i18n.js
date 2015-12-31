@@ -18,25 +18,17 @@ const dataStrings={
 	'message.elements': "choosing 8- or 16-bit index may limit available shape detail levels",
 
 	'options.canvas': "Canvas",
-	'options.canvas.width': "Canvas width",
-	'options.canvas.width.value': pixelValue,
-	'options.canvas.height': "Canvas height",
-	'options.canvas.height.value': pixelValue,
+	'options.canvas.{width,height}': "Canvas {width,height}",
+	'options.canvas.{width,height}.value': pixelValue,
 
 	'options.background': "Background",
 	'options.background.type': "Background type",
 	'options.background.type.none': "none (transparent)",
 	'options.background.type.solid': "solid color",
 	'options.background.color': "Background color",
-	'options.background.color.r': 'Background color red component',
-	'options.background.color.g': 'Background color green component',
-	'options.background.color.b': 'Background color blue component',
-	'options.background.color.a': 'Background color alpha component',
+	'options.background.color.{r,g,b,a}': 'Background color {red,green,blue,alpha} component',
 	'options.background.color.{r,g,b,a}.value': plainValue,
-	'options.background.color.r.speed': 'Background color red speed',
-	'options.background.color.g.speed': 'Background color green speed',
-	'options.background.color.b.speed': 'Background color blue speed',
-	'options.background.color.a.speed': 'Background color alpha speed',
+	'options.background.color.{r,g,b,a}.speed': 'Background color {red,green,blue,alpha} speed',
 	'options.background.color.{r,g,b,a}.speed.value': plainValue,
 
 	'options.material': "Material",
@@ -48,26 +40,16 @@ const dataStrings={
 	'options.material.data.one': "one color",
 	'options.material.data.sda': "specular/diffuse/ambient colors",
 	'options.material.color': "Material color",
-	'options.material.color.r': "Material color red component",
-	'options.material.color.g': "Material color green component",
-	'options.material.color.b': "Material color blue component",
-	'options.material.color.a': "Material color alpha component",
+	'options.material.color.{r,g,b,a}': "Material color {red,green,blue,alpha} component",
 	'options.material.color.{r,g,b,a}.value': plainValue,
-	'options.material.color.r.speed': "Material color red speed",
-	'options.material.color.g.speed': "Material color green speed",
-	'options.material.color.b.speed': "Material color blue speed",
-	'options.material.color.a.speed': "Material color alpha speed",
+	'options.material.color.{r,g,b,a}.speed': "Material color {red,green,blue,alpha} speed",
 	'options.material.color.{r,g,b,a}.speed.value': plainValue,
 
 	'ui.inputs': "Input method",
 	'ui.inputs.constant': "none",
 	'ui.inputs.slider': "slider",
-	'ui.inputs.mousemovex': "mouse x axis",
-	'ui.inputs.mousemovey': "mouse y axis",
-	'ui.inputs.gamepad0': "gamepad 0 axis",
-	'ui.inputs.gamepad1': "gamepad 1 axis",
-	'ui.inputs.gamepad2': "gamepad 2 axis",
-	'ui.inputs.gamepad3': "gamepad 3 axis",
+	'ui.inputs.mousemove{x,y}': "mouse {x,y} axis",
+	'ui.inputs.gamepad{0,1,2,3}': "gamepad {0,1,2,3} axis",
 	'ui.range': "with range",
 	'ui.reset': "Reset",
 	'ui.addSpeed': "Add speed",
@@ -135,15 +117,25 @@ const dataStrings={
 const strings={};
 const expandRegexp=/^([^{]*)\{([^}]*)\}(.*)$/;
 for (let id in dataStrings) {
-	let string=dataStrings[id];
-	let match=expandRegexp.exec(id);
-	if (match) {
-		let idStart=match[1];
-		let idExpansion=match[2];
-		let idEnd=match[3];
-		idExpansion.split(',').forEach(idMid=>{
-			strings[idStart+idMid+idEnd]=string;
-		});
+	const string=dataStrings[id];
+	let match;
+	if (match=expandRegexp.exec(id)) {
+		const idStart=match[1];
+		const idMids=match[2].split(',');
+		const idEnd=match[3];
+		if ((typeof string == 'string') && (match=expandRegexp.exec(string))) {
+			const stringStart=match[1];
+			const stringMids=match[2].split(',');
+			const stringEnd=match[3];
+			idMids.forEach((idMid,i)=>{
+				const stringMid=stringMids[i];
+				strings[idStart+idMid+idEnd]=stringStart+stringMid+stringEnd;
+			});
+		} else {
+			idMids.forEach(idMid=>{
+				strings[idStart+idMid+idEnd]=string;
+			});
+		}
 	} else {
 		strings[id]=string;
 	}
