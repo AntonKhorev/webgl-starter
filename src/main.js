@@ -41,18 +41,6 @@ $(function(){
 		function writeInputOption(option,withRange,withGamepad) {
 			var $rangeSpan,$rangeMinInput,$rangeMaxInput;
 			var $optionDiv=$("<div data-option='"+option.name+"'>");
-			if (withRange) {
-				$optionDiv.append(" ").append(
-					$rangeSpan=$("<span class='range'>")
-						.append(i18n('options.*.range')+" ")
-						.append($rangeMinInput=minMaxInput('min'))
-						.append(" .. ")
-						.append($rangeMaxInput=minMaxInput('max'))
-				);
-				if ($inputSelect.val()=='constant') {
-					$rangeSpan.hide();
-				}
-			}
 			$optionDiv.append(" ")
 				.append(
 					$("<button type='button'>Reset</button>").click(function(){
@@ -248,15 +236,6 @@ $(function(){
 								)
 							).val(option.input).change(function(){
 								option.input=this.value;
-								/*
-								if (withRange) {
-									if (this.value=='constant') {
-										$rangeSpan.hide();
-									} else {
-										$rangeSpan.show();
-									}
-								}
-								*/
 							})
 						)
 						.append(" ")
@@ -267,11 +246,6 @@ $(function(){
 								.append(" .. ")
 								.append($rangeMaxInput=writeMinMaxInput('max'))
 						);
-						/*
-						if ($inputSelect.val()=='constant') {
-							$rangeSpan.hide();
-						}
-						*/
 					;
 				};
 				option.$=writeOption(option);

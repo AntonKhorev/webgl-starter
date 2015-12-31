@@ -10,12 +10,17 @@ class LiveNumber extends RangeInput {
 		this._input='constant';
 		this._min=this.availableMin;
 		this._max=this.availableMax;
+		this._$range=null;
+	}
+	updateInternalVisibility() {
+		if (this._$range) this._$range.toggle(this._input!='constant');
 	}
 	get input() {
 		return this._input;
 	}
 	set input(input) {
 		this._input=input;
+		this.updateInternalVisibility();
 		this.updateCallback();
 	}
 	get min() {
@@ -31,6 +36,13 @@ class LiveNumber extends RangeInput {
 	set max(max) {
 		this._max=max;
 		this.updateCallback();
+	}
+	get $range() {
+		return this._$range;
+	}
+	set $range($range) {
+		this._$range=$range;
+		this.updateInternalVisibility();
 	}
 }
 
@@ -54,21 +66,13 @@ class LiveFloat extends LiveNumber {
 		this._speed$=null;
 		this._$addSpeed=null;
 	}
-	updateSpeedVisibility() {
+	updateInternalVisibility() {
+		super.updateInternalVisibility();
 		const notGamepad=['gamepad0','gamepad1','gamepad2','gamepad3'].indexOf(this._input)<0;
 		if (this._speed$) this._speed$.toggle(
 			this._addSpeed && notGamepad
 		);
 		if (this._$addSpeed) this._$addSpeed.toggle(notGamepad);
-	}
-	// TODO can't use super setters/getters... is it a Babel issue?
-	get input() {
-		return this._input;
-	}
-	set input(input) {
-		this._input=input;
-		this.updateSpeedVisibility();
-		this.updateCallback();
 	}
 	get addSpeed() {
 		return this._addSpeed;
@@ -140,7 +144,7 @@ class LiveFloat extends LiveNumber {
 			},
 			set $($) {
 				option._speed$=$;
-				option.updateSpeedVisibility();
+				option.updateInternalVisibility();
 			}
 		};
 	}
@@ -149,7 +153,7 @@ class LiveFloat extends LiveNumber {
 	}
 	set $addSpeed($addSpeed) {
 		this._$addSpeed=$addSpeed;
-		this.updateSpeedVisibility();
+		this.updateInternalVisibility();
 	}
 }
 
