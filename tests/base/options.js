@@ -136,4 +136,45 @@ describe("Base/Options",()=>{
 			});
 		});
 	});
+	context("checkbox and array of selects",()=>{
+		class TestOptions extends Options {
+			get entriesDescription() {
+				return [
+					['Checkbox','chk'],
+					['Array','arr',[
+						['Select','shape',['square','triangle','gasket','cube','hat','terrain']],
+						['Select','scope',['global','vertex','face']],
+						['Select','projection',['ortho','perspective']],
+					]],
+				];
+			}
+		};
+		it("has default entries",()=>{
+			const options=new TestOptions;
+			assert.equal(options.root.entries.length,2);
+			assert.equal(options.root.entries[0].value,false);
+			assert.equal(options.root.entries[1].entries.length,0);
+		});
+		it("imports data",()=>{
+			const options=new TestOptions({
+				chk: true,
+				arr: [
+					{type: 'scope', data: 'face'},
+					{type: 'shape', data: 'cube'},
+					'projection',
+					{type: 'scope'},
+				]
+			});
+			assert.equal(options.root.entries.length,2);
+			assert.equal(options.root.entries[0].value,true);
+			assert.equal(options.root.entries[1].entries.length,4);
+			// TODO types = names
+			const fullNames=['arr.scope','arr.shape','arr.projection','arr.scope'];
+			const values=['face','cube','ortho','global'];
+			options.root.entries[1].entries.forEach((option,i)=>{
+				assert.equal(option.fullName,fullNames[i]);
+				assert.equal(option.value,values[i]);
+			});
+		});
+	});
 });

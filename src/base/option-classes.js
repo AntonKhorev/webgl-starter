@@ -85,10 +85,25 @@ class Group extends Collection {
 
 class Array extends Base {
 	constructor(data,isVisible,updateCallback,fullName,availableTypes,availableConstructors) {
-		super(data,isVisible,updateCallback,fullName); // TODO actual data handling
+		super(undefined,isVisible,updateCallback,fullName);
 		this.availableTypes=availableTypes;
 		this.availableConstructors=availableConstructors;
 		this.entries=[];
+		if (typeof data == 'object') {
+			for (let i in data) {
+				const entryTypeAndData=data[i];
+				let entryType,entryData;
+				if (typeof entryTypeAndData == 'string') {
+					entryType=entryTypeAndData;
+				} else if (typeof entryTypeAndData == 'object') {
+					entryType=entryTypeAndData.type;
+					entryData=entryTypeAndData.data;
+				}
+				if (availableConstructors[entryType]) {
+					this.entries.push(availableConstructors[entryType](entryData));
+				}
+			}
+		}
 	}
 	addEntry(type) {
 		const entry=this.availableConstructors[type]();
