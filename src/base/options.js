@@ -1,7 +1,7 @@
 'use strict';
 
 class Options {
-	constructor() {
+	constructor(data) { // data = imported values, import is done in ctor to avoid calling updateCallback later
 		this.updateCallback=null; // general update callback for stuff like regenerating the code
 		const simpleUpdateCallback=()=>{
 			this.updateCallback();
@@ -41,11 +41,11 @@ class Options {
 					throw new Error("unknown argument type");
 				}
 			}
-			const ctorArgs=[null,()=>true,simpleUpdateCallback,fullName,contents,defaultValue];
+			const ctorArgs=[null,undefined,()=>true,simpleUpdateCallback,fullName,contents,defaultValue];
 			const option=new (Function.prototype.bind.apply(Option[className],ctorArgs));
 			return option;
 		};
-		const makeEntry=(description,fullNamePath)=>{
+		const makeEntry=(description,fullNamePath,data)=>{
 			const className=description[0];
 			if (Option[className]===undefined) {
 				throw new Error(`invalid option type '${className}'`);
@@ -80,7 +80,10 @@ class Options {
 						} else {
 							contents=arg.map(x=>{
 								if (Array.isArray(x)) {
-									return makeEntry(x,fullName+'.'); // nested option
+									const subName=x[1];
+									let subData;
+									if (typeof data == 'object') subData=data[subName];
+									return makeEntry(x,fullName+'.',subData); // nested option
 								} else {
 									return x; // available value / value range boundary
 								}
@@ -118,7 +121,7 @@ class Options {
 				}
 				if (this.updateCallback) this.updateCallback();
 			};
-			const ctorArgs=[null,isVisible,updateCallback,fullName,contents,defaultValueOrConstructors];
+			const ctorArgs=[null,data,isVisible,updateCallback,fullName,contents,defaultValueOrConstructors];
 			const option=new (Function.prototype.bind.apply(Option[className],ctorArgs));
 			optionByFullName[fullName]=option;
 			for (let testName in visibilityData) {
@@ -130,7 +133,12 @@ class Options {
 			return option;
 		};
 		this.root=new Option.Root(
-			()=>true,simpleUpdateCallback,null,this.entriesDescription.map(description=>makeEntry(description,''))
+			data,()=>true,simpleUpdateCallback,null,this.entriesDescription.map(description=>{
+				const subName=description[1];
+				let subData;
+				if (typeof data == 'object') subData=data[subName];
+				return makeEntry(description,'',subData);
+			})
 		);
 	}
 	// methods to be redefined by subclasses

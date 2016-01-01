@@ -48,11 +48,12 @@ describe("Base/Options",()=>{
 				];
 			}
 		};
-		const options=new TestOptions;
 		it("has root",()=>{
+			const options=new TestOptions;
 			assert(options.root instanceof Option.Root);
 		});
 		it("traverses entries",()=>{
+			const options=new TestOptions;
 			const fullNames=['foobar','letter'];
 			const values=['foo','c'];
 			const availableValues=[['foo','bar','baz'],['a','b','c','d','e']];
@@ -61,6 +62,13 @@ describe("Base/Options",()=>{
 				assert.equal(option.fullName,fullNames[i]);
 				assert.equal(option.value,values[i]);
 				assert.deepEqual(option.availableValues,availableValues[i]);
+			});
+		});
+		it("imports data",()=>{
+			const options=new TestOptions({letter:'e'});
+			const values=['foo','e'];
+			options.root.entries.forEach((option,i)=>{
+				assert.equal(option.value,values[i]);
 			});
 		});
 	});
@@ -78,11 +86,12 @@ describe("Base/Options",()=>{
 				];
 			}
 		};
-		const options=new TestOptions;
 		it("has root",()=>{
+			const options=new TestOptions;
 			assert(options.root instanceof Option.Root);
 		});
 		it("traverses entries",()=>{
+			const options=new TestOptions;
 			const fullGroupNames=['silly','stupid'];
 			const fullNames=[
 				['silly.foobar','silly.letter'],
@@ -104,6 +113,25 @@ describe("Base/Options",()=>{
 					assert.equal(option.fullName,fullNames[i][j]);
 					assert.equal(option.value,values[i][j]);
 					assert.deepEqual(option.availableValues,availableValues[i][j]);
+				});
+			});
+		});
+		it("imports data",()=>{
+			const options=new TestOptions({
+				silly: {
+					foobar: 'baz'
+				},
+				stupid: {
+					what: 'something'
+				}
+			});
+			const values=[
+				['baz','c'],
+				['something']
+			];
+			options.root.entries.forEach((option,i)=>{
+				option.entries.forEach((option,j)=>{
+					assert.equal(option.value,values[i][j]);
 				});
 			});
 		});

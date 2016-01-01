@@ -6,8 +6,8 @@ const RangeInput=imports.RangeInput;
 const Group=imports.Group;
 
 class LiveNumber extends RangeInput {
-	constructor(isVisible,updateCallback,fullName,availableRange,defaultValue) {
-		super(isVisible,updateCallback,fullName,availableRange,defaultValue);
+	constructor(data,isVisible,updateCallback,fullName,availableRange,defaultValue) {
+		super(data,isVisible,updateCallback,fullName,availableRange,defaultValue);
 		this._input='constant';
 		this._min=this.availableMin;
 		this._max=this.availableMax;
@@ -63,8 +63,8 @@ class CanvasLiveInt extends LiveInt {
 }
 
 class LiveFloat extends LiveNumber {
-	constructor(isVisible,updateCallback,fullName,availableRange,defaultValue) {
-		super(isVisible,updateCallback,fullName,availableRange,defaultValue);
+	constructor(data,isVisible,updateCallback,fullName,availableRange,defaultValue) {
+		super(data,isVisible,updateCallback,fullName,availableRange,defaultValue);
 		this._speedValue=0;
 		this._speedInput='constant';
 		this._speedMin=this._speedAvailableMin=availableRange[2];
@@ -169,10 +169,10 @@ class LiveFloat extends LiveNumber {
 }
 
 class LiveColor extends Group {
-	constructor(isVisible,updateCallback,fullName,colorComponentDefaultValues) {
+	constructor(data,isVisible,updateCallback,fullName,colorComponentDefaultValues) { // TODO import data
 		const cs='rgba';
-		super(isVisible,updateCallback,fullName,colorComponentDefaultValues.map(
-			(defaultValue,i)=>new LiveFloat(()=>true,updateCallback,fullName+'.'+cs.charAt(i),[0,1,-1,+1],defaultValue)
+		super(undefined,isVisible,updateCallback,fullName,colorComponentDefaultValues.map(
+			(defaultValue,i)=>new LiveFloat(undefined,()=>true,updateCallback,fullName+'.'+cs.charAt(i),[0,1,-1,+1],defaultValue)
 		));
 	}
 }
