@@ -5,12 +5,23 @@ const imports=require('./base/option-classes.js');
 const RangeInput=imports.RangeInput;
 const Group=imports.Group;
 
+// abstract classes
+
 class LiveNumber extends RangeInput {
 	constructor(data,isVisible,updateCallback,fullName,availableRange,defaultValue) {
-		super(data,isVisible,updateCallback,fullName,availableRange,defaultValue);
-		this._input='constant';
-		this._min=this.availableMin;
-		this._max=this.availableMax;
+		let dataValue,dataMin,dataMax,dataInput;
+		if (typeof data == 'object') {
+			dataValue=data.value;
+			dataMin=data.min;
+			dataMax=data.max;
+			dataInput=data.input;
+		} else {
+			dataValue=data;
+		}
+		super(dataValue,isVisible,updateCallback,fullName,availableRange,defaultValue);
+		this._min=(dataMin!==undefined)?dataMin:this.availableMin;
+		this._max=(dataMax!==undefined)?dataMax:this.availableMax;
+		this._input=(dataInput!==undefined)?dataInput:'constant';
 		this._$range=null;
 	}
 	updateInternalVisibility() {
@@ -46,6 +57,8 @@ class LiveNumber extends RangeInput {
 		this.updateInternalVisibility();
 	}
 }
+
+// concrete classes
 
 class LiveInt extends LiveNumber {
 	get step() {

@@ -47,7 +47,7 @@ describe("Base/Options",()=>{
 					['Select','letter',['a','b','c','d','e'],'c'],
 				];
 			}
-		};
+		}
 		it("has root",()=>{
 			const options=new TestOptions;
 			assert(options.root instanceof Option.Root);
@@ -85,7 +85,7 @@ describe("Base/Options",()=>{
 					]],
 				];
 			}
-		};
+		}
 		it("has root",()=>{
 			const options=new TestOptions;
 			assert(options.root instanceof Option.Root);
@@ -148,7 +148,7 @@ describe("Base/Options",()=>{
 					]],
 				];
 			}
-		};
+		}
 		it("has default entries",()=>{
 			const options=new TestOptions;
 			assert.equal(options.root.entries.length,2);
