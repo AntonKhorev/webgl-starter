@@ -40,9 +40,9 @@ class Options extends BaseOptions {
 			['Group','transforms',[
 				['Select','projection',['ortho','perspective']],
 				['Array','model',[
-					['LiveFloat','rotateX',[-180,180],0],
-					['LiveFloat','rotateY',[-180,180],0],
-					['LiveFloat','rotateZ',[-180,180],0],
+					['LiveFloat','rotateX',[-180,+180,-360,+360],0],
+					['LiveFloat','rotateY',[-180,+180,-360,+360],0],
+					['LiveFloat','rotateZ',[-180,+180,-360,+360],0],
 				]],
 			]],
 			['Group','debug',[

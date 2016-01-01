@@ -80,7 +80,11 @@ const dataStrings={
 	'options.transforms.projection.ortho': "orthogonal",
 	'options.transforms.projection.perspective': "perspective",
 	'options.transforms.model': "Model transform",
-	'options.transforms.model.rotate{X,Y,Z}': "Add rotation around {x,y,z} axis",
+	'options.transforms.model.rotate{X,Y,Z}.add': "Add rotation around {x,y,z} axis",
+	'options.transforms.model.rotate{X,Y,Z}': "Angle of rotation around {x,y,z} axis",
+	'options.transforms.model.rotate{X,Y,Z}.value': plainValue,
+	'options.transforms.model.rotate{X,Y,Z}.speed': "Speed of rotation around {x,y,z} axis",
+	'options.transforms.model.rotate{X,Y,Z}.speed.value': plainValue,
 
 	'options.debug': "Debug options",
 	'options.debug.shaders': "Log shader compilation errors",
@@ -101,18 +105,9 @@ const dataStrings={
 	'ui.reset': "Reset",
 	'ui.addSpeed': "Add speed",
 
-	// TODO review strings below
-
-	'options.rotate.x': 'Angle of rotation around x axis',
-	'options.rotate.x.speed': 'Speed of rotation around x axis',
-	'options.rotate.y': 'Angle of rotation around y axis',
-	'options.rotate.y.speed': 'Speed of rotation around y axis',
-	'options.rotate.z': 'Angle of rotation around z axis',
-	'options.rotate.z.speed': 'Speed of rotation around z axis',
-
-	'controls.type.mousemovex': 'Move the mouse pointer horizontally over the canvas',
-	'controls.type.mousemovey': 'Move the mouse pointer vertically over the canvas',
-	'controls.to': 'to update',
+	'controls.type.mousemovex': "Move the mouse pointer horizontally over the canvas",
+	'controls.type.mousemovey': "Move the mouse pointer vertically over the canvas",
+	'controls.to': "to update",
 };
 
 const strings={};

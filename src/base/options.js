@@ -9,12 +9,13 @@ class Options {
 		const Option=this.optionClasses;
 		const optionByFullName={};
 		const optionsWithVisibilityAffectedByFullName={};
-		const simpleMakeEntry=description=>{
+		const simpleMakeEntry=(description,fullNamePath)=>{
 			const className=description[0];
 			if (Option[className]===undefined) {
 				throw new Error(`invalid option type '${className}'`);
 			}
 			const name=description[1];
+			const fullName=fullNamePath+name;
 			const ctorArgsDescription=description.slice(2);
 			let contents=[];
 			let defaultValue;
@@ -40,7 +41,7 @@ class Options {
 					throw new Error("unknown argument type");
 				}
 			}
-			const ctorArgs=[null,()=>true,simpleUpdateCallback,name,contents,defaultValue];
+			const ctorArgs=[null,()=>true,simpleUpdateCallback,fullName,contents,defaultValue];
 			const option=new (Function.prototype.bind.apply(Option[className],ctorArgs));
 			return option;
 		};
@@ -74,7 +75,7 @@ class Options {
 							arg.forEach(x=>{
 								const type=x[1];
 								contents.push(type);
-								defaultValueOrConstructors[type]=()=>simpleMakeEntry(x);
+								defaultValueOrConstructors[type]=()=>simpleMakeEntry(x,fullName+'.');
 							});
 						} else {
 							contents=arg.map(x=>{

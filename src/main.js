@@ -235,19 +235,27 @@ $(function(){
 				}
 				return option.$;
 			} else if (option instanceof Option.Array) {
-				return option.$=$("<fieldset>").append("<legend>"+i18n('options.'+option.fullName)+"</legend>")
+				let $entries;
+				option.$=$("<fieldset>").append("<legend>"+i18n('options.'+option.fullName)+"</legend>")
 					.append(
-						$("<div>")
+						$entries=$("<div>")
 							.append(option.entries.map(writeOption))
 							// TODO delete buttons
-					)
-					.append(
-						$("<div>")
-							.append(option.availableTypes.map(type=>
-								$("<button type='button'>")
-									.html(i18n('options.'+option.fullName+'.'+type))
-							))
 					);
+				const $buttons=$("<div>");
+				option.availableTypes.forEach((type,i)=>{
+					if (i) $buttons.append(" ");
+					$buttons.append(
+						$("<button type='button'>")
+							.html(i18n('options.'+option.fullName+'.'+type+'.add'))
+							.click(function(){
+								const entry=option.addEntry(type);
+								$entries.append(writeOption(entry));
+							})
+					);
+				});
+				option.$.append($buttons);
+				return option.$;
 			}
 		}
 		function writeButtons() {
