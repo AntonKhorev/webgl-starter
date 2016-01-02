@@ -198,11 +198,14 @@ class LiveFloat extends LiveNumber {
 }
 
 class LiveColor extends Group {
-	constructor(data,isVisible,updateCallback,fullName,colorComponentDefaultValues) { // TODO import data
+	constructor(data,isVisible,updateCallback,fullName,colorComponentDefaultValues) {
 		const cs='rgba';
-		super(undefined,isVisible,updateCallback,fullName,colorComponentDefaultValues.map(
-			(defaultValue,i)=>new LiveFloat(undefined,()=>true,updateCallback,fullName+'.'+cs.charAt(i),[0,1,-1,+1],defaultValue)
-		));
+		super(undefined,isVisible,updateCallback,fullName,colorComponentDefaultValues.map((defaultValue,i)=>{
+			const c=cs.charAt(i);
+			let subData;
+			if (typeof data == 'object') subData=data[c];
+			return new LiveFloat(subData,()=>true,updateCallback,fullName+'.'+c,[0,1,-1,+1],defaultValue);
+		}));
 	}
 }
 

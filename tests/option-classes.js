@@ -172,3 +172,69 @@ describe("Option.LiveFloat",()=>{
 		assert.equal(option.addSpeed,true);
 	});
 });
+
+describe("Option.LiveColor",()=>{
+	class TestOptions extends Options {
+		get optionClasses() {
+			return Option;
+		}
+		get entriesDescription() {
+			return [
+				['LiveColor','color',[1,0,0]],
+			];
+		}
+	}
+	it("inits",()=>{
+		const options=new TestOptions;
+		const option=options.root.entries[0];
+		assert.equal(option.entries.length,3);
+		const r=option.entries[0];
+		assert.equal(r.value,1);
+		assert.equal(r.speed.value,0);
+		const g=option.entries[1];
+		assert.equal(g.value,0);
+		assert.equal(g.speed.value,0);
+		const b=option.entries[2];
+		assert.equal(g.value,0);
+		assert.equal(g.speed.value,0);
+	});
+	it("imports numbers",()=>{
+		const options=new TestOptions({color:{
+			r:0.2,
+			b:0.4,
+		}});
+		const option=options.root.entries[0];
+		assert.equal(option.entries.length,3);
+		const r=option.entries[0];
+		assert.equal(r.value,0.2);
+		assert.equal(r.speed.value,0);
+		const g=option.entries[1];
+		assert.equal(g.value,0);
+		assert.equal(g.speed.value,0);
+		const b=option.entries[2];
+		assert.equal(b.value,0.4);
+		assert.equal(b.speed.value,0);
+	});
+	it("imports objects",()=>{
+		const options=new TestOptions({color:{
+			g:{
+				value:0.3,
+				speed:-0.1,
+			},
+			b:{
+				value:0.7,
+			},
+		}});
+		const option=options.root.entries[0];
+		assert.equal(option.entries.length,3);
+		const r=option.entries[0];
+		assert.equal(r.value,1);
+		assert.equal(r.speed.value,0);
+		const g=option.entries[1];
+		assert.equal(g.value,0.3);
+		assert.equal(g.speed.value,-0.1);
+		const b=option.entries[2];
+		assert.equal(b.value,0.7);
+		assert.equal(b.speed.value,0);
+	});
+});
