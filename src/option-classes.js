@@ -12,8 +12,8 @@ class LiveNumber extends RangeInput {
 		let dataValue,dataMin,dataMax,dataInput;
 		if (typeof data == 'object') {
 			dataValue=data.value;
-			dataMin=data.min;
-			dataMax=data.max;
+			dataMin  =data.min;
+			dataMax  =data.max;
 			dataInput=data.input;
 		} else {
 			dataValue=data;
@@ -77,12 +77,28 @@ class CanvasLiveInt extends LiveInt {
 
 class LiveFloat extends LiveNumber {
 	constructor(data,isVisible,updateCallback,fullName,availableRange,defaultValue) {
+		let dataSpeedValue,dataSpeedMin,dataSpeedMax,dataSpeedInput;
+		if (typeof data == 'object') {
+			if (typeof data.speed == 'object') {
+				dataSpeedValue=data.speed.value;
+				dataSpeedMin  =data.speed.min;
+				dataSpeedMax  =data.speed.max;
+				dataSpeedInput=data.speed.input;
+			} else {
+				dataSpeedValue=data.speed;
+			}
+		}
 		super(data,isVisible,updateCallback,fullName,availableRange,defaultValue);
-		this._speedValue=0;
-		this._speedInput='constant';
-		this._speedMin=this._speedAvailableMin=availableRange[2];
-		this._speedMax=this._speedAvailableMax=availableRange[3];
-		this._addSpeed=false;
+		this._speedValue=(dataSpeedValue!==undefined)?dataSpeedValue:0;
+		this._speedAvailableMin=availableRange[2]; this._speedMin=(dataSpeedMin!==undefined)?dataSpeedMin:this._speedAvailableMin;
+		this._speedAvailableMax=availableRange[3]; this._speedMax=(dataSpeedMax!==undefined)?dataSpeedMax:this._speedAvailableMax;
+		this._speedInput=(dataSpeedInput!==undefined)?dataSpeedInput:'constant';
+		this._addSpeed=!(
+			this._speedValue==0 &&
+			this._speedMin==this._speedAvailableMin &&
+			this._speedMax==this._speedAvailableMax &&
+			this._speedInput=='constant'
+		);
 		this._speed$=null;
 		this._$addSpeed=null;
 	}
