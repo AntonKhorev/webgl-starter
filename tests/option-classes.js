@@ -63,6 +63,37 @@ describe("Option.LiveInt",()=>{
 		assert.equal(option.max,9);
 		assert.equal(option.input,'slider');
 	});
+	it("exports nothing",()=>{
+		const options=new TestOptions;
+		assert.deepEqual(options.export(),{});
+	});
+	it("exports number",()=>{
+		const options=new TestOptions;
+		const option=options.root.entries[0];
+		option.value=4;
+		assert.deepEqual(options.export(),{lod:
+			4
+		});
+	});
+	it("exports object with min",()=>{
+		const options=new TestOptions;
+		const option=options.root.entries[0];
+		option.min=2;
+		assert.deepEqual(options.export(),{lod:
+			{min:2}
+		});
+	});
+	it("exports object with value, min, max and input",()=>{
+		const options=new TestOptions;
+		const option=options.root.entries[0];
+		option.value=7;
+		option.min=3;
+		option.max=9;
+		option.input='slider';
+		assert.deepEqual(options.export(),{lod:
+			{value:7,min:3,max:9,input:'slider'}
+		});
+	});
 });
 
 describe("Option.LiveFloat",()=>{

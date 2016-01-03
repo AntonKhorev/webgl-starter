@@ -56,6 +56,18 @@ class LiveNumber extends RangeInput {
 		this._$range=$range;
 		this.updateInternalVisibility();
 	}
+	export() {
+		const data={};
+		if (this.min!=this.availableMin) data.min=this.min;
+		if (this.max!=this.availableMax) data.max=this.max;
+		if (this.input!='constant') data.input=this.input;
+		if (Object.keys(data).length>0) {
+			if (this.value!=this.defaultValue) data.value=this.value;
+			return data;
+		} else {
+			return super.export();
+		}
+	}
 }
 
 // concrete classes
