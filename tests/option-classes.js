@@ -344,4 +344,38 @@ describe("Option.LiveColor",()=>{
 		assert.equal(b.value,0.7);
 		assert.equal(b.speed.value,0);
 	});
+	it("exports numbers",()=>{
+		const options=new TestOptions;
+		const option=options.root.entries[0];
+		const r=option.entries[0];
+		r.value=0.2;
+		const b=option.entries[2];
+		b.value=0.4;
+		assert.deepEqual(options.export(),{color:{
+			r:0.2,
+			b:0.4,
+		}});
+	});
+	it("exports objects",()=>{
+		const options=new TestOptions;
+		const option=options.root.entries[0];
+		const g=option.entries[1];
+		g.value=0.3;
+		g.speed.value=-0.1;
+		const b=option.entries[2];
+		b.value=0.7;
+		b.speed.input='slider';
+		assert.deepEqual(options.export(),{color:{
+			g:{
+				value:0.3,
+				speed:-0.1,
+			},
+			b:{
+				value:0.7,
+				speed:{
+					input:'slider',
+				},
+			},
+		}});
+	});
 });
