@@ -34,9 +34,14 @@ describe("Visibility test utility",function(){
 
 describe("Base/Options",()=>{
 	context("empty",()=>{
-		const options=new Options;
 		it("has root",()=>{
+			const options=new Options;
 			assert(options.root instanceof Option.Root);
+		});
+		it("exports data",()=>{
+			const options=new Options;
+			assert.deepEqual(options.export(),{
+			});
 		});
 	});
 	context("selects",()=>{
@@ -65,10 +70,24 @@ describe("Base/Options",()=>{
 			});
 		});
 		it("imports data",()=>{
-			const options=new TestOptions({letter:'e'});
+			const options=new TestOptions({
+				letter: 'e',
+			});
 			const values=['foo','e'];
 			options.root.entries.forEach((option,i)=>{
 				assert.equal(option.value,values[i]);
+			});
+		});
+		it("exports unchanged data",()=>{
+			const options=new TestOptions;
+			assert.deepEqual(options.export(),{
+			});
+		});
+		it("exports changed data",()=>{
+			const options=new TestOptions;
+			options.root.entries[0].value='bar';
+			assert.deepEqual(options.export(),{
+				foobar: 'bar',
 			});
 		});
 	});
@@ -135,6 +154,24 @@ describe("Base/Options",()=>{
 				});
 			});
 		});
+		it("exports unchanged data",()=>{
+			const options=new TestOptions;
+			assert.deepEqual(options.export(),{
+			});
+		});
+		it("exports changed data",()=>{
+			const options=new TestOptions;
+			options.root.entries[0].entries[0].value='bar';
+			options.root.entries[1].entries[0].value='something';
+			assert.deepEqual(options.export(),{
+				silly: {
+					foobar: 'bar',
+				},
+				stupid: {
+					what: 'something'
+				}
+			});
+		});
 	});
 	context("checkbox and array of selects",()=>{
 		class TestOptions extends Options {
@@ -168,12 +205,27 @@ describe("Base/Options",()=>{
 			assert.equal(options.root.entries.length,2);
 			assert.equal(options.root.entries[0].value,true);
 			assert.equal(options.root.entries[1].entries.length,4);
-			// TODO types = names
+			const names=['scope','shape','projection','scope'];
 			const fullNames=['arr.scope','arr.shape','arr.projection','arr.scope'];
 			const values=['face','cube','ortho','global'];
 			options.root.entries[1].entries.forEach((option,i)=>{
+				assert.equal(option.name,names[i]);
 				assert.equal(option.fullName,fullNames[i]);
 				assert.equal(option.value,values[i]);
+			});
+		});
+		it("exports changed data",()=>{
+			const options=new TestOptions;
+			options.root.entries[0].value=true;
+			options.root.entries[1].addEntry('scope');
+			options.root.entries[1].addEntry('shape');
+			options.root.entries[1].entries[1].value='triangle';
+			assert.deepEqual(options.export(),{
+				chk: true,
+				arr: [
+					'scope',
+					{type: 'shape', value: 'triangle'},
+				],
 			});
 		});
 	});
