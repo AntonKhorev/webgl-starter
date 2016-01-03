@@ -165,6 +165,21 @@ describe("Option.LiveFloat",()=>{
 		assert.equal(option.speed.input,'constant');
 		assert.equal(option.addSpeed,false);
 	});
+	it("imports object with value and speed number",()=>{
+		const options=new TestOptions({rotate:
+			{value:12,speed:45}
+		});
+		const option=options.root.entries[0];
+		assert.equal(option.value,12);
+		assert.equal(option.min,-180);
+		assert.equal(option.max,+180);
+		assert.equal(option.input,'constant');
+		assert.equal(option.speed.value,45);
+		assert.equal(option.speed.min,-360);
+		assert.equal(option.speed.max,+360);
+		assert.equal(option.speed.input,'constant');
+		assert.equal(option.addSpeed,true);
+	});
 	it("imports object with speed object with input",()=>{
 		const options=new TestOptions({rotate:
 			{speed:{
@@ -201,6 +216,67 @@ describe("Option.LiveFloat",()=>{
 		assert.equal(option.speed.max,+100);
 		assert.equal(option.speed.input,'slider');
 		assert.equal(option.addSpeed,true);
+	});
+	it("exports nothing",()=>{
+		const options=new TestOptions;
+		assert.deepEqual(options.export(),{});
+	});
+	it("exports number",()=>{
+		const options=new TestOptions;
+		const option=options.root.entries[0];
+		option.value=90;
+		assert.deepEqual(options.export(),{rotate:
+			90
+		});
+	});
+	it("exports object with speed number",()=>{
+		const options=new TestOptions;
+		const option=options.root.entries[0];
+		option.speed.value=45;
+		assert.deepEqual(options.export(),{rotate:
+			{speed:45}
+		});
+	});
+	it("exports nothing b/c speed set to default",()=>{
+		const options=new TestOptions;
+		const option=options.root.entries[0];
+		option.speed.value=0;
+		assert.deepEqual(options.export(),{});
+	});
+	it("exports object with value and speed number",()=>{
+		const options=new TestOptions;
+		const option=options.root.entries[0];
+		option.value=12;
+		option.speed.value=45;
+		assert.deepEqual(options.export(),{rotate:
+			{value:12,speed:45}
+		});
+	});
+	it("exports object with speed object with input",()=>{
+		const options=new TestOptions;
+		const option=options.root.entries[0];
+		option.speed.input='slider';
+		assert.deepEqual(options.export(),{rotate:
+			{speed:{
+				input:'slider',
+			}}
+		});
+	});
+	it("exports object with speed object with everything",()=>{
+		const options=new TestOptions;
+		const option=options.root.entries[0];
+		option.speed.value=30;
+		option.speed.min=-100;
+		option.speed.max=+100;
+		option.speed.input='slider';
+		assert.deepEqual(options.export(),{rotate:
+			{speed:{
+				value:30,
+				min:-100,
+				max:+100,
+				input:'slider',
+			}}
+		});
 	});
 });
 

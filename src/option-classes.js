@@ -56,17 +56,19 @@ class LiveNumber extends RangeInput {
 		this._$range=$range;
 		this.updateInternalVisibility();
 	}
-	export() {
-		const data={};
-		if (this.min!=this.availableMin) data.min=this.min;
-		if (this.max!=this.availableMax) data.max=this.max;
-		if (this.input!='constant') data.input=this.input;
+	exportHelper(src,data) {
+		if (src.min!=src.availableMin) data.min=src.min;
+		if (src.max!=src.availableMax) data.max=src.max;
+		if (src.input!='constant') data.input=src.input;
 		if (Object.keys(data).length>0) {
-			if (this.value!=this.defaultValue) data.value=this.value;
+			if (src.value!=src.defaultValue) data.value=src.value;
 			return data;
 		} else {
-			return super.export();
+			return src.value!=src.defaultValue ? src.value : null;
 		}
+	}
+	export() {
+		return this.exportHelper(this,{});
 	}
 }
 
@@ -206,6 +208,12 @@ class LiveFloat extends LiveNumber {
 	set $addSpeed($addSpeed) {
 		this._$addSpeed=$addSpeed;
 		this.updateInternalVisibility();
+	}
+	export() {
+		const data={};
+		const speedData=this.exportHelper(this.speed,{});
+		if (speedData!==null) data.speed=speedData;
+		return this.exportHelper(this,data);
 	}
 }
 
