@@ -290,6 +290,23 @@ describe("Option.LiveFloat",()=>{
 			}}
 		});
 	});
+	it("fixes data",()=>{
+		const options=new TestOptions;
+		const option=options.root.entries[0];
+		option.value=40;
+		option.speed.value=30;
+		option.speed.min=-100;
+		option.speed.max=+100;
+		const fixed=options.fix();
+		assert.equal(fixed.rotate,40);
+		assert.equal(fixed.rotate.min,-180);
+		assert.equal(fixed.rotate.max,+180);
+		assert.equal(fixed.rotate.input,'constant');
+		assert.equal(fixed.rotate.speed,30);
+		assert.equal(fixed.rotate.speed.min,-100);
+		assert.equal(fixed.rotate.speed.max,+100);
+		assert.equal(fixed.rotate.speed.input,'constant');
+	});
 });
 
 describe("Option.LiveColor",()=>{
@@ -389,5 +406,40 @@ describe("Option.LiveColor",()=>{
 				},
 			},
 		}});
+	});
+	it("fixes data",()=>{
+		const options=new TestOptions;
+		const option=options.root.entries[0];
+		const g=option.entries[1];
+		g.value=0.3;
+		g.speed.value=-0.1;
+		const b=option.entries[2];
+		b.value=0.7;
+		b.speed.input='slider';
+		const fixed=options.fix();
+		assert.equal(fixed.color.r,1.0);
+		assert.equal(fixed.color.r.min,0.0);
+		assert.equal(fixed.color.r.max,1.0);
+		assert.equal(fixed.color.r.input,'constant');
+		assert.equal(fixed.color.r.speed,0.0);
+		assert.equal(fixed.color.r.speed.min,-1.0);
+		assert.equal(fixed.color.r.speed.max,+1.0);
+		assert.equal(fixed.color.r.speed.input,'constant');
+		assert.equal(fixed.color.g,0.3);
+		assert.equal(fixed.color.g.min,0.0);
+		assert.equal(fixed.color.g.max,1.0);
+		assert.equal(fixed.color.g.input,'constant');
+		assert.equal(fixed.color.g.speed,-0.1);
+		assert.equal(fixed.color.g.speed.min,-1.0);
+		assert.equal(fixed.color.g.speed.max,+1.0);
+		assert.equal(fixed.color.g.speed.input,'constant');
+		assert.equal(fixed.color.b,0.7);
+		assert.equal(fixed.color.b.min,0.0);
+		assert.equal(fixed.color.b.max,1.0);
+		assert.equal(fixed.color.b.input,'constant');
+		assert.equal(fixed.color.b.speed,0.0);
+		assert.equal(fixed.color.b.speed.min,-1.0);
+		assert.equal(fixed.color.b.speed.max,+1.0);
+		assert.equal(fixed.color.b.speed.input,'slider');
 	});
 });

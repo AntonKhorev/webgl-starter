@@ -222,6 +222,14 @@ class LiveFloat extends LiveNumber {
 		if (speedData!==null) data.speed=speedData;
 		return this.exportHelper(this,data);
 	}
+	fix() {
+		const fixed=super.fix();
+		fixed.speed=new Number(this.speed.value);
+		fixed.speed.min=this.speed.min;
+		fixed.speed.max=this.speed.max;
+		fixed.speed.input=this.speed.input;
+		return fixed;
+	}
 }
 
 class LiveColor extends Group {
