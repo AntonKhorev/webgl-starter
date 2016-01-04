@@ -110,7 +110,7 @@ class Array extends Base {
 		super(name,undefined,isVisible,updateCallback,fullName);
 		this.availableTypes=availableTypes;
 		this.availableConstructors=availableConstructors;
-		this.entries=[];
+		this._entries=[];
 		if (typeof data == 'object') {
 			for (let i in data) {
 				const entryTypeAndData=data[i];
@@ -122,13 +122,26 @@ class Array extends Base {
 					entryData=entryTypeAndData.data;
 				}
 				if (availableConstructors[entryType]) {
-					this.entries.push(availableConstructors[entryType](entryData));
+					this._entries.push(availableConstructors[entryType](entryData));
 				}
 			}
 		}
 	}
+	get entries() {
+		return this._entries;
+	}
+	set entries(entries) {
+		this._entries=entries;
+		this.updateCallback();
+	}
+	addEntry(type) {
+		const entry=this.availableConstructors[type]();
+		this._entries.push(entry);
+		this.updateCallback();
+		return entry;
+	}
 	export() {
-		return this.entries.map(entry=>{
+		return this._entries.map(entry=>{
 			const subData=entry.export();
 			if (subData!==null) {
 				return {type: entry.name, value: subData};
@@ -138,15 +151,9 @@ class Array extends Base {
 		});
 	}
 	fix() {
-		return this.entries.map(entry=>{
+		return this._entries.map(entry=>{
 			return {type: entry.name, value: entry.fix()};
 		});
-	}
-	addEntry(type) {
-		const entry=this.availableConstructors[type]();
-		this.entries.push(entry);
-		this.updateCallback();
-		return entry;
 	}
 }
 

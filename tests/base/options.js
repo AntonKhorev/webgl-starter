@@ -267,5 +267,19 @@ describe("Base/Options",()=>{
 			options.root.entries[1].addEntry('shape');
 			assert.equal(updated,true,"didn't call update");
 		});
+		it("calls update when rewriting array entries",()=>{
+			const options=new TestOptions;
+			options.root.entries[1].addEntry('shape');
+			options.root.entries[1].addEntry('scope');
+			let updated=false;
+			options.updateCallback=()=>{
+				updated=true;
+			};
+			options.root.entries[1].entries=[
+				options.root.entries[1].entries[1],
+				options.root.entries[1].entries[0],
+			];
+			assert.equal(updated,true,"didn't call update");
+		});
 	});
 });
