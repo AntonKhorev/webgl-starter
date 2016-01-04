@@ -70,6 +70,13 @@ class LiveNumber extends RangeInput {
 	export() {
 		return this.exportHelper(this,{});
 	}
+	fix() {
+		const fixed=new Number(this.value);
+		fixed.min=this.min;
+		fixed.max=this.max;
+		fixed.input=this.input;
+		return fixed;
+	}
 }
 
 // concrete classes

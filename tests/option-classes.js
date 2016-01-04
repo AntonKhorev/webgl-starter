@@ -94,6 +94,18 @@ describe("Option.LiveInt",()=>{
 			{value:7,min:3,max:9,input:'slider'}
 		});
 	});
+	it("fixes data",()=>{
+		const options=new TestOptions;
+		const option=options.root.entries[0];
+		option.value=7;
+		option.max=9;
+		option.input='slider';
+		const fixed=options.fix();
+		assert.equal(fixed.lod,7);
+		assert.equal(fixed.lod.min,0);
+		assert.equal(fixed.lod.max,9);
+		assert.equal(fixed.lod.input,'slider');
+	});
 });
 
 describe("Option.LiveFloat",()=>{
