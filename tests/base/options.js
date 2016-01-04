@@ -258,5 +258,14 @@ describe("Base/Options",()=>{
 			assert.equal(fixed.arr[1].type,'shape');
 			assert.equal(fixed.arr[1].value,'triangle');
 		});
+		it("calls update when adding entry to array",()=>{
+			const options=new TestOptions;
+			let updated=false;
+			options.updateCallback=()=>{
+				updated=true;
+			};
+			options.root.entries[1].addEntry('shape');
+			assert.equal(updated,true,"didn't call update");
+		});
 	});
 });

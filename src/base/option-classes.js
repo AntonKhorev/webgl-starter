@@ -145,6 +145,7 @@ class Array extends Base {
 	addEntry(type) {
 		const entry=this.availableConstructors[type]();
 		this.entries.push(entry);
+		this.updateCallback();
 		return entry;
 	}
 }
