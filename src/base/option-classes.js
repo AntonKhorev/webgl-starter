@@ -46,6 +46,9 @@ class Input extends Base {
 	export() {
 		return this.value!=this.defaultValue ? this.value : null;
 	}
+	fix() {
+		return this.value;
+	}
 }
 
 class FactorInput extends Input {
@@ -75,6 +78,13 @@ class Collection extends Base {
 			if (subData!==null) data[entry.name]=subData;
 		});
 		return Object.keys(data).length>0 ? data : null;
+	}
+	fix() {
+		const data={};
+		this.entries.forEach(entry=>{
+			data[entry.name]=entry.fix();
+		});
+		return data;
 	}
 }
 
@@ -125,6 +135,11 @@ class Array extends Base {
 			} else {
 				return entry.name;
 			}
+		});
+	}
+	fix() {
+		return this.entries.map(entry=>{
+			return {type: entry.name, value: entry.fix()};
 		});
 	}
 	addEntry(type) {

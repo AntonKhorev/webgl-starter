@@ -154,6 +154,9 @@ class Options {
 		const data=this.root.export();
 		return data!==null ? data : {};
 	}
+	fix() {
+		return this.root.fix();
+	}
 }
 
 module.exports=Options;

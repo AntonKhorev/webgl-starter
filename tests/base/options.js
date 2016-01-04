@@ -90,6 +90,13 @@ describe("Base/Options",()=>{
 				foobar: 'bar',
 			});
 		});
+		it("fixes data",()=>{
+			const options=new TestOptions;
+			options.root.entries[0].value='bar';
+			const fixed=options.fix();
+			assert.equal(fixed.foobar,'bar');
+			assert.equal(fixed.letter,'c');
+		});
 	});
 	context("groups and selects",()=>{
 		class TestOptions extends Options {
@@ -172,6 +179,15 @@ describe("Base/Options",()=>{
 				}
 			});
 		});
+		it("fixes data",()=>{
+			const options=new TestOptions;
+			options.root.entries[0].entries[0].value='bar';
+			options.root.entries[1].entries[0].value='something';
+			const fixed=options.fix();
+			assert.equal(fixed.silly.foobar,'bar');
+			assert.equal(fixed.silly.letter,'c');
+			assert.equal(fixed.stupid.what,'something');
+		});
 	});
 	context("checkbox and array of selects",()=>{
 		class TestOptions extends Options {
@@ -227,6 +243,20 @@ describe("Base/Options",()=>{
 					{type: 'shape', value: 'triangle'},
 				],
 			});
+		});
+		it("fixes data",()=>{
+			const options=new TestOptions;
+			options.root.entries[0].value=true;
+			options.root.entries[1].addEntry('scope');
+			options.root.entries[1].addEntry('shape');
+			options.root.entries[1].entries[1].value='triangle';
+			const fixed=options.fix();
+			assert.equal(fixed.chk,true);
+			assert.equal(fixed.arr.length,2);
+			assert.equal(fixed.arr[0].type,'scope');
+			assert.equal(fixed.arr[0].value,'global');
+			assert.equal(fixed.arr[1].type,'shape');
+			assert.equal(fixed.arr[1].value,'triangle');
 		});
 	});
 });
