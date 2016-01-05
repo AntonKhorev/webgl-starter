@@ -31,6 +31,7 @@ $(function(){
 			clearTimeout(codeUpdateTimeoutId);
 			codeUpdateTimeoutId=setTimeout(function(){
 				//$code.text(generateCode(options.fix(),i18n));
+				//console.log('all options',options.fix());
 				$code.text("TODO update code #"+(++ucc));
 				//
 				if (window.hljs) hljs.highlightBlock($code[0]);
@@ -236,11 +237,39 @@ $(function(){
 				return option.$;
 			} else if (option instanceof Option.Array) {
 				let $entries;
+				const updateArrayEntries=()=>{
+					option.entries=$entries.children().map(function(){
+						return $(this).data('option');
+					}).get();
+				};
+				const writeDraggableOption=option=>{
+					return $("<div class='draggable-with-handle'>")
+						.data('option',option)
+						.append(
+							$("<div draggable='true' tabindex='0' title='"+i18n('ui.drag')+"'>")
+								.keydown(function(ev){
+									var $handle=$(this);
+									var $sorted=$handle.parent();
+									if (ev.keyCode==38) {
+										$sorted.prev().before($sorted);
+										$handle.focus();
+										updateArrayEntries();
+										return false;
+									} else if (ev.keyCode==40) {
+										$sorted.next().after($sorted);
+										$handle.focus();
+										updateArrayEntries();
+										return false;
+									}
+								})
+						)
+						.append(writeOption(option));
+					// TODO delete buttons
+				};
 				option.$=$("<fieldset>").append("<legend>"+i18n('options.'+option.fullName)+"</legend>")
 					.append(
 						$entries=$("<div>")
-							.append(option.entries.map(writeOption))
-							// TODO delete buttons
+							.append(option.entries.map(writeDraggableOption))
 					);
 				const $buttons=$("<div>");
 				option.availableTypes.forEach((type,i)=>{
@@ -250,7 +279,7 @@ $(function(){
 							.html(i18n('options.'+option.fullName+'.'+type+'.add'))
 							.click(function(){
 								const entry=option.addEntry(type);
-								$entries.append(writeOption(entry));
+								$entries.append(writeDraggableOption(entry));
 							})
 					);
 				});
