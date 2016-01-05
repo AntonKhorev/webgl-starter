@@ -105,6 +105,7 @@ const dataStrings={
 	'ui.reset': "Reset",
 	'ui.addSpeed': "Add speed",
 	'ui.drag': "Drag or press up/down while in focus to reorder transforms",
+	'ui.delete': "Delete transform",
 
 	'controls.type.mousemovex': "Move the mouse pointer horizontally over the canvas",
 	'controls.type.mousemovey': "Move the mouse pointer vertically over the canvas",

@@ -1,6 +1,9 @@
 .webgl-starter {
 	.draggable-with-handle {
 		position: relative;
+		&.ghost {
+			opacity: .4;
+		}
 		[draggable] { // drag handle
 			position: absolute;
 			top: 0.2em;
@@ -10,8 +13,15 @@
 			// http://www.patternify.com/
 			background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAkAAAAJCAYAAADgkQYQAAAAGUlEQVQYlWNgIAYYGxv/J4SJMog4MFStAwDfUCsJGefs4gAAAABJRU5ErkJggg==) center no-repeat, url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAkAAAAJCAYAAADgkQYQAAAAF0lEQVQYlWNgIBZ0dHT8J8SmIhiK1gEAJMkXUFw51ewAAAAASUVORK5CYII=) center;
 		}
-		&.ghost {
-			opacity: .4;
+		.delete {
+			position: absolute;
+			top: 0.2em;
+			bottom: 0.2em;
+			width: 1em;
+			right: 0;
+			cursor: default;
+			border: dotted 1px #888;
+			text-align: center;
 		}
 	}
 	label:first-child {

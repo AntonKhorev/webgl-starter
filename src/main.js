@@ -156,9 +156,6 @@ $(function(){
 				}
 				return option.$;
 			} else if (option instanceof Option.Array) {
-				// have to make drag handler 'draggable', not the whole item
-				// because inputs and labels don't like to be inside 'draggable'
-				// http://stackoverflow.com/questions/13017177/selection-disabled-while-using-html5-drag-and-drop
 				let $dragged=null;
 				let $entries;
 				const updateArrayEntries=()=>{
@@ -167,6 +164,9 @@ $(function(){
 					}).get();
 				};
 				const writeDraggableOption=option=>{
+					// have to make drag handler 'draggable', not the whole item
+					// because inputs and labels don't like to be inside 'draggable'
+					// http://stackoverflow.com/questions/13017177/selection-disabled-while-using-html5-drag-and-drop
 					return $("<div class='draggable-with-handle'>")
 						.data('option',option)
 						.append(
@@ -199,6 +199,20 @@ $(function(){
 								})
 						)
 						.append(writeOption(option))
+						.append(
+							$("<div tabindex='0' class='delete' title='"+i18n('ui.delete')+"'>×</div>")
+								.click(function(){
+									$(this).parent().remove();
+									updateArrayEntries();
+								})
+								.keydown(function(ev){
+									if (ev.keyCode==13 || ev.keyCode==32) {
+										$(this).parent().remove();
+										updateArrayEntries();
+										return false;
+									}
+								})
+						)
 						.on('dragover',function(ev){
 							ev.preventDefault();
 							ev.originalEvent.dataTransfer.dropEffect='move';
@@ -223,7 +237,6 @@ $(function(){
 								$dragged=null;
 							}
 						});
-					// TODO delete buttons
 				};
 				option.$=$("<fieldset>").append("<legend>"+i18n('options.'+option.fullName)+"</legend>")
 					.append(
