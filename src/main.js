@@ -38,86 +38,6 @@ $(function(){
 			},codeUpdateDelay);
 		}
 		options.updateCallback=updateCode;
-		/*
-		function makeSortable($sortableRoot,callback) {
-			// have to make drag handler 'draggable', not the whole item
-			// because inputs and labels don't like to be inside 'draggable'
-			// http://stackoverflow.com/questions/13017177/selection-disabled-while-using-html5-drag-and-drop
-			var $dragged=null;
-			$sortableRoot.children().prepend(
-				$("<div draggable='true' tabindex='0' title='Drag or press up/down while in focus to reorder transforms'>").on('dragstart',function(ev){
-					$dragged=$(this).parent();
-					ev.originalEvent.dataTransfer.effectAllowed='move';
-					ev.originalEvent.dataTransfer.setData('Text',name);
-					if (ev.originalEvent.dataTransfer.setDragImage) { // doesn't work in IE
-						ev.originalEvent.dataTransfer.setDragImage($dragged[0],0,0);
-					}
-					setTimeout(function(){
-						$dragged.addClass('ghost');
-					},0);
-				})
-				.keydown(function(ev){
-					var $handle=$(this);
-					var $sorted=$handle.parent();
-					if (ev.keyCode==38) {
-						$sorted.prev().before($sorted);
-						$handle.focus();
-						callback();
-						return false;
-					} else if (ev.keyCode==40) {
-						$sorted.next().after($sorted);
-						$handle.focus();
-						callback();
-						return false;
-					}
-				})
-			).on('dragover',function(ev){
-				ev.preventDefault();
-				ev.originalEvent.dataTransfer.dropEffect='move';
-				var $target=$(this);
-				if ($dragged) {
-					if ($target.nextAll().is($dragged)) {
-						$target.before($dragged);
-						callback();
-					} else if ($target.prevAll().is($dragged)) {
-						$target.after($dragged);
-						callback();
-					}
-				}
-			}).on('drop',function(ev){
-				ev.preventDefault();
-			}).on('dragend',function(ev){
-				ev.preventDefault();
-				if ($dragged) {
-					$dragged.removeClass('ghost');
-					$dragged=null;
-				}
-			});
-		}
-		function writeOptions() {
-			var $transforms;
-			var $options=$("<div>").append(
-				$("<fieldset>").append("<legend>"+i18n('options.transform')+"</legend>").append(
-					$transforms=$("<div>").append(
-						options.transforms.map(function(transform){
-							return $("<div class='transform' data-transform='"+transform.name+"'>").append(
-								transform.options.map(function(option,i){
-									return writeInputOption(option,false,i==0) // gamepad only for value (not speed) option
-								})
-							);
-						})
-					)
-				)
-			);
-			makeSortable($transforms,function(){
-				options.transformOrder=$transforms.children().map(function(){
-					return $(this).attr('data-transform');
-				}).get();
-				updateCode();
-			});
-			return $options;
-		}
-		*/
 		function writeOption(option) {
 			if (option instanceof Option.Root) {
 				return option.$=$("<div>").append(
@@ -236,6 +156,10 @@ $(function(){
 				}
 				return option.$;
 			} else if (option instanceof Option.Array) {
+				// have to make drag handler 'draggable', not the whole item
+				// because inputs and labels don't like to be inside 'draggable'
+				// http://stackoverflow.com/questions/13017177/selection-disabled-while-using-html5-drag-and-drop
+				let $dragged=null;
 				let $entries;
 				const updateArrayEntries=()=>{
 					option.entries=$entries.children().map(function(){
@@ -247,9 +171,20 @@ $(function(){
 						.data('option',option)
 						.append(
 							$("<div draggable='true' tabindex='0' title='"+i18n('ui.drag')+"'>")
+								.on('dragstart',function(ev){
+									$dragged=$(this).parent();
+									ev.originalEvent.dataTransfer.effectAllowed='move';
+									ev.originalEvent.dataTransfer.setData('Text',name);
+									if (ev.originalEvent.dataTransfer.setDragImage) { // doesn't work in IE
+										ev.originalEvent.dataTransfer.setDragImage($dragged[0],0,0);
+									}
+									setTimeout(function(){
+										$dragged.addClass('ghost');
+									},0);
+								})
 								.keydown(function(ev){
-									var $handle=$(this);
-									var $sorted=$handle.parent();
+									const $handle=$(this);
+									const $sorted=$handle.parent();
 									if (ev.keyCode==38) {
 										$sorted.prev().before($sorted);
 										$handle.focus();
@@ -263,7 +198,31 @@ $(function(){
 									}
 								})
 						)
-						.append(writeOption(option));
+						.append(writeOption(option))
+						.on('dragover',function(ev){
+							ev.preventDefault();
+							ev.originalEvent.dataTransfer.dropEffect='move';
+							const $target=$(this);
+							if ($dragged) {
+								if ($target.nextAll().is($dragged)) {
+									$target.before($dragged);
+									updateArrayEntries();
+								} else if ($target.prevAll().is($dragged)) {
+									$target.after($dragged);
+									updateArrayEntries();
+								}
+							}
+						})
+						.on('drop',function(ev){
+							ev.preventDefault();
+						})
+						.on('dragend',function(ev){
+							ev.preventDefault();
+							if ($dragged) {
+								$dragged.removeClass('ghost');
+								$dragged=null;
+							}
+						});
 					// TODO delete buttons
 				};
 				option.$=$("<fieldset>").append("<legend>"+i18n('options.'+option.fullName)+"</legend>")
