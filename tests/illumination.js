@@ -1,20 +1,42 @@
-/* TODO rewrite
-var assert=require('assert');
-var Lines=require('../src/lines.js');
-var listeners=require('../src/listeners.js');
-var Illumination=require('../src/illumination.js');
+'use strict';
+
+const assert=require('assert');
+const Lines=require('../src/lines.js');
+const Options=require('../src/options.js');
+const listeners=require('../src/listeners.js');
+const Illumination=require('../src/illumination.js');
 
 describe('Illumination',function(){
+	class TestOptions extends Options {
+		get entriesDescription() {
+			return [
+				// options relevant for this Feature, copied here in case defaults change
+				['Group','material',[
+					['Select','scope',['global','vertex','face']],
+					['Select','data',['one','sda']],
+					['LiveColor','color',[1,0,0,1],{'material.scope':'global','material.data':'one'}],
+					['LiveColor','specularColor',[0.4,0.4,0.4],{'material.scope':'global','material.data':'sda'}],
+					['LiveColor','diffuseColor' ,[0.4,0.4,0.4],{'material.scope':'global','material.data':'sda'}],
+					['LiveColor','ambientColor' ,[0.2,0.2,0.2],{'material.scope':'global','material.data':'sda'}],
+				]],
+				['Group','light',[
+					['Select','type',['off','phong','blinn']],
+					['Group','direction',[
+						['LiveFloat','x',[-4,+4,-4,+4],-1],
+						['LiveFloat','y',[-4,+4,-4,+4],+1],
+						['LiveFloat','z',[-4,+4,-4,+4],+1],
+					],{'light.type':['phong','blinn']}],
+				]],
+			];
+		}
+	}
 	context('with global flat shading',function(){
-		var illumination=new Illumination({
-			'materialScope':'global',
-			'materialData':'one',
-			'light':'off',
-			'materialColor.r':0.9, 'materialColor.r.input':'constant', 'materialColor.r.min':0, 'materialColor.r.max':1,
-			'materialColor.g':0.7, 'materialColor.g.input':'constant', 'materialColor.g.min':0, 'materialColor.g.max':1,
-			'materialColor.b':0.5, 'materialColor.b.input':'constant', 'materialColor.b.min':0, 'materialColor.b.max':1,
-			'materialColor.a':1.0, 'materialColor.a.input':'constant', 'materialColor.a.min':0, 'materialColor.a.max':1
-		});
+		const options=(new TestOptions({
+			material:{
+				color:{r:0.9,g:0.7,b:0.5,a:1.0}
+			},
+		})).fix();
+		const illumination=new Illumination(options.material,options.light);
 		it("has empty color attr list",function(){
 			assert.deepEqual(illumination.getColorAttrs(),[
 			]);
@@ -50,6 +72,7 @@ describe('Illumination',function(){
 			]);
 		});
 	});
+	/*
 	context('with global flat shading and slider input',function(){
 		var illumination=new Illumination({
 			'materialScope':'global',
@@ -757,5 +780,5 @@ describe('Illumination',function(){
 			]);
 		});
 	});
+	*/
 });
-*/
