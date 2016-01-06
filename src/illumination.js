@@ -2,6 +2,8 @@
 
 const Lines=require('./lines.js');
 const GlslVector=require('./glsl-vector.js');
+const Options=require('./options.js');
+const extendFixedOptionGroup=require('./extend-fixed-option-group.js');
 
 const Illumination=function(material,light){
 	this.material=material;
@@ -22,21 +24,14 @@ const Illumination=function(material,light){
 			this.diffuseColorVector =new GlslVector('diffuseColor' ,material.diffuseColor);
 			this.ambientColorVector =new GlslVector('ambientColor' ,material.ambientColor);
 		} else {
-			/* TODO this won't work
-			const ExtendedOptions=function(){
-				['Specular','Diffuse','Ambient'].forEach(function(colorType){
-					this['material'+colorType+'Color.a']=1;
-					this['material'+colorType+'Color.a.input']='constant';
-					this['material'+colorType+'Color.a.min']=0;
-					this['material'+colorType+'Color.a.max']=1;
-				},this);
-			};
-			ExtendedOptions.prototype=options;
-			var extendedOptions=new ExtendedOptions;
-			this.specularColorVector=new GlslVector('specularColor','materialSpecularColor','rgba',extendedOptions);
-			this.diffuseColorVector =new GlslVector('diffuseColor' ,'materialDiffuseColor' ,'rgba',extendedOptions);
-			this.ambientColorVector =new GlslVector('ambientColor' ,'materialAmbientColor' ,'rgba',extendedOptions);
-			*/
+			const extendedAmbientColor=extendFixedOptionGroup(
+				material.ambientColor,
+				Options,
+				[
+					['LiveFloat','a',[0,1],1],
+				]
+			);
+			this.ambientColorVector=new GlslVector('ambientColor',extendedAmbientColor);
 		}
 	}
 	if (light.type!='off') {

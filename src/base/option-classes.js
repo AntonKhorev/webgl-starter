@@ -79,11 +79,10 @@ class Collection extends Base {
 		});
 		return Object.keys(data).length>0 ? data : null;
 	}
-	fix() {
-		const iterateOver=this.entries.map((entry,i)=>[entry.fix(),entry.name,i]);
+	fixFromIterateOver(iterateOver) {
 		const defineFn=fn=>((callback,thisArg)=>fn.call(iterateOver,vci=>callback.apply(thisArg,vci)));
 		const data={
-			length: this.entries.length,
+			length: iterateOver.length,
 			map: defineFn([].map),
 			every: defineFn([].every),
 			forEach: defineFn([].forEach),
@@ -92,6 +91,10 @@ class Collection extends Base {
 			data[vci[1]]=vci[0];
 		});
 		return data;
+	}
+	fix() {
+		const iterateOver=this.entries.map((entry,i)=>[entry.fix(),entry.name,i]);
+		return this.fixFromIterateOver(iterateOver);
 	}
 }
 

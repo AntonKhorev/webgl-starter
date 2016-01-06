@@ -33,7 +33,7 @@ describe('Illumination',function(){
 	context('with global flat shading',function(){
 		const options=(new TestOptions({
 			material:{
-				color:{r:0.9,g:0.7,b:0.5,a:1.0}
+				color:{r:0.9, g:0.7, b:0.5, a:1.0},
 			},
 		})).fix();
 		const illumination=new Illumination(options.material,options.light);
@@ -72,17 +72,13 @@ describe('Illumination',function(){
 			]);
 		});
 	});
-	/*
 	context('with global flat shading and slider input',function(){
-		var illumination=new Illumination({
-			'materialScope':'global',
-			'materialData':'one',
-			'light':'off',
-			'materialColor.r':0.9, 'materialColor.r.input':'slider',   'materialColor.r.min':0, 'materialColor.r.max':1,
-			'materialColor.g':0.7, 'materialColor.g.input':'constant', 'materialColor.g.min':0, 'materialColor.g.max':1,
-			'materialColor.b':0.5, 'materialColor.b.input':'constant', 'materialColor.b.min':0, 'materialColor.b.max':1,
-			'materialColor.a':1.0, 'materialColor.a.input':'constant', 'materialColor.a.min':0, 'materialColor.a.max':1
-		});
+		const options=(new TestOptions({
+			material:{
+				color:{r:{value:0.9, input:'slider'}, g:0.7, b:0.5, a:1.0},
+			},
+		})).fix();
+		const illumination=new Illumination(options.material,options.light);
 		it("has empty color attr list",function(){
 			assert.deepEqual(illumination.getColorAttrs(),[
 			]);
@@ -116,21 +112,22 @@ describe('Illumination',function(){
 			assert.deepEqual(illumination.getJsInterfaceLines([false,false],canvasMousemoveListener).data,[
 				"var colorRLoc=gl.getUniformLocation(program,'colorR');",
 				"function updateColor() {",
-				"	gl.uniform1f(colorRLoc,parseFloat(document.getElementById('materialColor.r').value));",
+				"	gl.uniform1f(colorRLoc,parseFloat(document.getElementById('color.r').value));",
 				"}",
 				"updateColor();",
-				"document.getElementById('materialColor.r').addEventListener('change',updateColor);"
+				"document.getElementById('color.r').addEventListener('change',updateColor);"
 			]);
 			assert.deepEqual(canvasMousemoveListener.write(false,false).data,[
 			]);
 		});
 	});
 	context('with local flat shading',function(){
-		var illumination=new Illumination({
-			'materialScope':'vertex',
-			'materialData':'one',
-			'light':'off',
-		});
+		const options=(new TestOptions({
+			material:{
+				scope:'vertex',
+			},
+		})).fix();
+		const illumination=new Illumination(options.material,options.light);
 		it("has color attr list with 1 enabled entry",function(){
 			assert.deepEqual(illumination.getColorAttrs(),[
 				{name:"color",enabled:true,weight:1.0}
@@ -172,20 +169,15 @@ describe('Illumination',function(){
 		});
 	});
 	context('with global ambient flat shading',function(){
-		var illumination=new Illumination({
-			'materialScope':'global',
-			'materialData':'sda',
-			'light':'off',
-			'materialSpecularColor.r':0.9, 'materialSpecularColor.r.input':'constant', 'materialSpecularColor.r.min':0, 'materialSpecularColor.r.max':1,
-			'materialSpecularColor.g':0.7, 'materialSpecularColor.g.input':'constant', 'materialSpecularColor.g.min':0, 'materialSpecularColor.g.max':1,
-			'materialSpecularColor.b':0.5, 'materialSpecularColor.b.input':'constant', 'materialSpecularColor.b.min':0, 'materialSpecularColor.b.max':1,
-			'materialDiffuseColor.r' :0.8, 'materialDiffuseColor.r.input' :'constant', 'materialDiffuseColor.r.min' :0, 'materialDiffuseColor.r.max' :1,
-			'materialDiffuseColor.g' :0.6, 'materialDiffuseColor.g.input' :'constant', 'materialDiffuseColor.g.min' :0, 'materialDiffuseColor.g.max' :1,
-			'materialDiffuseColor.b' :0.4, 'materialDiffuseColor.b.input' :'constant', 'materialDiffuseColor.b.min' :0, 'materialDiffuseColor.b.max' :1,
-			'materialAmbientColor.r' :0.7, 'materialAmbientColor.r.input' :'constant', 'materialAmbientColor.r.min' :0, 'materialAmbientColor.r.max' :1,
-			'materialAmbientColor.g' :0.5, 'materialAmbientColor.g.input' :'constant', 'materialAmbientColor.g.min' :0, 'materialAmbientColor.g.max' :1,
-			'materialAmbientColor.b' :0.3, 'materialAmbientColor.b.input' :'constant', 'materialAmbientColor.b.min' :0, 'materialAmbientColor.b.max' :1
-		});
+		const options=(new TestOptions({
+			material:{
+				data:'sda',
+				specularColor:{r:0.9, g:0.7, b:0.5},
+				diffuseColor :{r:0.8, g:0.6, b:0.4},
+				ambientColor :{r:0.7, g:0.5, b:0.3},
+			},
+		})).fix();
+		const illumination=new Illumination(options.material,options.light);
 		it("has empty color attr list",function(){
 			assert.deepEqual(illumination.getColorAttrs(),[
 			]);
@@ -221,6 +213,7 @@ describe('Illumination',function(){
 			]);
 		});
 	});
+	/*
 	context('with global ambient flat shading and 2 slider inputs',function(){
 		var illumination=new Illumination({
 			'materialScope':'global',
