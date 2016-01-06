@@ -3,7 +3,6 @@
 const Lines=require('./lines.js');
 const Vector=require('./vector.js');
 
-// TODO don't need components arg
 const CallVector=function(name,values,calledFn,calledFnDefaultArgs){
 	Vector.call(this,name,values);
 	this.calledFn=calledFn;

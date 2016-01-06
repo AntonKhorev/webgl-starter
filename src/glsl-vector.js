@@ -1,7 +1,9 @@
-var Lines=require('./lines.js');
-var Vector=require('./vector.js');
+'use strict';
 
-var GlslVector=function(varName,optName,components,options){
+const Lines=require('./lines.js');
+const Vector=require('./vector.js');
+
+const GlslVector=function(name,values){
 	Vector.apply(this,arguments);
 };
 GlslVector.prototype=Object.create(Vector.prototype);
@@ -11,22 +13,31 @@ GlslVector.prototype.getGlslDeclarationLines=function(){
 	if (this.modeConstant) {
 		return new Lines;
 	} else if (this.modeFloats) {
-		var lines=new Lines;
+		const lines=new Lines;
+		/*
 		this.components.forEach(function(c,i){
 			if (this.inputs[i]=='constant') return;
 			lines.a(
 				"uniform float "+this.varNameC(c)+";"
 			);
 		},this);
+		*/
+		this.values.forEach((v,c)=>{
+			if (v.input=='constant') return;
+			lines.a(
+				"uniform float "+this.varNameC(c)+";"
+			);
+		});
 		return lines;
 	} else {
 		return new Lines(
-			"uniform vec"+this.nVars+" "+this.varName+";"
+			"uniform vec"+this.nVars+" "+this.name+";"
 		);
 	}
 };
 GlslVector.prototype.getGlslValue=function(){
-	var vecType="vec"+this.values.length;
+	const vecType="vec"+this.values.length;
+	/*
 	varComponentMap=function(c,i) {
 		if (this.inputs[i]=='constant') {
 			return this.formatValue(this.values[i]);
@@ -35,8 +46,17 @@ GlslVector.prototype.getGlslValue=function(){
 		}
 	}.bind(this);
 	var vs=this.components.map(varComponentMap);
+	*/
+	let vs=this.values.map((v,c)=>{
+		if (v.input=='constant') {
+			return this.formatValue(v);
+		} else {
+			return this.varNameC(c);
+		}
+	});
+	//
 	if (this.modeConstant) {
-		var equalValues=vs.every(function(v){
+		const equalValues=vs.every(function(v){
 			return v==vs[0];
 		});
 		if (equalValues) {
@@ -47,40 +67,45 @@ GlslVector.prototype.getGlslValue=function(){
 	} else if (!this.modeFloats) {
 		vs=vs.slice(this.nVars);
 		if (vs.length==0) {
-			return this.varName;
+			return this.name;
 		}
-		vs.unshift(this.varName);
+		vs.unshift(this.name);
 	}
 	return vecType+"("+vs.join(",")+")";
 };
 GlslVector.prototype.getGlslComponentsValue=function(selectedComponents){
-	var results=[]; // [[isConstant,componentLetterOrNumber]]
-	var showResult=function(result){
+	const results=[]; // [[isConstant,componentLetterOrNumber]]
+	//const valuesArray=this.values.map(v=>v); // TODO componentLetterOrNumber == number when non-constant, but we don't need numbers now
+	const valuesArray=this.values; // TODO remove
+	const showResult=result=>{
 		if (result[0]) {
-			return this.formatValue(this.values[result[1]]);
+			return this.formatValue(valuesArray[result[1]]);
 		} else {
 			if (this.modeVector) {
-				return this.varName+"."+result[1];
+				return this.name+"."+result[1];
 			} else {
 				return this.varNameC(result[1]);
 			}
 		}
-	}.bind(this);
-	var allSameConstant=function(){
+	};
+	const allSameConstant=()=>{
 		if (!results[0][0]) return false;
-		var cmp=this.formatValue(this.values[results[0][1]]);
-		return results.every(function(result){
-			return result[0] && this.formatValue(this.values[result[1]])==cmp;
-		},this);
-	}.bind(this);
-	for (var j=0;j<selectedComponents.length;j++) {
-		var c=selectedComponents.charAt(j);
+		var cmp=this.formatValue(valuesArray[results[0][1]]);
+		return results.every(result=>(result[0] && this.formatValue(valuesArray[result[1]])==cmp));
+	};
+	for (let j=0;j<selectedComponents.length;j++) {
+		const c=selectedComponents.charAt(j);
+		/*
 		var i=this.components.indexOf(c);
 		if (this.inputs[i]=='constant') {
 			results.push([true,i]);
+		*/
+		if (this.values[c].input=='constant') {
+			results.push([true,c]);
+		//
 		} else {
 			if (this.modeVector && results.length>0) {
-				prevResult=results.pop();
+				const prevResult=results.pop();
 				if (prevResult[0]) {
 					results.push(prevResult,[false,c]); // prev is constant, don't merge
 				} else {
@@ -92,8 +117,11 @@ GlslVector.prototype.getGlslComponentsValue=function(selectedComponents){
 		}
 	}
 	if (results.length==1) {
-		if (this.modeVector && selectedComponents==this.components.slice(0,this.nVars).join('')) {
-			return this.varName;
+		//if (this.modeVector && selectedComponents==this.components.slice(0,this.nVars).join('')) {
+		if (this.modeVector && this.values.every((v,c,i)=>(
+			i>=selectedComponents.length || c==selectedComponents.charAt(i)
+		))) {
+			return this.name;
 		} else {
 			return showResult(results[0]);
 		}
@@ -107,23 +135,32 @@ GlslVector.prototype.getGlslComponentsValue=function(selectedComponents){
 };
 // private:
 GlslVector.prototype.writeJsInterfaceGlslLines=function(){
-	lines=new Lines;
+	const lines=new Lines;
 	if (this.modeFloats) {
+		/*
 		this.components.forEach(function(c,i){
 			if (this.inputs[i]=='constant') return;
 			lines.a(
 				"var "+this.varNameC(c)+"Loc=gl.getUniformLocation(program,'"+this.varNameC(c)+"');"
 			);
 		},this);
+		*/
+		this.values.forEach((v,c)=>{
+			if (v.input=='constant') return;
+			lines.a(
+				"var "+this.varNameC(c)+"Loc=gl.getUniformLocation(program,'"+this.varNameC(c)+"');"
+			);
+		});
 	} else {
 		lines.a(
-			"var "+this.varName+"Loc=gl.getUniformLocation(program,'"+this.varName+"');"
+			"var "+this.name+"Loc=gl.getUniformLocation(program,'"+this.name+"');"
 		);
 	}
 	if (this.nSliders==0 && this.modeVector) {
 		lines.a(
-			"gl.uniform"+this.nVars+"f("+this.varName+"Loc"
+			"gl.uniform"+this.nVars+"f("+this.name+"Loc"
 		);
+		/*
 		this.components.forEach(function(c,i){
 			if (this.inputs[i]!='constant') {
 				lines.t(
@@ -131,10 +168,19 @@ GlslVector.prototype.writeJsInterfaceGlslLines=function(){
 				);
 			}
 		},this);
+		*/
+		this.values.forEach(v=>{
+			if (v.input!='constant') {
+				lines.t(
+					","+this.formatValue(v)
+				);
+			}
+		});
 		lines.t(
 			");"
 		);
 	} else if (this.nSliders==0) {
+		/*
 		this.components.forEach(function(c,i){
 			if (this.inputs[i]!='constant') {
 				lines.a(
@@ -142,22 +188,39 @@ GlslVector.prototype.writeJsInterfaceGlslLines=function(){
 				);
 			}
 		},this);
+		*/
+		this.values.forEach((v,c)=>{
+			if (v.input!='constant') {
+				lines.a(
+					"gl.uniform1f("+this.varNameC(c)+"Loc,"+this.formatValue(v)+");"
+				);
+			}
+		});
 	}
 	return lines;
 };
 GlslVector.prototype.writeJsInterfaceUpdateFnLines=function() {
-	var updateFnLines=new Lines;
+	const updateFnLines=new Lines;
 	if (this.modeFloats) {
+		/*
 		this.components.forEach(function(c,i){
 			if (this.inputs[i]=='constant') return;
 			updateFnLines.a(
 				"gl.uniform1f("+this.varNameC(c)+"Loc,"+this.componentValue(c,i)+");"
 			);
 		},this);
+		*/
+		this.values.forEach((v,c)=>{
+			if (v.input=='constant') return;
+			updateFnLines.a(
+				"gl.uniform1f("+this.varNameC(c)+"Loc,"+this.componentValue(v,c)+");"
+			);
+		});
 	} else {
 		updateFnLines.a(
-			"gl.uniform"+this.nVars+"f("+this.varName+"Loc"
+			"gl.uniform"+this.nVars+"f("+this.name+"Loc"
 		);
+		/*
 		this.components.forEach(function(c,i){
 			if (this.inputs[i]=='constant') return;
 			updateFnLines.t(
@@ -165,6 +228,14 @@ GlslVector.prototype.writeJsInterfaceUpdateFnLines=function() {
 				"	"+this.componentValue(c,i)
 			);
 		},this);
+		*/
+		this.values.forEach((v,c)=>{
+			if (v.input=='constant') return;
+			updateFnLines.t(
+				",",
+				"	"+this.componentValue(v,c)
+			);
+		});
 		updateFnLines.a(
 			");"
 		);
@@ -182,13 +253,20 @@ GlslVector.prototype.addPostToEntryForComponent=function(entry,c){
 };
 GlslVector.prototype.addPostToEntryAfterComponents=function(entry){
 	if (this.nSliders==0 && this.modeVector) {
-		var vs=[];
+		const vs=[];
+		/*
 		this.components.forEach(function(c,i){
 			if (i<this.nVars) {
 				vs.push(this.varNameC(c));
 			}
 		},this);
-		entry.post("gl.uniform"+this.nVars+"f("+this.varName+"Loc,"+vs.join(",")+");");
+		*/
+		this.values.forEach((v,c,i)=>{
+			if (i<this.nVars) {
+				vs.push(this.varNameC(c));
+			}
+		});
+		entry.post("gl.uniform"+this.nVars+"f("+this.name+"Loc,"+vs.join(",")+");");
 	}
 };
 

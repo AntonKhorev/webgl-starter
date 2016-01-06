@@ -1,17 +1,25 @@
 'use strict';
 
-/* TODO rewrite
-var assert=require('assert');
-var GlslVector=require('../src/glsl-vector.js');
-var listeners=require('../src/listeners.js');
+const assert=require('assert');
+const Options=require('../src/options.js');
+const listeners=require('../src/listeners.js');
+const GlslVector=require('../src/glsl-vector.js');
 
 describe('GlslVector',function(){
+	class TestOptions extends Options {
+		get entriesDescription() {
+			return [
+				['Group','foo',[
+					['LiveFloat','x',[-4.0,+4.0,-4.0,+4.0],+1.0],
+					['LiveFloat','y',[-4.0,+4.0,-4.0,+4.0],+2.0],
+					['LiveFloat','z',[-4.0,+4.0,-4.0,+4.0],+3.0],
+				]],
+			];
+		}
+	}
 	context('with constant vector',function(){
-		var vector=new GlslVector('foo','bar','xyz',{
-			'bar.x':1.0, 'bar.x.input':'constant', 'bar.x.min':-4.0, 'bar.x.max':+4.0,
-			'bar.y':2.0, 'bar.y.input':'constant', 'bar.y.min':-4.0, 'bar.y.max':+4.0,
-			'bar.z':3.0, 'bar.z.input':'constant', 'bar.z.min':-4.0, 'bar.z.max':+4.0
-		});
+		const options=new TestOptions;
+		const vector=new GlslVector('foo',options.fix().foo);
 		it('returns empty declaration',function(){
 			assert.deepEqual(vector.getGlslDeclarationLines().data,[
 			]);
@@ -32,11 +40,10 @@ describe('GlslVector',function(){
 		});
 	});
 	context('with equal-component constant vector',function(){
-		var vector=new GlslVector('foo','bar','xyz',{
-			'bar.x':2.0, 'bar.x.input':'constant', 'bar.x.min':-4.0, 'bar.x.max':+4.0,
-			'bar.y':2.0, 'bar.y.input':'constant', 'bar.y.min':-4.0, 'bar.y.max':+4.0,
-			'bar.z':2.0, 'bar.z.input':'constant', 'bar.z.min':-4.0, 'bar.z.max':+4.0
-		});
+		const options=new TestOptions({foo:{
+			x:2.0, y:2.0, z:2.0
+		}});
+		const vector=new GlslVector('foo',options.fix().foo);
 		it('returns empty declaration',function(){
 			assert.deepEqual(vector.getGlslDeclarationLines().data,[
 			]);
@@ -57,11 +64,10 @@ describe('GlslVector',function(){
 		});
 	});
 	context('with 1 first component out of 3 variable vector',function(){
-		var vector=new GlslVector('foo','bar','xyz',{
-			'bar.x':1.0, 'bar.x.input':'slider',   'bar.x.min':-4.0, 'bar.x.max':+4.0,
-			'bar.y':2.0, 'bar.y.input':'constant', 'bar.y.min':-4.0, 'bar.y.max':+4.0,
-			'bar.z':3.0, 'bar.z.input':'constant', 'bar.z.min':-4.0, 'bar.z.max':+4.0
-		});
+		const options=new TestOptions({foo:{
+			x:{input:'slider'}
+		}});
+		const vector=new GlslVector('foo',options.fix().foo);
 		it('returns float declaration',function(){
 			assert.deepEqual(vector.getGlslDeclarationLines().data,[
 				"uniform float fooX;"
@@ -86,10 +92,10 @@ describe('GlslVector',function(){
 			assert.deepEqual(vector.getJsInterfaceLines([false,false]).data,[
 				"var fooXLoc=gl.getUniformLocation(program,'fooX');",
 				"function updateFoo() {",
-				"	gl.uniform1f(fooXLoc,parseFloat(document.getElementById('bar.x').value));",
+				"	gl.uniform1f(fooXLoc,parseFloat(document.getElementById('foo.x').value));",
 				"}",
 				"updateFoo();",
-				"document.getElementById('bar.x').addEventListener('change',updateFoo);"
+				"document.getElementById('foo.x').addEventListener('change',updateFoo);"
 			]);
 		});
 		it("doesn't write empty mousemove listener code",function(){
@@ -100,11 +106,10 @@ describe('GlslVector',function(){
 		});
 	});
 	context('with 2 first components out of 3 variable vector',function(){
-		var vector=new GlslVector('foo','bar','xyz',{
-			'bar.x':1.0, 'bar.x.input':'slider',   'bar.x.min':-4.0, 'bar.x.max':+4.0,
-			'bar.y':2.0, 'bar.y.input':'slider',   'bar.y.min':-4.0, 'bar.y.max':+4.0,
-			'bar.z':3.0, 'bar.z.input':'constant', 'bar.z.min':-4.0, 'bar.z.max':+4.0
-		});
+		const options=new TestOptions({foo:{
+			x:{input:'slider'}, y:{input:'slider'}
+		}});
+		const vector=new GlslVector('foo',options.fix().foo);
 		it('returns vec2 declaration',function(){
 			assert.deepEqual(vector.getGlslDeclarationLines().data,[
 				"uniform vec2 foo;"
@@ -135,13 +140,13 @@ describe('GlslVector',function(){
 				"var fooLoc=gl.getUniformLocation(program,'foo');",
 				"function updateFoo() {",
 				"	gl.uniform2f(fooLoc,",
-				"		parseFloat(document.getElementById('bar.x').value),",
-				"		parseFloat(document.getElementById('bar.y').value)",
+				"		parseFloat(document.getElementById('foo.x').value),",
+				"		parseFloat(document.getElementById('foo.y').value)",
 				"	);",
 				"}",
 				"updateFoo();",
-				"document.getElementById('bar.x').addEventListener('change',updateFoo);",
-				"document.getElementById('bar.y').addEventListener('change',updateFoo);"
+				"document.getElementById('foo.x').addEventListener('change',updateFoo);",
+				"document.getElementById('foo.y').addEventListener('change',updateFoo);"
 			]);
 		});
 		it('returns interface with one location and query listener with frame sheduling',function(){
@@ -149,12 +154,12 @@ describe('GlslVector',function(){
 				"var fooLoc=gl.getUniformLocation(program,'foo');",
 				"function updateFoo() {",
 				"	gl.uniform2f(fooLoc,",
-				"		parseFloat(document.getElementById('bar.x').value),",
-				"		parseFloat(document.getElementById('bar.y').value)",
+				"		parseFloat(document.getElementById('foo.x').value),",
+				"		parseFloat(document.getElementById('foo.y').value)",
 				"	);",
 				"}",
 				"updateFoo();",
-				"[].forEach.call(document.querySelectorAll('[id^=\"bar.\"]'),function(el){",
+				"[].forEach.call(document.querySelectorAll('[id^=\"foo.\"]'),function(el){",
 				"	el.addEventListener('change',function(){",
 				"		updateFoo();",
 				"		scheduleFrame();",
@@ -164,11 +169,10 @@ describe('GlslVector',function(){
 		});
 	});
 	context('with first and third components out of 3 variable vector',function(){
-		var vector=new GlslVector('foo','bar','xyz',{
-			'bar.x':1.0, 'bar.x.input':'slider',   'bar.x.min':-4.0, 'bar.x.max':+4.0,
-			'bar.y':2.0, 'bar.y.input':'constant', 'bar.y.min':-4.0, 'bar.y.max':+4.0,
-			'bar.z':3.0, 'bar.z.input':'slider',   'bar.z.min':-4.0, 'bar.z.max':+4.0
-		});
+		const options=new TestOptions({foo:{
+			x:{input:'slider'}, z:{input:'slider'}
+		}});
+		const vector=new GlslVector('foo',options.fix().foo);
 		it('returns 2 float declarations',function(){
 			assert.deepEqual(vector.getGlslDeclarationLines().data,[
 				"uniform float fooX;",
@@ -185,21 +189,20 @@ describe('GlslVector',function(){
 				"var fooXLoc=gl.getUniformLocation(program,'fooX');",
 				"var fooZLoc=gl.getUniformLocation(program,'fooZ');",
 				"function updateFoo() {",
-				"	gl.uniform1f(fooXLoc,parseFloat(document.getElementById('bar.x').value));",
-				"	gl.uniform1f(fooZLoc,parseFloat(document.getElementById('bar.z').value));",
+				"	gl.uniform1f(fooXLoc,parseFloat(document.getElementById('foo.x').value));",
+				"	gl.uniform1f(fooZLoc,parseFloat(document.getElementById('foo.z').value));",
 				"}",
 				"updateFoo();",
-				"document.getElementById('bar.x').addEventListener('change',updateFoo);",
-				"document.getElementById('bar.z').addEventListener('change',updateFoo);"
+				"document.getElementById('foo.x').addEventListener('change',updateFoo);",
+				"document.getElementById('foo.z').addEventListener('change',updateFoo);"
 			]);
 		});
 	});
 	context('with all-variable 3 component vector',function(){
-		var vector=new GlslVector('foo','bar','xyz',{
-			'bar.x':1.0, 'bar.x.input':'slider', 'bar.x.min':-4.0, 'bar.x.max':+4.0,
-			'bar.y':2.0, 'bar.y.input':'slider', 'bar.y.min':-4.0, 'bar.y.max':+4.0,
-			'bar.z':3.0, 'bar.z.input':'slider', 'bar.z.min':-4.0, 'bar.z.max':+4.0
-		});
+		const options=new TestOptions({foo:{
+			x:{input:'slider'}, y:{input:'slider'}, z:{input:'slider'}
+		}});
+		const vector=new GlslVector('foo',options.fix().foo);
 		it('returns vec3 declaration',function(){
 			assert.deepEqual(vector.getGlslDeclarationLines().data,[
 				"uniform vec3 foo;"
@@ -212,24 +215,23 @@ describe('GlslVector',function(){
 		});
 	});
 	context('with 2 first components (slider, mousemove) out of 3 variable vector',function(){
-		var vector=new GlslVector('foo','bar','xyz',{
-			'bar.x':1.0, 'bar.x.input':'slider',     'bar.x.min':-4.0, 'bar.x.max':+4.0,
-			'bar.y':2.0, 'bar.y.input':'mousemovex', 'bar.y.min':-4.0, 'bar.y.max':+4.0,
-			'bar.z':3.0, 'bar.z.input':'constant',   'bar.z.min':-4.0, 'bar.z.max':+4.0
-		});
+		const options=new TestOptions({foo:{
+			x:{input:'slider'}, y:{input:'mousemovex'}
+		}});
+		const vector=new GlslVector('foo',options.fix().foo);
 		it('returns interface with 1 location, 1 state var and 1 simple listener and mousemove listener',function(){
-			var canvasMousemoveListener=new listeners.CanvasMousemoveListener;
+			const canvasMousemoveListener=new listeners.CanvasMousemoveListener;
 			assert.deepEqual(vector.getJsInterfaceLines([false,false],canvasMousemoveListener).data,[
 				"var fooLoc=gl.getUniformLocation(program,'foo');",
 				"var fooY=+2.000;",
 				"function updateFoo() {",
 				"	gl.uniform2f(fooLoc,",
-				"		parseFloat(document.getElementById('bar.x').value),",
+				"		parseFloat(document.getElementById('foo.x').value),",
 				"		fooY",
 				"	);",
 				"}",
 				"updateFoo();",
-				"document.getElementById('bar.x').addEventListener('change',updateFoo);"
+				"document.getElementById('foo.x').addEventListener('change',updateFoo);"
 			]);
 			assert.deepEqual(canvasMousemoveListener.write(false,false).data,[
 				"canvas.addEventListener('mousemove',function(ev){",
@@ -243,11 +245,10 @@ describe('GlslVector',function(){
 		});
 	});
 	context('with 1 mousemove component out of 3 variable vector',function(){
-		var vector=new GlslVector('bar','baz','xyz',{
-			'baz.x':1.0, 'baz.x.input':'constant',   'baz.x.min':-4.0, 'baz.x.max':+4.0,
-			'baz.y':2.5, 'baz.y.input':'mousemovey', 'baz.y.min':-4.0, 'baz.y.max':+4.0,
-			'baz.z':3.0, 'baz.z.input':'constant',   'baz.z.min':-4.0, 'baz.z.max':+4.0
-		});
+		const options=new TestOptions({foo:{
+			y:{value:2.5,input:'mousemovey'}
+		}});
+		const vector=new GlslVector('bar',options.fix().foo);
 		it('returns interface without update fn',function(){
 			var canvasMousemoveListener=new listeners.CanvasMousemoveListener;
 			assert.deepEqual(vector.getJsInterfaceLines([false,false],canvasMousemoveListener).data,[
@@ -266,11 +267,10 @@ describe('GlslVector',function(){
 		});
 	});
 	context('with 2 first mousemove components out of 3 variable vector',function(){
-		var vector=new GlslVector('bar','baz','xyz',{
-			'baz.x':1.5, 'baz.x.input':'mousemovex', 'baz.x.min':-4.0, 'baz.x.max':+4.0,
-			'baz.y':2.5, 'baz.y.input':'mousemovey', 'baz.y.min':-4.0, 'baz.y.max':+4.0,
-			'baz.z':3.0, 'baz.z.input':'constant',   'baz.z.min':-4.0, 'baz.z.max':+4.0
-		});
+		const options=new TestOptions({foo:{
+			x:{value:1.5,input:'mousemovex'}, y:{value:2.5,input:'mousemovey'}
+		}});
+		const vector=new GlslVector('bar',options.fix().foo);
 		it('returns interface without update fn',function(){
 			var canvasMousemoveListener=new listeners.CanvasMousemoveListener;
 			assert.deepEqual(vector.getJsInterfaceLines([false,false],canvasMousemoveListener).data,[
@@ -292,11 +292,10 @@ describe('GlslVector',function(){
 		});
 	});
 	context('with 2 non-first mousemove components out of 3 variable vector',function(){
-		var vector=new GlslVector('bar','baz','xyz',{
-			'baz.x':1.5, 'baz.x.input':'constant',   'baz.x.min':-4.0, 'baz.x.max':+4.0,
-			'baz.y':2.5, 'baz.y.input':'mousemovey', 'baz.y.min':-4.0, 'baz.y.max':+4.0,
-			'baz.z':3.0, 'baz.z.input':'mousemovex', 'baz.z.min':-4.0, 'baz.z.max':+4.0
-		});
+		const options=new TestOptions({foo:{
+			x:1.5, y:{value:2.5,input:'mousemovey'}, z:{input:'mousemovex'}
+		}});
+		const vector=new GlslVector('bar',options.fix().foo);
 		it('returns interface without update fn',function(){
 			var canvasMousemoveListener=new listeners.CanvasMousemoveListener;
 			assert.deepEqual(vector.getJsInterfaceLines([false,false],canvasMousemoveListener).data,[
@@ -321,12 +320,15 @@ describe('GlslVector',function(){
 		});
 	});
 	context('with nonnegative limits',function(){
-		var vector=new GlslVector('color','shader.color','rgba',{
-			'shader.color.r':0.2, 'shader.color.r.input':'constant', 'shader.color.r.min':0, 'shader.color.r.max':1,
-			'shader.color.g':0.3, 'shader.color.g.input':'constant', 'shader.color.g.min':0, 'shader.color.g.max':1,
-			'shader.color.b':0.4, 'shader.color.b.input':'constant', 'shader.color.b.min':0, 'shader.color.b.max':1,
-			'shader.color.a':0.5, 'shader.color.a.input':'constant', 'shader.color.a.min':0, 'shader.color.a.max':1
-		});
+		class NonnegativeTestOptions extends Options {
+			get entriesDescription() {
+				return [
+					['LiveColor','color',[0.2,0.3,0.4,0.5]],
+				];
+			}
+		}
+		const options=new NonnegativeTestOptions;
+		const vector=new GlslVector('color',options.fix().color);
 		it('returns unsigned value',function(){
 			assert.equal(vector.getGlslValue(),
 				"vec4(0.200,0.300,0.400,0.500)"
@@ -334,4 +336,3 @@ describe('GlslVector',function(){
 		});
 	});
 });
-*/
