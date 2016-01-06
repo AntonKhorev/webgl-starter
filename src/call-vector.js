@@ -15,13 +15,6 @@ CallVector.prototype.getJsInitLines=function(){
 	if (this.nSliders>0 || this.values.every((v,c,i)=>v==this.calledFnDefaultArgs[i])) {
 		return new Lines;
 	}
-	/*
-	if (this.nSliders>0 || this.values.every((v,i)=>{
-		return v==this.calledFnDefaultArgs[i];
-	})) {
-		return new Lines;
-	}
-	*/
 	return new Lines(
 		this.calledFn+"("+this.values.map(this.formatValue).join(",")+");"
 	);
@@ -34,10 +27,8 @@ CallVector.prototype.writeJsInterfaceUpdateFnLines=function(){
 	const updateFnLines=new Lines;
 	if (this.nSliders<=1) {
 		updateFnLines.a(
-			//this.calledFn+"("+this.components.map(this.componentValue,this).join(",")+");"
 			this.calledFn+"("+this.values.map(this.componentValue,this).join(",")+");"
 		);
-	//} else if (this.nSliders==this.components.length) {
 	} else if (this.nSliders==this.values.length) {
 		let obj=this.calledFn;
 		const dotIndex=obj.lastIndexOf('.');
@@ -45,7 +36,6 @@ CallVector.prototype.writeJsInterfaceUpdateFnLines=function(){
 			obj=obj.slice(0,dotIndex);
 		}
 		updateFnLines.a(
-			//this.calledFn+".apply("+obj+",["+this.components.map(c=>"'"+c+"'").join(",")+"].map(function(c){",
 			this.calledFn+".apply("+obj+",["+this.values.map((v,c)=>"'"+c+"'").join(",")+"].map(function(c){",
 			"	return parseFloat(document.getElementById('"+this.name+".'+c).value);",
 			"}));"
@@ -54,13 +44,11 @@ CallVector.prototype.writeJsInterfaceUpdateFnLines=function(){
 		updateFnLines.a(
 			this.calledFn+"("
 		);
-		//this.components.forEach((c,i)=>{
 		this.values.forEach((v,c,i)=>{
 			if (i>0) {
 				updateFnLines.t(",");
 			}
 			updateFnLines.a(
-				//"	"+this.componentValue(c,i)
 				"	"+this.componentValue(v,c)
 			);
 		});
@@ -75,7 +63,6 @@ CallVector.prototype.addPostToEntryForComponent=function(entry,c){
 CallVector.prototype.addPostToEntryAfterComponents=function(entry){
 	if (this.nSliders==0) {
 		entry.post(
-			//this.calledFn+"("+this.components.map(this.componentValue,this).join(",")+");"
 			this.calledFn+"("+this.values.map(this.componentValue,this).join(",")+");"
 		);
 	} else {
