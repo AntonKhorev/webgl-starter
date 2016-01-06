@@ -1,5 +1,7 @@
-var assert=require('assert');
+'use strict';
 
+/* TODO rewrite
+var assert=require('assert');
 var GlslVector=require('../src/glsl-vector.js');
 var listeners=require('../src/listeners.js');
 
@@ -332,3 +334,4 @@ describe('GlslVector',function(){
 		});
 	});
 });
+*/

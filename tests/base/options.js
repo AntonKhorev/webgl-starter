@@ -96,6 +96,17 @@ describe("Base/Options",()=>{
 			const fixed=options.fix();
 			assert.equal(fixed.foobar,'bar');
 			assert.equal(fixed.letter,'c');
+			assert.equal(fixed.length,2,"has wrong length");
+			assert.deepEqual(fixed.map((v,c,i)=>[String(v),c,i]),[
+				['bar','foobar',0],
+				['c','letter',1],
+			],"maps to wrong values");
+			assert.equal(fixed.every((v,c)=>c.length==6),true,".every() condition check is wrong");
+			let nForEachCalls=0;
+			fixed.forEach((v,c,i)=>{
+				nForEachCalls++;
+			});
+			assert.equal(nForEachCalls,2,"makes wrong number of .forEach() calls");
 		});
 	});
 	context("groups and selects",()=>{

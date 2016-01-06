@@ -80,9 +80,16 @@ class Collection extends Base {
 		return Object.keys(data).length>0 ? data : null;
 	}
 	fix() {
-		const data={};
-		this.entries.forEach(entry=>{
-			data[entry.name]=entry.fix();
+		const iterateOver=this.entries.map((entry,i)=>[entry.fix(),entry.name,i]);
+		const defineFn=fn=>((callback,thisArg)=>fn.call(iterateOver,vci=>callback.apply(thisArg,vci)));
+		const data={
+			length: this.entries.length,
+			map: defineFn([].map),
+			every: defineFn([].every),
+			forEach: defineFn([].forEach),
+		};
+		iterateOver.forEach((vci)=>{
+			data[vci[1]]=vci[0];
 		});
 		return data;
 	}
