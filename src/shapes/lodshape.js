@@ -2,10 +2,11 @@ var Lines=require('../lines.js');
 var Colorgen=require('../colorgen.js');
 var Shape=require('./shape.js');
 
-var LodShape=function(elementIndexBits,hasReflections,hasColorsPerVertex,hasColorsPerFace,colorAttrs,lod){
-	Shape.call(this,elementIndexBits,hasReflections,hasColorsPerVertex,hasColorsPerFace,colorAttrs);
-	this.lod=lod;
+var LodShape=function(options,hasReflections,hasColorsPerVertex,hasColorsPerFace,colorAttrs){
+	Shape.apply(this,arguments);
+	this.lod=options.lod;
 	var maxLod=this.getMaxPossibleLod();
+	// TODO option rewriting won't work
 	if (this.lod.value>maxLod) this.lod.value=maxLod;
 	if (this.lod.max>maxLod) this.lod.max=maxLod;
 };

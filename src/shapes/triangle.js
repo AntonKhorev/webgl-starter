@@ -2,7 +2,7 @@ var Lines=require('../lines.js');
 var Colorgen=require('../colorgen.js');
 var Shape=require('./shape.js');
 
-var Triangle=function(elementIndexBits,hasReflections,hasColorsPerVertex,hasColorsPerFace,colorAttrs){
+var Triangle=function(options,hasReflections,hasColorsPerVertex,hasColorsPerFace,colorAttrs){
 	Shape.apply(this,arguments);
 };
 Triangle.prototype=Object.create(Shape.prototype);

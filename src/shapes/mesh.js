@@ -1,7 +1,7 @@
 var Lines=require('../lines.js');
 var LodShape=require('./lodshape.js');
 
-var Mesh=function(elementIndexBits,hasReflections,hasColorsPerVertex,hasColorsPerFace,colorAttrs,lod){
+var Mesh=function(options,hasReflections,hasColorsPerVertex,hasColorsPerFace,colorAttrs){
 	LodShape.apply(this,arguments);
 };
 Mesh.prototype=Object.create(LodShape.prototype);

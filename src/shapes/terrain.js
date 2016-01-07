@@ -1,7 +1,7 @@
 var Lines=require('../lines.js');
 var Mesh=require('./mesh.js');
 
-var Terrain=function(elementIndexBits,hasReflections,hasColorsPerVertex,hasColorsPerFace,colorAttrs,lod){
+var Terrain=function(options,hasReflections,hasColorsPerVertex,hasColorsPerFace,colorAttrs){
 	Mesh.apply(this,arguments);
 };
 Terrain.prototype=Object.create(Mesh.prototype);

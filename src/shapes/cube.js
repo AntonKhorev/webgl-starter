@@ -2,7 +2,7 @@ var Lines=require('../lines.js');
 var Colorgen=require('../colorgen.js');
 var Shape=require('./shape.js');
 
-var Cube=function(elementIndexBits,hasReflections,hasColorsPerVertex,hasColorsPerFace,colorAttrs){
+var Cube=function(options,hasReflections,hasColorsPerVertex,hasColorsPerFace,colorAttrs){
 	Shape.apply(this,arguments);
 };
 Cube.prototype=Object.create(Shape.prototype);

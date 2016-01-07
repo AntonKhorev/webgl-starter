@@ -1,14 +1,14 @@
 'use strict';
 
-var idCounter=0;
+let idCounter=0;
 function generateId() {
 	return 'webgl-starter-id-'+(idCounter++);
 }
 
-var i18n=require('./i18n.js');
-var Option=require('./option-classes.js');
-var Options=require('./options.js');
-//var generateCode=require('./code.js');
+const i18n=require('./i18n.js');
+const Option=require('./option-classes.js');
+const Options=require('./options.js');
+const generateCode=require('./code.js');
 
 function getHtmlDataUri(html) {
 	// with base64: https://developer.mozilla.org/en-US/docs/Web/API/WindowBase64/btoa
@@ -19,21 +19,15 @@ function getHtmlDataUri(html) {
 
 $(function(){
 	$('.webgl-starter').each(function(){
-		var $container=$(this);
-		var $options;
-		var $code;
-		var options=new Options();
-		var codeUpdateTimeoutId=null;
-		var codeUpdateDelay=200;
-		//
-		let ucc=0;
+		const $container=$(this);
+		let $options,$code;
+		const options=new Options();
+		const codeUpdateDelay=200;
+		let codeUpdateTimeoutId=null;
 		function updateCode() {
 			clearTimeout(codeUpdateTimeoutId);
 			codeUpdateTimeoutId=setTimeout(function(){
-				//$code.text(generateCode(options.fix(),i18n));
-				//console.log('all options',options.fix());
-				$code.text("TODO update code #"+(++ucc));
-				//
+				$code.text(generateCode(options.fix(),i18n));
 				if (window.hljs) hljs.highlightBlock($code[0]);
 			},codeUpdateDelay);
 		}
@@ -277,8 +271,7 @@ $(function(){
 		}
 		$container.empty().append($options=writeOption(options.root));
 		$container.append(writeButtons()).append(
-			//$("<pre>").append($code=$("<code>").text(generateCode(options.fix(),i18n)))
-			$("<pre>").append($code=$("<code>").text("TODO code"))
+			$("<pre>").append($code=$("<code>").text(generateCode(options.fix(),i18n)))
 		);
 		if (window.hljs) {
 			hljs.highlightBlock($code[0]);

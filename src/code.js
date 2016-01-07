@@ -1,11 +1,14 @@
-var Lines=require('./lines.js');
-var listeners=require('./listeners.js');
-var shapes=require('./shapes.js');
-var CallVector=require('./call-vector.js');
-var GlslVector=require('./glsl-vector.js');
-var Illumination=require('./illumination.js');
+'use strict';
+
+const Lines=require('./lines.js');
+const listeners=require('./listeners.js');
+const shapes=require('./shapes.js');
+const CallVector=require('./call-vector.js');
+const GlslVector=require('./glsl-vector.js');
+const Illumination=require('./illumination.js');
 
 module.exports=function(options,i18n){
+	// TODO replace them by option...out
 	function intOptionValue(name) {
 		return parseInt(options[name]);
 	}
@@ -16,30 +19,21 @@ module.exports=function(options,i18n){
 		return ['mousemovex','mousemovey'].indexOf(options[name+'.input'])>=0;
 	}
 
-	var illumination=new Illumination(options);
+	const illumination=new Illumination(options.material,options.light);
 	function makeShape() {
-		var className=options.shape.charAt(0).toUpperCase()+options.shape.slice(1);
-		var shapeLod=undefined;
-		if (options.shapeLod!==undefined) {
-			shapeLod={
-				value: intOptionValue('shapeLod'),
-				changes: options['shapeLod.input']!='constant',
-				min: intOptionValue('shapeLod.min'),
-				max: intOptionValue('shapeLod.max')
-			}
-		};
+		const className=options.shape.type.charAt(0).toUpperCase()+options.shape.type.slice(1);
 		return new shapes[className](
 			parseInt(options.elements),
 			options.light!='off',
 			options.materialScope=='vertex',
 			options.materialScope=='face',
-			illumination.getColorAttrs(),
-			shapeLod
+			illumination.getColorAttrs()
 		);
 	}
-	var shape=makeShape();
-	if (options.background=='solid') {
-		var backgroundColorVector=new CallVector('backgroundColor','backgroundColor','rgba',options,'gl.clearColor',[0,0,0,0]);
+	const shape=makeShape();
+	if (options.background.type=='solid') {
+		// TODO replace with background Feature
+		var backgroundColorVector=new CallVector('backgroundColor',options.background.color,'gl.clearColor',[0,0,0,0]);
 	}
 
 	function generateHtmlStyleLines() {
@@ -711,6 +705,7 @@ module.exports=function(options,i18n){
 		return lines;
 	}
 
+	/*
 	var scriptLines=new Lines;
 	scriptLines.interleave(
 		generateJsMakeProgramLines(),
@@ -722,6 +717,7 @@ module.exports=function(options,i18n){
 		"<script>",
 		"</script>"
 	);
+	*/
 	var lines=new Lines;
 	lines.a(
 		"<!DOCTYPE html>",
@@ -729,25 +725,25 @@ module.exports=function(options,i18n){
 		"<head>",
 		"<meta charset='utf-8' />",
 		"<title>Generated code</title>",
-		generateHtmlStyleLines(),
+		//generateHtmlStyleLines(),
 		"<script id='myVertexShader' type='x-shader/x-vertex'>",
-		generateVertexShaderLines().indent(),
+		//generateVertexShaderLines().indent(),
 		"</script>",
 		"<script id='myFragmentShader' type='x-shader/x-fragment'>",
-		generateFragmentShaderLines().indent(),
+		//generateFragmentShaderLines().indent(),
 		"</script>",
 		"</head>",
 		"<body>",
 		"<div>",
-		"	<canvas id='myCanvas' width='"+intOptionValue('canvas.width')+"' height='"+intOptionValue('canvas.height')+"'></canvas>",
+		//"	<canvas id='myCanvas' width='"+intOptionValue('canvas.width')+"' height='"+intOptionValue('canvas.height')+"'></canvas>",
 		"</div>",
-		generateHtmlControlMessageLines(),
-		generateHtmlInputLines(),
-		scriptLines,
+		//generateHtmlControlMessageLines(),
+		//generateHtmlInputLines(),
+		//scriptLines,
 		"</body>",
 		"</html>"
 	);
 	return lines.join(
-		options.indent=='tab' ? '\t' : Array(parseInt(options.indent)+1).join(' ')
+		options.formatting.indent=='tab' ? '\t' : Array(parseInt(options.formatting.indent)+1).join(' ')
 	);
 };

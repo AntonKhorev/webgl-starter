@@ -1,7 +1,7 @@
 var Lines=require('../lines.js');
 var Mesh=require('./mesh.js');
 
-var Hat=function(elementIndexBits,hasReflections,hasColorsPerVertex,hasColorsPerFace,colorAttrs,lod){
+var Hat=function(options,hasReflections,hasColorsPerVertex,hasColorsPerFace,colorAttrs){
 	Mesh.apply(this,arguments);
 };
 Hat.prototype=Object.create(Mesh.prototype);
