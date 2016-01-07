@@ -213,22 +213,16 @@ describe('Illumination',function(){
 			]);
 		});
 	});
-	/*
 	context('with global ambient flat shading and 2 slider inputs',function(){
-		var illumination=new Illumination({
-			'materialScope':'global',
-			'materialData':'sda',
-			'light':'off',
-			'materialSpecularColor.r':0.9, 'materialSpecularColor.r.input':'constant', 'materialSpecularColor.r.min':0, 'materialSpecularColor.r.max':1,
-			'materialSpecularColor.g':0.7, 'materialSpecularColor.g.input':'slider',   'materialSpecularColor.g.min':0, 'materialSpecularColor.g.max':1,
-			'materialSpecularColor.b':0.5, 'materialSpecularColor.b.input':'constant', 'materialSpecularColor.b.min':0, 'materialSpecularColor.b.max':1,
-			'materialDiffuseColor.r' :0.8, 'materialDiffuseColor.r.input' :'constant', 'materialDiffuseColor.r.min' :0, 'materialDiffuseColor.r.max' :1,
-			'materialDiffuseColor.g' :0.6, 'materialDiffuseColor.g.input' :'constant', 'materialDiffuseColor.g.min' :0, 'materialDiffuseColor.g.max' :1,
-			'materialDiffuseColor.b' :0.4, 'materialDiffuseColor.b.input' :'constant', 'materialDiffuseColor.b.min' :0, 'materialDiffuseColor.b.max' :1,
-			'materialAmbientColor.r' :0.7, 'materialAmbientColor.r.input' :'constant', 'materialAmbientColor.r.min' :0, 'materialAmbientColor.r.max' :1,
-			'materialAmbientColor.g' :0.5, 'materialAmbientColor.g.input' :'constant', 'materialAmbientColor.g.min' :0, 'materialAmbientColor.g.max' :1,
-			'materialAmbientColor.b' :0.3, 'materialAmbientColor.b.input' :'slider',   'materialAmbientColor.b.min' :0, 'materialAmbientColor.b.max' :1
-		});
+		const options=(new TestOptions({
+			material:{
+				data:'sda',
+				specularColor:{r:0.9, g:{value:0.7, input:'slider'}, b:0.5},
+				diffuseColor :{r:0.8, g:0.6, b:0.4},
+				ambientColor :{r:0.7, g:0.5, b:{value:0.3, input:'slider'}},
+			},
+		})).fix();
+		const illumination=new Illumination(options.material,options.light);
 		it("declares nothing for vertex shader",function(){
 			assert.deepEqual(illumination.getGlslVertexDeclarationLines(true,false).data,[
 			]);
@@ -258,30 +252,25 @@ describe('Illumination',function(){
 			assert.deepEqual(illumination.getJsInterfaceLines([false,false],canvasMousemoveListener).data,[
 				"var ambientColorBLoc=gl.getUniformLocation(program,'ambientColorB');",
 				"function updateAmbientColor() {",
-				"	gl.uniform1f(ambientColorBLoc,parseFloat(document.getElementById('materialAmbientColor.b').value));",
+				"	gl.uniform1f(ambientColorBLoc,parseFloat(document.getElementById('ambientColor.b').value));",
 				"}",
 				"updateAmbientColor();",
-				"document.getElementById('materialAmbientColor.b').addEventListener('change',updateAmbientColor);"
+				"document.getElementById('ambientColor.b').addEventListener('change',updateAmbientColor);"
 			]);
 			assert.deepEqual(canvasMousemoveListener.write(false,false).data,[
 			]);
 		});
 	});
 	context('with global ambient flat shading and complete slider inputs',function(){
-		var illumination=new Illumination({
-			'materialScope':'global',
-			'materialData':'sda',
-			'light':'off',
-			'materialSpecularColor.r':0.9, 'materialSpecularColor.r.input':'slider',   'materialSpecularColor.r.min':0, 'materialSpecularColor.r.max':1,
-			'materialSpecularColor.g':0.7, 'materialSpecularColor.g.input':'slider',   'materialSpecularColor.g.min':0, 'materialSpecularColor.g.max':1,
-			'materialSpecularColor.b':0.5, 'materialSpecularColor.b.input':'slider',   'materialSpecularColor.b.min':0, 'materialSpecularColor.b.max':1,
-			'materialDiffuseColor.r' :0.8, 'materialDiffuseColor.r.input' :'slider',   'materialDiffuseColor.r.min' :0, 'materialDiffuseColor.r.max' :1,
-			'materialDiffuseColor.g' :0.6, 'materialDiffuseColor.g.input' :'slider',   'materialDiffuseColor.g.min' :0, 'materialDiffuseColor.g.max' :1,
-			'materialDiffuseColor.b' :0.4, 'materialDiffuseColor.b.input' :'slider',   'materialDiffuseColor.b.min' :0, 'materialDiffuseColor.b.max' :1,
-			'materialAmbientColor.r' :0.7, 'materialAmbientColor.r.input' :'slider',   'materialAmbientColor.r.min' :0, 'materialAmbientColor.r.max' :1,
-			'materialAmbientColor.g' :0.5, 'materialAmbientColor.g.input' :'slider',   'materialAmbientColor.g.min' :0, 'materialAmbientColor.g.max' :1,
-			'materialAmbientColor.b' :0.3, 'materialAmbientColor.b.input' :'slider',   'materialAmbientColor.b.min' :0, 'materialAmbientColor.b.max' :1
-		});
+		const options=(new TestOptions({
+			material:{
+				data:'sda',
+				specularColor:{r:{value:0.9, input:'slider'}, g:{value:0.7, input:'slider'}, b:{value:0.5, input:'slider'}},
+				diffuseColor :{r:{value:0.8, input:'slider'}, g:{value:0.6, input:'slider'}, b:{value:0.4, input:'slider'}},
+				ambientColor :{r:{value:0.7, input:'slider'}, g:{value:0.5, input:'slider'}, b:{value:0.3, input:'slider'}},
+			},
+		})).fix();
+		const illumination=new Illumination(options.material,options.light);
 		it("declares nothing for vertex shader",function(){
 			assert.deepEqual(illumination.getGlslVertexDeclarationLines(true,false).data,[
 			]);
@@ -308,11 +297,13 @@ describe('Illumination',function(){
 		});
 	});
 	context('with local ambient flat shading',function(){
-		var illumination=new Illumination({
-			'materialScope':'vertex',
-			'materialData':'sda',
-			'light':'off',
-		});
+		const options=(new TestOptions({
+			material:{
+				scope:'vertex',
+				data:'sda',
+			},
+		})).fix();
+		const illumination=new Illumination(options.material,options.light);
 		it("has color attr list with 2 disabled and 1 enabled entry",function(){
 			assert.deepEqual(illumination.getColorAttrs(),[
 				{name:"specularColor",enabled:false,weight:0.4},
@@ -349,18 +340,16 @@ describe('Illumination',function(){
 		});
 	});
 	context('with global color and light',function(){
-		var illumination=new Illumination({
-			'materialScope':'global',
-			'materialData':'one',
-			'light':'blinn',
-			'materialColor.r':0.9, 'materialColor.r.input':'constant', 'materialColor.r.min':0, 'materialColor.r.max':1,
-			'materialColor.g':0.7, 'materialColor.g.input':'constant', 'materialColor.g.min':0, 'materialColor.g.max':1,
-			'materialColor.b':0.5, 'materialColor.b.input':'constant', 'materialColor.b.min':0, 'materialColor.b.max':1,
-			'materialColor.a':1.0, 'materialColor.a.input':'constant', 'materialColor.a.min':0, 'materialColor.a.max':1,
-			'lightDirection.x':+2.0, 'lightDirection.x.input':'constant', 'lightDirection.x.min':-4, 'lightDirection.x.max':+4,
-			'lightDirection.y':-1.5, 'lightDirection.y.input':'constant', 'lightDirection.y.min':-4, 'lightDirection.y.max':+4,
-			'lightDirection.z':+0.5, 'lightDirection.z.input':'constant', 'lightDirection.z.min':-4, 'lightDirection.z.max':+4
-		});
+		const options=(new TestOptions({
+			material:{
+				color:{r:0.9, g:0.7, b:0.5, a:1.0},
+			},
+			light:{
+				type:'blinn',
+				direction:{x:+2.0, y:-1.5, z:+0.5},
+			},
+		})).fix();
+		const illumination=new Illumination(options.material,options.light);
 		it("has empty color attr list",function(){
 			assert.deepEqual(illumination.getColorAttrs(),[
 			]);
@@ -442,18 +431,16 @@ describe('Illumination',function(){
 		});
 	});
 	context('with global color and light input',function(){
-		var illumination=new Illumination({
-			'materialScope':'global',
-			'materialData':'one',
-			'light':'blinn',
-			'materialColor.r':0.9, 'materialColor.r.input':'constant', 'materialColor.r.min':0, 'materialColor.r.max':1,
-			'materialColor.g':0.7, 'materialColor.g.input':'constant', 'materialColor.g.min':0, 'materialColor.g.max':1,
-			'materialColor.b':0.5, 'materialColor.b.input':'constant', 'materialColor.b.min':0, 'materialColor.b.max':1,
-			'materialColor.a':1.0, 'materialColor.a.input':'constant', 'materialColor.a.min':0, 'materialColor.a.max':1,
-			'lightDirection.x':+2.0, 'lightDirection.x.input':'slider'  , 'lightDirection.x.min':-4, 'lightDirection.x.max':+4,
-			'lightDirection.y':-1.5, 'lightDirection.y.input':'constant', 'lightDirection.y.min':-4, 'lightDirection.y.max':+4,
-			'lightDirection.z':+0.5, 'lightDirection.z.input':'constant', 'lightDirection.z.min':-4, 'lightDirection.z.max':+4
-		});
+		const options=(new TestOptions({
+			material:{
+				color:{r:0.9, g:0.7, b:0.5, a:1.0},
+			},
+			light:{
+				type:'blinn',
+				direction:{x:{value:+2.0, input:'slider'}, y:-1.5, z:+0.5},
+			},
+		})).fix();
+		const illumination=new Illumination(options.material,options.light);
 		it("has empty color attr list",function(){
 			assert.deepEqual(illumination.getColorAttrs(),[
 			]);
@@ -502,23 +489,19 @@ describe('Illumination',function(){
 		});
 	});
 	context('with global blinn-phong shading',function(){
-		var illumination=new Illumination({
-			'materialScope':'global',
-			'materialData':'sda',
-			'light':'blinn',
-			'materialSpecularColor.r':0.9, 'materialSpecularColor.r.input':'constant', 'materialSpecularColor.r.min':0, 'materialSpecularColor.r.max':1,
-			'materialSpecularColor.g':0.7, 'materialSpecularColor.g.input':'constant', 'materialSpecularColor.g.min':0, 'materialSpecularColor.g.max':1,
-			'materialSpecularColor.b':0.5, 'materialSpecularColor.b.input':'constant', 'materialSpecularColor.b.min':0, 'materialSpecularColor.b.max':1,
-			'materialDiffuseColor.r' :0.8, 'materialDiffuseColor.r.input' :'constant', 'materialDiffuseColor.r.min' :0, 'materialDiffuseColor.r.max' :1,
-			'materialDiffuseColor.g' :0.6, 'materialDiffuseColor.g.input' :'constant', 'materialDiffuseColor.g.min' :0, 'materialDiffuseColor.g.max' :1,
-			'materialDiffuseColor.b' :0.4, 'materialDiffuseColor.b.input' :'constant', 'materialDiffuseColor.b.min' :0, 'materialDiffuseColor.b.max' :1,
-			'materialAmbientColor.r' :0.7, 'materialAmbientColor.r.input' :'constant', 'materialAmbientColor.r.min' :0, 'materialAmbientColor.r.max' :1,
-			'materialAmbientColor.g' :0.5, 'materialAmbientColor.g.input' :'constant', 'materialAmbientColor.g.min' :0, 'materialAmbientColor.g.max' :1,
-			'materialAmbientColor.b' :0.3, 'materialAmbientColor.b.input' :'constant', 'materialAmbientColor.b.min' :0, 'materialAmbientColor.b.max' :1,
-			'lightDirection.x':+2.0, 'lightDirection.x.input':'constant', 'lightDirection.x.min':-4, 'lightDirection.x.max':+4,
-			'lightDirection.y':-1.5, 'lightDirection.y.input':'constant', 'lightDirection.y.min':-4, 'lightDirection.y.max':+4,
-			'lightDirection.z':+0.5, 'lightDirection.z.input':'constant', 'lightDirection.z.min':-4, 'lightDirection.z.max':+4
-		});
+		const options=(new TestOptions({
+			material:{
+				data:'sda',
+				specularColor:{r:0.9, g:0.7, b:0.5},
+				diffuseColor :{r:0.8, g:0.6, b:0.4},
+				ambientColor :{r:0.7, g:0.5, b:0.3},
+			},
+			light:{
+				type:'blinn',
+				direction:{x:+2.0, y:-1.5, z:+0.5},
+			},
+		})).fix();
+		const illumination=new Illumination(options.material,options.light);
 		it("has empty color attr list",function(){
 			assert.deepEqual(illumination.getColorAttrs(),[
 			]);
@@ -613,6 +596,7 @@ describe('Illumination',function(){
 			]);
 		});
 	});
+	/*
 	context('with global blinn-phong shading with input',function(){
 		var illumination=new Illumination({
 			'materialScope':'global',

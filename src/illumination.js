@@ -165,16 +165,16 @@ Illumination.prototype.getGlslFragmentOutputLines=function(eyeAtInfinity,twoSide
 			? this.colorVector
 			: this.ambientColorVector
 		);
-		colorRGB=vector.getGlslComponentsValue('rgb');
-		colorA=vector.getGlslComponentsValue('a');
-		colorRGBA=vector.getGlslValue();
+		colorRGB =()=>vector.getGlslComponentsValue('rgb');
+		colorA   =()=>vector.getGlslComponentsValue('a');
+		colorRGBA=()=>vector.getGlslValue();
 	} else {
-		colorRGB="interpolatedColor.rgb"; // TODO don't pass it as vec4 if light is on
-		colorA="interpolatedColor.a";
-		colorRGBA="interpolatedColor";
+		colorRGB =()=>"interpolatedColor.rgb"; // TODO don't pass it as vec4 if light is on
+		colorA   =()=>"interpolatedColor.a";
+		colorRGBA=()=>"interpolatedColor";
 	}
 	if (this.light.type=='off') {
-		lines.a("gl_FragColor="+colorRGBA+";");
+		lines.a("gl_FragColor="+colorRGBA()+";");
 	} else {
 		lines.a("vec3 N=normalize(interpolatedNormal);");
 		if (twoSided) {
@@ -183,7 +183,7 @@ Illumination.prototype.getGlslFragmentOutputLines=function(eyeAtInfinity,twoSide
 		lines.a("vec3 L=normalize("+this.lightDirectionVector.getGlslValue()+");");
 		if (this.material.data=='one') {
 			lines.a(
-				"gl_FragColor=vec4("+colorRGB+"*max(0.0,dot(L,N)),"+colorA+");"
+				"gl_FragColor=vec4("+colorRGB()+"*max(0.0,dot(L,N)),"+colorA()+");"
 			);
 		} else {
 			if (this.wantsTransformedPosition(eyeAtInfinity)) {
