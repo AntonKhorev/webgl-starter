@@ -596,25 +596,20 @@ describe('Illumination',function(){
 			]);
 		});
 	});
-	/*
 	context('with global blinn-phong shading with input',function(){
-		var illumination=new Illumination({
-			'materialScope':'global',
-			'materialData':'sda',
-			'light':'blinn',
-			'materialSpecularColor.r':0.9, 'materialSpecularColor.r.input':'slider',   'materialSpecularColor.r.min':0, 'materialSpecularColor.r.max':1,
-			'materialSpecularColor.g':0.7, 'materialSpecularColor.g.input':'constant', 'materialSpecularColor.g.min':0, 'materialSpecularColor.g.max':1,
-			'materialSpecularColor.b':0.5, 'materialSpecularColor.b.input':'constant', 'materialSpecularColor.b.min':0, 'materialSpecularColor.b.max':1,
-			'materialDiffuseColor.r' :0.8, 'materialDiffuseColor.r.input' :'constant', 'materialDiffuseColor.r.min' :0, 'materialDiffuseColor.r.max' :1,
-			'materialDiffuseColor.g' :0.6, 'materialDiffuseColor.g.input' :'constant', 'materialDiffuseColor.g.min' :0, 'materialDiffuseColor.g.max' :1,
-			'materialDiffuseColor.b' :0.4, 'materialDiffuseColor.b.input' :'constant', 'materialDiffuseColor.b.min' :0, 'materialDiffuseColor.b.max' :1,
-			'materialAmbientColor.r' :0.7, 'materialAmbientColor.r.input' :'constant', 'materialAmbientColor.r.min' :0, 'materialAmbientColor.r.max' :1,
-			'materialAmbientColor.g' :0.5, 'materialAmbientColor.g.input' :'constant', 'materialAmbientColor.g.min' :0, 'materialAmbientColor.g.max' :1,
-			'materialAmbientColor.b' :0.3, 'materialAmbientColor.b.input' :'constant', 'materialAmbientColor.b.min' :0, 'materialAmbientColor.b.max' :1,
-			'lightDirection.x':+2.0, 'lightDirection.x.input':'constant', 'lightDirection.x.min':-4, 'lightDirection.x.max':+4,
-			'lightDirection.y':-1.5, 'lightDirection.y.input':'constant', 'lightDirection.y.min':-4, 'lightDirection.y.max':+4,
-			'lightDirection.z':+0.5, 'lightDirection.z.input':'constant', 'lightDirection.z.min':-4, 'lightDirection.z.max':+4
-		});
+		const options=(new TestOptions({
+			material:{
+				data:'sda',
+				specularColor:{r:{value:0.9, input:'slider'}, g:0.7, b:0.5},
+				diffuseColor :{r:0.8, g:0.6, b:0.4},
+				ambientColor :{r:0.7, g:0.5, b:0.3},
+			},
+			light:{
+				type:'blinn',
+				direction:{x:+2.0, y:-1.5, z:+0.5},
+			},
+		})).fix();
+		const illumination=new Illumination(options.material,options.light);
 		it("has empty color attr list",function(){
 			assert.deepEqual(illumination.getColorAttrs(),[
 			]);
@@ -660,24 +655,27 @@ describe('Illumination',function(){
 			assert.deepEqual(illumination.getJsInterfaceLines([false,false],canvasMousemoveListener).data,[
 				"var specularColorRLoc=gl.getUniformLocation(program,'specularColorR');",
 				"function updateSpecularColor() {",
-				"	gl.uniform1f(specularColorRLoc,parseFloat(document.getElementById('materialSpecularColor.r').value));",
+				"	gl.uniform1f(specularColorRLoc,parseFloat(document.getElementById('specularColor.r').value));",
 				"}",
 				"updateSpecularColor();",
-				"document.getElementById('materialSpecularColor.r').addEventListener('change',updateSpecularColor);"
+				"document.getElementById('specularColor.r').addEventListener('change',updateSpecularColor);"
 			]);
 			assert.deepEqual(canvasMousemoveListener.write(false,false).data,[
 			]);
 		});
 	});
 	context('with local blinn-phong shading',function(){
-		var illumination=new Illumination({
-			'materialScope':'vertex',
-			'materialData':'sda',
-			'light':'blinn',
-			'lightDirection.x':+2.0, 'lightDirection.x.input':'constant', 'lightDirection.x.min':-4, 'lightDirection.x.max':+4,
-			'lightDirection.y':-1.5, 'lightDirection.y.input':'constant', 'lightDirection.y.min':-4, 'lightDirection.y.max':+4,
-			'lightDirection.z':+0.5, 'lightDirection.z.input':'constant', 'lightDirection.z.min':-4, 'lightDirection.z.max':+4
-		});
+		const options=(new TestOptions({
+			material:{
+				scope:'vertex',
+				data:'sda',
+			},
+			light:{
+				type:'blinn',
+				direction:{x:+2.0, y:-1.5, z:+0.5},
+			},
+		})).fix();
+		const illumination=new Illumination(options.material,options.light);
 		it("has color attr list with 3 enabled entries",function(){
 			assert.deepEqual(illumination.getColorAttrs(),[
 				{name:"specularColor",enabled:true,weight:0.4},
@@ -734,14 +732,17 @@ describe('Illumination',function(){
 		});
 	});
 	context('with local phong shading',function(){
-		var illumination=new Illumination({
-			'materialScope':'vertex',
-			'materialData':'sda',
-			'light':'phong',
-			'lightDirection.x':+2.0, 'lightDirection.x.input':'constant', 'lightDirection.x.min':-4, 'lightDirection.x.max':+4,
-			'lightDirection.y':-1.5, 'lightDirection.y.input':'constant', 'lightDirection.y.min':-4, 'lightDirection.y.max':+4,
-			'lightDirection.z':+0.5, 'lightDirection.z.input':'constant', 'lightDirection.z.min':-4, 'lightDirection.z.max':+4
-		});
+		const options=(new TestOptions({
+			material:{
+				scope:'vertex',
+				data:'sda',
+			},
+			light:{
+				type:'phong',
+				direction:{x:+2.0, y:-1.5, z:+0.5},
+			},
+		})).fix();
+		const illumination=new Illumination(options.material,options.light);
 		it("outputs phong shading for fragment shader",function(){
 			assert.deepEqual(illumination.getGlslFragmentOutputLines(true,false).data,[
 				"vec3 N=normalize(interpolatedNormal);",
@@ -757,5 +758,4 @@ describe('Illumination',function(){
 			]);
 		});
 	});
-	*/
 });
