@@ -4,8 +4,7 @@
 const Lines=require('./lines.js');
 const listeners=require('./listeners.js');
 const shapes=require('./shapes.js');
-const CallVector=require('./call-vector.js');
-const GlslVector=require('./glsl-vector.js');
+const Background=require('./background.js');
 const Illumination=require('./illumination.js');
 
 module.exports=function(options,i18n){
@@ -26,7 +25,7 @@ module.exports=function(options,i18n){
 	function makeShape() {
 		const className=options.shape.type.charAt(0).toUpperCase()+options.shape.type.slice(1);
 		return new shapes[className](
-			parseInt(options.elements),
+			options.shape,
 			options.light!='off',
 			options.materialScope=='vertex',
 			options.materialScope=='face',
@@ -34,11 +33,9 @@ module.exports=function(options,i18n){
 		);
 	}
 	const shape=makeShape();
-	if (options.background.type=='solid') {
-		// TODO replace with background Feature
-		var backgroundColorVector=new CallVector('backgroundColor',options.background.color,'gl.clearColor',[0,0,0,0]);
-	}
+	const background=new Background(options.background);
 
+	/*
 	function generateHtmlStyleLines() {
 		var lines=new Lines;
 		if (options.hasSliderInputs()) {
@@ -353,54 +350,51 @@ module.exports=function(options,i18n){
 		writeOptionGroup(options.transformOptions);
 		return lines;
 	}
-	function generateJsMakeProgramLines() {
-		var lines=new Lines;
-		lines.a(
-			"var vertexShader=gl.createShader(gl.VERTEX_SHADER);",
-			"gl.shaderSource(vertexShader,vertexShaderSrc);",
-			"gl.compileShader(vertexShader);"
-		);
-		if (options.debugShaders) {
+	*/
+	function getJsInitLines() {
+		function getMakeProgramLines() {
+			const lines=new Lines;
 			lines.a(
-				"if (!gl.getShaderParameter(vertexShader,gl.COMPILE_STATUS)) console.log(gl.getShaderInfoLog(vertexShader));"
+				"var vertexShader=gl.createShader(gl.VERTEX_SHADER);",
+				"gl.shaderSource(vertexShader,vertexShaderSrc);",
+				"gl.compileShader(vertexShader);"
+			);
+			if (options.debugShaders) {
+				lines.a(
+					"if (!gl.getShaderParameter(vertexShader,gl.COMPILE_STATUS)) console.log(gl.getShaderInfoLog(vertexShader));"
+				);
+			}
+			lines.a(
+				"var fragmentShader=gl.createShader(gl.FRAGMENT_SHADER);",
+				"gl.shaderSource(fragmentShader,fragmentShaderSrc);",
+				"gl.compileShader(fragmentShader);"
+			);
+			if (options.debugShaders) {
+				lines.a(
+					"if (!gl.getShaderParameter(fragmentShader,gl.COMPILE_STATUS)) console.log(gl.getShaderInfoLog(fragmentShader));"
+				);
+			}
+			lines.a(
+				"var program=gl.createProgram();",
+				"gl.attachShader(program,vertexShader);",
+				"gl.attachShader(program,fragmentShader);",
+				"gl.linkProgram(program);",
+				"return program;"
+			);
+			return lines.wrap(
+				"function makeProgram(vertexShaderSrc,fragmentShaderSrc) {",
+				"}"
 			);
 		}
+		const lines=new Lines;
 		lines.a(
-			"var fragmentShader=gl.createShader(gl.FRAGMENT_SHADER);",
-			"gl.shaderSource(fragmentShader,fragmentShaderSrc);",
-			"gl.compileShader(fragmentShader);"
-		);
-		if (options.debugShaders) {
-			lines.a(
-				"if (!gl.getShaderParameter(fragmentShader,gl.COMPILE_STATUS)) console.log(gl.getShaderInfoLog(fragmentShader));"
-			);
-		}
-		lines.a(
-			"var program=gl.createProgram();",
-			"gl.attachShader(program,vertexShader);",
-			"gl.attachShader(program,fragmentShader);",
-			"gl.linkProgram(program);",
-			"return program;"
-		);
-		return lines.wrap(
-			"function makeProgram(vertexShaderSrc,fragmentShaderSrc) {",
-			"}"
-		);
-	}
-	function generateJsInitLines() {
-		var lines=new Lines;
-		lines.a(
+			getMakeProgramLines(),
 			"var canvas=document.getElementById('myCanvas');",
 			"var gl=canvas.getContext('webgl')||canvas.getContext('experimental-webgl');"
 		);
-		if (options['elements']=='32') {
+		if (shape.elementIndexBits==32) {
 			lines.a(
 				"gl.getExtension('OES_element_index_uint');" // TODO check if null is returned and don't allow more elements
-			);
-		}
-		if (options.background=='solid') {
-			lines.a(
-				backgroundColorVector.getJsInitLines()
 			);
 		}
 		if (shape.dim>2) {
@@ -413,10 +407,12 @@ module.exports=function(options,i18n){
 			"	document.getElementById('myVertexShader').text,",
 			"	document.getElementById('myFragmentShader').text",
 			");",
-			"gl.useProgram(program);"
+			"gl.useProgram(program);",
+			background.getJsInitLines()
 		);
 		return lines;
 	}
+	/*
 	function generateJsInputHandlerLines() {
 		var writeListenerArgs=[!options.isAnimated(),options.debugInputs];
 		var lines=new Lines;
@@ -707,21 +703,19 @@ module.exports=function(options,i18n){
 		}
 		return lines;
 	}
+	*/
 
-	/*
-	var scriptLines=new Lines;
+	const scriptLines=new Lines;
 	scriptLines.interleave(
-		generateJsMakeProgramLines(),
-		generateJsInitLines(),
+		getJsInitLines()/*,
 		shape.writeInit(options.debugArrays),
 		generateJsInputHandlerLines(),
-		generateJsRenderLines()
+		generateJsRenderLines()*/
 	).wrap(
 		"<script>",
 		"</script>"
 	);
-	*/
-	var lines=new Lines;
+	const lines=new Lines;
 	lines.a(
 		"<!DOCTYPE html>",
 		"<html lang='en'>",
@@ -742,7 +736,7 @@ module.exports=function(options,i18n){
 		"</div>",
 		//generateHtmlControlMessageLines(),
 		//generateHtmlInputLines(),
-		//scriptLines,
+		scriptLines,
 		"</body>",
 		"</html>"
 	);
