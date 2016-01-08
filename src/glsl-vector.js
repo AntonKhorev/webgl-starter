@@ -1,5 +1,6 @@
 'use strict';
 
+const fixOptHelp=require('./fixed-options-helpers.js');
 const Lines=require('./lines.js');
 const Vector=require('./vector.js');
 
@@ -31,7 +32,7 @@ GlslVector.prototype.getGlslValue=function(){
 	const vecType="vec"+this.values.length;
 	let vs=this.values.map((v,c)=>{
 		if (v.input=='constant') {
-			return this.formatValue(v);
+			return fixOptHelp.formatNumber(v);
 		} else {
 			return this.varNameC(c);
 		}
@@ -58,7 +59,7 @@ GlslVector.prototype.getGlslComponentsValue=function(selectedComponents){
 	const results=[]; // [[isConstant,componentName]]
 	const showResult=result=>{
 		if (result[0]) {
-			return this.formatValue(this.values[result[1]]);
+			return fixOptHelp.formatNumber(this.values[result[1]]);
 		} else {
 			if (this.modeVector) {
 				return this.name+"."+result[1];
@@ -69,8 +70,8 @@ GlslVector.prototype.getGlslComponentsValue=function(selectedComponents){
 	};
 	const allSameConstant=()=>{
 		if (!results[0][0]) return false;
-		const cmp=this.formatValue(this.values[results[0][1]]);
-		return results.every(result=>(result[0] && this.formatValue(this.values[result[1]])==cmp));
+		const cmp=fixOptHelp.formatNumber(this.values[results[0][1]]);
+		return results.every(result=>(result[0] && fixOptHelp.formatNumber(this.values[result[1]])==cmp));
 	};
 	for (let j=0;j<selectedComponents.length;j++) {
 		const c=selectedComponents.charAt(j);
@@ -127,7 +128,7 @@ GlslVector.prototype.writeJsInterfaceGlslLines=function(){
 		this.values.forEach(v=>{
 			if (v.input!='constant') {
 				lines.t(
-					","+this.formatValue(v)
+					","+fixOptHelp.formatNumber(v)
 				);
 			}
 		});
@@ -138,7 +139,7 @@ GlslVector.prototype.writeJsInterfaceGlslLines=function(){
 		this.values.forEach((v,c)=>{
 			if (v.input!='constant') {
 				lines.a(
-					"gl.uniform1f("+this.varNameC(c)+"Loc,"+this.formatValue(v)+");"
+					"gl.uniform1f("+this.varNameC(c)+"Loc,"+fixOptHelp.formatNumber(v)+");"
 				);
 			}
 		});

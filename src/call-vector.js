@@ -1,5 +1,6 @@
 'use strict';
 
+const fixOptHelp=require('./fixed-options-helpers.js');
 const Lines=require('./lines.js');
 const Vector=require('./vector.js');
 
@@ -16,7 +17,7 @@ CallVector.prototype.getJsInitLines=function(){
 		return new Lines;
 	}
 	return new Lines(
-		this.calledFn+"("+this.values.map(this.formatValue).join(",")+");"
+		this.calledFn+"("+this.values.map(fixOptHelp.formatNumber).join(",")+");"
 	);
 };
 // private:

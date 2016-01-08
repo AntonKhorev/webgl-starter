@@ -1,5 +1,6 @@
 'use strict';
 
+const fixOptHelp=require('./fixed-options-helpers.js');
 const Lines=require('./lines.js');
 const listeners=require('./listeners.js');
 
@@ -24,13 +25,7 @@ const Vector=function(name,values){
 	if (this.nVars==1) {
 		this.modeFloats=true;
 	}
-	this.modeVector= !this.modeConstant && !this.modeFloats;
-	const nonnegativeLimits=values.every(v=>(v.min>=0 && v.max>=0)); // TODO move to options.fix() ... .out
-	if (nonnegativeLimits) {
-		this.formatValue=value=>value.toFixed(3);
-	} else {
-		this.formatValue=value=>(value<=0 ? value<0 ? '' /* - */ : ' ' : '+')+value.toFixed(3);
-	}
+	this.modeVector=(!this.modeConstant && !this.modeFloats);
 };
 Vector.prototype.updateFnName=function(){
 	function capitalize(s) {
@@ -44,7 +39,7 @@ Vector.prototype.varNameC=function(c){
 };
 Vector.prototype.componentValue=function(v,c){
 	if (v.input=='constant') {
-		return this.formatValue(v);
+		return fixOptHelp.formatNumber(v);
 	} else if (v.input=='slider') {
 		return "parseFloat(document.getElementById('"+this.name+"."+c+"').value)";
 	} else if (v.input=='mousemovex' || v.input=='mousemovey') {
@@ -89,7 +84,7 @@ Vector.prototype.getJsInterfaceLines=function(writeListenerArgs,canvasMousemoveL
 		this.values.forEach((v,c)=>{
 			if (v.input=='mousemovex' || v.input=='mousemovey') {
 				lines.a(
-					"var "+this.varNameC(c)+"="+this.formatValue(v)+";"
+					"var "+this.varNameC(c)+"="+fixOptHelp.formatNumber(v)+";"
 				);
 			}
 		});
@@ -106,15 +101,16 @@ Vector.prototype.getJsInterfaceLines=function(writeListenerArgs,canvasMousemoveL
 		const entry=canvasMousemoveListener.enter();
 		this.values.forEach((v,c)=>{
 			if (v.input=='mousemovex' || v.input=='mousemovey') {
+				const fmt=fixOptHelp.makeFormatNumber(v);
 				if (this.nSliders==0) {
 					entry.minMaxVarFloat(v.input,this.varNameC(c),
-						this.formatValue(v.min),
-						this.formatValue(v.max)
+						fmt(v.min),
+						fmt(v.max)
 					);
 				} else {
 					entry.minMaxFloat(v.input,this.varNameC(c),
-						this.formatValue(v.min),
-						this.formatValue(v.max)
+						fmt(v.min),
+						fmt(v.max)
 					);
 				}
 				entry.log("console.log('"+this.name+"."+c+" input value:',"+this.varNameC(c)+");");
