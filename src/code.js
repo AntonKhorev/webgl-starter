@@ -1,5 +1,6 @@
 'use strict';
 
+const fixOptHelp=require('./fixed-options-helpers.js');
 const Lines=require('./lines.js');
 const listeners=require('./listeners.js');
 const shapes=require('./shapes.js');
@@ -8,13 +9,15 @@ const GlslVector=require('./glsl-vector.js');
 const Illumination=require('./illumination.js');
 
 module.exports=function(options,i18n){
-	// TODO replace them by option...out
+	// TODO replace them by option helpers
+	/*
 	function intOptionValue(name) {
 		return parseInt(options[name]);
 	}
 	function floatOptionValue(name) {
 		return options[name].toFixed(3);
 	}
+	*/
 	function isMousemoveInput(name) {
 		return ['mousemovex','mousemovey'].indexOf(options[name+'.input'])>=0;
 	}
@@ -735,7 +738,7 @@ module.exports=function(options,i18n){
 		"</head>",
 		"<body>",
 		"<div>",
-		//"	<canvas id='myCanvas' width='"+intOptionValue('canvas.width')+"' height='"+intOptionValue('canvas.height')+"'></canvas>",
+		"	<canvas id='myCanvas' width='"+fixOptHelp.formatNumber(options.canvas.width)+"' height='"+fixOptHelp.formatNumber(options.canvas.height)+"'></canvas>",
 		"</div>",
 		//generateHtmlControlMessageLines(),
 		//generateHtmlInputLines(),

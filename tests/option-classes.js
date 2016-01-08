@@ -105,6 +105,9 @@ describe("Option.LiveInt",()=>{
 		assert.equal(fixed.lod.min,0);
 		assert.equal(fixed.lod.max,9);
 		assert.equal(fixed.lod.input,'slider');
+		assert.equal(fixed.lod.availableMin,0);
+		assert.equal(fixed.lod.availableMax,10);
+		assert.equal(fixed.lod.step,1);
 	});
 });
 
@@ -302,10 +305,16 @@ describe("Option.LiveFloat",()=>{
 		assert.equal(fixed.rotate.min,-180);
 		assert.equal(fixed.rotate.max,+180);
 		assert.equal(fixed.rotate.input,'constant');
+		assert.equal(fixed.rotate.availableMin,-180);
+		assert.equal(fixed.rotate.availableMax,+180);
+		assert.equal(fixed.rotate.step,0.1);
 		assert.equal(fixed.rotate.speed,30);
 		assert.equal(fixed.rotate.speed.min,-100);
 		assert.equal(fixed.rotate.speed.max,+100);
 		assert.equal(fixed.rotate.speed.input,'constant');
+		assert.equal(fixed.rotate.speed.availableMin,-360);
+		assert.equal(fixed.rotate.speed.availableMax,+360);
+		assert.equal(fixed.rotate.speed.step,0.1);
 	});
 });
 

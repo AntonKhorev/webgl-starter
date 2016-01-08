@@ -3,7 +3,7 @@
 const Lines=require('./lines.js');
 const GlslVector=require('./glsl-vector.js');
 const Options=require('./options.js');
-const extendFixedOptionGroup=require('./extend-fixed-option-group.js');
+const fixOptHelp=require('./fixed-options-helpers.js');
 
 const Illumination=function(material,light){
 	this.material=material;
@@ -24,7 +24,7 @@ const Illumination=function(material,light){
 			this.diffuseColorVector =new GlslVector('diffuseColor' ,material.diffuseColor);
 			this.ambientColorVector =new GlslVector('ambientColor' ,material.ambientColor);
 		} else {
-			const extendedAmbientColor=extendFixedOptionGroup(
+			const extendedAmbientColor=fixOptHelp.extendCollection(
 				material.ambientColor,
 				Options,
 				[

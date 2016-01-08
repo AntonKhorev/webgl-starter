@@ -70,12 +70,19 @@ class LiveNumber extends RangeInput {
 	export() {
 		return this.exportHelper(this,{});
 	}
-	fix() {
-		const fixed=new Number(this.value);
-		fixed.min=this.min;
-		fixed.max=this.max;
-		fixed.input=this.input;
+	fixHelper(src) {
+		const fixed=new Number(src.value);
+		fixed.min=src.min;
+		fixed.max=src.max;
+		fixed.input=src.input;
+		// needed for formatting:
+		fixed.availableMin=src.availableMin;
+		fixed.availableMax=src.availableMax;
+		fixed.step=src.step;
 		return fixed;
+	}
+	fix() {
+		return this.fixHelper(this);
 	}
 }
 
@@ -223,11 +230,8 @@ class LiveFloat extends LiveNumber {
 		return this.exportHelper(this,data);
 	}
 	fix() {
-		const fixed=super.fix();
-		fixed.speed=new Number(this.speed.value);
-		fixed.speed.min=this.speed.min;
-		fixed.speed.max=this.speed.max;
-		fixed.speed.input=this.speed.input;
+		const fixed=this.fixHelper(this);
+		fixed.speed=this.fixHelper(this.speed);
 		return fixed;
 	}
 }
