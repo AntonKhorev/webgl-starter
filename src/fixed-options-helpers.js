@@ -13,6 +13,7 @@ function extendCollection(fixedOptionGroup,Options,additionalEntriesDescription)
 	return additionalOptions.root.fixFromIterateOver(iterateOver);
 }
 
+// fixed-width number formatting - don't use it for min width
 function makeFormatNumber(contextNumber) {
 	const nonnegativeLimits=(contextNumber.availableMin>=0 && contextNumber.availableMax>=0);
 	const lead=Math.max(

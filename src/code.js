@@ -1,6 +1,6 @@
 'use strict';
 
-const fixOptHelp=require('./fixed-options-helpers.js');
+//const fixOptHelp=require('./fixed-options-helpers.js');
 const Lines=require('./lines.js');
 const listeners=require('./listeners.js');
 const shapes=require('./shapes.js');
@@ -738,7 +738,7 @@ module.exports=function(options,i18n){
 		"</head>",
 		"<body>",
 		"<div>",
-		"	<canvas id='myCanvas' width='"+fixOptHelp.formatNumber(options.canvas.width)+"' height='"+fixOptHelp.formatNumber(options.canvas.height)+"'></canvas>",
+		"	<canvas id='myCanvas' width='"+options.canvas.width+"' height='"+options.canvas.height+"'></canvas>",
 		"</div>",
 		//generateHtmlControlMessageLines(),
 		//generateHtmlInputLines(),
