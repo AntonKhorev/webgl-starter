@@ -15,18 +15,23 @@ function extendCollection(fixedOptionGroup,Options,additionalEntriesDescription)
 
 function makeFormatNumber(contextNumber) {
 	const nonnegativeLimits=(contextNumber.availableMin>=0 && contextNumber.availableMax>=0);
-	// http://stackoverflow.com/a/9553423
-	const intFrac=String(contextNumber.step).split(".");
-	const prec=(intFrac.length>1 ? intFrac[1].length : 0);
+	const lead=Math.max(
+		String(Math.abs(contextNumber.availableMin)).split('.')[0].length,
+		String(Math.abs(contextNumber.availableMax)).split('.')[0].length
+	);
+	const splitStep=String(contextNumber.step).split('.'); // http://stackoverflow.com/a/9553423
+	const prec=(splitStep.length>1 ? splitStep[1].length : 0);
+	const width=lead+prec+(prec>0);
+	const spaces='          '; // http://stackoverflow.com/q/10073699
+	const fmt=n=>(spaces+n.toFixed(prec)).slice(-width);
 	if (nonnegativeLimits) {
-		return n=>n.toFixed(prec);
+		return n=>fmt(n);
 	} else {
-		return n=>(n<=0 ? n<0 ? '' /* - */ : ' ' : '+')+n.toFixed(prec);
+		return n=>(n<=0 ? n<0 ? '-' : ' ' : '+')+fmt(Math.abs(n));
 	}
 }
 
 function formatNumber(number) {
-	//return String(fixedNumber);
 	return makeFormatNumber(number)(number);
 }
 
