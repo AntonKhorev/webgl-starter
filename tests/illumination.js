@@ -3,7 +3,7 @@
 const assert=require('assert');
 const Lines=require('../src/lines.js');
 const Options=require('../src/options.js');
-const listeners=require('../src/listeners.js');
+const FeatureContext=require('../src/feature-context.js');
 const Illumination=require('../src/illumination.js');
 
 describe('Illumination',function(){
@@ -65,10 +65,11 @@ describe('Illumination',function(){
 			]);
 		});
 		it("returns empty js interface",function(){
-			var canvasMousemoveListener=new listeners.CanvasMousemoveListener;
-			assert.deepEqual(illumination.getJsInterfaceLines([false,false],canvasMousemoveListener).data,[
+			const featureContext=new FeatureContext(false);
+			featureContext.hasStartTime=true; // animated
+			assert.deepEqual(illumination.getJsInitLines(featureContext).data,[
 			]);
-			assert.deepEqual(canvasMousemoveListener.write(false,false).data,[
+			assert.deepEqual(featureContext.getJsAfterInitLines().data,[
 			]);
 		});
 	});
@@ -108,8 +109,9 @@ describe('Illumination',function(){
 			]);
 		});
 		it("returns slider js interface",function(){
-			var canvasMousemoveListener=new listeners.CanvasMousemoveListener;
-			assert.deepEqual(illumination.getJsInterfaceLines([false,false],canvasMousemoveListener).data,[
+			const featureContext=new FeatureContext(false);
+			featureContext.hasStartTime=true; // animated
+			assert.deepEqual(illumination.getJsInitLines(featureContext).data,[
 				"var colorRLoc=gl.getUniformLocation(program,'colorR');",
 				"function updateColor() {",
 				"	gl.uniform1f(colorRLoc,parseFloat(document.getElementById('color.r').value));",
@@ -117,7 +119,7 @@ describe('Illumination',function(){
 				"updateColor();",
 				"document.getElementById('color.r').addEventListener('change',updateColor);"
 			]);
-			assert.deepEqual(canvasMousemoveListener.write(false,false).data,[
+			assert.deepEqual(featureContext.getJsAfterInitLines().data,[
 			]);
 		});
 	});
@@ -161,10 +163,11 @@ describe('Illumination',function(){
 			]);
 		});
 		it("returns empty js interface",function(){
-			var canvasMousemoveListener=new listeners.CanvasMousemoveListener;
-			assert.deepEqual(illumination.getJsInterfaceLines([false,false],canvasMousemoveListener).data,[
+			const featureContext=new FeatureContext(false);
+			featureContext.hasStartTime=true; // animated
+			assert.deepEqual(illumination.getJsInitLines(featureContext).data,[
 			]);
-			assert.deepEqual(canvasMousemoveListener.write(false,false).data,[
+			assert.deepEqual(featureContext.getJsAfterInitLines().data,[
 			]);
 		});
 	});
@@ -206,10 +209,11 @@ describe('Illumination',function(){
 			]);
 		});
 		it("returns empty js interface",function(){
-			var canvasMousemoveListener=new listeners.CanvasMousemoveListener;
-			assert.deepEqual(illumination.getJsInterfaceLines([false,false],canvasMousemoveListener).data,[
+			const featureContext=new FeatureContext(false);
+			featureContext.hasStartTime=true; // animated
+			assert.deepEqual(illumination.getJsInitLines(featureContext).data,[
 			]);
-			assert.deepEqual(canvasMousemoveListener.write(false,false).data,[
+			assert.deepEqual(featureContext.getJsAfterInitLines().data,[
 			]);
 		});
 	});
@@ -248,8 +252,9 @@ describe('Illumination',function(){
 			]);
 		});
 		it("returns slider js interface (skipping unused specular color)",function(){
-			var canvasMousemoveListener=new listeners.CanvasMousemoveListener;
-			assert.deepEqual(illumination.getJsInterfaceLines([false,false],canvasMousemoveListener).data,[
+			const featureContext=new FeatureContext(false);
+			featureContext.hasStartTime=true; // animated
+			assert.deepEqual(illumination.getJsInitLines(featureContext).data,[
 				"var ambientColorBLoc=gl.getUniformLocation(program,'ambientColorB');",
 				"function updateAmbientColor() {",
 				"	gl.uniform1f(ambientColorBLoc,parseFloat(document.getElementById('ambientColor.b').value));",
@@ -257,7 +262,7 @@ describe('Illumination',function(){
 				"updateAmbientColor();",
 				"document.getElementById('ambientColor.b').addEventListener('change',updateAmbientColor);"
 			]);
-			assert.deepEqual(canvasMousemoveListener.write(false,false).data,[
+			assert.deepEqual(featureContext.getJsAfterInitLines().data,[
 			]);
 		});
 	});
@@ -387,7 +392,7 @@ describe('Illumination',function(){
 			]);
 		});
 		it("outputs transformed normal for vertex shader",function(){
-			var tr=new Lines;
+			const tr=new Lines;
 			tr.a("");
 			tr.t(
 				"*do(",
@@ -423,10 +428,11 @@ describe('Illumination',function(){
 			]);
 		});
 		it("returns empty js interface",function(){
-			var canvasMousemoveListener=new listeners.CanvasMousemoveListener;
-			assert.deepEqual(illumination.getJsInterfaceLines([false,false],canvasMousemoveListener).data,[
+			const featureContext=new FeatureContext(false);
+			featureContext.hasStartTime=true; // animated
+			assert.deepEqual(illumination.getJsInitLines(featureContext).data,[
 			]);
-			assert.deepEqual(canvasMousemoveListener.write(false,false).data,[
+			assert.deepEqual(featureContext.getJsAfterInitLines().data,[
 			]);
 		});
 	});
@@ -475,8 +481,9 @@ describe('Illumination',function(){
 			]);
 		});
 		it("returns light direction slider js interface",function(){
-			var canvasMousemoveListener=new listeners.CanvasMousemoveListener;
-			assert.deepEqual(illumination.getJsInterfaceLines([false,false],canvasMousemoveListener).data,[
+			const featureContext=new FeatureContext(false);
+			featureContext.hasStartTime=true; // animated
+			assert.deepEqual(illumination.getJsInitLines(featureContext).data,[
 				"var lightDirectionXLoc=gl.getUniformLocation(program,'lightDirectionX');",
 				"function updateLightDirection() {",
 				"	gl.uniform1f(lightDirectionXLoc,parseFloat(document.getElementById('lightDirection.x').value));",
@@ -484,7 +491,7 @@ describe('Illumination',function(){
 				"updateLightDirection();",
 				"document.getElementById('lightDirection.x').addEventListener('change',updateLightDirection);"
 			]);
-			assert.deepEqual(canvasMousemoveListener.write(false,false).data,[
+			assert.deepEqual(featureContext.getJsAfterInitLines().data,[
 			]);
 		});
 	});
@@ -589,10 +596,11 @@ describe('Illumination',function(){
 			]);
 		});
 		it("returns empty js interface",function(){
-			var canvasMousemoveListener=new listeners.CanvasMousemoveListener;
-			assert.deepEqual(illumination.getJsInterfaceLines([false,false],canvasMousemoveListener).data,[
+			const featureContext=new FeatureContext(false);
+			featureContext.hasStartTime=true; // animated
+			assert.deepEqual(illumination.getJsInitLines(featureContext).data,[
 			]);
-			assert.deepEqual(canvasMousemoveListener.write(false,false).data,[
+			assert.deepEqual(featureContext.getJsAfterInitLines().data,[
 			]);
 		});
 	});
@@ -651,8 +659,9 @@ describe('Illumination',function(){
 			]);
 		});
 		it("returns color component slider js interface",function(){
-			var canvasMousemoveListener=new listeners.CanvasMousemoveListener;
-			assert.deepEqual(illumination.getJsInterfaceLines([false,false],canvasMousemoveListener).data,[
+			const featureContext=new FeatureContext(false);
+			featureContext.hasStartTime=true; // animated
+			assert.deepEqual(illumination.getJsInitLines(featureContext).data,[
 				"var specularColorRLoc=gl.getUniformLocation(program,'specularColorR');",
 				"function updateSpecularColor() {",
 				"	gl.uniform1f(specularColorRLoc,parseFloat(document.getElementById('specularColor.r').value));",
@@ -660,7 +669,7 @@ describe('Illumination',function(){
 				"updateSpecularColor();",
 				"document.getElementById('specularColor.r').addEventListener('change',updateSpecularColor);"
 			]);
-			assert.deepEqual(canvasMousemoveListener.write(false,false).data,[
+			assert.deepEqual(featureContext.getJsAfterInitLines().data,[
 			]);
 		});
 	});
