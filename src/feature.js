@@ -4,7 +4,7 @@ const Lines=require('./lines.js');
 
 class Feature {
 	// methods to be redefined
-	getJsInitLines() {
+	getJsInitLines(featureContext) {
 		return new Lines;
 	}
 	getJsLoopLines() {

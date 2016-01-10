@@ -106,7 +106,7 @@ class GlslVector extends Vector {
 		}
 	}
 	// private:
-	writeJsInterfaceGlslLines() {
+	writeJsInitStartLines() {
 		const lines=new Lines;
 		if (this.modeFloats) {
 			this.values.forEach((v,c)=>{
@@ -145,7 +145,7 @@ class GlslVector extends Vector {
 		}
 		return lines;
 	}
-	writeJsInterfaceUpdateFnLines() {
+	writeJsUpdateFnLines() {
 		const updateFnLines=new Lines;
 		if (this.modeFloats) {
 			this.values.forEach((v,c)=>{

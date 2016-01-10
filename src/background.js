@@ -12,11 +12,11 @@ class Background extends Feature {
 			this.colorVector=new CallVector('backgroundColor',options.color,'gl.clearColor',[0,0,0,0]);
 		}
 	}
-	getJsInitLines() {
+	getJsInitLines(featureContext) {
 		const lines=new Lines;
 		if (this.isSolid) {
 			lines.a(
-				this.colorVector.getJsInitLines()
+				this.colorVector.getJsInitLines(featureContext)
 			);
 		}
 		return lines;

@@ -4,6 +4,7 @@
 const Lines=require('./lines.js');
 const listeners=require('./listeners.js');
 const shapes=require('./shapes.js');
+const FeatureContext=require('./feature-context.js');
 const Background=require('./background.js');
 const Illumination=require('./illumination.js');
 
@@ -21,6 +22,7 @@ module.exports=function(options,i18n){
 		return ['mousemovex','mousemovey'].indexOf(options[name+'.input'])>=0;
 	}
 
+	const featureContext=new FeatureContext(options.debug.input);
 	const illumination=new Illumination(options.material,options.light);
 	function makeShape() {
 		const className=options.shape.type.charAt(0).toUpperCase()+options.shape.type.slice(1);
@@ -408,7 +410,8 @@ module.exports=function(options,i18n){
 			"	document.getElementById('myFragmentShader').text",
 			");",
 			"gl.useProgram(program);",
-			background.getJsInitLines()
+			background.getJsInitLines(featureContext),
+			featureContext.getJsAfterInitLines()
 		);
 		return lines;
 	}

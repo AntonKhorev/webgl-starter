@@ -10,8 +10,8 @@ class CallVector extends Vector {
 		this.calledFn=calledFn;
 		this.calledFnDefaultArgs=calledFnDefaultArgs;
 	}
-	// public:
-	getJsInitLines() {
+	// private:
+	writeJsInitStartLines() {
 		if (this.nSliders>0 || this.values.every((v,c,i)=>v==this.calledFnDefaultArgs[i])) {
 			return new Lines;
 		}
@@ -19,8 +19,7 @@ class CallVector extends Vector {
 			this.calledFn+"("+this.values.map(fixOptHelp.formatNumber).join(",")+");"
 		);
 	}
-	// private:
-	writeJsInterfaceUpdateFnLines() {
+	writeJsUpdateFnLines() {
 		const updateFnLines=new Lines;
 		if (this.nSliders<=1) {
 			updateFnLines.a(

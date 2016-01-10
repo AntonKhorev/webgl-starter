@@ -50,14 +50,12 @@ class Vector extends Feature {
 		}
 	}
 	// abstract fns:
-	writeJsInterfaceGlslLines() { // Locs
-		return new Lines;
-	}
-	//writeJsInterfaceUpdateFnLines() {}
+	//writeJsInitStartLines() {} // Locs, fn calls, ets
+	//writeJsUpdateFnLines() {}
 	addPostToListenerEntryForComponent(entry,c) {} // do necessary entry.post()
 	addPostToListenerEntryAfterComponents(entry) {}
 	// public:
-	getJsInterfaceLines(writeListenerArgs,canvasMousemoveListener) {
+	getJsInitLines(featureContext) {
 		const writeManyListenersLines=()=>{
 			const lines=new Lines;
 			this.values.forEach((v,c)=>{
@@ -67,7 +65,7 @@ class Vector extends Feature {
 					.log("console.log(this.id,'input value:',parseFloat(this.value));")
 					.post(this.updateFnName()+"();");
 				lines.a(
-					listener.write.apply(listener,writeListenerArgs)
+					listener.write(!featureContext.isAnimated,featureContext.haveToLogInput)
 				);
 			});
 			return lines;
@@ -78,18 +76,18 @@ class Vector extends Feature {
 				.log("console.log(this.id,'input value:',parseFloat(this.value));")
 				.post(this.updateFnName()+"();");
 			return new Lines(
-				listener.write.apply(listener,writeListenerArgs)
+				listener.write(!featureContext.isAnimated,featureContext.haveToLogInput)
 			);
 		};
-		if (this.modeConstant) {
-			return new Lines;
-		}
 		const lines=new Lines;
+		lines.a(
+			this.writeJsInitStartLines()
+		);
+		if (this.modeConstant) {
+			return lines;
+		}
 		const manyListenersLines=writeManyListenersLines();
 		const oneListenerLines=writeOneListenerLines();
-		lines.a(
-			this.writeJsInterfaceGlslLines()
-		);
 		if (this.nSliders>0) {
 			this.values.forEach((v,c)=>{
 				if (v.input=='mousemovex' || v.input=='mousemovey') {
@@ -99,7 +97,7 @@ class Vector extends Feature {
 				}
 			});
 			lines.a(
-				this.writeJsInterfaceUpdateFnLines().wrap(
+				this.writeJsUpdateFnLines().wrap(
 					"function "+this.updateFnName()+"() {",
 					"}"
 				),
@@ -108,7 +106,7 @@ class Vector extends Feature {
 			);
 		}
 		if (this.nMousemoves>0) {
-			const entry=canvasMousemoveListener.enter();
+			const entry=featureContext.canvasMousemoveListener.enter();
 			this.values.forEach((v,c)=>{
 				if (v.input=='mousemovex' || v.input=='mousemovey') {
 					const fmt=fixOptHelp.makeFormatNumber(v);
