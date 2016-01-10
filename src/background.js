@@ -21,6 +21,16 @@ class Background extends Feature {
 		}
 		return lines;
 	}
+	getJsLoopLines() {
+		const lines=new Lines;
+		if (this.isSolid) {
+			lines.a(
+				this.colorVector.getJsLoopLines(),
+				"gl.clear(gl.COLOR_BUFFER_BIT);"
+			);
+		}
+		return lines;
+	}
 }
 
 module.exports=Background;

@@ -523,7 +523,14 @@ module.exports=function(options,i18n){
 		writeListener(canvasMousemoveListener);
 		return lines;
 	}
-	function generateJsRenderLines() {
+	*/
+	function generateJsLoopLines() {
+		const lines=new Lines;
+		lines.a(
+			background.getJsLoopLines()
+		);
+		return lines;
+		/*
 		var needStartTime=false; // set by renderInner()
 		var needPrevTime=false; // set by renderInner()
 		function renderInner() {
@@ -702,15 +709,15 @@ module.exports=function(options,i18n){
 			lines.a(innerLines);
 		}
 		return lines;
+		*/
 	}
-	*/
 
 	const scriptLines=new Lines;
 	scriptLines.interleave(
 		getJsInitLines()/*,
 		shape.writeInit(options.debugArrays),
-		generateJsInputHandlerLines(),
-		generateJsRenderLines()*/
+		generateJsInputHandlerLines()*/,
+		generateJsLoopLines()
 	).wrap(
 		"<script>",
 		"</script>"

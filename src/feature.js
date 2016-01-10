@@ -7,6 +7,9 @@ class Feature {
 	getJsInitLines() {
 		return new Lines;
 	}
+	getJsLoopLines() {
+		return new Lines;
+	}
 }
 
 module.exports=Feature;
