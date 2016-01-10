@@ -108,6 +108,9 @@ class GlslVector extends Vector {
 	// private:
 	writeJsInitStartLines() {
 		const lines=new Lines;
+		if (this.modeConstant) {
+			return lines;
+		}
 		if (this.modeFloats) {
 			this.values.forEach((v,c)=>{
 				if (v.input=='constant') return;

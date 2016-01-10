@@ -2,7 +2,7 @@
 
 const assert=require('assert');
 const Options=require('../src/options.js');
-const listeners=require('../src/listeners.js');
+const FeatureContext=require('../src/feature-context.js');
 const GlslVector=require('../src/glsl-vector.js');
 
 describe('GlslVector',function(){
@@ -35,7 +35,9 @@ describe('GlslVector',function(){
 			);
 		});
 		it('returns empty js interface',function(){
-			assert.deepEqual(vector.getJsInterfaceLines([false,false]).data,[
+			const featureContext=new FeatureContext(false);
+			featureContext.hasStartTime=true; // animated
+			assert.deepEqual(vector.getJsInitLines(featureContext).data,[
 			]);
 		});
 	});
@@ -59,7 +61,9 @@ describe('GlslVector',function(){
 			);
 		});
 		it('returns empty js interface',function(){
-			assert.deepEqual(vector.getJsInterfaceLines([false,false]).data,[
+			const featureContext=new FeatureContext(false);
+			featureContext.hasStartTime=true; // animated
+			assert.deepEqual(vector.getJsInitLines(featureContext).data,[
 			]);
 		});
 	});
@@ -89,7 +93,9 @@ describe('GlslVector',function(){
 			);
 		});
 		it('returns interface with 1 location and 1 simple listener',function(){
-			assert.deepEqual(vector.getJsInterfaceLines([false,false]).data,[
+			const featureContext=new FeatureContext(false);
+			featureContext.hasStartTime=true; // animated
+			assert.deepEqual(vector.getJsInitLines(featureContext).data,[
 				"var fooXLoc=gl.getUniformLocation(program,'fooX');",
 				"function updateFoo() {",
 				"	gl.uniform1f(fooXLoc,parseFloat(document.getElementById('foo.x').value));",
@@ -99,9 +105,9 @@ describe('GlslVector',function(){
 			]);
 		});
 		it("doesn't write empty mousemove listener code",function(){
-			var canvasMousemoveListener=new listeners.CanvasMousemoveListener;
-			vector.getJsInterfaceLines([true,false],canvasMousemoveListener);
-			assert.deepEqual(canvasMousemoveListener.write(true,false).data,[
+			const featureContext=new FeatureContext(false);
+			vector.getJsInitLines(featureContext);
+			assert.deepEqual(featureContext.getJsAfterInitLines().data,[
 			]);
 		});
 	});
@@ -136,7 +142,9 @@ describe('GlslVector',function(){
 			);
 		});
 		it('returns interface with 1 location and 2 simple listeners',function(){
-			assert.deepEqual(vector.getJsInterfaceLines([false,false]).data,[
+			const featureContext=new FeatureContext(false);
+			featureContext.hasStartTime=true; // animated
+			assert.deepEqual(vector.getJsInitLines(featureContext).data,[
 				"var fooLoc=gl.getUniformLocation(program,'foo');",
 				"function updateFoo() {",
 				"	gl.uniform2f(fooLoc,",
@@ -150,7 +158,8 @@ describe('GlslVector',function(){
 			]);
 		});
 		it('returns interface with one location and query listener with frame sheduling',function(){
-			assert.deepEqual(vector.getJsInterfaceLines([true,false]).data,[
+			const featureContext=new FeatureContext(false);
+			assert.deepEqual(vector.getJsInitLines(featureContext).data,[
 				"var fooLoc=gl.getUniformLocation(program,'foo');",
 				"function updateFoo() {",
 				"	gl.uniform2f(fooLoc,",
@@ -185,7 +194,9 @@ describe('GlslVector',function(){
 			);
 		});
 		it('returns interface with 2 locations and 2 simple listeners',function(){
-			assert.deepEqual(vector.getJsInterfaceLines([false,false]).data,[
+			const featureContext=new FeatureContext(false);
+			featureContext.hasStartTime=true; // animated
+			assert.deepEqual(vector.getJsInitLines(featureContext).data,[
 				"var fooXLoc=gl.getUniformLocation(program,'fooX');",
 				"var fooZLoc=gl.getUniformLocation(program,'fooZ');",
 				"function updateFoo() {",
@@ -220,8 +231,9 @@ describe('GlslVector',function(){
 		}});
 		const vector=new GlslVector('foo',options.fix().foo);
 		it('returns interface with 1 location, 1 state var and 1 simple listener and mousemove listener',function(){
-			const canvasMousemoveListener=new listeners.CanvasMousemoveListener;
-			assert.deepEqual(vector.getJsInterfaceLines([false,false],canvasMousemoveListener).data,[
+			const featureContext=new FeatureContext(false);
+			featureContext.hasStartTime=true; // animated
+			assert.deepEqual(vector.getJsInitLines(featureContext).data,[
 				"var fooLoc=gl.getUniformLocation(program,'foo');",
 				"var fooY=+2.000;",
 				"function updateFoo() {",
@@ -233,7 +245,7 @@ describe('GlslVector',function(){
 				"updateFoo();",
 				"document.getElementById('foo.x').addEventListener('change',updateFoo);"
 			]);
-			assert.deepEqual(canvasMousemoveListener.write(false,false).data,[
+			assert.deepEqual(featureContext.getJsAfterInitLines().data,[
 				"canvas.addEventListener('mousemove',function(ev){",
 				"	var rect=this.getBoundingClientRect();",
 				"	var minFooY=-4.000;",
@@ -250,12 +262,13 @@ describe('GlslVector',function(){
 		}});
 		const vector=new GlslVector('bar',options.fix().foo);
 		it('returns interface without update fn',function(){
-			var canvasMousemoveListener=new listeners.CanvasMousemoveListener;
-			assert.deepEqual(vector.getJsInterfaceLines([false,false],canvasMousemoveListener).data,[
+			const featureContext=new FeatureContext(false);
+			featureContext.hasStartTime=true; // animated
+			assert.deepEqual(vector.getJsInitLines(featureContext).data,[
 				"var barYLoc=gl.getUniformLocation(program,'barY');",
 				"gl.uniform1f(barYLoc,+2.500);"
 			]);
-			assert.deepEqual(canvasMousemoveListener.write(false,false).data,[
+			assert.deepEqual(featureContext.getJsAfterInitLines().data,[
 				"canvas.addEventListener('mousemove',function(ev){",
 				"	var rect=this.getBoundingClientRect();",
 				"	var minBarY=-4.000;",
@@ -272,12 +285,13 @@ describe('GlslVector',function(){
 		}});
 		const vector=new GlslVector('bar',options.fix().foo);
 		it('returns interface without update fn',function(){
-			var canvasMousemoveListener=new listeners.CanvasMousemoveListener;
-			assert.deepEqual(vector.getJsInterfaceLines([false,false],canvasMousemoveListener).data,[
+			const featureContext=new FeatureContext(false);
+			featureContext.hasStartTime=true; // animated
+			assert.deepEqual(vector.getJsInitLines(featureContext).data,[
 				"var barLoc=gl.getUniformLocation(program,'bar');",
 				"gl.uniform2f(barLoc,+1.500,+2.500);"
 			]);
-			assert.deepEqual(canvasMousemoveListener.write(false,false).data,[
+			assert.deepEqual(featureContext.getJsAfterInitLines().data,[
 				"canvas.addEventListener('mousemove',function(ev){",
 				"	var rect=this.getBoundingClientRect();",
 				"	var minBarX=-4.000;",
@@ -297,14 +311,15 @@ describe('GlslVector',function(){
 		}});
 		const vector=new GlslVector('bar',options.fix().foo);
 		it('returns interface without update fn',function(){
-			var canvasMousemoveListener=new listeners.CanvasMousemoveListener;
-			assert.deepEqual(vector.getJsInterfaceLines([false,false],canvasMousemoveListener).data,[
+			const featureContext=new FeatureContext(false);
+			featureContext.hasStartTime=true; // animated
+			assert.deepEqual(vector.getJsInitLines(featureContext).data,[
 				"var barYLoc=gl.getUniformLocation(program,'barY');",
 				"var barZLoc=gl.getUniformLocation(program,'barZ');",
 				"gl.uniform1f(barYLoc,+2.500);",
 				"gl.uniform1f(barZLoc,+3.000);"
 			]);
-			assert.deepEqual(canvasMousemoveListener.write(false,false).data,[
+			assert.deepEqual(featureContext.getJsAfterInitLines().data,[
 				"canvas.addEventListener('mousemove',function(ev){",
 				"	var rect=this.getBoundingClientRect();",
 				"	var minBarY=-4.000;",

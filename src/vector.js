@@ -83,7 +83,7 @@ class Vector extends Feature {
 		lines.a(
 			this.writeJsInitStartLines()
 		);
-		if (this.modeConstant) {
+		if (this.modeConstant) { // safe to skip this check
 			return lines;
 		}
 		const manyListenersLines=writeManyListenersLines();
