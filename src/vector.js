@@ -55,7 +55,14 @@ class Vector extends Feature {
 	addPostToListenerEntryForComponent(entry,c) {} // do necessary entry.post()
 	addPostToListenerEntryAfterComponents(entry) {}
 	// public:
+	requestFeatureContext(featureContext) {
+		super.requestFeatureContext(featureContext);
+		if (this.nSliders>0) {
+			featureContext.hasSliders=true;
+		}
+	}
 	getJsInitLines(featureContext) {
+		const lines=super.getJsInitLines(featureContext);
 		const writeManyListenersLines=()=>{
 			const lines=new Lines;
 			this.values.forEach((v,c)=>{
@@ -79,7 +86,6 @@ class Vector extends Feature {
 				listener.write(!featureContext.isAnimated,featureContext.haveToLogInput)
 			);
 		};
-		const lines=new Lines;
 		lines.a(
 			this.writeJsInitStartLines()
 		);

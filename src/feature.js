@@ -3,12 +3,28 @@
 const Lines=require('./lines.js');
 
 class Feature {
+	constructor() {
+		this.features=[];
+	}
 	// methods to be redefined
+	requestFeatureContext(featureContext) {
+		this.features.forEach(feature=>{
+			feature.requestFeatureContext(featureContext);
+		});
+	}
 	getJsInitLines(featureContext) {
-		return new Lines;
+		const lines=new Lines;
+		this.features.forEach(feature=>{
+			lines.a(feature.getJsInitLines(featureContext));
+		});
+		return lines;
 	}
 	getJsLoopLines() {
-		return new Lines;
+		const lines=new Lines;
+		this.features.forEach(feature=>{
+			lines.a(feature.getJsLoopLines());
+		});
+		return lines;
 	}
 }
 

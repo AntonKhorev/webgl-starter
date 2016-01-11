@@ -9,23 +9,15 @@ class Background extends Feature {
 		super();
 		this.isSolid=(options.type=='solid');
 		if (this.isSolid) {
-			this.colorVector=new CallVector('backgroundColor',options.color,'gl.clearColor',[0,0,0,0]);
-		}
-	}
-	getJsInitLines(featureContext) {
-		const lines=new Lines;
-		if (this.isSolid) {
-			lines.a(
-				this.colorVector.getJsInitLines(featureContext)
+			this.features.push(
+				this.colorVector=new CallVector('backgroundColor',options.color,'gl.clearColor',[0,0,0,0])
 			);
 		}
-		return lines;
 	}
 	getJsLoopLines() {
-		const lines=new Lines;
+		const lines=super.getJsLoopLines();
 		if (this.isSolid) {
 			lines.a(
-				this.colorVector.getJsLoopLines(),
 				"gl.clear(gl.COLOR_BUFFER_BIT);"
 			);
 		}

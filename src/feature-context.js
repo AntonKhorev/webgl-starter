@@ -6,7 +6,10 @@ class FeatureContext {
 	constructor(haveToLogInput) {
 		this.haveToLogInput=haveToLogInput;
 		this.canvasMousemoveListener=new listeners.CanvasMousemoveListener();
-		// to be set by faetures:
+		//// to be set by features:
+		// for html:
+		this.hasSliders=false;
+		// for js:
 		this.hasStartTime=false;
 		this.hasPrevTime=false;
 		this.pollsGamepad=false;

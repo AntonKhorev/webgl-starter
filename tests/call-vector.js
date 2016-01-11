@@ -43,6 +43,13 @@ describe("CallVector",function(){
 			r:{value:0.2,input:'slider'}, g:0.3, b:0.4, a:0.5
 		}});
 		const vector=new CallVector('color',options.fix().color,'up',[0.0,0.0,0.0,0.0]);
+		it("requests sliders",function(){
+			const testFeatureContext={};
+			vector.requestFeatureContext(testFeatureContext);
+			assert.deepEqual(testFeatureContext,{
+				hasSliders: true,
+			});
+		});
 		it("returns interface with update fn and slider listener",function(){
 			const featureContext=new FeatureContext(false);
 			featureContext.hasStartTime=true; // animated

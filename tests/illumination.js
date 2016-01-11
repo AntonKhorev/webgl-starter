@@ -80,6 +80,13 @@ describe('Illumination',function(){
 			},
 		})).fix();
 		const illumination=new Illumination(options.material,options.light);
+		it("requests sliders",function(){
+			const testFeatureContext={};
+			illumination.requestFeatureContext(testFeatureContext);
+			assert.deepEqual(testFeatureContext,{
+				hasSliders: true,
+			});
+		});
 		it("has empty color attr list",function(){
 			assert.deepEqual(illumination.getColorAttrs(),[
 			]);

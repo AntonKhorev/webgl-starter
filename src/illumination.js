@@ -21,11 +21,15 @@ class Illumination extends Feature {
 		// light.type=='blinn'
 		if (material.scope=='global') {
 			if (material.data=='one') {
-				this.colorVector=new GlslVector('color',material.color);
+				this.features.push(
+					this.colorVector=new GlslVector('color',material.color)
+				);
 			} else if (light.type!='off') {
-				this.specularColorVector=new GlslVector('specularColor',material.specularColor);
-				this.diffuseColorVector =new GlslVector('diffuseColor' ,material.diffuseColor);
-				this.ambientColorVector =new GlslVector('ambientColor' ,material.ambientColor);
+				this.features.push(
+					this.specularColorVector=new GlslVector('specularColor',material.specularColor),
+					this.diffuseColorVector =new GlslVector('diffuseColor' ,material.diffuseColor),
+					this.ambientColorVector =new GlslVector('ambientColor' ,material.ambientColor)
+				);
 			} else {
 				const extendedAmbientColor=fixOptHelp.extendCollection(
 					material.ambientColor,
@@ -34,11 +38,15 @@ class Illumination extends Feature {
 						['LiveFloat','a',[0,1],1],
 					]
 				);
-				this.ambientColorVector=new GlslVector('ambientColor',extendedAmbientColor);
+				this.features.push(
+					this.ambientColorVector=new GlslVector('ambientColor',extendedAmbientColor)
+				);
 			}
 		}
 		if (light.type!='off') {
-			this.lightDirectionVector=new GlslVector('lightDirection',light.direction);
+			this.features.push(
+				this.lightDirectionVector=new GlslVector('lightDirection',light.direction)
+			);
 		}
 	}
 	getColorAttrs() {
@@ -220,24 +228,6 @@ class Illumination extends Feature {
 					",1.0);"
 				));
 			}
-		}
-		return lines;
-	}
-	getJsInitLines(featureContext) {
-		const lines=new Lines;
-		if (this.material.scope=='global') {
-			if (this.material.data=='one') {
-				lines.a(this.colorVector.getJsInitLines(featureContext));
-			} else {
-				if (this.light.type!='off') {
-					lines.a(this.specularColorVector.getJsInitLines(featureContext));
-					lines.a(this.diffuseColorVector.getJsInitLines(featureContext));
-				}
-				lines.a(this.ambientColorVector.getJsInitLines(featureContext));
-			}
-		}
-		if (this.light.type!='off') {
-			lines.a(this.lightDirectionVector.getJsInitLines(featureContext));
 		}
 		return lines;
 	}

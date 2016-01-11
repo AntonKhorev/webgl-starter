@@ -22,7 +22,8 @@ module.exports=function(options,i18n){
 		return ['mousemovex','mousemovey'].indexOf(options[name+'.input'])>=0;
 	}
 
-	const featureContext=new FeatureContext(options.debug.input);
+	const featureContext=new FeatureContext(options.debug.inputs);
+	const background=new Background(options.background);
 	const illumination=new Illumination(options.material,options.light);
 	function makeShape() {
 		const className=options.shape.type.charAt(0).toUpperCase()+options.shape.type.slice(1);
@@ -35,12 +36,18 @@ module.exports=function(options,i18n){
 		);
 	}
 	const shape=makeShape();
-	const background=new Background(options.background);
+	const features=[
+		background,
+		illumination,
+		// shape, // TODO
+	];
+	features.forEach(feature=>{
+		feature.requestFeatureContext(featureContext);
+	});
 
-	/*
-	function generateHtmlStyleLines() {
+	function getHtmlStyleLines() {
 		var lines=new Lines;
-		if (options.hasSliderInputs()) {
+		if (featureContext.hasSliders) {
 			lines.a(
 				"label {",
 				"	display: inline-block;",
@@ -64,6 +71,7 @@ module.exports=function(options,i18n){
 			"</style>"
 		);
 	}
+	/*
 	function generateVertexShaderLines() {
 		var use2dTransform=(
 			shape.dim==2 &&
@@ -409,8 +417,12 @@ module.exports=function(options,i18n){
 			"	document.getElementById('myVertexShader').text,",
 			"	document.getElementById('myFragmentShader').text",
 			");",
-			"gl.useProgram(program);",
-			background.getJsInitLines(featureContext),
+			"gl.useProgram(program);"
+		);
+		features.forEach(feature=>{
+			lines.a(feature.getJsInitLines(featureContext));
+		});
+		lines.a(
 			featureContext.getJsAfterInitLines()
 		);
 		return lines;
@@ -527,11 +539,11 @@ module.exports=function(options,i18n){
 		return lines;
 	}
 	*/
-	function generateJsLoopLines() {
+	function getJsLoopLines() {
 		const lines=new Lines;
-		lines.a(
-			background.getJsLoopLines()
-		);
+		features.forEach(feature=>{
+			lines.a(feature.getJsLoopLines());
+		});
 		return lines;
 		/*
 		var needStartTime=false; // set by renderInner()
@@ -720,7 +732,7 @@ module.exports=function(options,i18n){
 		getJsInitLines()/*,
 		shape.writeInit(options.debugArrays),
 		generateJsInputHandlerLines()*/,
-		generateJsLoopLines()
+		getJsLoopLines()
 	).wrap(
 		"<script>",
 		"</script>"
@@ -732,7 +744,7 @@ module.exports=function(options,i18n){
 		"<head>",
 		"<meta charset='utf-8' />",
 		"<title>Generated code</title>",
-		//generateHtmlStyleLines(),
+		getHtmlStyleLines(),
 		"<script id='myVertexShader' type='x-shader/x-vertex'>",
 		//generateVertexShaderLines().indent(),
 		"</script>",
