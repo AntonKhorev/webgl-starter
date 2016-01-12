@@ -1,24 +1,26 @@
-var gulp=require('gulp');
-var reload=require('require-reload')(require);
-var notify=require('gulp-notify');
-var file=require('gulp-file');
-var browserify=require('browserify');
-var source=require('vinyl-source-stream');
-var buffer=require('vinyl-buffer');
-var sourcemaps=require('gulp-sourcemaps');
-var wrapJS=require('gulp-wrap-js');
-var uglify=require('gulp-uglify');
-var less=require('gulp-less');
-var autoprefixer=require('gulp-autoprefixer');
-var minifyCss=require('gulp-minify-css');
-var mocha=require('gulp-mocha');
+'use strict';
 
-var demoDestination='public_html/en/base';
-var libDestination='public_html/lib';
+const gulp=require('gulp');
+const reload=require('require-reload')(require);
+const notify=require('gulp-notify');
+const file=require('gulp-file');
+const browserify=require('browserify');
+const source=require('vinyl-source-stream');
+const buffer=require('vinyl-buffer');
+const sourcemaps=require('gulp-sourcemaps');
+const wrapJS=require('gulp-wrap-js');
+const uglify=require('gulp-uglify');
+const less=require('gulp-less');
+const autoprefixer=require('gulp-autoprefixer');
+const minifyCss=require('gulp-minify-css');
+const mocha=require('gulp-mocha');
+
+const demoDestination='public_html/en/base';
+const libDestination='public_html/lib';
 
 // https://github.com/greypants/gulp-starter/blob/master/gulp/util/handleErrors.js
-function handleErrors() {
-	var args=Array.prototype.slice.call(arguments);
+const handleErrors=()=>{
+	const args=Array.prototype.slice.call(arguments);
 	notify.onError({
 		title: "Compile Error",
 		message: "<%= error %>"
@@ -26,7 +28,7 @@ function handleErrors() {
 	this.emit('end');
 }
 
-gulp.task('html',function(){
+gulp.task('html',()=>{
 	return file(
 		'index.html',
 		reload('./demos/template.js')(
@@ -39,7 +41,7 @@ gulp.task('html',function(){
 		.pipe(gulp.dest(demoDestination));
 });
 
-gulp.task('css',function(){
+gulp.task('css',()=>{
 	gulp.src('src/webgl-starter.less')
 		.pipe(sourcemaps.init())
 		.pipe(less())
@@ -52,39 +54,46 @@ gulp.task('css',function(){
 		.pipe(gulp.dest(libDestination));
 });
 
-gulp.task('js',function(){
-	browserify({
-		entries: 'src/main.js',
-		debug: true
-	})
-		.transform('babelify',{
-			presets:['es2015-loose'],
-			plugins:['external-helpers-2'],
+const makeJsTaskFn=(doUglify)=>{
+	return function(){
+		let stream=browserify({
+			entries: 'src/main.js',
+			debug: true
 		})
-		.bundle()
-		.on('error',handleErrors)
-		.pipe(source('webgl-starter.js'))
-		.pipe(buffer())
-		.pipe(sourcemaps.init({
-			loadMaps: true
-		}))
-		.pipe(wrapJS(
-			reload('./src/base/babel-helpers-wrapper.js')()
-		))
-		.pipe(uglify())
-		.pipe(sourcemaps.write('.',{
-			sourceRoot: '.'
-		}))
-		.pipe(gulp.dest(libDestination));
-});
+			.transform('babelify',{
+				presets:['es2015-loose'],
+				plugins:['external-helpers-2'],
+			})
+			.bundle()
+			.on('error',handleErrors)
+			.pipe(source('webgl-starter.js'))
+			.pipe(buffer())
+			.pipe(sourcemaps.init({
+				loadMaps: true
+			}))
+			.pipe(wrapJS(
+				reload('./src/base/babel-helpers-wrapper.js')()
+			));
+		if (doUglify) {
+			stream=stream.pipe(uglify())
+		}
+		stream
+			.pipe(sourcemaps.write('.',{
+				sourceRoot: '.'
+			}))
+			.pipe(gulp.dest(libDestination));
+	}
+};
+gulp.task('js',makeJsTaskFn(true));
+gulp.task('js-no-uglify',makeJsTaskFn(false));
 
-gulp.task('watch',function(){
+gulp.task('watch',()=>{
 	gulp.watch(['demos/*'],['html']);
 	gulp.watch(['src/**/*.js'],['js']);
 	gulp.watch(['src/*.less'],['css']);
 });
 
-gulp.task('test',function(){
+gulp.task('test',()=>{
 	gulp.src('tests/**/*.js')
 		.pipe(mocha());
 });

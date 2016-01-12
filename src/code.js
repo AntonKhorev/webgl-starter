@@ -5,6 +5,7 @@ const Lines=require('./lines.js');
 const listeners=require('./listeners.js');
 const shapes=require('./shapes.js');
 const FeatureContext=require('./feature-context.js');
+const Canvas=require('./canvas.js');
 const Background=require('./background.js');
 const Illumination=require('./illumination.js');
 
@@ -23,6 +24,7 @@ module.exports=function(options,i18n){
 	}
 
 	const featureContext=new FeatureContext(options.debug.inputs);
+	const canvas=new Canvas(options.canvas);
 	const background=new Background(options.background);
 	const illumination=new Illumination(options.material,options.light);
 	function makeShape() {
@@ -37,6 +39,7 @@ module.exports=function(options,i18n){
 	}
 	const shape=makeShape();
 	const features=[
+		canvas,
 		background,
 		illumination,
 		// shape, // TODO
@@ -758,9 +761,7 @@ module.exports=function(options,i18n){
 		"</script>",
 		"</head>",
 		"<body>",
-		"<div>",
-		"	<canvas id='myCanvas' width='"+options.canvas.width+"' height='"+options.canvas.height+"'></canvas>",
-		"</div>",
+		canvas.getHtmlCanvasLines(),
 		//generateHtmlControlMessageLines(),
 		getHtmlInputLines(),
 		scriptLines,
