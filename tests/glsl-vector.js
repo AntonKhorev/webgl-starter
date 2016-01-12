@@ -5,7 +5,7 @@ const Options=require('../src/options.js');
 const FeatureContext=require('../src/feature-context.js');
 const GlslVector=require('../src/glsl-vector.js');
 
-describe('GlslVector',function(){
+describe("GlslVector",()=>{
 	class TestOptions extends Options {
 		get entriesDescription() {
 			return [
@@ -17,24 +17,34 @@ describe('GlslVector',function(){
 			];
 		}
 	}
-	context('with constant vector',function(){
+	context("with constant vector",()=>{
 		const options=new TestOptions;
 		const vector=new GlslVector('foo',options.fix().foo);
-		it('returns empty declaration',function(){
+		it("returns empty declaration",()=>{
 			assert.deepEqual(vector.getGlslDeclarationLines().data,[
 			]);
 		});
-		it('returns constant vec3 value',function(){
+		it("returns constant vec3 value",()=>{
 			assert.equal(vector.getGlslValue(),
 				"vec3(+1.000,+2.000,+3.000)"
 			);
 		});
-		it('returns constant vec2 components',function(){
+		it("returns constant vec2 components",()=>{
 			assert.equal(vector.getGlslComponentsValue('yz'),
 				"vec2(+2.000,+3.000)"
 			);
 		});
-		it('returns empty js interface',function(){
+		it("returns vec3 map declaration",()=>{
+			assert.deepEqual(vector.getGlslMapDeclarationLines('ololo',v=>"lol("+v+")").data,[
+				"vec3 ololo=lol(vec3(+1.000,+2.000,+3.000));"
+			]);
+		});
+		it("returns vec3 map component",()=>{
+			assert.equal(vector.getGlslMapComponentValue('ololo','x'),
+				"ololo.x"
+			);
+		});
+		it("returns empty js interface",()=>{
 			const featureContext=new FeatureContext(false);
 			featureContext.hasStartTime=true; // animated
 			assert.deepEqual(vector.getJsInitLines(featureContext).data,[
@@ -373,6 +383,41 @@ describe('GlslVector',function(){
 		it('returns .x component of declared vec3',function(){
 			assert.equal(vector.getGlslComponentsValue('x'),
 				"myFoo.x"
+			);
+		});
+	});
+	context("with variable 1 component vector",()=>{
+		class OneComponentTestOptions extends Options {
+			get entriesDescription() {
+				return [
+					['Group','rotate',[
+						['LiveFloat','z',[-4.0,+4.0,-4.0,+4.0],+3.0],
+					]],
+				];
+			}
+		}
+		const options=new OneComponentTestOptions({rotate:{
+			z:{input:'slider'}
+		}});
+		const vector=new GlslVector('rotate',options.fix().rotate);
+		it("returns float declaration",()=>{
+			assert.deepEqual(vector.getGlslDeclarationLines().data,[
+				"uniform float rotateZ;"
+			]);
+		});
+		it("returns value equal to declaration",()=>{
+			assert.equal(vector.getGlslValue(),
+				"rotateZ"
+			);
+		});
+		it("returns float map declaration",()=>{
+			assert.deepEqual(vector.getGlslMapDeclarationLines('c',v=>"cos("+v+")").data,[
+				"float cz=cos(rotateZ);"
+			]);
+		});
+		it("returns float map",()=>{
+			assert.equal(vector.getGlslMapComponentValue('c','z'),
+				"cz"
 			);
 		});
 	});

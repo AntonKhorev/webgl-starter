@@ -82,26 +82,6 @@ module.exports=function(options,i18n){
 		const needTransformedPosition=illumination.wantsTransformedPosition(eyeAtInfinity);
 		function generateMain() {
 			const lines=new Lines();
-			/*
-			['x','y','z'].forEach(function(d){
-				var D=d.toUpperCase();
-				var optName='rotate.'+d;
-				var varName='rotate'+D;
-				if (options.needsTransform(optName)) {
-					if (options.needsUniform('rotate.'+d)) {
-						lines.a(
-							"float c"+d+"=cos(radians("+varName+"));",
-							"float s"+d+"=sin(radians("+varName+"));"
-						);
-					} else {
-						lines.a(
-							"float c"+d+"=cos(radians("+floatOptionValue(optName)+"));",
-							"float s"+d+"=sin(radians("+floatOptionValue(optName)+"));"
-						);
-					}
-				}
-			});
-			*/
 			lines.a(
 				canvas.getGlslVertexOutputLines(),
 				transforms.getGlslVertexOutputLines(shape.dim==2,needTransformedPosition)
@@ -241,16 +221,6 @@ module.exports=function(options,i18n){
 			return lines;
 		}
 		const lines=new Lines();
-		/*
-		['x','y','z'].forEach(function(d){
-			var D=d.toUpperCase();
-			var optName='rotate.'+d;
-			var varName='rotate'+D;
-			if (options.needsUniform(optName)) {
-				lines.a("uniform float "+varName+";");
-			}
-		});
-		*/
 		lines.a(
 			canvas.getGlslVertexDeclarationLines(),
 			transforms.getGlslVertexDeclarationLines(shape.dim==2),

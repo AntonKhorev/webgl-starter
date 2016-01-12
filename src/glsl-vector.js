@@ -28,31 +28,7 @@ class GlslVector extends Vector {
 		}
 	}
 	getGlslValue() {
-		const vecType="vec"+this.values.length;
-		let vs=this.values.map((v,c)=>{
-			if (v.input=='constant') {
-				return fixOptHelp.formatNumber(v);
-			} else {
-				return this.varNameC(c);
-			}
-		});
-		if (this.modeConstant) {
-			const equalValues=vs.every(function(v){
-				return v==vs[0];
-			});
-			if (equalValues) {
-				return vecType+"("+vs[0]+")"; // see OpenGL ES SL section 5.4.2
-			} else {
-				return vecType+"("+vs.join(",")+")";
-			}
-		} else if (!this.modeFloats) {
-			vs=vs.slice(this.nVars);
-			if (vs.length==0) {
-				return this.varName;
-			}
-			vs.unshift(this.varName);
-		}
-		return vecType+"("+vs.join(",")+")";
+		return this.getGlslComponentsValue(this.values.map((v,c)=>c).join(''));
 	}
 	getGlslComponentsValue(selectedComponents) {
 		const results=[]; // [[isConstant,componentName]]
@@ -61,7 +37,12 @@ class GlslVector extends Vector {
 				return fixOptHelp.formatNumber(this.values[result[1]]);
 			} else {
 				if (this.modeVector) {
-					return this.varName+"."+result[1];
+					const resultPartEqualToWholeVector=result[1]==this.values.map((v,c)=>c).slice(0,this.nVars).join('');
+					if (resultPartEqualToWholeVector) {
+						return this.varName;
+					} else {
+						return this.varName+"."+result[1];
+					}
 				} else {
 					return this.varNameC(result[1]);
 				}
@@ -97,10 +78,28 @@ class GlslVector extends Vector {
 			}
 		} else {
 			if (allSameConstant()) {
-				return "vec"+selectedComponents.length+"("+showResult(results[0])+")";
+				return "vec"+selectedComponents.length+"("+showResult(results[0])+")"; // see OpenGL ES SL section 5.4.2
 			} else {
 				return "vec"+selectedComponents.length+"("+results.map(showResult).join(",")+")";
 			}
+		}
+	}
+	getGlslMapDeclarationLines(mapName,mapFn) {
+		if (this.values.length>1) {
+			return new Lines(
+				"vec"+this.values.length+" "+mapName+"="+mapFn(this.getGlslValue())+";"
+			);
+		} else {
+			return new Lines(
+				"float "+mapName+this.values.map((v,c)=>c)[0]+"="+mapFn(this.getGlslValue())+";"
+			);
+		}
+	}
+	getGlslMapComponentValue(mapName,selectedComponent) {
+		if (this.values.length>1) {
+			return mapName+"."+selectedComponent;
+		} else {
+			return mapName+selectedComponent;
 		}
 	}
 	// private:

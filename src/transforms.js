@@ -10,7 +10,7 @@ class Transforms extends Feature {
 	constructor(options) {
 		super();
 		this.options=options;
-		this.vectors=[]; // like features, but vectors have additional methods that don't follow feature interfaces
+		this.rotateVectorEntries=[]; // [{vector,suffix}] like features, but vectors have additional methods that don't follow feature interfaces
 		const possibleComponents=['x','y','z'];
 		const rotate=[[],[],[]];
 		options.model.forEach((tr,iTr)=>{
@@ -49,11 +49,21 @@ class Transforms extends Feature {
 			}
 			const makeVector=(values,names)=>{
 				const vector=new GlslVector('transforms.model.rotate',fixOptHelp.makeCollection(values,names,Options));
-				vector.varName='rotate'+(nLayers>1?i:'');
+				const suffix=(nLayers>1?String(i):'');
+				vector.varName='rotate'+suffix;
 				vector.htmlName='transforms.model.rotate'+(nLayers>1?'.'+i:'');
 				this.features.push(vector);
-				this.vectors.push(vector);
+				this.rotateVectorEntries.push({
+					vector: vector,
+					suffix: suffix,
+				});
 				return vector;
+			};
+			const storeSequenceElement=(vector,j)=>{
+				transformSequence[rotate[j][i].index]={
+					vector: vector,
+					component: possibleComponents[j]
+				};
 			};
 			if (isStraight) {
 				const vector=makeVector(
@@ -61,10 +71,7 @@ class Transforms extends Feature {
 					possibleComponents.slice(0,lastStraightIndex+1)
 				);
 				for (let j=0;j<=lastStraightIndex;j++) {
-					transformSequence[rotate[j][i].index]={
-						vector: vector,
-						component: possibleComponents[j]
-					};
+					storeSequenceElement(vector,j);
 				}
 			} else {
 				for (let j=0;j<3;j++) {
@@ -74,10 +81,7 @@ class Transforms extends Feature {
 							[rotate[j][i].transform],
 							possibleComponents.slice(j,j+1)
 						);
-						transformSequence[rotate[j][i].index]={
-							vector: vector,
-							component: possibleComponents[j]
-						};
+						storeSequenceElement(vector,j);
 					}
 				}
 			}
@@ -90,8 +94,8 @@ class Transforms extends Feature {
 	// public:
 	getGlslVertexDeclarationLines(flatShape) {
 		const lines=new Lines;
-		this.vectors.forEach(vector=>{
-			lines.a(vector.getGlslDeclarationLines())
+		this.rotateVectorEntries.forEach(rve=>{
+			lines.a(rve.vector.getGlslDeclarationLines())
 		});
 		if (this.use2dTransform(flatShape)) {
 			lines.a("attribute vec2 position;");
@@ -102,6 +106,12 @@ class Transforms extends Feature {
 	}
 	getGlslVertexOutputLines(flatShape,needTransformedPosition) {
 		const lines=new Lines;
+		this.rotateVectorEntries.forEach(rve=>{
+			lines.a(
+				rve.vector.getGlslMapDeclarationLines('c'+rve.suffix,v=>`cos(radians(${v}))`),
+				rve.vector.getGlslMapDeclarationLines('s'+rve.suffix,v=>`sin(radians(${v}))`)
+			);
+		});
 		if (this.options.projection=='perspective') {
 			lines.a(
 				"float fovy=45.0;",
