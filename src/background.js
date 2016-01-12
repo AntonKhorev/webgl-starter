@@ -10,7 +10,7 @@ class Background extends Feature {
 		this.isSolid=(options.type=='solid');
 		if (this.isSolid) {
 			this.features.push(
-				this.colorVector=new CallVector('background.color',options.color,'gl.clearColor',[0,0,0,0])
+				new CallVector('background.color',options.color,'gl.clearColor',[0,0,0,0])
 			);
 		}
 	}

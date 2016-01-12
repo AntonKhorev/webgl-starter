@@ -3,9 +3,9 @@
 const fixOptHelp=require('./fixed-options-helpers.js');
 const Lines=require('./lines.js');
 const listeners=require('./listeners.js');
-const Feature=require('./feature.js');
+const NumericFeature=require('./numeric-feature.js');
 
-class Vector extends Feature {
+class Vector extends NumericFeature {
 	constructor(name,values) {
 		super();
 		this.name=name; // name with dots like "material.color", transformed into "materialColor" for js var names

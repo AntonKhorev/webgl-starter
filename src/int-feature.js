@@ -1,0 +1,34 @@
+'use strict';
+
+const NumericFeature=require('./numeric-feature.js');
+
+class IntFeature extends NumericFeature {
+	constructor(name,value) {
+		super();
+		this.name=name;
+		this.value=value;
+	}
+	requestFeatureContext(featureContext) {
+		super.requestFeatureContext(featureContext);
+		if (this.value.input=='slider') {
+			featureContext.hasSliders=true;
+		}
+	}
+	getHtmlInputLines(i18n) {
+		const lines=super.getHtmlInputLines(i18n);
+		const v=this.value;
+		if (v.input=='slider') {
+			lines.a(
+				"<div>",
+				"	<label for='"+this.name+"'>"+i18n('options.'+this.name)+":</label>",
+				"	<span class='min'>"+i18n('options.'+this.name+'.value',v.min)+"</span>",
+				"	<input type='range' id='"+this.name+"' min='"+v.min+"' max='"+v.max+"' value='"+v+"' />",
+				"	<span class='max'>"+i18n('options.'+this.name+'.value',v.max)+"</span>",
+				"</div>"
+			);
+		}
+		return lines;
+	}
+}
+
+module.exports=IntFeature;

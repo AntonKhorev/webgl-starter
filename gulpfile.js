@@ -19,7 +19,7 @@ const demoDestination='public_html/en/base';
 const libDestination='public_html/lib';
 
 // https://github.com/greypants/gulp-starter/blob/master/gulp/util/handleErrors.js
-const handleErrors=()=>{
+function handleErrors() {
 	const args=Array.prototype.slice.call(arguments);
 	notify.onError({
 		title: "Compile Error",
@@ -54,8 +54,8 @@ gulp.task('css',()=>{
 		.pipe(gulp.dest(libDestination));
 });
 
-const makeJsTaskFn=(doUglify)=>{
-	return function(){
+function makeJsTaskFn(doUglify) {
+	return ()=>{
 		let stream=browserify({
 			entries: 'src/main.js',
 			debug: true
@@ -75,7 +75,7 @@ const makeJsTaskFn=(doUglify)=>{
 				reload('./src/base/babel-helpers-wrapper.js')()
 			));
 		if (doUglify) {
-			stream=stream.pipe(uglify())
+			stream=stream.pipe(uglify());
 		}
 		stream
 			.pipe(sourcemaps.write('.',{
@@ -83,7 +83,7 @@ const makeJsTaskFn=(doUglify)=>{
 			}))
 			.pipe(gulp.dest(libDestination));
 	}
-};
+}
 gulp.task('js',makeJsTaskFn(true));
 gulp.task('js-no-uglify',makeJsTaskFn(false));
 

@@ -59,12 +59,12 @@ module.exports=function(options,i18n){
 				"}",
 				".min {",
 				"	display: inline-block;",
-				"	width: 3em;",
+				"	width: 4em;",
 				"	text-align: right;",
 				"}",
 				".max {",
 				"	display: inline-block;",
-				"	width: 3em;",
+				"	width: 4em;",
 				"	text-align: left;",
 				"}"
 			);
@@ -323,50 +323,6 @@ module.exports=function(options,i18n){
 		features.forEach(feature=>{
 			lines.a(feature.getHtmlInputLines(i18n));
 		});
-		/*
-		function writeOptionGroup(group) {
-			group.filter(function(option){
-				return options[option.name+'.input']=='slider';
-			}).forEach(function(option){
-				lines.a(
-					"<div>",
-					"	<label for='"+option.name+"'>"+i18n('options.'+option.name)+":</label>"
-				);
-				if (option.name!='shapeLod') {
-					lines.a(
-						"	<span class='min'>"+option.getMinLabel(options[option.name+'.min'])+"</span> "
-					);
-					if (option.getStep()==1) {
-						lines.t(
-							"<input type='range' id='"+option.name+"' min='"+intOptionValue(option.name+'.min')+"' max='"+intOptionValue(option.name+'.max')+"' value='"+intOptionValue(option.name)+"' />"
-						);
-					} else {
-						lines.t(
-							"<input type='range' id='"+option.name+"' min='"+floatOptionValue(option.name+'.min')+"' max='"+floatOptionValue(option.name+'.max')+"' step='"+option.getStep()+"' value='"+floatOptionValue(option.name)+"' />"
-						);
-					}
-					lines.t(
-						" <span class='max'>"+option.getMaxLabel(options[option.name+'.max'])+"</span>"
-					);
-				} else {
-					lines.a(
-						"	<span class='min'>"+option.getMinLabel(shape.lod.min)+"</span> "
-					);
-					lines.t(
-							"<input type='range' id='"+option.name+"' min='"+shape.lod.min+"' max='"+shape.lod.max+"' value='"+shape.lod.value+"' />"
-						);
-					lines.t(
-						" <span class='max'>"+option.getMaxLabel(shape.lod.max)+"</span>"
-					);
-				}
-				lines.t(
-					"</div>"
-				);
-			});
-		}
-		writeOptionGroup(options.inputOptions);
-		writeOptionGroup(options.transformOptions);
-		*/
 		return lines;
 	}
 	function getJsInitLines() {
