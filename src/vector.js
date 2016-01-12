@@ -8,13 +8,13 @@ const Feature=require('./feature.js');
 class Vector extends Feature {
 	constructor(name,values) {
 		super();
-		this.name=name;
+		this.name=name; // name with dots like "material.color", transformed into "materialColor" for js var names
 		this.values=values;
 		this.nVars=0;
 		this.nSliders=0; // sliders are <input> elements with values that can be populated by the browser, disregarding default value
 		this.nMousemoves=0;
-		this.modeConstant=true;
-		this.modeFloats=false;
+		this.modeConstant=true; // all vector components are constants
+		this.modeFloats=false; // one/some vector components are variable, such components get their own glsl vars
 		values.map((v,c,i)=>{
 			if (v.input!='constant') {
 				this.modeConstant=false;
@@ -28,17 +28,23 @@ class Vector extends Feature {
 		if (this.nVars==1) {
 			this.modeFloats=true;
 		}
-		this.modeVector=(!this.modeConstant && !this.modeFloats);
+		this.modeVector=(!this.modeConstant && !this.modeFloats); // first consecutive components are variable, packed into one glsl vector
 	}
-	updateFnName() {
+	convertStringToCamelCase(s) {
 		function capitalize(s) {
 			return s.charAt(0).toUpperCase()+s.slice(1);
 		}
-		return 'update'+capitalize(this.name);
+		return s.split('.').map((w,i)=>i>0?capitalize(w):w).join('');
+	}
+	updateFnName() {
+		return this.convertStringToCamelCase('update.'+this.name);
+	}
+	varName() {
+		return this.convertStringToCamelCase(this.name);
 	}
 	// fns that can be mapped over values/components:
 	varNameC(c) {
-		return this.name+c.toUpperCase();
+		return this.convertStringToCamelCase(this.name+'.'+c);
 	}
 	componentValue(v,c) {
 		if (v.input=='constant') {
@@ -60,6 +66,23 @@ class Vector extends Feature {
 		if (this.nSliders>0) {
 			featureContext.hasSliders=true;
 		}
+	}
+	getHtmlInputLines(i18n) {
+		const lines=super.getHtmlInputLines(i18n);
+		this.values.forEach((v,c)=>{
+			if (v.input!='slider') return;
+			const namec=this.name+'.'+c;
+			const fmt=fixOptHelp.makeFormatNumber(v);
+			lines.a(
+				"<div>",
+				"	<label for='"+namec+"'>"+i18n('options.'+namec)+":</label>",
+				"	<span class='min'>"+i18n('options.'+namec+'.value',v.min)+"</span>",
+				"	<input type='range' id='"+namec+"' min='"+fmt(v.min)+"' max='"+fmt(v.max)+"' value='"+fmt(v)+"' step='any' />",
+				"	<span class='max'>"+i18n('options.'+namec+'.value',v.max)+"</span>",
+				"</div>"
+			);
+		});
+		return lines;
 	}
 	getJsInitLines(featureContext) {
 		const lines=super.getJsInitLines(featureContext);

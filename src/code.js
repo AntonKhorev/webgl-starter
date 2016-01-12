@@ -314,8 +314,13 @@ module.exports=function(options,i18n){
 			"</ul>"
 		);
 	}
-	function generateHtmlInputLines() {
+	*/
+	function getHtmlInputLines() {
 		var lines=new Lines;
+		features.forEach(feature=>{
+			lines.a(feature.getHtmlInputLines(i18n));
+		});
+		/*
 		function writeOptionGroup(group) {
 			group.filter(function(option){
 				return options[option.name+'.input']=='slider';
@@ -358,9 +363,9 @@ module.exports=function(options,i18n){
 		}
 		writeOptionGroup(options.inputOptions);
 		writeOptionGroup(options.transformOptions);
+		*/
 		return lines;
 	}
-	*/
 	function getJsInitLines() {
 		function getMakeProgramLines() {
 			const lines=new Lines;
@@ -757,7 +762,7 @@ module.exports=function(options,i18n){
 		"	<canvas id='myCanvas' width='"+options.canvas.width+"' height='"+options.canvas.height+"'></canvas>",
 		"</div>",
 		//generateHtmlControlMessageLines(),
-		//generateHtmlInputLines(),
+		getHtmlInputLines(),
 		scriptLines,
 		"</body>",
 		"</html>"

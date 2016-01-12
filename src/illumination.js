@@ -22,13 +22,13 @@ class Illumination extends Feature {
 		if (material.scope=='global') {
 			if (material.data=='one') {
 				this.features.push(
-					this.colorVector=new GlslVector('color',material.color)
+					this.colorVector=new GlslVector('material.color',material.color)
 				);
 			} else if (light.type!='off') {
 				this.features.push(
-					this.specularColorVector=new GlslVector('specularColor',material.specularColor),
-					this.diffuseColorVector =new GlslVector('diffuseColor' ,material.diffuseColor),
-					this.ambientColorVector =new GlslVector('ambientColor' ,material.ambientColor)
+					this.specularColorVector=new GlslVector('material.specularColor',material.specularColor),
+					this.diffuseColorVector =new GlslVector('material.diffuseColor' ,material.diffuseColor),
+					this.ambientColorVector =new GlslVector('material.ambientColor' ,material.ambientColor)
 				);
 			} else {
 				const extendedAmbientColor=fixOptHelp.extendCollection(
@@ -39,13 +39,14 @@ class Illumination extends Feature {
 					]
 				);
 				this.features.push(
-					this.ambientColorVector=new GlslVector('ambientColor',extendedAmbientColor)
+					this.ambientColorVector=new GlslVector('material.ambientColor',extendedAmbientColor)
 				);
+				// TODO consider extendind .specularColor and .diffuseColor, b/c they would be present if vertex scope is chosen
 			}
 		}
 		if (light.type!='off') {
 			this.features.push(
-				this.lightDirectionVector=new GlslVector('lightDirection',light.direction)
+				this.lightDirectionVector=new GlslVector('light.direction',light.direction)
 			);
 		}
 	}

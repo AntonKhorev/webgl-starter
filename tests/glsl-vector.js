@@ -126,6 +126,11 @@ describe('GlslVector',function(){
 				"vec3(foo,+3.000)"
 			);
 		});
+		it('returns original vec2 .x as components',function(){
+			assert.equal(vector.getGlslComponentsValue('x'),
+				"foo.x"
+			);
+		});
 		it('returns original vec2 as components',function(){
 			assert.equal(vector.getGlslComponentsValue('xy'),
 				"foo"
@@ -347,6 +352,27 @@ describe('GlslVector',function(){
 		it('returns unsigned value',function(){
 			assert.equal(vector.getGlslValue(),
 				"vec4(0.200,0.300,0.400,0.500)"
+			);
+		});
+	});
+	context('with all-variable 3 component vector and name with dot',function(){
+		const options=new TestOptions({foo:{
+			x:{input:'slider'}, y:{input:'slider'}, z:{input:'slider'}
+		}});
+		const vector=new GlslVector('my.foo',options.fix().foo);
+		it('returns vec3 declaration',function(){
+			assert.deepEqual(vector.getGlslDeclarationLines().data,[
+				"uniform vec3 myFoo;"
+			]);
+		});
+		it('returns value equal to declaration',function(){
+			assert.equal(vector.getGlslValue(),
+				"myFoo"
+			);
+		});
+		it('returns .x component of declared vec3',function(){
+			assert.equal(vector.getGlslComponentsValue('x'),
+				"myFoo.x"
 			);
 		});
 	});

@@ -23,7 +23,7 @@ class GlslVector extends Vector {
 			return lines;
 		} else {
 			return new Lines(
-				"uniform vec"+this.nVars+" "+this.name+";"
+				"uniform vec"+this.nVars+" "+this.varName()+";"
 			);
 		}
 	}
@@ -48,9 +48,9 @@ class GlslVector extends Vector {
 		} else if (!this.modeFloats) {
 			vs=vs.slice(this.nVars);
 			if (vs.length==0) {
-				return this.name;
+				return this.varName();
 			}
-			vs.unshift(this.name);
+			vs.unshift(this.varName());
 		}
 		return vecType+"("+vs.join(",")+")";
 	}
@@ -61,7 +61,7 @@ class GlslVector extends Vector {
 				return fixOptHelp.formatNumber(this.values[result[1]]);
 			} else {
 				if (this.modeVector) {
-					return this.name+"."+result[1];
+					return this.varName()+"."+result[1];
 				} else {
 					return this.varNameC(result[1]);
 				}
@@ -90,10 +90,8 @@ class GlslVector extends Vector {
 			}
 		}
 		if (results.length==1) {
-			if (this.modeVector && this.values.every((v,c,i)=>(
-				i>=selectedComponents.length || c==selectedComponents.charAt(i)
-			))) {
-				return this.name;
+			if (this.modeVector && selectedComponents==this.values.map((v,c)=>c).slice(0,this.nVars).join('')) {
+				return this.varName();
 			} else {
 				return showResult(results[0]);
 			}

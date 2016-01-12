@@ -107,24 +107,24 @@ describe('Illumination',function(){
 		});
 		it("declares 1 uniform float for fragment shader",function(){
 			assert.deepEqual(illumination.getGlslFragmentDeclarationLines(true).data,[
-				"uniform float colorR;"
+				"uniform float materialColorR;"
 			]);
 		});
 		it("outputs literal with 1 variable for fragment shader",function(){
 			assert.deepEqual(illumination.getGlslFragmentOutputLines(true,false).data,[
-				"gl_FragColor=vec4(colorR,0.700,0.500,1.000);"
+				"gl_FragColor=vec4(materialColorR,0.700,0.500,1.000);"
 			]);
 		});
 		it("returns slider js interface",function(){
 			const featureContext=new FeatureContext(false);
 			featureContext.hasStartTime=true; // animated
 			assert.deepEqual(illumination.getJsInitLines(featureContext).data,[
-				"var colorRLoc=gl.getUniformLocation(program,'colorR');",
-				"function updateColor() {",
-				"	gl.uniform1f(colorRLoc,parseFloat(document.getElementById('color.r').value));",
+				"var materialColorRLoc=gl.getUniformLocation(program,'materialColorR');",
+				"function updateMaterialColor() {",
+				"	gl.uniform1f(materialColorRLoc,parseFloat(document.getElementById('material.color.r').value));",
 				"}",
-				"updateColor();",
-				"document.getElementById('color.r').addEventListener('change',updateColor);"
+				"updateMaterialColor();",
+				"document.getElementById('material.color.r').addEventListener('change',updateMaterialColor);"
 			]);
 			assert.deepEqual(featureContext.getJsAfterInitLines().data,[
 			]);
@@ -250,24 +250,24 @@ describe('Illumination',function(){
 		});
 		it("declares uniform float (skipping unused specular color) for fragment shader",function(){
 			assert.deepEqual(illumination.getGlslFragmentDeclarationLines(true).data,[
-				"uniform float ambientColorB;"
+				"uniform float materialAmbientColorB;"
 			]);
 		});
 		it("outputs literal with 1 variable for fragment shader",function(){
 			assert.deepEqual(illumination.getGlslFragmentOutputLines(true,false).data,[
-				"gl_FragColor=vec4(0.700,0.500,ambientColorB,1.000);"
+				"gl_FragColor=vec4(0.700,0.500,materialAmbientColorB,1.000);"
 			]);
 		});
 		it("returns slider js interface (skipping unused specular color)",function(){
 			const featureContext=new FeatureContext(false);
 			featureContext.hasStartTime=true; // animated
 			assert.deepEqual(illumination.getJsInitLines(featureContext).data,[
-				"var ambientColorBLoc=gl.getUniformLocation(program,'ambientColorB');",
-				"function updateAmbientColor() {",
-				"	gl.uniform1f(ambientColorBLoc,parseFloat(document.getElementById('ambientColor.b').value));",
+				"var materialAmbientColorBLoc=gl.getUniformLocation(program,'materialAmbientColorB');",
+				"function updateMaterialAmbientColor() {",
+				"	gl.uniform1f(materialAmbientColorBLoc,parseFloat(document.getElementById('material.ambientColor.b').value));",
 				"}",
-				"updateAmbientColor();",
-				"document.getElementById('ambientColor.b').addEventListener('change',updateAmbientColor);"
+				"updateMaterialAmbientColor();",
+				"document.getElementById('material.ambientColor.b').addEventListener('change',updateMaterialAmbientColor);"
 			]);
 			assert.deepEqual(featureContext.getJsAfterInitLines().data,[
 			]);
@@ -299,12 +299,12 @@ describe('Illumination',function(){
 		});
 		it("declares uniform vec3 (skipping unused specular and diffuse colors) for fragment shader",function(){
 			assert.deepEqual(illumination.getGlslFragmentDeclarationLines(true).data,[
-				"uniform vec3 ambientColor;"
+				"uniform vec3 materialAmbientColor;"
 			]);
 		});
 		it("outputs literal with vec3 for fragment shader",function(){
 			assert.deepEqual(illumination.getGlslFragmentOutputLines(true,false).data,[
-				"gl_FragColor=vec4(ambientColor,1.000);"
+				"gl_FragColor=vec4(materialAmbientColor,1.000);"
 			]);
 		});
 	});
@@ -493,10 +493,10 @@ describe('Illumination',function(){
 			assert.deepEqual(illumination.getJsInitLines(featureContext).data,[
 				"var lightDirectionXLoc=gl.getUniformLocation(program,'lightDirectionX');",
 				"function updateLightDirection() {",
-				"	gl.uniform1f(lightDirectionXLoc,parseFloat(document.getElementById('lightDirection.x').value));",
+				"	gl.uniform1f(lightDirectionXLoc,parseFloat(document.getElementById('light.direction.x').value));",
 				"}",
 				"updateLightDirection();",
-				"document.getElementById('lightDirection.x').addEventListener('change',updateLightDirection);"
+				"document.getElementById('light.direction.x').addEventListener('change',updateLightDirection);"
 			]);
 			assert.deepEqual(featureContext.getJsAfterInitLines().data,[
 			]);
@@ -648,7 +648,7 @@ describe('Illumination',function(){
 		it("declares normal and color component for fragment shader",function(){
 			assert.deepEqual(illumination.getGlslFragmentDeclarationLines(true).data,[
 				"varying vec3 interpolatedNormal;",
-				"uniform float specularColorR;",
+				"uniform float materialSpecularColorR;",
 			]);
 		});
 		it("outputs blinn-phong shading for fragment shader",function(){
@@ -659,7 +659,7 @@ describe('Illumination',function(){
 				"vec3 H=normalize(L+V);",
 				"float shininess=100.0;",
 				"gl_FragColor=vec4(",
-				"	+vec3(specularColorR,0.700,0.500)*pow(max(0.0,dot(H,N)),shininess)",
+				"	+vec3(materialSpecularColorR,0.700,0.500)*pow(max(0.0,dot(H,N)),shininess)",
 				"	+vec3(0.800,0.600,0.400)*max(0.0,dot(L,N))",
 				"	+vec3(0.700,0.500,0.300)",
 				",1.0);"
@@ -669,12 +669,12 @@ describe('Illumination',function(){
 			const featureContext=new FeatureContext(false);
 			featureContext.hasStartTime=true; // animated
 			assert.deepEqual(illumination.getJsInitLines(featureContext).data,[
-				"var specularColorRLoc=gl.getUniformLocation(program,'specularColorR');",
-				"function updateSpecularColor() {",
-				"	gl.uniform1f(specularColorRLoc,parseFloat(document.getElementById('specularColor.r').value));",
+				"var materialSpecularColorRLoc=gl.getUniformLocation(program,'materialSpecularColorR');",
+				"function updateMaterialSpecularColor() {",
+				"	gl.uniform1f(materialSpecularColorRLoc,parseFloat(document.getElementById('material.specularColor.r').value));",
 				"}",
-				"updateSpecularColor();",
-				"document.getElementById('specularColor.r').addEventListener('change',updateSpecularColor);"
+				"updateMaterialSpecularColor();",
+				"document.getElementById('material.specularColor.r').addEventListener('change',updateMaterialSpecularColor);"
 			]);
 			assert.deepEqual(featureContext.getJsAfterInitLines().data,[
 			]);

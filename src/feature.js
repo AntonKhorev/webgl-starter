@@ -12,6 +12,13 @@ class Feature {
 			feature.requestFeatureContext(featureContext);
 		});
 	}
+	getHtmlInputLines(i18n) {
+		const lines=new Lines;
+		this.features.forEach(feature=>{
+			lines.a(feature.getHtmlInputLines(i18n));
+		});
+		return lines;
+	}
 	getJsInitLines(featureContext) {
 		const lines=new Lines;
 		this.features.forEach(feature=>{
