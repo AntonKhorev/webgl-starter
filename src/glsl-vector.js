@@ -23,7 +23,7 @@ class GlslVector extends Vector {
 			return lines;
 		} else {
 			return new Lines(
-				"uniform vec"+this.nVars+" "+this.varName()+";"
+				"uniform vec"+this.nVars+" "+this.varName+";"
 			);
 		}
 	}
@@ -48,9 +48,9 @@ class GlslVector extends Vector {
 		} else if (!this.modeFloats) {
 			vs=vs.slice(this.nVars);
 			if (vs.length==0) {
-				return this.varName();
+				return this.varName;
 			}
-			vs.unshift(this.varName());
+			vs.unshift(this.varName);
 		}
 		return vecType+"("+vs.join(",")+")";
 	}
@@ -61,7 +61,7 @@ class GlslVector extends Vector {
 				return fixOptHelp.formatNumber(this.values[result[1]]);
 			} else {
 				if (this.modeVector) {
-					return this.varName()+"."+result[1];
+					return this.varName+"."+result[1];
 				} else {
 					return this.varNameC(result[1]);
 				}
@@ -91,7 +91,7 @@ class GlslVector extends Vector {
 		}
 		if (results.length==1) {
 			if (this.modeVector && selectedComponents==this.values.map((v,c)=>c).slice(0,this.nVars).join('')) {
-				return this.varName();
+				return this.varName;
 			} else {
 				return showResult(results[0]);
 			}
@@ -178,7 +178,7 @@ class GlslVector extends Vector {
 		} else if (this.nSliders==0) {
 			entry.post("gl.uniform1f("+this.varNameC(c)+"Loc,"+this.varNameC(c)+");");
 		} else {
-			entry.post(this.updateFnName()+"();");
+			entry.post(this.updateFnName+"();");
 		}
 	}
 	addPostToListenerEntryAfterComponents(entry) {

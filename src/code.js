@@ -43,6 +43,7 @@ module.exports=function(options,i18n){
 	const features=[
 		canvas,
 		background,
+		transforms,
 		illumination,
 		shape,
 	];

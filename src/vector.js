@@ -9,6 +9,8 @@ class Vector extends NumericFeature {
 	constructor(name,values) {
 		super();
 		this.name=name; // name with dots like "material.color", transformed into "materialColor" for js var names
+		this.htmlName=name; // html id - ok to rewrite this property - Transforms does it
+		this.varName=this.convertStringToCamelCase(name); // js/glsl var name - ok to rewrite this property - Transforms does it
 		this.values=values;
 		this.nVars=0;
 		this.nSliders=0; // sliders are <input> elements with values that can be populated by the browser, disregarding default value
@@ -30,27 +32,24 @@ class Vector extends NumericFeature {
 		}
 		this.modeVector=(!this.modeConstant && !this.modeFloats); // first consecutive components are variable, packed into one glsl vector
 	}
-	convertStringToCamelCase(s) {
+	convertStringToCamelCase(s) { // TODO static
 		function capitalize(s) {
 			return s.charAt(0).toUpperCase()+s.slice(1);
 		}
 		return s.split('.').map((w,i)=>i>0?capitalize(w):w).join('');
 	}
-	updateFnName() {
-		return this.convertStringToCamelCase('update.'+this.name);
-	}
-	varName() {
-		return this.convertStringToCamelCase(this.name);
+	get updateFnName() {
+		return this.convertStringToCamelCase('update.'+this.varName);
 	}
 	// fns that can be mapped over values/components:
 	varNameC(c) {
-		return this.convertStringToCamelCase(this.name+'.'+c);
+		return this.convertStringToCamelCase(this.varName+'.'+c);
 	}
 	componentValue(v,c) {
 		if (v.input=='constant') {
 			return fixOptHelp.formatNumber(v);
 		} else if (v.input=='slider') {
-			return "parseFloat(document.getElementById('"+this.name+"."+c+"').value)";
+			return "parseFloat(document.getElementById('"+this.htmlName+"."+c+"').value)";
 		} else if (v.input=='mousemovex' || v.input=='mousemovey') {
 			return this.varNameC(c);
 		}
@@ -74,14 +73,14 @@ class Vector extends NumericFeature {
 		const lines=super.getHtmlInputLines(i18n);
 		this.values.forEach((v,c)=>{
 			if (v.input!='slider') return;
-			const namec=this.name+'.'+c;
+			const opnamec='options.'+this.name+'.'+c;
 			const fmt=fixOptHelp.makeFormatNumber(v);
 			lines.a(
 				"<div>",
-				"	<label for='"+namec+"'>"+i18n('options.'+namec)+":</label>",
-				"	<span class='min'>"+i18n('options.'+namec+'.value',v.min)+"</span>",
-				"	<input type='range' id='"+namec+"' min='"+fmt(v.min)+"' max='"+fmt(v.max)+"' value='"+fmt(v)+"' step='any' />",
-				"	<span class='max'>"+i18n('options.'+namec+'.value',v.max)+"</span>",
+				"	<label for='"+this.htmlName+"."+c+"'>"+i18n(opnamec)+":</label>",
+				"	<span class='min'>"+i18n(opnamec+'.value',v.min)+"</span>",
+				"	<input type='range' id='"+this.htmlName+"."+c+"' min='"+fmt(v.min)+"' max='"+fmt(v.max)+"' value='"+fmt(v)+"' step='any' />",
+				"	<span class='max'>"+i18n(opnamec+'.value',v.max)+"</span>",
 				"</div>"
 			);
 		});
@@ -96,7 +95,7 @@ class Vector extends NumericFeature {
 				const listener=new listeners.SliderListener(this.name+'.'+c);
 				listener.enter()
 					.log("console.log(this.id,'input value:',parseFloat(this.value));")
-					.post(this.updateFnName()+"();");
+					.post(this.updateFnName+"();");
 				lines.a(
 					listener.write(!featureContext.isAnimated,featureContext.debugOptions.inputs)
 				);
@@ -104,10 +103,10 @@ class Vector extends NumericFeature {
 			return lines;
 		};
 		const writeOneListenerLines=()=>{
-			const listener=new listeners.MultipleSliderListener("[id^=\""+this.name+".\"]");
+			const listener=new listeners.MultipleSliderListener("[id^=\""+this.htmlName+".\"]");
 			listener.enter()
 				.log("console.log(this.id,'input value:',parseFloat(this.value));")
-				.post(this.updateFnName()+"();");
+				.post(this.updateFnName+"();");
 			return new Lines(
 				listener.write(!featureContext.isAnimated,featureContext.debugOptions.inputs)
 			);
@@ -130,10 +129,10 @@ class Vector extends NumericFeature {
 			});
 			lines.a(
 				this.writeJsUpdateFnLines().wrap(
-					"function "+this.updateFnName()+"() {",
+					"function "+this.updateFnName+"() {",
 					"}"
 				),
-				this.updateFnName()+"();",
+				this.updateFnName+"();",
 				manyListenersLines.data.length<=oneListenerLines.data.length ? manyListenersLines : oneListenerLines
 			);
 		}
@@ -153,7 +152,7 @@ class Vector extends NumericFeature {
 							fmt(v.max)
 						);
 					}
-					entry.log("console.log('"+this.name+"."+c+" input value:',"+this.varNameC(c)+");");
+					entry.log("console.log('"+this.htmlName+"."+c+" input value:',"+this.varNameC(c)+");");
 					this.addPostToListenerEntryForComponent(entry,c);
 				}
 			});

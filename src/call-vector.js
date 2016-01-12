@@ -60,7 +60,7 @@ class CallVector extends Vector {
 				this.calledFn+"("+this.values.map(this.componentValue,this).join(",")+");"
 			);
 		} else {
-			entry.post(this.updateFnName()+"();");
+			entry.post(this.updateFnName+"();");
 		}
 	}
 }

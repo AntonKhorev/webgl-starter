@@ -13,6 +13,17 @@ function extendCollection(fixedOptionGroup,Options,additionalEntriesDescription)
 	return additionalOptions.root.fixFromIterateOver(iterateOver);
 }
 
+function makeCollection(values,names,Options) {
+	class EmptyOptions extends Options {
+		get entriesDescription() {
+			return [];
+		}
+	}
+	const emptyOptions=new EmptyOptions;
+	const iterateOver=values.map((v,i)=>[v,names[i],i]);
+	return emptyOptions.root.fixFromIterateOver(iterateOver);
+}
+
 // fixed-width number formatting - don't use it for min width
 function makeFormatNumber(contextNumber) {
 	const nonnegativeLimits=(contextNumber.availableMin>=0 && contextNumber.availableMax>=0);
@@ -37,5 +48,6 @@ function formatNumber(number) {
 }
 
 exports.extendCollection=extendCollection;
+exports.makeCollection=makeCollection;
 exports.makeFormatNumber=makeFormatNumber;
 exports.formatNumber=formatNumber;
