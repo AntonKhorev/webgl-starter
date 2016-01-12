@@ -7,6 +7,9 @@ class Feature {
 		this.features=[];
 	}
 	// methods to be redefined
+	hasInputs() {
+		return this.features.some(feature=>feature.hasInputs());
+	}
 	requestFeatureContext(featureContext) {
 		this.features.forEach(feature=>{
 			feature.requestFeatureContext(featureContext);

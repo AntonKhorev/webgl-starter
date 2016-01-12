@@ -7,6 +7,7 @@ const Shape=require('./shape-classes.js');
 const FeatureContext=require('./feature-context.js');
 const Canvas=require('./canvas.js');
 const Background=require('./background.js');
+const Transforms=require('./transforms.js');
 const Illumination=require('./illumination.js');
 
 module.exports=function(options,i18n){
@@ -26,6 +27,7 @@ module.exports=function(options,i18n){
 	const featureContext=new FeatureContext(options.debug);
 	const canvas=new Canvas(options.canvas);
 	const background=new Background(options.background);
+	const transforms=new Transforms(options.transforms);
 	const illumination=new Illumination(options.material,options.light);
 	function makeShape() {
 		const className=options.shape.type.charAt(0).toUpperCase()+options.shape.type.slice(1);
@@ -74,20 +76,12 @@ module.exports=function(options,i18n){
 			"</style>"
 		);
 	}
-	/*
-	function generateVertexShaderLines() {
-		var use2dTransform=(
-			shape.dim==2 &&
-			!options.needsTransform('rotate.x') &&
-			!options.needsTransform('rotate.y') &&
-			 options.needsTransform('rotate.z')
-		);
-		var needAspectUniform=options.hasInputsFor('canvas');
-		var needAspectConstant=!needAspectUniform && options['canvas.width']!=options['canvas.height'];
-		var eyeAtInfinity=options.projection=='ortho';
-		var needTransformedPosition=illumination.wantsTransformedPosition(eyeAtInfinity);
+	function getVertexShaderLines() {
+		const eyeAtInfinity=options.transforms.projection=='ortho';
+		const needTransformedPosition=illumination.wantsTransformedPosition(eyeAtInfinity);
 		function generateMain() {
-			var lines=new Lines();
+			const lines=new Lines();
+			/*
 			['x','y','z'].forEach(function(d){
 				var D=d.toUpperCase();
 				var optName='rotate.'+d;
@@ -106,27 +100,12 @@ module.exports=function(options,i18n){
 					}
 				}
 			});
-			if (needAspectConstant) {
-				lines.a(
-					"float aspect="+intOptionValue('canvas.width')+".0/"+intOptionValue('canvas.height')+".0;"
-				);
-			}
-			if (options.projection=='perspective') {
-				lines.a(
-					"float fovy=45.0;",
-					"float near=1.0/tan(radians(fovy)/2.0);",
-					"float far=near+2.0;"
-				);
-			}
-			if (needTransformedPosition) {
-				lines.a(
-					"vec4 transformedPosition="
-				);
-			} else {
-				lines.a(
-					"gl_Position="
-				);
-			}
+			*/
+			lines.a(
+				canvas.getGlslVertexOutputLines(),
+				transforms.getGlslVertexOutputLines(shape.dim==2,needTransformedPosition)
+			);
+			/*
 			if (use2dTransform) {
 				lines.t(
 					"vec4(position*mat2(",
@@ -189,7 +168,7 @@ module.exports=function(options,i18n){
 				);
 			}
 			if (options.projection=='ortho') {
-				if (needAspectUniform || needAspectConstant) {
+				if (canvas.providesAspect()) {
 					lines.t(
 						"*vec4(1.0/aspect,1.0,-1.0,1.0)" // correct aspect ratio and make coords right-handed
 					);
@@ -199,7 +178,7 @@ module.exports=function(options,i18n){
 					);
 				}
 			} else if (options.projection=='perspective') {
-				if (needAspectUniform || needAspectConstant) {
+				if (canvas.providesAspect()) {
 					lines.t(
 						"*mat4(",
 						"	near/aspect, 0.0,  0.0,                   0.0,",
@@ -257,12 +236,11 @@ module.exports=function(options,i18n){
 			lines.a(
 				illumination.getGlslVertexOutputLines(eyeAtInfinity,shape.hasNormals,writeNormalTransformLines())
 			);
+			*/
 			return lines;
 		}
-		var lines=new Lines();
-		if (needAspectUniform) {
-			lines.a("uniform float aspect;");
-		}
+		const lines=new Lines();
+		/*
 		['x','y','z'].forEach(function(d){
 			var D=d.toUpperCase();
 			var optName='rotate.'+d;
@@ -271,12 +249,10 @@ module.exports=function(options,i18n){
 				lines.a("uniform float "+varName+";");
 			}
 		});
-		if (use2dTransform) {
-			lines.a("attribute vec2 position;");
-		} else {
-			lines.a("attribute vec4 position;");
-		}
+		*/
 		lines.a(
+			canvas.getGlslVertexDeclarationLines(),
+			transforms.getGlslVertexDeclarationLines(shape.dim==2),
 			illumination.getGlslVertexDeclarationLines(eyeAtInfinity,shape.dim>2),
 			"void main() {",
 			generateMain().indent(),
@@ -284,6 +260,7 @@ module.exports=function(options,i18n){
 		);
 		return lines;
 	}
+	/*
 	function generateFragmentShaderLines() {
 		var lines=new Lines;
 		var eyeAtInfinity=options.projection=='ortho';
@@ -708,7 +685,7 @@ module.exports=function(options,i18n){
 		"<title>Generated code</title>",
 		getHtmlStyleLines(),
 		"<script id='myVertexShader' type='x-shader/x-vertex'>",
-		//generateVertexShaderLines().indent(),
+		getVertexShaderLines().indent(),
 		"</script>",
 		"<script id='myFragmentShader' type='x-shader/x-fragment'>",
 		//generateFragmentShaderLines().indent(),

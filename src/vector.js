@@ -61,6 +61,9 @@ class Vector extends NumericFeature {
 	addPostToListenerEntryForComponent(entry,c) {} // do necessary entry.post()
 	addPostToListenerEntryAfterComponents(entry) {}
 	// public:
+	hasInputs() {
+		return super.hasInputs() || this.values.some(v=>v.input!='constant');
+	}
 	requestFeatureContext(featureContext) {
 		super.requestFeatureContext(featureContext);
 		if (this.nSliders>0) {

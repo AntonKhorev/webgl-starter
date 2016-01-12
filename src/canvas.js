@@ -20,6 +20,26 @@ class Canvas extends Feature {
 			"</div>"
 		);
 	}
+	getGlslVertexDeclarationLines() {
+		if (this.hasInputs()) {
+			return new Lines("uniform float aspect;");
+		} else {
+			return new Lines;
+		}
+	}
+	getGlslVertexOutputLines() {
+		const needAspectConstant=!this.hasInputs() && Number(this.options.width)!=Number(this.options.height);
+		if (needAspectConstant) {
+			return new Lines(
+				"float aspect="+this.options.width+".0/"+this.options.height+".0;"
+			);
+		} else {
+			return new Lines;
+		}
+	}
+	providesAspect() {
+		return this.hasInputs() || Number(this.options.width)!=Number(this.options.height);
+	}
 }
 
 module.exports=Canvas;

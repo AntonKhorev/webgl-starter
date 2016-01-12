@@ -85,6 +85,7 @@ class Collection extends Base {
 			length: iterateOver.length,
 			map: defineFn([].map),
 			every: defineFn([].every),
+			some: defineFn([].some),
 			forEach: defineFn([].forEach),
 		};
 		iterateOver.forEach((vci)=>{

@@ -8,6 +8,9 @@ class IntFeature extends NumericFeature {
 		this.name=name;
 		this.value=value;
 	}
+	hasInputs() {
+		return super.hasInputs() || this.value.input!='constant';
+	}
 	requestFeatureContext(featureContext) {
 		super.requestFeatureContext(featureContext);
 		if (this.value.input=='slider') {
