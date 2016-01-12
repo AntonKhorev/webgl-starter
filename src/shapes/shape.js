@@ -15,7 +15,7 @@ class Shape extends Feature {
 	get dim() { return 2; }
 	get twoSided() { return true; } // triangles can be viewed from both sides
 	get glPrimitive() { return 'TRIANGLES'; }
-	usesElements() {
+	usesElements() { // TODO convert to getter
 		return this.elementIndexBits>0;
 	}
 	getNumbersPerVertex() {

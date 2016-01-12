@@ -31,9 +31,9 @@ module.exports=function(options,i18n){
 		const className=options.shape.type.charAt(0).toUpperCase()+options.shape.type.slice(1);
 		return new Shape[className](
 			options.shape,
-			options.light!='off',
-			options.materialScope=='vertex',
-			options.materialScope=='face',
+			options.light.type!='off',
+			options.material.scope=='vertex',
+			options.material.scope=='face',
 			illumination.getColorAttrs()
 		);
 	}
