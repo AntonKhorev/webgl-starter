@@ -3,8 +3,8 @@
 const listeners=require('./listeners.js');
 
 class FeatureContext {
-	constructor(haveToLogInput) {
-		this.haveToLogInput=haveToLogInput;
+	constructor(debugOptions) {
+		this.debugOptions=debugOptions;
 		this.canvasMousemoveListener=new listeners.CanvasMousemoveListener();
 		//// to be set by features:
 		// for html:
@@ -18,7 +18,7 @@ class FeatureContext {
 		return this.hasStartTime || this.hasPrevTime || this.pollsGamepad;
 	}
 	getJsAfterInitLines() {
-		return this.canvasMousemoveListener.write(!this.isAnimated,this.haveToLogInput);
+		return this.canvasMousemoveListener.write(!this.isAnimated,this.debugOptions.inputs);
 	}
 }
 

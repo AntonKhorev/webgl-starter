@@ -95,7 +95,7 @@ class Vector extends NumericFeature {
 					.log("console.log(this.id,'input value:',parseFloat(this.value));")
 					.post(this.updateFnName()+"();");
 				lines.a(
-					listener.write(!featureContext.isAnimated,featureContext.haveToLogInput)
+					listener.write(!featureContext.isAnimated,featureContext.debugOptions.inputs)
 				);
 			});
 			return lines;
@@ -106,7 +106,7 @@ class Vector extends NumericFeature {
 				.log("console.log(this.id,'input value:',parseFloat(this.value));")
 				.post(this.updateFnName()+"();");
 			return new Lines(
-				listener.write(!featureContext.isAnimated,featureContext.haveToLogInput)
+				listener.write(!featureContext.isAnimated,featureContext.debugOptions.inputs)
 			);
 		};
 		lines.a(

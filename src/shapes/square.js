@@ -1,43 +1,42 @@
-var Lines=require('../lines.js');
-var Colorgen=require('../colorgen.js');
-var Shape=require('./shape.js');
+'use strict';
 
-var Square=function(options,hasReflections,hasColorsPerVertex,hasColorsPerFace,colorAttrs){
-	Shape.apply(this,arguments);
-};
-Square.prototype=Object.create(Shape.prototype);
-Square.prototype.constructor=Square;
-Square.prototype.glPrimitive='TRIANGLE_FAN';
-Square.prototype.writeArrays=function(){
-	var colorgen=new Colorgen(this.colorAttrs,0);
-	var colorDataForFace;
-	var writeColorData=function(){
-		if (this.hasColorsPerFace && !this.hasColorsPerVertex) {
-			if (colorDataForFace===undefined) {
-				colorDataForFace=colorgen.getNextColorString();
+const Lines=require('../lines.js');
+const Colorgen=require('../colorgen.js');
+const Shape=require('./shape.js');
+
+class Square extends Shape {
+	get glPrimitive() { return 'TRIANGLE_FAN'; }
+	writeArrays() {
+		const colorgen=new Colorgen(this.colorAttrs,0);
+		let colorDataForFace;
+		const writeColorData=()=>{
+			if (this.hasColorsPerFace && !this.hasColorsPerVertex) {
+				if (colorDataForFace===undefined) {
+					colorDataForFace=colorgen.getNextColorString();
+				}
+				return colorDataForFace;
+			} else {
+				return colorgen.getNextColorString();
 			}
-			return colorDataForFace;
-		} else {
-			return colorgen.getNextColorString();
-		}
-	}.bind(this);
-	var lines=new Lines(
-		"var nVertices=4;",
-		"var vertices=new Float32Array([",
-		"	// x    y"+colorgen.getHeaderString(),
-		"	-0.5,-0.5,"+writeColorData(),
-		"	+0.5,-0.5,"+writeColorData(),
-		"	+0.5,+0.5,"+writeColorData(),
-		"	-0.5,+0.5,"+writeColorData(),
-		"]);"
-	);
-	if (this.usesElements()) {
-		lines.a(
-			"var nElements=4;",
-			"var elements=new "+this.getElementIndexJsArray()+"([0,1,2,3]);"
+		};
+		const lines=new Lines(
+			"var nVertices=4;",
+			"var vertices=new Float32Array([",
+			"	// x    y"+colorgen.getHeaderString(),
+			"	-0.5,-0.5,"+writeColorData(),
+			"	+0.5,-0.5,"+writeColorData(),
+			"	+0.5,+0.5,"+writeColorData(),
+			"	-0.5,+0.5,"+writeColorData(),
+			"]);"
 		);
+		if (this.usesElements()) {
+			lines.a(
+				"var nElements=4;",
+				"var elements=new "+this.getElementIndexJsArray()+"([0,1,2,3]);"
+			);
+		}
+		return lines;
 	}
-	return lines;
-};
+}
 
 module.exports=Square;

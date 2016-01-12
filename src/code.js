@@ -3,7 +3,7 @@
 //const fixOptHelp=require('./fixed-options-helpers.js');
 const Lines=require('./lines.js');
 const listeners=require('./listeners.js');
-const shapes=require('./shapes.js');
+const Shape=require('./shape-classes.js');
 const FeatureContext=require('./feature-context.js');
 const Canvas=require('./canvas.js');
 const Background=require('./background.js');
@@ -23,13 +23,13 @@ module.exports=function(options,i18n){
 		return ['mousemovex','mousemovey'].indexOf(options[name+'.input'])>=0;
 	}
 
-	const featureContext=new FeatureContext(options.debug.inputs);
+	const featureContext=new FeatureContext(options.debug);
 	const canvas=new Canvas(options.canvas);
 	const background=new Background(options.background);
 	const illumination=new Illumination(options.material,options.light);
 	function makeShape() {
 		const className=options.shape.type.charAt(0).toUpperCase()+options.shape.type.slice(1);
-		return new shapes[className](
+		return new Shape[className](
 			options.shape,
 			options.light!='off',
 			options.materialScope=='vertex',
@@ -42,7 +42,7 @@ module.exports=function(options,i18n){
 		canvas,
 		background,
 		illumination,
-		// shape, // TODO
+		shape,
 	];
 	features.forEach(feature=>{
 		feature.requestFeatureContext(featureContext);
@@ -693,9 +693,7 @@ module.exports=function(options,i18n){
 
 	const scriptLines=new Lines;
 	scriptLines.interleave(
-		getJsInitLines()/*,
-		shape.writeInit(options.debugArrays),
-		generateJsInputHandlerLines()*/,
+		getJsInitLines(),
 		getJsLoopLines()
 	).wrap(
 		"<script>",
