@@ -88,6 +88,9 @@ class Transforms extends Feature {
 			}
 		}
 	}
+	get eyeAtInfinity() {
+		return this.options.projection=='ortho';
+	}
 	// private:
 	use2dTransform(flatShape) { // has flat shape and exactly one z rotation TODO multiple z rotations
 		return flatShape && this.options.model.length==1 && this.options.model[0].type=='rotate.z';

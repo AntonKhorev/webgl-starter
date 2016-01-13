@@ -78,44 +78,32 @@ module.exports=function(options,i18n){
 		);
 	}
 	function getVertexShaderLines() {
-		const eyeAtInfinity=options.transforms.projection=='ortho';
-		const needTransformedPosition=illumination.wantsTransformedPosition(eyeAtInfinity);
-		function generateMain() {
-			const lines=new Lines();
-			lines.a(
-				canvas.getGlslVertexOutputLines(),
-				transforms.getGlslVertexOutputLines(shape.dim==2,canvas.providesAspect(),needTransformedPosition),
-				illumination.getGlslVertexOutputLines(eyeAtInfinity,shape.hasNormals,transforms.getGlslVertexNormalTransformLines())
-			);
-			return lines;
-		}
-		const lines=new Lines();
-		lines.a(
+		const needTransformedPosition=illumination.wantsTransformedPosition(transforms.eyeAtInfinity);
+		return new Lines(
 			canvas.getGlslVertexDeclarationLines(),
 			transforms.getGlslVertexDeclarationLines(shape.dim==2),
-			illumination.getGlslVertexDeclarationLines(eyeAtInfinity,shape.dim>2),
-			"void main() {",
-			generateMain().indent(),
-			"}"
-		);
-		return lines;
-	}
-	/*
-	function generateFragmentShaderLines() {
-		var lines=new Lines;
-		var eyeAtInfinity=options.projection=='ortho';
-		lines.a(
-			"precision mediump float;"
-		);
-		lines.a(
-			illumination.getGlslFragmentDeclarationLines(eyeAtInfinity),
-			illumination.getGlslFragmentOutputLines(eyeAtInfinity,shape.twoSided).wrap(
+			illumination.getGlslVertexDeclarationLines(transforms.eyeAtInfinity,shape.dim>2),
+			(new Lines(
+				canvas.getGlslVertexOutputLines(),
+				transforms.getGlslVertexOutputLines(shape.dim==2,canvas.providesAspect(),needTransformedPosition),
+				illumination.getGlslVertexOutputLines(transforms.eyeAtInfinity,shape.hasNormals,transforms.getGlslVertexNormalTransformLines())
+			)).wrap(
 				"void main() {",
 				"}"
 			)
 		);
-		return lines;
 	}
+	function getFragmentShaderLines() {
+		return new Lines(
+			"precision mediump float;",
+			illumination.getGlslFragmentDeclarationLines(transforms.eyeAtInfinity),
+			illumination.getGlslFragmentOutputLines(transforms.eyeAtInfinity,shape.twoSided).wrap(
+				"void main() {",
+				"}"
+			)
+		);
+	}
+	/*
 	function generateHtmlControlMessageLines() {
 		var lines=new Lines;
 		function writeOptionGroup(group) {
@@ -528,7 +516,7 @@ module.exports=function(options,i18n){
 		getVertexShaderLines().indent(),
 		"</script>",
 		"<script id='myFragmentShader' type='x-shader/x-fragment'>",
-		//generateFragmentShaderLines().indent(),
+		getFragmentShaderLines().indent(),
 		"</script>",
 		"</head>",
 		"<body>",
