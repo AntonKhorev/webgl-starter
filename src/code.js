@@ -309,11 +309,10 @@ module.exports=function(options,i18n){
 	}
 	*/
 	function getJsLoopLines() {
-		const lines=new Lines;
+		const innerLines=new Lines;
 		features.forEach(feature=>{
-			lines.a(feature.getJsLoopLines());
+			innerLines.a(feature.getJsLoopLines());
 		});
-		return lines;
 		/*
 		var needStartTime=false; // set by renderInner()
 		var needPrevTime=false; // set by renderInner()
@@ -420,7 +419,9 @@ module.exports=function(options,i18n){
 			);
 			return lines;
 		}
+		*/
 		var lines=new Lines;
+		/*
 		var innerLines=renderInner();
 		if (options.isAnimated()) {
 			['x','y','z'].forEach(function(d){
@@ -444,28 +445,37 @@ module.exports=function(options,i18n){
 					);
 				}
 			});
-			if (needStartTime && needPrevTime) {
-				lines.a(
-					"var startTime=performance.now();",
-					"var prevTime=startTime;"
-				);
-			} else if (needStartTime) {
-				lines.a(
-					"var startTime=performance.now();"
-				);
-			} else if (needPrevTime) {
-				lines.a(
-					"var prevTime=performance.now();"
-				);
-			}
+		}
+		*/
+		if (featureContext.hasStartTime && featureContext.hasPrevTime) {
+			lines.a(
+				"var startTime=performance.now();",
+				"var prevTime=startTime;"
+			);
+		} else if (featureContext.hasStartTime) {
+			lines.a(
+				"var startTime=performance.now();"
+			);
+		} else if (featureContext.hasPrevTime) {
+			lines.a(
+				"var prevTime=performance.now();"
+			);
 		}
 		// wrap inner render lines in function if needed
-		if (options.isAnimated()) {
+		if (featureContext.isAnimated) {
+			if (featureContext.hasTime) {
+				lines.a(
+					"function renderFrame(time) {"
+				);
+			} else {
+				lines.a(
+					"function renderFrame() {"
+				);
+			}
 			lines.a(
-				"function renderFrame(time) {",
 				innerLines.indent()
 			);
-			if (needPrevTime) {
+			if (featureContext.hasPrevTime) {
 				lines.a(
 					"	prevTime=time;"
 				);
@@ -475,7 +485,7 @@ module.exports=function(options,i18n){
 				"}",
 				"requestAnimationFrame(renderFrame);"
 			);
-		} else if (options.hasInputs()) {
+		} else if (featureContext.hasInputs) {
 			lines.a(
 				"var frameId=null;",
 				"function renderFrame() {",
@@ -493,7 +503,6 @@ module.exports=function(options,i18n){
 			lines.a(innerLines);
 		}
 		return lines;
-		*/
 	}
 
 	const scriptLines=new Lines;

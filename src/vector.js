@@ -65,6 +65,9 @@ class Vector extends NumericFeature {
 	}
 	requestFeatureContext(featureContext) {
 		super.requestFeatureContext(featureContext);
+		if (this.values.some(v=>v.input!='constant')) {
+			featureContext.hasInputs=true;
+		}
 		if (this.nSliders>0) {
 			featureContext.hasSliders=true;
 		}

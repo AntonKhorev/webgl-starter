@@ -13,6 +13,9 @@ class IntFeature extends NumericFeature {
 	}
 	requestFeatureContext(featureContext) {
 		super.requestFeatureContext(featureContext);
+		if (this.value.input!='constant') {
+			featureContext.hasInputs=true;
+		}
 		if (this.value.input=='slider') {
 			featureContext.hasSliders=true;
 		}

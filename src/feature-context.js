@@ -10,9 +10,13 @@ class FeatureContext {
 		// for html:
 		this.hasSliders=false;
 		// for js:
+		this.hasInputs=false; // must have renderFrame()
 		this.hasStartTime=false;
 		this.hasPrevTime=false;
 		this.pollsGamepad=false;
+	}
+	get hasTime() {
+		return this.hasStartTime || this.hasPrevTime;
 	}
 	get isAnimated() {
 		return this.hasStartTime || this.hasPrevTime || this.pollsGamepad;
