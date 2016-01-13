@@ -47,7 +47,20 @@ function formatNumber(number) {
 	return makeFormatNumber(number)(number);
 }
 
+function capNumber(number,maxValue) {
+	const capped=new Number(Math.min(maxValue,number));
+	capped.min=number.min;
+	capped.max=Math.min(maxValue,number.max);
+	capped.input=number.input;
+	// needed for formatting:
+	capped.availableMin=number.availableMin;
+	capped.availableMax=number.availableMax;
+	capped.step=number.step;
+	return capped;
+}
+
 exports.extendCollection=extendCollection;
 exports.makeCollection=makeCollection;
 exports.makeFormatNumber=makeFormatNumber;
 exports.formatNumber=formatNumber;
+exports.capNumber=capNumber;

@@ -1,27 +1,28 @@
 'use strict';
 
+const fixOptHelp=require('../fixed-options-helpers.js');
 const Lines=require('../lines.js');
 const Colorgen=require('../colorgen.js');
 const Shape=require('./shape.js');
+const IntFeature=require('../int-feature.js');
 
 class LodShape extends Shape {
 	constructor(options,hasReflections,hasColorsPerVertex,hasColorsPerFace,colorAttrs) {
 		super(options,hasReflections,hasColorsPerVertex,hasColorsPerFace,colorAttrs);
-		this.lod=options.lod;
-		const maxLod=this.getMaxPossibleLod();
-		// TODO option rewriting won't work - implement capNumber helper
-		if (this.lod.value>maxLod) this.lod.value=maxLod;
-		if (this.lod.max>maxLod) this.lod.max=maxLod;
+		this.lod=fixOptHelp.capNumber(options.lod,this.getMaxPossibleLod(options.lod.max));
+		this.features.push(
+			new IntFeature('shape.lod',this.lod)
+		);
 	}
-	getMaxPossibleLod() { // due to element index type
+	getMaxPossibleLod(requestedMaxLod) { // due to element index type
 		if (!this.usesElements() || this.elementIndexBits>=31) { // 1<<31 is a negative number, can't compare with it
-			return this.lod.max; // no need to limit lod if elements are not used or index type is large enough
+			return requestedMaxLod; // no need to limit lod if elements are not used or index type is large enough
 		}
 		const nVerticesFn = this.hasColorsPerFace
 			? this.getFaceVertexCount
 			: this.getDistinctVertexCount;
 		const indexLimit=1<<this.elementIndexBits;
-		for (let m=this.lod.max;m>=0;m--) {
+		for (let m=requestedMaxLod;m>=0;m--) {
 			let n=eval(nVerticesFn(m));
 			if (n<=indexLimit) {
 				return m;
@@ -49,7 +50,7 @@ class LodShape extends Shape {
 			? this.getFaceVertexCount
 			: this.getDistinctVertexCount;
 		const lines=new Lines;
-		if (this.lod.changes) {
+		if (this.lod.input!='constant') {
 			lines.a(
 				"var minShapeLod="+this.lod.min+";",
 				"var maxShapeLod="+this.lod.max+";"
@@ -80,7 +81,7 @@ class LodShape extends Shape {
 			}
 		} else {
 			lines.a(
-				"var shapeLod="+this.lod.value+";"
+				"var shapeLod="+this.lod+";"
 			);
 			if (this.usesElements()) {
 				lines.a(
@@ -105,9 +106,9 @@ class LodShape extends Shape {
 			this.writeBufferData().indent(),
 			"}"
 		);
-		if (this.lod.changes) {
+		if (this.lod.input!='constant') {
 			lines.a(
-				"storeShape("+this.lod.value+");"
+				"storeShape("+this.lod+");"
 			);
 		} else {
 			lines.a(
