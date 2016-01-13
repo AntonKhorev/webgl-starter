@@ -2,6 +2,7 @@
 
 const fixOptHelp=require('../fixed-options-helpers.js');
 const Lines=require('../lines.js');
+const listeners=require('../listeners.js');
 const Colorgen=require('../colorgen.js');
 const Shape=require('./shape.js');
 const IntFeature=require('../int-feature.js');
@@ -114,6 +115,25 @@ class LodShape extends Shape {
 			lines.a(
 				"storeShape();"
 			);
+		}
+		return lines;
+	}
+	getJsInitLines(featureContext) {
+		const lines=super.getJsInitLines(featureContext);
+		if (this.lod.input=='slider') {
+			var listener=new listeners.SliderListener('shape.lod');
+			listener.enter()
+				.log("console.log(this.id,'input value:',parseInt(this.value));")
+				.post("storeShape(parseInt(this.value));");
+			lines.a(
+				featureContext.getListenerLines(listener)
+			);
+		} else if (this.lod.input=='mousemovex' || this.lod.input=='mousemovey') {
+			featureContext.canvasMousemoveListener.enter()
+				.newVarInt(this.lod.input,'shapeLod')
+				.cond("newShapeLod!=shapeLod")
+				.log("console.log('shapeLod input value:',newShapeLod);")
+				.post("storeShape(newShapeLod);");
 		}
 		return lines;
 	}

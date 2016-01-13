@@ -24,6 +24,9 @@ class FeatureContext {
 	getJsAfterInitLines() {
 		return this.canvasMousemoveListener.write(!this.isAnimated,this.debugOptions.inputs);
 	}
+	getListenerLines(listener) {
+		return listener.write(!this.isAnimated,this.debugOptions.inputs);
+	}
 }
 
 module.exports=FeatureContext;

@@ -11,15 +11,7 @@ const Transforms=require('./transforms.js');
 const Illumination=require('./illumination.js');
 
 module.exports=function(options,i18n){
-	// TODO replace them by option helpers
-	/*
-	function intOptionValue(name) {
-		return parseInt(options[name]);
-	}
-	function floatOptionValue(name) {
-		return options[name].toFixed(3);
-	}
-	*/
+	// TODO replace it by option helpers - or by input classes
 	function isMousemoveInput(name) {
 		return ['mousemovex','mousemovey'].indexOf(options[name+'.input'])>=0;
 	}
@@ -233,27 +225,6 @@ module.exports=function(options,i18n){
 			canvasUpdater();
 			canvasListener('width');
 			canvasListener('height');
-		}
-		if (options.background=='solid') {
-			lines.a(
-				backgroundColorVector.getJsInterfaceLines(writeListenerArgs,canvasMousemoveListener)
-			);
-		}
-		lines.a(
-			illumination.getJsInterfaceLines(writeListenerArgs,canvasMousemoveListener)
-		);
-		if (options['shapeLod.input']=='slider') {
-			var listener=new listeners.SliderListener('shapeLod');
-			listener.enter()
-				.log("console.log(this.id,'input value:',parseInt(this.value));")
-				.post("storeShape(parseInt(this.value));");
-			writeListener(listener);
-		} else if (isMousemoveInput('shapeLod')) {
-			canvasMousemoveListener.enter()
-				.newVarInt(options['shapeLod.input'],'shapeLod')
-				.cond("newShapeLod!=shapeLod")
-				.log("console.log('shapeLod input value:',newShapeLod);")
-				.post("storeShape(newShapeLod);");
 		}
 		['x','y','z'].forEach(function(d){
 			var D=d.toUpperCase();
