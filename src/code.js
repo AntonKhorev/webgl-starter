@@ -87,59 +87,6 @@ module.exports=function(options,i18n){
 				transforms.getGlslVertexOutputLines(shape.dim==2,needTransformedPosition)
 			);
 			/*
-			if (use2dTransform) {
-				lines.t(
-					"vec4(position*mat2(",
-					"	cz, -sz,",
-					"	sz,  cz",
-					"),0,1)"
-				);
-			} else {
-				lines.t(
-					"position"
-				);
-				options.transformOrder.forEach(function(transformName){
-					if (!options.needsTransform(transformName)) {
-						return;
-					}
-					lines.t({
-						'rotate.x': [
-							"*mat4(",
-							"	1.0, 0.0, 0.0, 0.0,",
-							"	0.0,  cx, -sx, 0.0,",
-							"	0.0,  sx,  cx, 0.0,",
-							"	0.0, 0.0, 0.0, 1.0",
-							")"
-						],
-						'rotate.y': [
-							"*mat4(",
-							"	 cy, 0.0,  sy, 0.0,",
-							"	0.0, 1.0, 0.0, 0.0,",
-							"	-sy, 0.0,  cy, 0.0,",
-							"	0.0, 0.0, 0.0, 1.0",
-							")"
-						],
-						'rotate.z': [
-							"*mat4(",
-							"	 cz, -sz, 0.0, 0.0,",
-							"	 sz,  cz, 0.0, 0.0,",
-							"	0.0, 0.0, 1.0, 0.0,",
-							"	0.0, 0.0, 0.0, 1.0",
-							")"
-						]
-					}[transformName]);
-				});
-				if (options.projection=='perspective') {
-					lines.t(
-						"*mat4( // move center of coords inside view",
-						"	1.0, 0.0, 0.0, 0.0,",
-						"	0.0, 1.0, 0.0, 0.0,",
-						"	0.0, 0.0, 1.0, -(near+far)/2.0,",
-						"	0.0, 0.0, 0.0, 1.0",
-						")"
-					);
-				}
-			}
 			if (needTransformedPosition) {
 				lines.t(
 					";"

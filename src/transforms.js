@@ -11,6 +11,7 @@ class Transforms extends Feature {
 		super();
 		this.options=options;
 		this.rotateVectorEntries=[]; // [{vector,suffix}] like features, but vectors have additional methods that don't follow feature interfaces
+		this.transformSequence=new Array(options.model.length); // [{vector,component,suffix}]
 		const possibleComponents=['x','y','z'];
 		const rotate=[[],[],[]];
 		options.model.forEach((tr,iTr)=>{
@@ -26,7 +27,6 @@ class Transforms extends Feature {
 				rotate[2].push(trData);
 			}
 		});
-		const transformSequence=new Array(options.model.length); // [{vector,component}]
 		const nLayers=Math.max.apply(null,rotate.map(r=>r.length));
 		for (let i=0;i<nLayers;i++) {
 			let isInGap=false;
@@ -47,9 +47,9 @@ class Transforms extends Feature {
 					}
 				}
 			}
+			const suffix=(nLayers>1?String(i):'');
 			const makeVector=(values,names)=>{
 				const vector=new GlslVector('transforms.model.rotate',fixOptHelp.makeCollection(values,names,Options));
-				const suffix=(nLayers>1?String(i):'');
 				vector.varName='rotate'+suffix;
 				vector.htmlName='transforms.model.rotate'+(nLayers>1?'.'+i:'');
 				this.features.push(vector);
@@ -60,9 +60,10 @@ class Transforms extends Feature {
 				return vector;
 			};
 			const storeSequenceElement=(vector,j)=>{
-				transformSequence[rotate[j][i].index]={
+				this.transformSequence[rotate[j][i].index]={
 					vector: vector,
-					component: possibleComponents[j]
+					component: possibleComponents[j],
+					suffix: suffix,
 				};
 			};
 			if (isStraight) {
@@ -89,7 +90,7 @@ class Transforms extends Feature {
 	}
 	// private:
 	use2dTransform(flatShape) { // has flat shape and exactly one z rotation TODO multiple z rotations
-		return flatShape && this.options.model.length==1 && this.options.model[0].type=='rotateZ';
+		return flatShape && this.options.model.length==1 && this.options.model[0].type=='rotate.z';
 	}
 	// public:
 	getGlslVertexDeclarationLines(flatShape) {
@@ -127,6 +128,74 @@ class Transforms extends Feature {
 			lines.a(
 				"gl_Position="
 			);
+		}
+		if (this.use2dTransform(flatShape)) {
+			lines.t(
+				"vec4(position*mat2(",
+				"	cz, -sz,",
+				"	sz,  cz",
+				"),0,1)"
+			);
+		} else {
+			lines.t(
+				"position"
+			);
+			const maxSuffixLength=1; // TODO calculate it
+			const width=4+maxSuffixLength; // 1(sign)+3(c.x)+(max suffix length)
+			const pad=e=>{
+				if (e.length<width) {
+					return ("          "+e).slice(-width);
+				} else {
+					return e;
+				}
+			};
+			const mat=(rows)=>{
+				const dim=rows.length;
+				lines.t("*mat"+dim+"(");
+				rows.forEach((row,i)=>{
+					lines.a("	");
+					row.forEach((e,j)=>{
+						lines.t(pad(e));
+						if (i<dim-1 || j<dim-1) lines.t(",");
+					});
+				});
+				lines.a(")");
+			};
+			this.transformSequence.forEach(ts=>{
+				if (!ts) return;
+				const c=ts.vector.getGlslMapComponentValue('c'+ts.suffix,ts.component);
+				const s=ts.vector.getGlslMapComponentValue('s'+ts.suffix,ts.component);
+				if (ts.component=='x') {
+					mat([
+						["1.0","0.0","0.0","0.0"],
+						["0.0",    c,"-"+s,"0.0"],
+						["0.0",    s,    c,"0.0"],
+						["0.0","0.0","0.0","1.0"],
+					]);
+				} else if (ts.component=='y') {
+					mat([
+						[    c,"0.0",    s,"0.0"],
+						["0.0","1.0","0.0","0.0"],
+						["-"+s,"0.0",    c,"0.0"],
+						["0.0","0.0","0.0","1.0"],
+					]);
+				} else if (ts.component=='z') {
+					mat([
+						[    c,"-"+s,"0.0","0.0"],
+						[    s,    c,"0.0","0.0"],
+						["0.0","0.0","1.0","0.0"],
+						["0.0","0.0","0.0","1.0"],
+					]);
+				}
+			});
+			if (this.options.projection=='perspective') {
+				mat([
+					["1.0","0.0","0.0","0.0"],
+					["0.0","1.0","0.0","0.0"],
+					["0.0","0.0","1.0","-(near+far)/2.0"],
+					["0.0","0.0","0.0","1.0"],
+				]);
+			}
 		}
 		return lines;
 	}
