@@ -48,6 +48,7 @@ describe("CallVector",function(){
 			vector.requestFeatureContext(testFeatureContext);
 			assert.deepEqual(testFeatureContext,{
 				hasSliders: true,
+				hasInputs: true,
 			});
 		});
 		it("returns interface with update fn and slider listener",function(){

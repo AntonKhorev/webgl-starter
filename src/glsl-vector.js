@@ -117,12 +117,12 @@ class GlslVector extends Vector {
 			});
 		} else {
 			lines.a(
-				"var "+this.name+"Loc=gl.getUniformLocation(program,'"+this.name+"');"
+				"var "+this.varName+"Loc=gl.getUniformLocation(program,'"+this.varName+"');"
 			);
 		}
 		if (this.nSliders==0 && this.modeVector) {
 			lines.a(
-				"gl.uniform"+this.nVars+"f("+this.name+"Loc"
+				"gl.uniform"+this.nVars+"f("+this.varName+"Loc"
 			);
 			this.values.forEach(v=>{
 				if (v.input!='constant') {
@@ -156,7 +156,7 @@ class GlslVector extends Vector {
 			});
 		} else {
 			updateFnLines.a(
-				"gl.uniform"+this.nVars+"f("+this.name+"Loc"
+				"gl.uniform"+this.nVars+"f("+this.varName+"Loc"
 			);
 			this.values.forEach((v,c)=>{
 				if (v.input=='constant') return;
@@ -188,7 +188,7 @@ class GlslVector extends Vector {
 					vs.push(this.varNameC(c));
 				}
 			});
-			entry.post("gl.uniform"+this.nVars+"f("+this.name+"Loc,"+vs.join(",")+");");
+			entry.post("gl.uniform"+this.nVars+"f("+this.varName+"Loc,"+vs.join(",")+");");
 		}
 	}
 }

@@ -85,6 +85,7 @@ describe('Illumination',function(){
 			illumination.requestFeatureContext(testFeatureContext);
 			assert.deepEqual(testFeatureContext,{
 				hasSliders: true,
+				hasInputs: true,
 			});
 		});
 		it("has empty color attr list",function(){

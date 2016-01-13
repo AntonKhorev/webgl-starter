@@ -192,6 +192,28 @@ describe("GlslVector",()=>{
 			]);
 		});
 	});
+	context('with 2 first components out of 3 variable vector with dot in name',function(){
+		const options=new TestOptions({foo:{
+			x:{input:'slider'}, y:{input:'slider'}
+		}});
+		const vector=new GlslVector('foo.bar',options.fix().foo);
+		it('returns interface with 1 location and 2 simple listeners',function(){
+			const featureContext=new FeatureContext(false);
+			featureContext.hasStartTime=true; // animated
+			assert.deepEqual(vector.getJsInitLines(featureContext).data,[
+				"var fooBarLoc=gl.getUniformLocation(program,'fooBar');",
+				"function updateFooBar() {",
+				"	gl.uniform2f(fooBarLoc,",
+				"		parseFloat(document.getElementById('foo.bar.x').value),",
+				"		parseFloat(document.getElementById('foo.bar.y').value)",
+				"	);",
+				"}",
+				"updateFooBar();",
+				"document.getElementById('foo.bar.x').addEventListener('change',updateFooBar);",
+				"document.getElementById('foo.bar.y').addEventListener('change',updateFooBar);"
+			]);
+		});
+	});
 	context('with first and third components out of 3 variable vector',function(){
 		const options=new TestOptions({foo:{
 			x:{input:'slider'}, z:{input:'slider'}
