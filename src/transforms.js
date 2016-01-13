@@ -92,6 +92,67 @@ class Transforms extends Feature {
 	use2dTransform(flatShape) { // has flat shape and exactly one z rotation TODO multiple z rotations
 		return flatShape && this.options.model.length==1 && this.options.model[0].type=='rotate.z';
 	}
+	getTransformMatricesLines(dim) { // dim==3 for normal transform, dim==4 for position transform
+		const lines=new Lines("");
+		const maxSuffixLength=1; // TODO calculate it
+		const width=4+maxSuffixLength; // 1(sign)+3(c.x)+(max suffix length)
+		const pad=e=>{
+			if (e.length<width) {
+				return ("          "+e).slice(-width);
+			} else {
+				return e;
+			}
+		};
+		const mat=(rows,comment)=>{
+			lines.t("*mat"+dim+"( // "+comment);
+			rows.forEach((row,i)=>{
+				if (i>=dim) return;
+				lines.a("	");
+				row.forEach((e,j)=>{
+					if (j>=dim) return;
+					lines.t(pad(e));
+					if (i<dim-1 || j<dim-1) lines.t(",");
+				});
+			});
+			lines.a(")");
+		};
+		this.transformSequence.forEach(ts=>{
+			if (!ts) return;
+			const c=ts.vector.getGlslMapComponentValue('c'+ts.suffix,ts.component);
+			const s=ts.vector.getGlslMapComponentValue('s'+ts.suffix,ts.component);
+			if (ts.component=='x') {
+				mat([
+					["1.0","0.0","0.0","0.0"],
+					["0.0",    c,"-"+s,"0.0"],
+					["0.0",    s,    c,"0.0"],
+					["0.0","0.0","0.0","1.0"],
+				],"rotate around x axis");
+			} else if (ts.component=='y') {
+				mat([
+					[    c,"0.0",    s,"0.0"],
+					["0.0","1.0","0.0","0.0"],
+					["-"+s,"0.0",    c,"0.0"],
+					["0.0","0.0","0.0","1.0"],
+				],"rotate around y axis");
+			} else if (ts.component=='z') {
+				mat([
+					[    c,"-"+s,"0.0","0.0"],
+					[    s,    c,"0.0","0.0"],
+					["0.0","0.0","1.0","0.0"],
+					["0.0","0.0","0.0","1.0"],
+				],"rotate around z axis");
+			}
+		});
+		if (dim==4 && this.options.projection=='perspective') {
+			mat([
+				["1.0","0.0","0.0","0.0"],
+				["0.0","1.0","0.0","0.0"],
+				["0.0","0.0","1.0","-(near+far)/2.0"],
+				["0.0","0.0","0.0","1.0"],
+			],"move center of coords inside view");
+		}
+		return lines;
+	}
 	// public:
 	getGlslVertexDeclarationLines(flatShape) {
 		const lines=new Lines;
@@ -140,62 +201,9 @@ class Transforms extends Feature {
 			lines.t(
 				"position"
 			);
-			const maxSuffixLength=1; // TODO calculate it
-			const width=4+maxSuffixLength; // 1(sign)+3(c.x)+(max suffix length)
-			const pad=e=>{
-				if (e.length<width) {
-					return ("          "+e).slice(-width);
-				} else {
-					return e;
-				}
-			};
-			const mat=(rows,comment)=>{
-				const dim=rows.length;
-				lines.t("*mat"+dim+"( // "+comment);
-				rows.forEach((row,i)=>{
-					lines.a("	");
-					row.forEach((e,j)=>{
-						lines.t(pad(e));
-						if (i<dim-1 || j<dim-1) lines.t(",");
-					});
-				});
-				lines.a(")");
-			};
-			this.transformSequence.forEach(ts=>{
-				if (!ts) return;
-				const c=ts.vector.getGlslMapComponentValue('c'+ts.suffix,ts.component);
-				const s=ts.vector.getGlslMapComponentValue('s'+ts.suffix,ts.component);
-				if (ts.component=='x') {
-					mat([
-						["1.0","0.0","0.0","0.0"],
-						["0.0",    c,"-"+s,"0.0"],
-						["0.0",    s,    c,"0.0"],
-						["0.0","0.0","0.0","1.0"],
-					],"rotate around x axis");
-				} else if (ts.component=='y') {
-					mat([
-						[    c,"0.0",    s,"0.0"],
-						["0.0","1.0","0.0","0.0"],
-						["-"+s,"0.0",    c,"0.0"],
-						["0.0","0.0","0.0","1.0"],
-					],"rotate around y axis");
-				} else if (ts.component=='z') {
-					mat([
-						[    c,"-"+s,"0.0","0.0"],
-						[    s,    c,"0.0","0.0"],
-						["0.0","0.0","1.0","0.0"],
-						["0.0","0.0","0.0","1.0"],
-					],"rotate around z axis");
-				}
-			});
-			if (this.options.projection=='perspective') {
-				mat([
-					["1.0","0.0","0.0","0.0"],
-					["0.0","1.0","0.0","0.0"],
-					["0.0","0.0","1.0","-(near+far)/2.0"],
-					["0.0","0.0","0.0","1.0"],
-				],"move center of coords inside view");
-			}
+			lines.t(
+				this.getTransformMatricesLines(4)
+			);
 		}
 		if (needTransformedPosition) {
 			lines.t(
@@ -240,6 +248,9 @@ class Transforms extends Feature {
 			";"
 		);
 		return lines;
+	}
+	getGlslVertexNormalTransformLines() {
+		return this.getTransformMatricesLines(3);
 	}
 }
 

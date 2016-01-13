@@ -84,45 +84,9 @@ module.exports=function(options,i18n){
 			const lines=new Lines();
 			lines.a(
 				canvas.getGlslVertexOutputLines(),
-				transforms.getGlslVertexOutputLines(shape.dim==2,canvas.providesAspect(),needTransformedPosition)
+				transforms.getGlslVertexOutputLines(shape.dim==2,canvas.providesAspect(),needTransformedPosition),
+				illumination.getGlslVertexOutputLines(eyeAtInfinity,shape.hasNormals,transforms.getGlslVertexNormalTransformLines())
 			);
-			/*
-			var writeNormalTransformLines=function(){
-				var lines=new Lines("");
-				options.transformOrder.forEach(function(transformName){
-					if (!options.needsTransform(transformName)) {
-						return;
-					}
-					lines.t({
-						'rotate.x': [
-							"*mat3(",
-							"	1.0, 0.0, 0.0,",
-							"	0.0,  cx, -sx,",
-							"	0.0,  sx,  cx",
-							")"
-						],
-						'rotate.y': [
-							"*mat3(",
-							"	 cy, 0.0,  sy,",
-							"	0.0, 1.0, 0.0,",
-							"	-sy, 0.0,  cy",
-							")"
-						],
-						'rotate.z': [
-							"*mat3(",
-							"	 cz, -sz, 0.0,",
-							"	 sz,  cz, 0.0,",
-							"	0.0, 0.0, 1.0",
-							")"
-						]
-					}[transformName]);
-				});
-				return lines;
-			};
-			lines.a(
-				illumination.getGlslVertexOutputLines(eyeAtInfinity,shape.hasNormals,writeNormalTransformLines())
-			);
-			*/
 			return lines;
 		}
 		const lines=new Lines();
