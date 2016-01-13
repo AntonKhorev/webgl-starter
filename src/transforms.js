@@ -105,7 +105,7 @@ class Transforms extends Feature {
 		}
 		return lines;
 	}
-	getGlslVertexOutputLines(flatShape,needTransformedPosition) {
+	getGlslVertexOutputLines(flatShape,receivesAspect,needTransformedPosition) {
 		const lines=new Lines;
 		this.rotateVectorEntries.forEach(rve=>{
 			lines.a(
@@ -149,9 +149,9 @@ class Transforms extends Feature {
 					return e;
 				}
 			};
-			const mat=(rows)=>{
+			const mat=(rows,comment)=>{
 				const dim=rows.length;
-				lines.t("*mat"+dim+"(");
+				lines.t("*mat"+dim+"( // "+comment);
 				rows.forEach((row,i)=>{
 					lines.a("	");
 					row.forEach((e,j)=>{
@@ -171,21 +171,21 @@ class Transforms extends Feature {
 						["0.0",    c,"-"+s,"0.0"],
 						["0.0",    s,    c,"0.0"],
 						["0.0","0.0","0.0","1.0"],
-					]);
+					],"rotate around x axis");
 				} else if (ts.component=='y') {
 					mat([
 						[    c,"0.0",    s,"0.0"],
 						["0.0","1.0","0.0","0.0"],
 						["-"+s,"0.0",    c,"0.0"],
 						["0.0","0.0","0.0","1.0"],
-					]);
+					],"rotate around y axis");
 				} else if (ts.component=='z') {
 					mat([
 						[    c,"-"+s,"0.0","0.0"],
 						[    s,    c,"0.0","0.0"],
 						["0.0","0.0","1.0","0.0"],
 						["0.0","0.0","0.0","1.0"],
-					]);
+					],"rotate around z axis");
 				}
 			});
 			if (this.options.projection=='perspective') {
@@ -194,9 +194,51 @@ class Transforms extends Feature {
 					["0.0","1.0","0.0","0.0"],
 					["0.0","0.0","1.0","-(near+far)/2.0"],
 					["0.0","0.0","0.0","1.0"],
-				]);
+				],"move center of coords inside view");
 			}
 		}
+		if (needTransformedPosition) {
+			lines.t(
+				";"
+			);
+			lines.a(
+				"gl_Position=transformedPosition"
+			);
+		}
+		if (this.options.projection=='ortho') {
+			if (receivesAspect) {
+				lines.t(
+					"*vec4(1.0/aspect,1.0,-1.0,1.0)" // correct aspect ratio and make coords right-handed
+				);
+			} else if (!flatShape) {
+				lines.t(
+					"*vec4(1.0,1.0,-1.0,1.0)" // make coords right-handed for 3d shapes
+				);
+			}
+		} else if (this.options.projection=='perspective') {
+			if (receivesAspect) {
+				lines.t(
+					"*mat4(",
+					"	near/aspect, 0.0,  0.0,                   0.0,",
+					"	0.0,         near, 0.0,                   0.0,",
+					"	0.0,         0.0,  (near+far)/(near-far), 2.0*near*far/(near-far),",
+					"	0.0,         0.0,  -1.0,                  0.0",
+					")"
+				);
+			} else {
+				lines.t(
+					"*mat4(",
+					"	near, 0.0,  0.0,                   0.0,",
+					"	0.0,  near, 0.0,                   0.0,",
+					"	0.0,  0.0,  (near+far)/(near-far), 2.0*near*far/(near-far),",
+					"	0.0,  0.0,  -1.0,                  0.0",
+					")"
+				);
+			}
+		}
+		lines.t(
+			";"
+		);
 		return lines;
 	}
 }

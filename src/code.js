@@ -84,51 +84,9 @@ module.exports=function(options,i18n){
 			const lines=new Lines();
 			lines.a(
 				canvas.getGlslVertexOutputLines(),
-				transforms.getGlslVertexOutputLines(shape.dim==2,needTransformedPosition)
+				transforms.getGlslVertexOutputLines(shape.dim==2,canvas.providesAspect(),needTransformedPosition)
 			);
 			/*
-			if (needTransformedPosition) {
-				lines.t(
-					";"
-				);
-				lines.a(
-					"gl_Position=transformedPosition"
-				);
-			}
-			if (options.projection=='ortho') {
-				if (canvas.providesAspect()) {
-					lines.t(
-						"*vec4(1.0/aspect,1.0,-1.0,1.0)" // correct aspect ratio and make coords right-handed
-					);
-				} else if (shape.dim>2) {
-					lines.t(
-						"*vec4(1.0,1.0,-1.0,1.0)" // make coords right-handed for 3d shapes
-					);
-				}
-			} else if (options.projection=='perspective') {
-				if (canvas.providesAspect()) {
-					lines.t(
-						"*mat4(",
-						"	near/aspect, 0.0,  0.0,                   0.0,",
-						"	0.0,         near, 0.0,                   0.0,",
-						"	0.0,         0.0,  (near+far)/(near-far), 2.0*near*far/(near-far),",
-						"	0.0,         0.0,  -1.0,                  0.0",
-						")"
-					);
-				} else {
-					lines.t(
-						"*mat4(",
-						"	near, 0.0,  0.0,                   0.0,",
-						"	0.0,  near, 0.0,                   0.0,",
-						"	0.0,  0.0,  (near+far)/(near-far), 2.0*near*far/(near-far),",
-						"	0.0,  0.0,  -1.0,                  0.0",
-						")"
-					);
-				}
-			}
-			lines.t(
-				";"
-			);
 			var writeNormalTransformLines=function(){
 				var lines=new Lines("");
 				options.transformOrder.forEach(function(transformName){
