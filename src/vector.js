@@ -19,7 +19,7 @@ class Vector extends NumericFeature {
 		this.modeConstant=true; // all vector components are constants
 		this.modeFloats=false; // one/some vector components are variable, such components get their own glsl vars
 		values.map((v,c,i)=>{
-			if (v.input!='constant') {
+			if (v.input!='constant' || v.speed!=0) {
 				this.modeConstant=false;
 				if (this.nVars++!=i) {
 					this.modeFloats=true;
@@ -47,12 +47,12 @@ class Vector extends NumericFeature {
 		return this.convertStringToCamelCase(this.varName+'.'+c);
 	}
 	componentValue(v,c) {
-		if (v.input=='constant') {
+		if (v.speed!=0 || v.input instanceof Input.MouseMove) {
+			return this.varNameC(c);
+		} else if (v.input=='constant') {
 			return fixOptHelp.formatNumber(v);
 		} else if (v.input=='slider') {
 			return "parseFloat(document.getElementById('"+this.htmlName+"."+c+"').value)";
-		} else if (v.input instanceof Input.MouseMove) {
-			return this.varNameC(c);
 		}
 	}
 	// abstract fns:
@@ -71,6 +71,9 @@ class Vector extends NumericFeature {
 		}
 		if (this.nSliders>0) {
 			featureContext.hasSliders=true;
+		}
+		if (this.values.some(v=>v.speed!=0)) {
+			featureContext.hasStartTime=true;
 		}
 	}
 	getHtmlControlMessageLines(i18n) {
@@ -170,6 +173,32 @@ class Vector extends NumericFeature {
 				}
 			});
 			this.addPostToListenerEntryAfterComponents(entry);
+		}
+		return lines;
+	}
+	getJsLoopLines() {
+		const lines=super.getJsLoopLines();
+		const add=(s)=>{
+			const c=s.charAt(0);
+			if (c=='-' || c=='+') {
+				return s;
+			} else {
+				return "+"+s;
+			}
+		};
+		let needUpdate=false;
+		this.values.forEach((v,c)=>{
+			if (v.speed!=0) {
+				needUpdate=true;
+				const fmt=fixOptHelp.makeFormatNumber(v);
+				const sfmt=fixOptHelp.makeFormatNumber(v.speed);
+				lines.a(
+					"var "+this.varNameC(c)+"=Math."+(v.speed<0?"max":"min")+"("+(v.speed<0?fmt(v.min):fmt(v.max))+","+fmt(v)+add(sfmt(v.speed))+"*(time-startTime)/1000);"
+				);
+			}
+		});
+		if (needUpdate) {
+			lines.a(this.writeJsUpdateFnLines());
 		}
 		return lines;
 	}

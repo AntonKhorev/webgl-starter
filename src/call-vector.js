@@ -11,8 +11,12 @@ class CallVector extends Vector {
 		this.calledFnDefaultArgs=calledFnDefaultArgs;
 	}
 	// private:
-	writeJsInitStartLines() {
-		if (this.nSliders>0 || this.values.every((v,c,i)=>v==this.calledFnDefaultArgs[i])) {
+	writeJsInitStartLines() { // TODO split this fn into two: one with declarations (Locs), another one with update (or is it the same as writeJsUpdateFnLines()?)
+		if (
+			this.nSliders>0 ||
+			this.values.every((v,c,i)=>v==this.calledFnDefaultArgs[i]) ||
+			this.values.some(v=>v.speed!=0) // TODO won't have to do this check
+		) {
 			return new Lines;
 		}
 		return new Lines(

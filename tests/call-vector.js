@@ -5,7 +5,7 @@ const Options=require('../src/options.js');
 const FeatureContext=require('../src/feature-context.js');
 const CallVector=require('../src/call-vector.js');
 
-describe("CallVector",function(){
+describe("CallVector",()=>{
 	class TestOptions extends Options {
 		get entriesDescription() {
 			return [
@@ -13,12 +13,12 @@ describe("CallVector",function(){
 			];
 		}
 	}
-	context("with constant components",function(){
+	context("with constant components",()=>{
 		const options=new TestOptions({color:{
 			r:0.2, g:0.3, b:0.4, a:0.5
 		}});
 		const vector=new CallVector('color',options.fix().color,'do.something',[1.0,1.0,1.0,1.0]);
-		it("makes a call during init",function(){
+		it("makes a call during init",()=>{
 			const featureContext=new FeatureContext(false);
 			featureContext.hasStartTime=true; // animated
 			assert.deepEqual(vector.getJsInitLines(featureContext).data,[
@@ -27,23 +27,27 @@ describe("CallVector",function(){
 			assert.deepEqual(featureContext.getJsAfterInitLines().data,[
 			]);
 		});
+		it("has empty loop",()=>{
+			assert.deepEqual(vector.getJsLoopLines().data,[
+			]);
+		});
 	});
-	context("with constant components equal to default value",function(){
+	context("with constant components equal to default value",()=>{
 		const options=new TestOptions;
 		const vector=new CallVector('color',options.fix().color,'do.something',[1.0,1.0,1.0,1.0]);
-		it("doesn't make a call during init",function(){
+		it("doesn't make a call during init",()=>{
 			const featureContext=new FeatureContext(false);
 			featureContext.hasStartTime=true; // animated
 			assert.deepEqual(vector.getJsInitLines(featureContext).data,[
 			]);
 		});
 	});
-	context("with 1 slider component",function(){
+	context("with 1 slider component",()=>{
 		const options=new TestOptions({color:{
 			r:{value:0.2,input:'slider'}, g:0.3, b:0.4, a:0.5
 		}});
 		const vector=new CallVector('color',options.fix().color,'up',[0.0,0.0,0.0,0.0]);
-		it("requests sliders",function(){
+		it("requests sliders",()=>{
 			const testFeatureContext={};
 			vector.requestFeatureContext(testFeatureContext);
 			assert.deepEqual(testFeatureContext,{
@@ -51,7 +55,7 @@ describe("CallVector",function(){
 				hasInputs: true,
 			});
 		});
-		it("returns interface with update fn and slider listener",function(){
+		it("returns interface with update fn and slider listener",()=>{
 			const featureContext=new FeatureContext(false);
 			featureContext.hasStartTime=true; // animated
 			assert.deepEqual(vector.getJsInitLines(featureContext).data,[
@@ -64,19 +68,19 @@ describe("CallVector",function(){
 			assert.deepEqual(featureContext.getJsAfterInitLines().data,[
 			]);
 		});
-		it("returns empty mousemove listener when not animated",function(){
+		it("returns empty mousemove listener when not animated",()=>{
 			const featureContext=new FeatureContext(false);
 			vector.getJsInitLines(featureContext);
 			assert.deepEqual(featureContext.getJsAfterInitLines().data,[
 			]);
 		});
 	});
-	context("with 2 slider components",function(){
+	context("with 2 slider components",()=>{
 		const options=new TestOptions({color:{
 			r:{value:0.2,input:'slider'}, g:0.3, b:{value:0.4,input:'slider'}, a:1.0
 		}});
 		const vector=new CallVector('color',options.fix().color,'up',[0.0,0.0,0.0,0.0]);
-		it("returns interface with update fn and 2 slider listeners",function(){
+		it("returns interface with update fn and 2 slider listeners",()=>{
 			const featureContext=new FeatureContext(false);
 			featureContext.hasStartTime=true; // animated
 			assert.deepEqual(vector.getJsInitLines(featureContext).data,[
@@ -96,12 +100,12 @@ describe("CallVector",function(){
 			]);
 		});
 	});
-	context("with 4 slider components",function(){
+	context("with 4 slider components",()=>{
 		const options=new TestOptions({color:{
 			r:{value:0.2,input:'slider'}, g:{value:0.3,input:'slider'}, b:{value:0.4,input:'slider'}, a:{value:1.0,input:'slider'}
 		}});
 		const vector=new CallVector('color',options.fix().color,'obj.up',[0.0,0.0,0.0,0.0]);
-		it("returns interface with map update fn and query slider listener",function(){
+		it("returns interface with map update fn and query slider listener",()=>{
 			const featureContext=new FeatureContext(false);
 			featureContext.hasStartTime=true; // animated
 			assert.deepEqual(vector.getJsInitLines(featureContext).data,[
@@ -119,12 +123,12 @@ describe("CallVector",function(){
 			]);
 		});
 	});
-	context("with 1 mousemove component",function(){
+	context("with 1 mousemove component",()=>{
 		const options=new TestOptions({color:{
 			r:{value:0.2,input:'mousemovex'}, g:0.3, b:0.4, a:1.0
 		}});
 		const vector=new CallVector('color',options.fix().color,'up',[0.0,0.0,0.0,0.0]);
-		it("returns interface with mousemove listener",function(){
+		it("returns interface with mousemove listener",()=>{
 			const featureContext=new FeatureContext(false);
 			featureContext.hasStartTime=true; // animated
 			assert.deepEqual(vector.getJsInitLines(featureContext).data,[
@@ -139,12 +143,12 @@ describe("CallVector",function(){
 			]);
 		});
 	});
-	context("with 2 mousemove components",function(){
+	context("with 2 mousemove components",()=>{
 		const options=new TestOptions({color:{
 			r:{value:0.2,input:'mousemovex'}, g:0.3, b:0.4, a:{value:1.0,input:'mousemovey'}
 		}});
 		const vector=new CallVector('color',options.fix().color,'up',[0.0,0.0,0.0,0.0]);
-		it("returns interface with mousemove listener",function(){
+		it("returns interface with mousemove listener",()=>{
 			const featureContext=new FeatureContext(false);
 			featureContext.hasStartTime=true; // animated
 			assert.deepEqual(vector.getJsInitLines(featureContext).data,[
@@ -160,12 +164,12 @@ describe("CallVector",function(){
 			]);
 		});
 	});
-	context("with 1 slider and 2 mousemove components",function(){
+	context("with 1 slider and 2 mousemove components",()=>{
 		const options=new TestOptions({color:{
 			r:{value:0.2,input:'mousemovex'}, g:{value:0.3,input:'slider'}, b:0.4, a:{value:1.0,input:'mousemovey'}
 		}});
 		const vector=new CallVector('color',options.fix().color,'up',[0.0,0.0,0.0,0.0]);
-		it("returns interface with 2 state vars, update fn, slider listener and mousemove listener",function(){
+		it("returns interface with 2 state vars, update fn, slider listener and mousemove listener",()=>{
 			const featureContext=new FeatureContext(false);
 			featureContext.hasStartTime=true; // animated
 			assert.deepEqual(vector.getJsInitLines(featureContext).data,[
@@ -187,12 +191,12 @@ describe("CallVector",function(){
 			]);
 		});
 	});
-	context("with 2 sliders and 2 mousemove components",function(){
+	context("with 2 sliders and 2 mousemove components",()=>{
 		const options=new TestOptions({color:{
 			r:{value:0.2,input:'mousemovex'}, g:{value:0.3,input:'slider'}, b:{value:0.4,input:'slider'}, a:{value:1.0,input:'mousemovey'}
 		}});
 		const vector=new CallVector('color',options.fix().color,'up',[0.0,0.0,0.0,0.0]);
-		it("returns interface with 2 state vars, update fn, 2 slider listeners and mousemove listener",function(){
+		it("returns interface with 2 state vars, update fn, 2 slider listeners and mousemove listener",()=>{
 			const featureContext=new FeatureContext(false);
 			featureContext.hasStartTime=true; // animated
 			assert.deepEqual(vector.getJsInitLines(featureContext).data,[
@@ -217,6 +221,60 @@ describe("CallVector",function(){
 				"	colorA=(rect.bottom-1-ev.clientY)/(rect.height-1);",
 				"	updateColor();",
 				"});"
+			]);
+		});
+	});
+	context("with constant positive speed",()=>{
+		const options=new TestOptions({color:{
+			r:{value:0.5, speed:+0.123}, g:0.4, b:0.3, a:1.0
+		}});
+		const vector=new CallVector('color',options.fix().color,'setColor',[1.0,1.0,1.0,1.0]);
+		it("requests start time",()=>{
+			const testFeatureContext={};
+			vector.requestFeatureContext(testFeatureContext);
+			assert.deepEqual(testFeatureContext,{
+				hasStartTime: true,
+			});
+		});
+		it("has no state vars",()=>{
+			const featureContext=new FeatureContext(false);
+			featureContext.hasStartTime=true; // animated
+			assert.deepEqual(vector.getJsInitLines(featureContext).data,[
+			]);
+			assert.deepEqual(featureContext.getJsAfterInitLines().data,[
+			]);
+		});
+		it("has loop with constant increment",()=>{
+			assert.deepEqual(vector.getJsLoopLines().data,[
+				"var colorR=Math.min(1.000,0.500+0.123*(time-startTime)/1000);",
+				"setColor(colorR,0.400,0.300,1.000);"
+			]);
+		});
+	});
+	context("with constant negative speed",()=>{
+		const options=new TestOptions({color:{
+			r:{value:0.5, speed:-0.1}, g:0.4, b:0.3, a:1.0
+		}});
+		const vector=new CallVector('color',options.fix().color,'setColor',[1.0,1.0,1.0,1.0]);
+		it("requests start time",()=>{
+			const testFeatureContext={};
+			vector.requestFeatureContext(testFeatureContext);
+			assert.deepEqual(testFeatureContext,{
+				hasStartTime: true,
+			});
+		});
+		it("has no state vars",()=>{
+			const featureContext=new FeatureContext(false);
+			featureContext.hasStartTime=true; // animated
+			assert.deepEqual(vector.getJsInitLines(featureContext).data,[
+			]);
+			assert.deepEqual(featureContext.getJsAfterInitLines().data,[
+			]);
+		});
+		it("has loop with constant increment",()=>{
+			assert.deepEqual(vector.getJsLoopLines().data,[
+				"var colorR=Math.max(0.000,0.500-0.100*(time-startTime)/1000);",
+				"setColor(colorR,0.400,0.300,1.000);"
 			]);
 		});
 	});
