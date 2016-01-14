@@ -66,6 +66,16 @@ class Shape extends Feature {
 	// public:
 	getJsInitLines(featureContext) {
 		const lines=super.getJsInitLines(featureContext);
+		if (this.elementIndexBits==32) {
+			lines.a(
+				"gl.getExtension('OES_element_index_uint');" // TODO check if null is returned and don't allow more elements
+			);
+		}
+		if (this.dim>2) {
+			lines.a(
+				"gl.enable(gl.DEPTH_TEST);"
+			);
+		}
 		lines.a(
 			"gl.bindBuffer(gl.ARRAY_BUFFER,gl.createBuffer());"
 		);

@@ -146,16 +146,6 @@ module.exports=function(options,i18n){
 			"var canvas=document.getElementById('myCanvas');",
 			"var gl=canvas.getContext('webgl')||canvas.getContext('experimental-webgl');"
 		);
-		if (shape.elementIndexBits==32) {
-			lines.a(
-				"gl.getExtension('OES_element_index_uint');" // TODO check if null is returned and don't allow more elements
-			);
-		}
-		if (shape.dim>2) {
-			lines.a(
-				"gl.enable(gl.DEPTH_TEST);"
-			);
-		}
 		lines.a(
 			"var program=makeProgram(",
 			"	document.getElementById('myVertexShader').text,",
