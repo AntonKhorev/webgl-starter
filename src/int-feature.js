@@ -20,6 +20,13 @@ class IntFeature extends NumericFeature {
 			featureContext.hasSliders=true;
 		}
 	}
+	getHtmlControlMessageLines(i18n) {
+		const lines=super.getHtmlControlMessageLines(i18n);
+		lines.a(
+			this.getHtmlControlMessageForValue(i18n,this.value,this.name)
+		);
+		return lines;
+	}
 	getHtmlInputLines(i18n) {
 		const lines=super.getHtmlInputLines(i18n);
 		const v=this.value;

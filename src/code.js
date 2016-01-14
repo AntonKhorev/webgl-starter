@@ -92,19 +92,6 @@ module.exports=function(options,i18n){
 	}
 	function getHtmlControlMessageLines() {
 		var lines=new Lines;
-		/*
-		function writeOptionGroup(group) {
-			group.filter(function(option){
-				return isMousemoveInput(option.name);
-			}).forEach(function(option){
-				lines.a(
-					"<li>"+i18n('controls.type.'+options[option.name+'.input'])+" "+i18n('controls.to')+" <strong>"+i18n('options.'+option.name)+"</strong></li>"
-				);
-			});
-		}
-		writeOptionGroup(options.inputOptions);
-		writeOptionGroup(options.transformOptions);
-		*/
 		features.forEach(feature=>{
 			lines.a(feature.getHtmlControlMessageLines(i18n));
 		});

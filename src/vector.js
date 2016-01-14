@@ -76,11 +76,9 @@ class Vector extends NumericFeature {
 	getHtmlControlMessageLines(i18n) {
 		const lines=super.getHtmlControlMessageLines(i18n);
 		this.values.forEach((v,c)=>{
-			if (v.input instanceof Input.MouseMove) {
-				lines.a(
-					"<li>"+i18n('controls.type.'+v.input)+" "+i18n('controls.to')+" <strong>"+i18n('options.'+this.name+'.'+c)+"</strong></li>"
-				);
-			}
+			lines.a(
+				this.getHtmlControlMessageForValue(i18n,v,this.name+'.'+c)
+			);
 		});
 		return lines;
 	}
