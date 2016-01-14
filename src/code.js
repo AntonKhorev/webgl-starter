@@ -2,7 +2,7 @@
 
 //const fixOptHelp=require('./fixed-options-helpers.js');
 const Lines=require('./lines.js');
-const listeners=require('./listeners.js');
+//const listeners=require('./listeners.js');
 const Shape=require('./shape-classes.js');
 const FeatureContext=require('./feature-context.js');
 const Canvas=require('./canvas.js');

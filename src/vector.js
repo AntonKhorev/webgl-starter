@@ -2,7 +2,7 @@
 
 const fixOptHelp=require('./fixed-options-helpers.js');
 const Lines=require('./lines.js');
-const listeners=require('./listeners.js');
+const Listener=require('./listener-classes.js');
 const NumericFeature=require('./numeric-feature.js');
 
 class Vector extends NumericFeature {
@@ -95,7 +95,7 @@ class Vector extends NumericFeature {
 			const lines=new Lines;
 			this.values.forEach((v,c)=>{
 				if (v.input!='slider') return;
-				const listener=new listeners.SliderListener(this.name+'.'+c);
+				const listener=new Listener.Slider(this.name+'.'+c);
 				listener.enter()
 					.log("console.log(this.id,'input value:',parseFloat(this.value));")
 					.post(this.updateFnName+"();");
@@ -106,7 +106,7 @@ class Vector extends NumericFeature {
 			return lines;
 		};
 		const writeOneListenerLines=()=>{
-			const listener=new listeners.MultipleSliderListener("[id^=\""+this.htmlName+".\"]");
+			const listener=new Listener.MultipleSlider("[id^=\""+this.htmlName+".\"]");
 			listener.enter()
 				.log("console.log(this.id,'input value:',parseFloat(this.value));")
 				.post(this.updateFnName+"();");

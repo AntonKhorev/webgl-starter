@@ -1,11 +1,11 @@
 'use strict';
 
-const listeners=require('./listeners.js');
+const Listener=require('./listener-classes.js');
 
 class FeatureContext {
 	constructor(debugOptions) {
 		this.debugOptions=debugOptions;
-		this.canvasMousemoveListener=new listeners.CanvasMousemoveListener();
+		this.canvasMousemoveListener=new Listener.CanvasMousemove();
 		//// to be set by features:
 		// for html:
 		this.hasSliders=false;

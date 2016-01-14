@@ -2,7 +2,7 @@
 
 const fixOptHelp=require('../fixed-options-helpers.js');
 const Lines=require('../lines.js');
-const listeners=require('../listeners.js');
+const Listener=require('../listener-classes.js');
 const Colorgen=require('../colorgen.js');
 const Shape=require('./shape.js');
 const IntFeature=require('../int-feature.js');
@@ -121,7 +121,7 @@ class LodShape extends Shape {
 	getJsInitLines(featureContext) {
 		const lines=super.getJsInitLines(featureContext);
 		if (this.lod.input=='slider') {
-			var listener=new listeners.SliderListener('shape.lod');
+			var listener=new Listener.Slider('shape.lod');
 			listener.enter()
 				.log("console.log(this.id,'input value:',parseInt(this.value));")
 				.post("storeShape(parseInt(this.value));");
