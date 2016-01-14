@@ -141,6 +141,10 @@ class Vector extends NumericFeature {
 		lines.a(
 			this.getJsDeclarationLines()
 		);
+		if (this.values.some(v=>v.speed!=0)) {
+			// TODO will likely fail for mousemove inputs
+			return lines;
+		}
 		if (this.modeConstant) {
 			lines.a(
 				this.getJsUpdateLines(this.makeInitialComponentValue())

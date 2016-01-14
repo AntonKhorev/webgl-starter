@@ -278,4 +278,24 @@ describe("CallVector",()=>{
 			]);
 		});
 	});
+	context("with constant positive speed and slider",()=>{
+		const options=new TestOptions({color:{
+			r:{value:0.5, speed:+0.123}, g:{value:0.4, input:'slider'}, b:0.3, a:1.0
+		}});
+		const vector=new CallVector('color',options.fix().color,'setColor',[1.0,1.0,1.0,1.0]);
+		it("has no state vars",()=>{
+			const featureContext=new FeatureContext(false);
+			featureContext.hasStartTime=true; // animated
+			assert.deepEqual(vector.getJsInitLines(featureContext).data,[
+			]);
+			assert.deepEqual(featureContext.getJsAfterInitLines().data,[
+			]);
+		});
+		it("has loop with constant increment",()=>{
+			assert.deepEqual(vector.getJsLoopLines().data,[
+				"var colorR=Math.min(1.000,0.500+0.123*(time-startTime)/1000);",
+				"setColor(colorR,parseFloat(document.getElementById('color.g').value),0.300,1.000);"
+			]);
+		});
+	});
 });
