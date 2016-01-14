@@ -73,6 +73,17 @@ class Vector extends NumericFeature {
 			featureContext.hasSliders=true;
 		}
 	}
+	getHtmlControlMessageLines(i18n) {
+		const lines=super.getHtmlControlMessageLines(i18n);
+		this.values.forEach((v,c)=>{
+			if (v.input instanceof Input.MouseMove) {
+				lines.a(
+					"<li>"+i18n('controls.type.'+v.input)+" "+i18n('controls.to')+" <strong>"+i18n('options.'+this.name+'.'+c)+"</strong></li>"
+				);
+			}
+		});
+		return lines;
+	}
 	getHtmlInputLines(i18n) {
 		const lines=super.getHtmlInputLines(i18n);
 		this.values.forEach((v,c)=>{

@@ -90,9 +90,9 @@ module.exports=function(options,i18n){
 			)
 		);
 	}
-	/*
-	function generateHtmlControlMessageLines() {
+	function getHtmlControlMessageLines() {
 		var lines=new Lines;
+		/*
 		function writeOptionGroup(group) {
 			group.filter(function(option){
 				return isMousemoveInput(option.name);
@@ -104,12 +104,15 @@ module.exports=function(options,i18n){
 		}
 		writeOptionGroup(options.inputOptions);
 		writeOptionGroup(options.transformOptions);
+		*/
+		features.forEach(feature=>{
+			lines.a(feature.getHtmlControlMessageLines(i18n));
+		});
 		return lines.wrapIfNotEmpty(
 			"<ul>",
 			"</ul>"
 		);
 	}
-	*/
 	function getHtmlInputLines() {
 		var lines=new Lines;
 		features.forEach(feature=>{
@@ -496,7 +499,7 @@ module.exports=function(options,i18n){
 		"</head>",
 		"<body>",
 		canvas.getHtmlCanvasLines(),
-		//generateHtmlControlMessageLines(),
+		getHtmlControlMessageLines(),
 		getHtmlInputLines(),
 		scriptLines,
 		"</body>",

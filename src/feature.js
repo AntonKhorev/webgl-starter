@@ -6,7 +6,15 @@ class Feature {
 	constructor() {
 		this.features=[];
 	}
-	// methods to be redefined
+	// private:
+	getRecursiveLines(method,args) {
+		const lines=new Lines;
+		this.features.forEach(feature=>{
+			lines.a(feature[method].apply(feature,args));
+		});
+		return lines;
+	}
+	// methods to be redefined:
 	hasInputs() {
 		return this.features.some(feature=>feature.hasInputs());
 	}
@@ -16,25 +24,16 @@ class Feature {
 		});
 	}
 	getHtmlInputLines(i18n) {
-		const lines=new Lines;
-		this.features.forEach(feature=>{
-			lines.a(feature.getHtmlInputLines(i18n));
-		});
-		return lines;
+		return this.getRecursiveLines('getHtmlInputLines',arguments);
+	}
+	getHtmlControlMessageLines(i18n) {
+		return this.getRecursiveLines('getHtmlControlMessageLines',arguments);
 	}
 	getJsInitLines(featureContext) {
-		const lines=new Lines;
-		this.features.forEach(feature=>{
-			lines.a(feature.getJsInitLines(featureContext));
-		});
-		return lines;
+		return this.getRecursiveLines('getJsInitLines',arguments);
 	}
 	getJsLoopLines() {
-		const lines=new Lines;
-		this.features.forEach(feature=>{
-			lines.a(feature.getJsLoopLines());
-		});
-		return lines;
+		return this.getRecursiveLines('getJsLoopLines',arguments);
 	}
 }
 
