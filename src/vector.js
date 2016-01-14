@@ -46,20 +46,31 @@ class Vector extends NumericFeature {
 	varNameC(c) {
 		return this.convertStringToCamelCase(this.varName+'.'+c);
 	}
-	componentValue(v,c) {
-		if (v.speed!=0 || v.input instanceof Input.MouseMove) {
-			return this.varNameC(c);
-		} else if (v.input=='constant') {
-			return fixOptHelp.formatNumber(v);
-		} else if (v.input=='slider') {
-			return "parseFloat(document.getElementById('"+this.htmlName+"."+c+"').value)";
+	makeInitialComponentValue() {
+		return (v,c)=>{
+			if (v.input=='slider') {
+				return "parseFloat(document.getElementById('"+this.htmlName+"."+c+"').value)"; // b/c slider could be init'd to a value different than the default
+			} else {
+				return fixOptHelp.formatNumber(v);
+			}
+		}
+	}
+	makeUpdatedComponentValue() {
+		return (v,c)=>{
+			if (v.speed!=0 || v.input instanceof Input.MouseMove) {
+				return this.varNameC(c);
+			} else if (v.input=='slider') {
+				return "parseFloat(document.getElementById('"+this.htmlName+"."+c+"').value)";
+			} else {
+				return fixOptHelp.formatNumber(v);
+			}
 		}
 	}
 	// abstract fns:
-	//writeJsInitStartLines() {} // Locs, fn calls, ets
-	//writeJsUpdateFnLines() {}
+	getJsDeclarationLines() { return new Lines; } // Locs etc
+	getJsUpdateLines(componentValue) { return new Lines; }
 	addPostToListenerEntryForComponent(entry,c) {} // do necessary entry.post()
-	addPostToListenerEntryAfterComponents(entry) {}
+	addPostToListenerEntryAfterComponents(entry,componentValue) {}
 	// public:
 	hasInputs() {
 		return super.hasInputs() || this.values.some(v=>v.input!='constant');
@@ -128,9 +139,12 @@ class Vector extends NumericFeature {
 			);
 		};
 		lines.a(
-			this.writeJsInitStartLines()
+			this.getJsDeclarationLines()
 		);
-		if (this.modeConstant) { // safe to skip this check
+		if (this.modeConstant) {
+			lines.a(
+				this.getJsUpdateLines(this.makeInitialComponentValue())
+			);
 			return lines;
 		}
 		const manyListenersLines=writeManyListenersLines();
@@ -144,7 +158,7 @@ class Vector extends NumericFeature {
 				}
 			});
 			lines.a(
-				this.writeJsUpdateFnLines().wrap(
+				this.getJsUpdateLines(this.makeUpdatedComponentValue()).wrap(
 					"function "+this.updateFnName+"() {",
 					"}"
 				),
@@ -153,6 +167,12 @@ class Vector extends NumericFeature {
 			);
 		}
 		if (this.nMousemoves>0) {
+			if (this.nSliders<=0) {
+				// didn't call update in (this.nSliders>0) branch
+				lines.a(
+					this.getJsUpdateLines(this.makeInitialComponentValue())
+				);
+			}
 			const entry=featureContext.canvasMousemoveListener.enter();
 			this.values.forEach((v,c)=>{
 				if (v.input instanceof Input.MouseMove) {
@@ -172,7 +192,7 @@ class Vector extends NumericFeature {
 					this.addPostToListenerEntryForComponent(entry,c);
 				}
 			});
-			this.addPostToListenerEntryAfterComponents(entry);
+			this.addPostToListenerEntryAfterComponents(entry,this.makeUpdatedComponentValue());
 		}
 		return lines;
 	}
@@ -198,7 +218,7 @@ class Vector extends NumericFeature {
 			}
 		});
 		if (needUpdate) {
-			lines.a(this.writeJsUpdateFnLines());
+			lines.a(this.getJsUpdateLines(this.makeUpdatedComponentValue()));
 		}
 		return lines;
 	}

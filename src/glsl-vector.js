@@ -103,7 +103,7 @@ class GlslVector extends Vector {
 		}
 	}
 	// private:
-	writeJsInitStartLines() {
+	getJsDeclarationLines() {
 		const lines=new Lines;
 		if (this.modeConstant) {
 			return lines;
@@ -120,56 +120,46 @@ class GlslVector extends Vector {
 				"var "+this.varName+"Loc=gl.getUniformLocation(program,'"+this.varName+"');"
 			);
 		}
-		if (this.nSliders==0 && this.modeVector) {
+		return lines;
+	}
+	getJsUpdateLines(componentValue) {
+		const lines=new Lines;
+		if (this.modeVector) {
 			lines.a(
 				"gl.uniform"+this.nVars+"f("+this.varName+"Loc"
 			);
-			this.values.forEach(v=>{
-				if (v.input!='constant') {
+			if (this.nSliders==0) {
+				this.values.forEach((v,c)=>{
+					if (v.input!='constant') {
+						lines.t(
+							","+componentValue(v,c)
+						);
+					}
+				});
+				lines.t(
+					");"
+				);
+			} else {
+				this.values.forEach((v,c)=>{
+					if (v.input=='constant') return;
 					lines.t(
-						","+fixOptHelp.formatNumber(v)
+						",",
+						"	"+componentValue(v,c)
 					);
-				}
-			});
-			lines.t(
-				");"
-			);
-		} else if (this.nSliders==0) {
+				});
+				lines.a(
+					");"
+				);
+			}
+		} else {
 			this.values.forEach((v,c)=>{
-				if (v.input!='constant') {
-					lines.a(
-						"gl.uniform1f("+this.varNameC(c)+"Loc,"+fixOptHelp.formatNumber(v)+");"
-					);
-				}
+				if (v.input=='constant') return;
+				lines.a(
+					"gl.uniform1f("+this.varNameC(c)+"Loc,"+componentValue(v,c)+");"
+				);
 			});
 		}
 		return lines;
-	}
-	writeJsUpdateFnLines() {
-		const updateFnLines=new Lines;
-		if (this.modeFloats) {
-			this.values.forEach((v,c)=>{
-				if (v.input=='constant') return;
-				updateFnLines.a(
-					"gl.uniform1f("+this.varNameC(c)+"Loc,"+this.componentValue(v,c)+");"
-				);
-			});
-		} else {
-			updateFnLines.a(
-				"gl.uniform"+this.nVars+"f("+this.varName+"Loc"
-			);
-			this.values.forEach((v,c)=>{
-				if (v.input=='constant') return;
-				updateFnLines.t(
-					",",
-					"	"+this.componentValue(v,c)
-				);
-			});
-			updateFnLines.a(
-				");"
-			);
-		}
-		return updateFnLines;
 	}
 	addPostToListenerEntryForComponent(entry,c) {
 		if (this.nSliders==0 && this.modeVector) {
@@ -180,7 +170,7 @@ class GlslVector extends Vector {
 			entry.post(this.updateFnName+"();");
 		}
 	}
-	addPostToListenerEntryAfterComponents(entry) {
+	addPostToListenerEntryAfterComponents(entry,componentValue) {
 		if (this.nSliders==0 && this.modeVector) {
 			const vs=[];
 			this.values.forEach((v,c,i)=>{
