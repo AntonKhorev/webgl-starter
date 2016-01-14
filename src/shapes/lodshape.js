@@ -1,6 +1,7 @@
 'use strict';
 
 const fixOptHelp=require('../fixed-options-helpers.js');
+const Input=require('../input-classes.js');
 const Lines=require('../lines.js');
 const Listener=require('../listener-classes.js');
 const Colorgen=require('../colorgen.js');
@@ -128,7 +129,7 @@ class LodShape extends Shape {
 			lines.a(
 				featureContext.getListenerLines(listener)
 			);
-		} else if (this.lod.input=='mousemovex' || this.lod.input=='mousemovey') {
+		} else if (this.lod.input instanceof Input.MouseMove) {
 			featureContext.canvasMousemoveListener.enter()
 				.newVarInt(this.lod.input,'shapeLod')
 				.cond("newShapeLod!=shapeLod")

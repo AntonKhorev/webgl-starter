@@ -223,9 +223,9 @@ class CanvasMousemove extends Base {
 			);
 		};
 		proxy.prexy=function(inputType,xLine,yLine){
-			if (inputType=='mousemovex') {
+			if (inputType.axis=='x') {
 				return proxy.pre(xLine);
-			} else if (inputType=='mousemovey') {
+			} else if (inputType.axis=='y') {
 				return proxy.pre(yLine);
 			}
 			return proxy;

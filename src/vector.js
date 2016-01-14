@@ -1,6 +1,7 @@
 'use strict';
 
 const fixOptHelp=require('./fixed-options-helpers.js');
+const Input=require('./input-classes.js');
 const Lines=require('./lines.js');
 const Listener=require('./listener-classes.js');
 const NumericFeature=require('./numeric-feature.js');
@@ -25,7 +26,7 @@ class Vector extends NumericFeature {
 				}
 			}
 			this.nSliders+=v.input=='slider';
-			this.nMousemoves+=(v.input=='mousemovex' || v.input=='mousemovey');
+			this.nMousemoves+=(v.input instanceof Input.MouseMove);
 		});
 		if (this.nVars==1) {
 			this.modeFloats=true;
@@ -50,7 +51,7 @@ class Vector extends NumericFeature {
 			return fixOptHelp.formatNumber(v);
 		} else if (v.input=='slider') {
 			return "parseFloat(document.getElementById('"+this.htmlName+"."+c+"').value)";
-		} else if (v.input=='mousemovex' || v.input=='mousemovey') {
+		} else if (v.input instanceof Input.MouseMove) {
 			return this.varNameC(c);
 		}
 	}
@@ -124,7 +125,7 @@ class Vector extends NumericFeature {
 		const oneListenerLines=writeOneListenerLines();
 		if (this.nSliders>0) {
 			this.values.forEach((v,c)=>{
-				if (v.input=='mousemovex' || v.input=='mousemovey') {
+				if (v.input instanceof Input.MouseMove) {
 					lines.a(
 						"var "+this.varNameC(c)+"="+fixOptHelp.formatNumber(v)+";"
 					);
@@ -142,7 +143,7 @@ class Vector extends NumericFeature {
 		if (this.nMousemoves>0) {
 			const entry=featureContext.canvasMousemoveListener.enter();
 			this.values.forEach((v,c)=>{
-				if (v.input=='mousemovex' || v.input=='mousemovey') {
+				if (v.input instanceof Input.MouseMove) {
 					const fmt=fixOptHelp.makeFormatNumber(v);
 					if (this.nSliders==0) {
 						entry.minMaxVarFloat(v.input,this.varNameC(c),

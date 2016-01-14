@@ -1,6 +1,7 @@
 'use strict';
 
 const assert=require('assert');
+const Input=require('../src/input-classes.js');
 const Option=require('../src/option-classes.js');
 const Options=require('../src/base/options.js');
 
@@ -108,6 +109,13 @@ describe("Option.LiveInt",()=>{
 		assert.equal(fixed.lod.availableMin,0);
 		assert.equal(fixed.lod.availableMax,10);
 		assert.equal(fixed.lod.step,1);
+	});
+	it("has Slider input class",()=>{
+		const options=new TestOptions({lod:
+			{input:'slider'}
+		});
+		const fixed=options.fix();
+		assert(fixed.lod.input instanceof Input.Slider);
 	});
 });
 

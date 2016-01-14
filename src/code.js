@@ -11,11 +11,6 @@ const Transforms=require('./transforms.js');
 const Illumination=require('./illumination.js');
 
 module.exports=function(options,i18n){
-	// TODO replace it by option helpers - or by input classes
-	function isMousemoveInput(name) {
-		return ['mousemovex','mousemovey'].indexOf(options[name+'.input'])>=0;
-	}
-
 	const featureContext=new FeatureContext(options.debug);
 	const canvas=new Canvas(options.canvas);
 	const background=new Background(options.background);

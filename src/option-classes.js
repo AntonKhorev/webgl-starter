@@ -1,5 +1,6 @@
 'use strict';
 
+const Input=require('./input-classes.js');
 const imports=require('./base/option-classes.js');
 
 const RangeInput=imports.RangeInput;
@@ -74,7 +75,7 @@ class LiveNumber extends RangeInput {
 		const fixed=new Number(src.value);
 		fixed.min=src.min;
 		fixed.max=src.max;
-		fixed.input=src.input;
+		fixed.input=Input.createFromString(src.input);
 		// needed for formatting:
 		fixed.availableMin=src.availableMin;
 		fixed.availableMax=src.availableMax;

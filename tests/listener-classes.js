@@ -1,6 +1,7 @@
 'use strict';
 
 const assert=require('assert');
+const Input=require('../src/input-classes.js');
 const Listener=require('../src/listener-classes.js');
 
 describe("Listener.Slider",()=>{
@@ -122,7 +123,7 @@ describe("Listener.CanvasMousemove",()=>{
 	it("outputs code to get float value with x-axis, min/max declaration, no value declaration",()=>{
 		const listener=new Listener.CanvasMousemove();
 		listener.enter()
-			.minMaxFloat('mousemovex','foo','-180','+180');
+			.minMaxFloat(Input.createFromString('mousemovex'),'foo','-180','+180');
 		const lines=listener.write(false,false);
 		assert.deepEqual(lines.data,[
 			"canvas.addEventListener('mousemove',function(ev){",
@@ -136,7 +137,7 @@ describe("Listener.CanvasMousemove",()=>{
 	it("outputs code to get [0..1] value with x-axis, min/max declaration omitted b/c not needed, no value declaration",()=>{
 		const listener=new Listener.CanvasMousemove();
 		listener.enter()
-			.minMaxFloat('mousemovex','baz',0,1);
+			.minMaxFloat(Input.createFromString('mousemovex'),'baz',0,1);
 		const lines=listener.write(false,false);
 		assert.deepEqual(lines.data,[
 			"canvas.addEventListener('mousemove',function(ev){",
@@ -148,7 +149,7 @@ describe("Listener.CanvasMousemove",()=>{
 	it("outputs code to get float value with y-axis, min/max declaration, value declaration",()=>{
 		const listener=new Listener.CanvasMousemove();
 		listener.enter()
-			.minMaxVarFloat('mousemovey','bar','-100','+100');
+			.minMaxVarFloat(Input.createFromString('mousemovey'),'bar','-100','+100');
 		const lines=listener.write(false,false);
 		assert.deepEqual(lines.data,[
 			"canvas.addEventListener('mousemove',function(ev){",
@@ -162,7 +163,7 @@ describe("Listener.CanvasMousemove",()=>{
 	it("outputs code to get int value with y-axis, new value declaration",()=>{
 		const listener=new Listener.CanvasMousemove();
 		listener.enter()
-			.newVarInt('mousemovey','depth');
+			.newVarInt(Input.createFromString('mousemovey'),'depth');
 		const lines=listener.write(false,false);
 		assert.deepEqual(lines.data,[
 			"canvas.addEventListener('mousemove',function(ev){",
