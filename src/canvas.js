@@ -1,13 +1,15 @@
 'use strict';
 
 const Lines=require('./lines.js');
+const Listener=require('./listener-classes.js');
 const Feature=require('./feature.js');
 const IntFeature=require('./int-feature.js');
 
 class Canvas extends Feature {
 	constructor(options) {
 		super();
-		this.options=options;
+		this.width=options.width;
+		this.height=options.height;
 		this.features.push(
 			new IntFeature('canvas.width' ,options.width),
 			new IntFeature('canvas.height',options.height)
@@ -16,7 +18,7 @@ class Canvas extends Feature {
 	getHtmlCanvasLines() {
 		return new Lines(
 			"<div>",
-			"	<canvas id='myCanvas' width='"+this.options.width+"' height='"+this.options.height+"'></canvas>",
+			"	<canvas id='myCanvas' width='"+this.width+"' height='"+this.height+"'></canvas>",
 			"</div>"
 		);
 	}
@@ -28,17 +30,50 @@ class Canvas extends Feature {
 		}
 	}
 	getGlslVertexOutputLines() {
-		const needAspectConstant=!this.hasInputs() && Number(this.options.width)!=Number(this.options.height);
+		const needAspectConstant=!this.hasInputs() && Number(this.width)!=Number(this.height);
 		if (needAspectConstant) {
 			return new Lines(
-				"float aspect="+this.options.width+".0/"+this.options.height+".0;"
+				"float aspect="+this.width+".0/"+this.height+".0;"
 			);
 		} else {
 			return new Lines;
 		}
 	}
 	providesAspect() {
-		return this.hasInputs() || Number(this.options.width)!=Number(this.options.height);
+		return this.hasInputs() || Number(this.width)!=Number(this.height);
+	}
+	getJsInitLines(featureContext) {
+		const lines=super.getJsInitLines(featureContext);
+		const canvasUpdater=()=>{
+			lines.a(
+				"function updateAspect() {",
+				"	gl.viewport(0,0,canvas.width,canvas.height);",
+				"	gl.uniform1f(aspectLoc,canvas.width/canvas.height);",
+				"}",
+				"updateAspect();"
+			);
+		};
+		const canvasListener=wh=>{
+			if (this[wh].input=='slider') {
+				const listener=new Listener.Slider('canvas.'+wh);
+				listener.enter()
+					.log("console.log(this.id,'input value:',parseInt(this.value));")
+					.post("canvas."+wh+"=parseInt(this.value);")
+					.post("updateAspect();");
+				lines.a(
+					featureContext.getListenerLines(listener)
+				);
+			}
+		};
+		if (this.hasInputs()) {
+			lines.a(
+				"var aspectLoc=gl.getUniformLocation(program,'aspect');"
+			);
+			canvasUpdater();
+			canvasListener('width');
+			canvasListener('height');
+		}
+		return lines;
 	}
 }
 

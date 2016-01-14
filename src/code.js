@@ -1,8 +1,6 @@
 'use strict';
 
-//const fixOptHelp=require('./fixed-options-helpers.js');
 const Lines=require('./lines.js');
-//const listeners=require('./listeners.js');
 const Shape=require('./shape-classes.js');
 const FeatureContext=require('./feature-context.js');
 const Canvas=require('./canvas.js');
@@ -181,35 +179,6 @@ module.exports=function(options,i18n){
 			lines.a(
 				listener.write.apply(listener,writeListenerArgs)
 			);
-		}
-		var canvasMousemoveListener=new listeners.CanvasMousemoveListener();
-		function canvasUpdater() {
-			lines.a(
-				"function updateAspect() {",
-				"	gl.viewport(0,0,canvas.width,canvas.height);",
-				"	gl.uniform1f(aspectLoc,canvas.width/canvas.height);",
-				"}",
-				"updateAspect();"
-			);
-		}
-		function canvasListener(wh) {
-			var optName='canvas.'+wh;
-			if (options[optName+'.input']=='slider') {
-				var listener=new listeners.SliderListener(optName);
-				listener.enter()
-					.log("console.log(this.id,'input value:',parseInt(this.value));")
-					.post("canvas."+wh+"=parseInt(this.value);")
-					.post("updateAspect();");
-				writeListener(listener);
-			}
-		}
-		if (options.hasInputsFor('canvas')) {
-			lines.a(
-				"var aspectLoc=gl.getUniformLocation(program,'aspect');"
-			);
-			canvasUpdater();
-			canvasListener('width');
-			canvasListener('height');
 		}
 		['x','y','z'].forEach(function(d){
 			var D=d.toUpperCase();
