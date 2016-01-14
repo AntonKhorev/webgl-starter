@@ -32,6 +32,13 @@ module.exports=function(options,i18n){
 		illumination,
 		shape,
 	];
+	const featureNames=[
+		'canvas',
+		'background',
+		'transforms',
+		'illumination',
+		'shape',
+	];
 	features.forEach(feature=>{
 		feature.requestFeatureContext(featureContext);
 	});
@@ -153,8 +160,15 @@ module.exports=function(options,i18n){
 			");",
 			"gl.useProgram(program);"
 		);
-		features.forEach(feature=>{
-			lines.a(feature.getJsInitLines(featureContext));
+		features.forEach((feature,i)=>{
+			const featureLines=feature.getJsInitLines(featureContext);
+			if (featureLines.data.length>0) {
+				lines.a(
+					"",
+					"// init "+featureNames[i], // TODO i18n
+					featureLines
+				);
+			}
 		});
 		lines.a(
 			featureContext.getJsAfterInitLines()
