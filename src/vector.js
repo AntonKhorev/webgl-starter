@@ -229,17 +229,21 @@ class Vector extends NumericFeature {
 				const sfmt=fixOptHelp.makeFormatNumber(v.speed);
 				const varName=this.varNameC(c);
 				const incrementLine=(base,dt)=>
-					"var "+varName+"=Math."+(v.speed<0?"max":"min")+"("+(v.speed<0?fmt(v.min):fmt(v.max))+","+base+add(sfmt(v.speed))+"*"+dt+"/1000);";
+					varName+"=Math."+(v.speed<0?"max":"min")+"("+(v.speed<0?fmt(v.min):fmt(v.max))+","+base+add(sfmt(v.speed))+"*"+dt+"/1000);";
 				if (v.input=='slider') {
 					const inputVarName=this.varNameC(c)+"Input";
 					lines.a(
 						"var "+inputVarName+"=document.getElementById('"+this.htmlName+"."+c+"');",
-						incrementLine("parseFloat("+inputVarName+".value)","(time-prevTime)"),
+						"var "+incrementLine("parseFloat("+inputVarName+".value)","(time-prevTime)"),
 						inputVarName+".value="+varName+";"
+					);
+				} else if (v.input instanceof Input.MouseMove) {
+					lines.a(
+						incrementLine(varName,"(time-prevTime)")
 					);
 				} else {
 					lines.a(
-						incrementLine(fmt(v),"(time-startTime)")
+						"var "+incrementLine(fmt(v),"(time-startTime)")
 					);
 				}
 			}
