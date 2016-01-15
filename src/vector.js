@@ -168,7 +168,7 @@ class Vector extends NumericFeature {
 		this.values.forEach((v,c)=>{
 			if (
 				(v.input instanceof Input.MouseMove && (someValueSliders || someSpeeds)) || // mouse input required elsewhere
-				v.speed.input!='constant' // variable speed
+				(v.speed.input!='constant' && v.input!='slider') // variable speed and no value input capable of storing the state
 			) {
 				lines.a(
 					"var "+this.varNameC(c)+"="+fixOptHelp.formatNumber(v)+";"
