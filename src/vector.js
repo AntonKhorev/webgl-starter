@@ -14,7 +14,6 @@ class Vector extends NumericFeature {
 		this.varName=this.convertStringToCamelCase(name); // js/glsl var name - ok to rewrite this property - Transforms does it
 		this.values=values;
 		this.nVars=0;
-		this.nMousemoves=0;
 		this.modeConstant=true; // all vector components are constants
 		this.modeFloats=false; // one/some vector components are variable, such components get their own glsl vars
 		values.map((v,c,i)=>{
@@ -24,7 +23,6 @@ class Vector extends NumericFeature {
 					this.modeFloats=true;
 				}
 			}
-			this.nMousemoves+=(v.input instanceof Input.MouseMove);
 		});
 		if (this.nVars==1) {
 			this.modeFloats=true;
@@ -187,7 +185,7 @@ class Vector extends NumericFeature {
 				manyListenersLines.data.length<=oneListenerLines.data.length ? manyListenersLines : oneListenerLines
 			);
 		}
-		if (this.nMousemoves>0) {
+		if (this.values.some(v=>(v.input instanceof Input.MouseMove))) {
 			if (!someSpeeds && !someValueSliders) {
 				lines.a(
 					this.getJsUpdateLines(this.makeInitialComponentValue())
