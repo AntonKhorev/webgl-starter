@@ -49,13 +49,9 @@ class CallVector extends Vector {
 		return lines;
 	}
 	addPostToListenerEntryAfterComponents(entry,componentValue) {
-		if (this.nSliders==0) {
-			entry.post(
-				this.calledFn+"("+this.values.map(componentValue).join(",")+");"
-			);
-		} else {
-			entry.post(this.updateFnName+"();");
-		}
+		entry.post(
+			this.calledFn+"("+this.values.map(componentValue).join(",")+");"
+		);
 	}
 }
 

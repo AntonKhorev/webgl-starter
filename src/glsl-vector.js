@@ -162,16 +162,14 @@ class GlslVector extends Vector {
 		return lines;
 	}
 	addPostToListenerEntryForComponent(entry,c) {
-		if (this.nSliders==0 && this.modeVector) {
+		if (this.modeVector) {
 			// written at the end as a vector
-		} else if (this.nSliders==0) {
-			entry.post("gl.uniform1f("+this.varNameC(c)+"Loc,"+this.varNameC(c)+");");
 		} else {
-			entry.post(this.updateFnName+"();");
+			entry.post("gl.uniform1f("+this.varNameC(c)+"Loc,"+this.varNameC(c)+");");
 		}
 	}
 	addPostToListenerEntryAfterComponents(entry,componentValue) {
-		if (this.nSliders==0 && this.modeVector) {
+		if (this.modeVector) {
 			const vs=[];
 			this.values.forEach((v,c,i)=>{
 				if (i<this.nVars) {

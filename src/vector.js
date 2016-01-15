@@ -193,10 +193,16 @@ class Vector extends NumericFeature {
 						);
 					}
 					entry.log("console.log('"+this.htmlName+"."+c+" input value:',"+this.varNameC(c)+");");
-					this.addPostToListenerEntryForComponent(entry,c);
+					if (this.nSliders==0) {
+						this.addPostToListenerEntryForComponent(entry,c);
+					}
 				}
 			});
-			this.addPostToListenerEntryAfterComponents(entry,this.makeUpdatedComponentValue());
+			if (this.nSliders==0) {
+				this.addPostToListenerEntryAfterComponents(entry,this.makeUpdatedComponentValue());
+			} else {
+				entry.post(this.updateFnName+"();");
+			}
 		}
 		return lines;
 	}
