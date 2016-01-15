@@ -14,12 +14,12 @@ class Vector extends NumericFeature {
 		this.varName=this.convertStringToCamelCase(name); // js/glsl var name - ok to rewrite this property - Transforms does it
 		this.values=values;
 		this.nVars=0;
-		this.nSliders=0; // sliders are <input> elements with values that can be populated by the browser, disregarding default value
+		this.nSliders=0; // this is only for value sliders, not speed sliders; sliders are <input> elements with values that can be populated by the browser, disregarding default value
 		this.nMousemoves=0;
 		this.modeConstant=true; // all vector components are constants
 		this.modeFloats=false; // one/some vector components are variable, such components get their own glsl vars
 		values.map((v,c,i)=>{
-			if (v.input!='constant' || v.speed!=0) {
+			if (v.input!='constant' || v.speed!=0 || v.speed.input!='constant') {
 				this.modeConstant=false;
 				if (this.nVars++!=i) {
 					this.modeFloats=true;
@@ -57,7 +57,7 @@ class Vector extends NumericFeature {
 	}
 	makeUpdatedComponentValue() {
 		return (v,c)=>{
-			if (v.speed!=0 || v.input instanceof Input.MouseMove) {
+			if (v.speed!=0 || v.speed.input!='constant' || v.input instanceof Input.MouseMove) {
 				return this.varNameC(c);
 			} else if (v.input=='slider') {
 				return "parseFloat(document.getElementById('"+this.htmlName+"."+c+"').value)";
@@ -78,14 +78,14 @@ class Vector extends NumericFeature {
 	requestFeatureContext(featureContext) {
 		super.requestFeatureContext(featureContext);
 		this.values.forEach(v=>{
-			if (v.input!='constant') {
+			if (v.input!='constant' || v.speed.input!='constant') {
 				featureContext.hasInputs=true;
 			}
-			if (v.input=='slider') {
+			if (v.input=='slider' || v.speed.input=='slider') {
 				featureContext.hasSliders=true;
 			}
-			if (v.speed!=0) {
-				if (v.input=='constant') {
+			if (v.speed!=0 || v.speed.input!='constant') {
+				if (v.input=='constant' && v.speed.input=='constant') {
 					featureContext.hasStartTime=true;
 				} else {
 					featureContext.hasPrevTime=true;
@@ -97,24 +97,36 @@ class Vector extends NumericFeature {
 		const lines=super.getHtmlControlMessageLines(i18n);
 		this.values.forEach((v,c)=>{
 			lines.a(
-				this.getHtmlControlMessageForValue(i18n,v,this.name+'.'+c)
+				this.getHtmlControlMessageForValue(i18n,v,this.name+'.'+c),
+				this.getHtmlControlMessageForValue(i18n,v.speed,this.name+'.'+c+'.speed')
 			);
 		});
 		return lines;
 	}
 	getHtmlInputLines(i18n) {
 		const lines=super.getHtmlInputLines(i18n);
-		this.values.forEach((v,c)=>{
+		const writeInput=(v,opName,htmlName)=>{
 			if (v.input!='slider') return;
-			const opnamec='options.'+this.name+'.'+c;
 			const fmt=fixOptHelp.makeFormatNumber(v);
 			lines.a(
 				"<div>",
-				"	<label for='"+this.htmlName+"."+c+"'>"+i18n(opnamec)+":</label>",
-				"	<span class='min'>"+i18n(opnamec+'.value',v.min)+"</span>",
-				"	<input type='range' id='"+this.htmlName+"."+c+"' min='"+fmt(v.min)+"' max='"+fmt(v.max)+"' value='"+fmt(v)+"' step='any' />",
-				"	<span class='max'>"+i18n(opnamec+'.value',v.max)+"</span>",
+				"	<label for='"+htmlName+"'>"+i18n(opName)+":</label>",
+				"	<span class='min'>"+i18n(opName+'.value',v.min)+"</span>",
+				"	<input type='range' id='"+htmlName+"' min='"+fmt(v.min)+"' max='"+fmt(v.max)+"' value='"+fmt(v)+"' step='any' />",
+				"	<span class='max'>"+i18n(opName+'.value',v.max)+"</span>",
 				"</div>"
+			);
+		};
+		this.values.forEach((v,c)=>{
+			writeInput(
+				v,
+				'options.'+this.name+'.'+c,
+				this.htmlName+'.'+c
+			);
+			writeInput(
+				v.speed,
+				'options.'+this.name+'.'+c+'.speed',
+				this.htmlName+'.'+c+'.speed'
 			);
 		});
 		return lines;
@@ -147,17 +159,20 @@ class Vector extends NumericFeature {
 		lines.a(
 			this.getJsDeclarationLines()
 		);
-		const someSpeedNonzero=this.values.some(v=>v.speed!=0);
-		if (!someSpeedNonzero && this.modeConstant) {
+		if (this.modeConstant) {
 			lines.a(
 				this.getJsUpdateLines(this.makeInitialComponentValue())
 			);
 			return lines;
 		}
+		const someSpeedNonzero=this.values.some(v=>(v.speed!=0 || v.speed.input!='constant'));
 		const manyListenersLines=writeManyListenersLines();
 		const oneListenerLines=writeOneListenerLines();
 		this.values.forEach((v,c)=>{
-			if (v.input instanceof Input.MouseMove && (this.nSliders>0 || someSpeedNonzero)) {
+			if (
+				(v.input instanceof Input.MouseMove && (this.nSliders>0 || someSpeedNonzero)) || // mouse input required elsewhere
+				v.speed.input!='constant' // variable speed
+			) {
 				lines.a(
 					"var "+this.varNameC(c)+"="+fixOptHelp.formatNumber(v)+";"
 				);
@@ -223,13 +238,17 @@ class Vector extends NumericFeature {
 		};
 		let needUpdate=false;
 		this.values.forEach((v,c)=>{
-			if (v.speed!=0) {
+			if (v.speed!=0 || v.speed.input!='constant') {
 				needUpdate=true;
 				const fmt=fixOptHelp.makeFormatNumber(v);
 				const sfmt=fixOptHelp.makeFormatNumber(v.speed);
 				const varName=this.varNameC(c);
+				let addSpeed=add(sfmt(v.speed));
+				if (v.speed.input=='slider') {
+					addSpeed="+parseFloat(document.getElementById('"+this.htmlName+"."+c+".speed').value)";
+				}
 				const incrementLine=(base,dt)=>
-					varName+"=Math."+(v.speed<0?"max":"min")+"("+(v.speed<0?fmt(v.min):fmt(v.max))+","+base+add(sfmt(v.speed))+"*"+dt+"/1000);";
+					varName+"=Math."+(v.speed<0?"max":"min")+"("+(v.speed<0?fmt(v.min):fmt(v.max))+","+base+addSpeed+"*"+dt+"/1000);";
 				if (v.input=='slider') {
 					const inputVarName=this.varNameC(c)+"Input";
 					lines.a(
@@ -237,7 +256,7 @@ class Vector extends NumericFeature {
 						"var "+incrementLine("parseFloat("+inputVarName+".value)","(time-prevTime)"),
 						inputVarName+".value="+varName+";"
 					);
-				} else if (v.input instanceof Input.MouseMove) {
+				} else if (v.input instanceof Input.MouseMove || v.speed.input=='slider') {
 					lines.a(
 						incrementLine(varName,"(time-prevTime)")
 					);

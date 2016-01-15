@@ -401,4 +401,36 @@ describe("CallVector",()=>{
 			]);
 		});
 	});
+	context("with slider-controlled speed",()=>{
+		const options=new TestOptions({color:{
+			r:{value:0.5, speed:{input:'slider'}}, g:0.4, b:0.3, a:1.0
+		}});
+		const vector=new CallVector('color',options.fix().color,'setColor',[1.0,1.0,1.0,1.0]);
+		it("requests prev time",()=>{
+			const testFeatureContext={};
+			vector.requestFeatureContext(testFeatureContext);
+			assert.deepEqual(testFeatureContext,{
+				hasPrevTime: true,
+				hasSliders: true,
+				hasInputs: true,
+			});
+		});
+		it("has state var for component with speed",()=>{
+			const featureContext=new FeatureContext(false);
+			featureContext.hasPrevTime=true; // animated
+			featureContext.hasSliders=true;
+			featureContext.hasInputs=true;
+			assert.deepEqual(vector.getJsInitLines(featureContext).data,[
+				"var colorR=0.500;"
+			]);
+			assert.deepEqual(featureContext.getJsAfterInitLines().data,[
+			]);
+		});
+		it("has loop with time difference increment",()=>{
+			assert.deepEqual(vector.getJsLoopLines().data,[
+				"colorR=Math.min(1.000,colorR+parseFloat(document.getElementById('color.r.speed').value)*(time-prevTime)/1000);",
+				"setColor(colorR,0.400,0.300,1.000);"
+			]);
+		});
+	});
 });
