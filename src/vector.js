@@ -128,30 +128,39 @@ class Vector extends NumericFeature {
 		return lines;
 	}
 	getJsInitLines(featureContext) {
-		const lines=super.getJsInitLines(featureContext);
-		const writeManyListenersLines=()=>{
-			const lines=new Lines;
-			this.values.forEach((v,c)=>{
-				if (v.input!='slider') return;
-				const listener=new Listener.Slider(this.name+'.'+c);
-				listener.enter()
-					.log("console.log(this.id,'input value:',parseFloat(this.value));")
-					.post(this.updateFnName+"();");
-				lines.a(
+		const getSliderListenerLines=(doUpdate)=>{
+			const writeManyListenersLines=()=>{
+				const lines=new Lines;
+				this.values.forEach((v,c)=>{
+					if (v.input!='slider') return;
+					const listener=new Listener.Slider(this.htmlName+'.'+c);
+					const entry=listener.enter();
+					entry.log("console.log(this.id,'input value:',parseFloat(this.value));");
+					if (doUpdate) {
+						entry.post(this.updateFnName+"();");
+					}
+					lines.a(
+						featureContext.getListenerLines(listener)
+					);
+				});
+				return lines;
+			};
+			const writeOneListenerLines=()=>{
+				const listener=new Listener.MultipleSlider("[id^=\""+this.htmlName+".\"]");
+				const entry=listener.enter();
+				entry.log("console.log(this.id,'input value:',parseFloat(this.value));");
+				if (doUpdate) {
+					entry.post(this.updateFnName+"();");
+				}
+				return new Lines(
 					featureContext.getListenerLines(listener)
 				);
-			});
-			return lines;
+			};
+			const manyListenersLines=writeManyListenersLines();
+			const oneListenerLines=writeOneListenerLines();
+			return manyListenersLines.data.length<=oneListenerLines.data.length ? manyListenersLines : oneListenerLines;
 		};
-		const writeOneListenerLines=()=>{
-			const listener=new Listener.MultipleSlider("[id^=\""+this.htmlName+".\"]");
-			listener.enter()
-				.log("console.log(this.id,'input value:',parseFloat(this.value));")
-				.post(this.updateFnName+"();");
-			return new Lines(
-				featureContext.getListenerLines(listener)
-			);
-		};
+		const lines=super.getJsInitLines(featureContext);
 		lines.a(
 			this.getJsDeclarationLines()
 		);
@@ -163,8 +172,6 @@ class Vector extends NumericFeature {
 		}
 		const someSpeeds=this.values.some(v=>(v.speed!=0 || v.speed.input!='constant'));
 		const someValueSliders=this.values.some(v=>v.input=='slider');
-		const manyListenersLines=writeManyListenersLines();
-		const oneListenerLines=writeOneListenerLines();
 		this.values.forEach((v,c)=>{
 			if (
 				(v.input instanceof Input.MouseMove && (someValueSliders || someSpeeds)) || // mouse input required elsewhere
@@ -181,10 +188,12 @@ class Vector extends NumericFeature {
 					"function "+this.updateFnName+"() {",
 					"}"
 				),
-				this.updateFnName+"();",
-				manyListenersLines.data.length<=oneListenerLines.data.length ? manyListenersLines : oneListenerLines
+				this.updateFnName+"();"
 			);
 		}
+		lines.a(
+			getSliderListenerLines(!someSpeeds && someValueSliders)
+		);
 		if (this.values.some(v=>(v.input instanceof Input.MouseMove))) {
 			if (!someSpeeds && !someValueSliders) {
 				lines.a(

@@ -10,6 +10,11 @@ describe("CallVector",()=>{
 		get entriesDescription() {
 			return [
 				['LiveColor','color',[1.0,1.0,1.0,1.0]],
+				['Group','debug',[
+					['Checkbox','shaders',true],
+					['Checkbox','arrays'],
+					['Checkbox','inputs'],
+				]],
 			];
 		}
 	}
@@ -19,7 +24,7 @@ describe("CallVector",()=>{
 		}});
 		const vector=new CallVector('color',options.fix().color,'do.something',[1.0,1.0,1.0,1.0]);
 		it("makes a call during init",()=>{
-			const featureContext=new FeatureContext(false);
+			const featureContext=new FeatureContext(options.fix().debug);
 			featureContext.hasStartTime=true; // animated
 			assert.deepEqual(vector.getJsInitLines(featureContext).data,[
 				"do.something(0.200,0.300,0.400,0.500);"
@@ -36,7 +41,7 @@ describe("CallVector",()=>{
 		const options=new TestOptions;
 		const vector=new CallVector('color',options.fix().color,'do.something',[1.0,1.0,1.0,1.0]);
 		it("doesn't make a call during init",()=>{
-			const featureContext=new FeatureContext(false);
+			const featureContext=new FeatureContext(options.fix().debug);
 			featureContext.hasStartTime=true; // animated
 			assert.deepEqual(vector.getJsInitLines(featureContext).data,[
 			]);
@@ -56,7 +61,7 @@ describe("CallVector",()=>{
 			});
 		});
 		it("returns interface with update fn and slider listener",()=>{
-			const featureContext=new FeatureContext(false);
+			const featureContext=new FeatureContext(options.fix().debug);
 			featureContext.hasStartTime=true; // animated
 			assert.deepEqual(vector.getJsInitLines(featureContext).data,[
 				"function updateColor() {",
@@ -69,7 +74,7 @@ describe("CallVector",()=>{
 			]);
 		});
 		it("returns empty mousemove listener when not animated",()=>{
-			const featureContext=new FeatureContext(false);
+			const featureContext=new FeatureContext(options.fix().debug);
 			vector.getJsInitLines(featureContext);
 			assert.deepEqual(featureContext.getJsAfterInitLines().data,[
 			]);
@@ -81,7 +86,7 @@ describe("CallVector",()=>{
 		}});
 		const vector=new CallVector('color',options.fix().color,'up',[0.0,0.0,0.0,0.0]);
 		it("returns interface with update fn and 2 slider listeners",()=>{
-			const featureContext=new FeatureContext(false);
+			const featureContext=new FeatureContext(options.fix().debug);
 			featureContext.hasStartTime=true; // animated
 			assert.deepEqual(vector.getJsInitLines(featureContext).data,[
 				"function updateColor() {",
@@ -106,7 +111,7 @@ describe("CallVector",()=>{
 		}});
 		const vector=new CallVector('color',options.fix().color,'obj.up',[0.0,0.0,0.0,0.0]);
 		it("returns interface with map update fn and query slider listener",()=>{
-			const featureContext=new FeatureContext(false);
+			const featureContext=new FeatureContext(options.fix().debug);
 			featureContext.hasStartTime=true; // animated
 			assert.deepEqual(vector.getJsInitLines(featureContext).data,[
 				"function updateColor() {",
@@ -129,7 +134,7 @@ describe("CallVector",()=>{
 		}});
 		const vector=new CallVector('color',options.fix().color,'up',[0.0,0.0,0.0,0.0]);
 		it("returns interface with mousemove listener",()=>{
-			const featureContext=new FeatureContext(false);
+			const featureContext=new FeatureContext(options.fix().debug);
 			featureContext.hasStartTime=true; // animated
 			assert.deepEqual(vector.getJsInitLines(featureContext).data,[
 				"up(0.200,0.300,0.400,1.000);"
@@ -149,7 +154,7 @@ describe("CallVector",()=>{
 		}});
 		const vector=new CallVector('color',options.fix().color,'up',[0.0,0.0,0.0,0.0]);
 		it("returns interface with mousemove listener",()=>{
-			const featureContext=new FeatureContext(false);
+			const featureContext=new FeatureContext(options.fix().debug);
 			featureContext.hasStartTime=true; // animated
 			assert.deepEqual(vector.getJsInitLines(featureContext).data,[
 				"up(0.200,0.300,0.400,1.000);"
@@ -170,7 +175,7 @@ describe("CallVector",()=>{
 		}});
 		const vector=new CallVector('color',options.fix().color,'up',[0.0,0.0,0.0,0.0]);
 		it("returns interface with 2 state vars, update fn, slider listener and mousemove listener",()=>{
-			const featureContext=new FeatureContext(false);
+			const featureContext=new FeatureContext(options.fix().debug);
 			featureContext.hasStartTime=true; // animated
 			assert.deepEqual(vector.getJsInitLines(featureContext).data,[
 				"var colorR=0.200;",
@@ -197,7 +202,7 @@ describe("CallVector",()=>{
 		}});
 		const vector=new CallVector('color',options.fix().color,'up',[0.0,0.0,0.0,0.0]);
 		it("returns interface with 2 state vars, update fn, 2 slider listeners and mousemove listener",()=>{
-			const featureContext=new FeatureContext(false);
+			const featureContext=new FeatureContext(options.fix().debug);
 			featureContext.hasStartTime=true; // animated
 			assert.deepEqual(vector.getJsInitLines(featureContext).data,[
 				"var colorR=0.200;",
@@ -237,7 +242,7 @@ describe("CallVector",()=>{
 			});
 		});
 		it("has no state vars",()=>{
-			const featureContext=new FeatureContext(false);
+			const featureContext=new FeatureContext(options.fix().debug);
 			featureContext.hasStartTime=true; // animated
 			assert.deepEqual(vector.getJsInitLines(featureContext).data,[
 			]);
@@ -264,7 +269,7 @@ describe("CallVector",()=>{
 			});
 		});
 		it("has no state vars",()=>{
-			const featureContext=new FeatureContext(false);
+			const featureContext=new FeatureContext(options.fix().debug);
 			featureContext.hasStartTime=true; // animated
 			assert.deepEqual(vector.getJsInitLines(featureContext).data,[
 			]);
@@ -284,7 +289,7 @@ describe("CallVector",()=>{
 		}});
 		const vector=new CallVector('color',options.fix().color,'setColor',[1.0,1.0,1.0,1.0]);
 		it("has no state vars",()=>{
-			const featureContext=new FeatureContext(false);
+			const featureContext=new FeatureContext(options.fix().debug);
 			featureContext.hasStartTime=true; // animated
 			featureContext.hasSliders=true;
 			featureContext.hasInputs=true;
@@ -315,7 +320,7 @@ describe("CallVector",()=>{
 			});
 		});
 		it("has no state vars",()=>{
-			const featureContext=new FeatureContext(false);
+			const featureContext=new FeatureContext(options.fix().debug);
 			featureContext.hasPrevTime=true; // animated
 			featureContext.hasSliders=true;
 			featureContext.hasInputs=true;
@@ -347,7 +352,7 @@ describe("CallVector",()=>{
 			});
 		});
 		it("has state var for mousemove component",()=>{
-			const featureContext=new FeatureContext(false);
+			const featureContext=new FeatureContext(options.fix().debug);
 			featureContext.hasStartTime=true; // animated
 			featureContext.hasInputs=true;
 			assert.deepEqual(vector.getJsInitLines(featureContext).data,[
@@ -381,7 +386,7 @@ describe("CallVector",()=>{
 			});
 		});
 		it("has state var for mousemove component",()=>{
-			const featureContext=new FeatureContext(false);
+			const featureContext=new FeatureContext(options.fix().debug);
 			featureContext.hasPrevTime=true; // animated
 			featureContext.hasInputs=true;
 			assert.deepEqual(vector.getJsInitLines(featureContext).data,[
@@ -416,7 +421,7 @@ describe("CallVector",()=>{
 			});
 		});
 		it("has state var for component with speed",()=>{
-			const featureContext=new FeatureContext(false);
+			const featureContext=new FeatureContext(options.fix().debug);
 			featureContext.hasPrevTime=true; // animated
 			featureContext.hasSliders=true;
 			featureContext.hasInputs=true;
@@ -448,7 +453,7 @@ describe("CallVector",()=>{
 			});
 		});
 		it("has no state vars",()=>{
-			const featureContext=new FeatureContext(false);
+			const featureContext=new FeatureContext(options.fix().debug);
 			featureContext.hasPrevTime=true; // animated
 			featureContext.hasSliders=true;
 			featureContext.hasInputs=true;
@@ -463,6 +468,28 @@ describe("CallVector",()=>{
 				"var colorR=Math.min(1.000,parseFloat(colorRInput.value)+parseFloat(document.getElementById('color.r.speed').value)*(time-prevTime)/1000);",
 				"colorRInput.value=colorR;",
 				"setColor(colorR,0.400,0.300,1.000);"
+			]);
+		});
+	});
+	context("with slider-controlled speed and slider-controlled value and input logging",()=>{
+		const options=new TestOptions({color:{
+			r:{value:0.5, input:'slider', speed:{input:'slider'}}, g:0.4, b:0.3, a:1.0
+		}, debug:{
+			inputs: true
+		}});
+		const vector=new CallVector('color',options.fix().color,'setColor',[1.0,1.0,1.0,1.0]);
+		it("has input value logging",()=>{
+			const featureContext=new FeatureContext(options.fix().debug);
+			featureContext.hasPrevTime=true; // animated
+			featureContext.hasSliders=true;
+			featureContext.hasInputs=true;
+			assert.deepEqual(vector.getJsInitLines(featureContext).data,[
+				"document.getElementById('color.r').addEventListener('change',function(){",
+				"	console.log(this.id,'input value:',parseFloat(this.value));",
+				"});",
+				"document.getElementById('color.r.speed').addEventListener('change',function(){",
+				"	console.log(this.id,'input value:',parseFloat(this.value));",
+				"});"
 			]);
 		});
 	});
