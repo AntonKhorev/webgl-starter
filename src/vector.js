@@ -129,11 +129,11 @@ class Vector extends NumericFeature {
 	}
 	getJsInitLines(featureContext) {
 		const getSliderListenerLines=(doUpdate)=>{
-			const writeManyListenersLines=()=>{
+			const getManyListenersLines=()=>{
 				const lines=new Lines;
-				this.values.forEach((v,c)=>{
+				const writeListener=(v,htmlName)=>{
 					if (v.input!='slider') return;
-					const listener=new Listener.Slider(this.htmlName+'.'+c);
+					const listener=new Listener.Slider(htmlName);
 					const entry=listener.enter();
 					entry.log("console.log(this.id,'input value:',parseFloat(this.value));");
 					if (doUpdate) {
@@ -142,11 +142,15 @@ class Vector extends NumericFeature {
 					lines.a(
 						featureContext.getListenerLines(listener)
 					);
+				}
+				this.values.forEach((v,c)=>{
+					writeListener(v,this.htmlName+'.'+c);
+					writeListener(v.speed,this.htmlName+'.'+c+'.speed');
 				});
 				return lines;
 			};
-			const writeOneListenerLines=()=>{
-				const listener=new Listener.MultipleSlider("[id^=\""+this.htmlName+".\"]");
+			const getOneListenerLines=()=>{
+				const listener=new Listener.MultipleSlider("[id^=\""+this.htmlName+".\"]"); // will also handle speed sliders, but it's ok
 				const entry=listener.enter();
 				entry.log("console.log(this.id,'input value:',parseFloat(this.value));");
 				if (doUpdate) {
@@ -156,8 +160,8 @@ class Vector extends NumericFeature {
 					featureContext.getListenerLines(listener)
 				);
 			};
-			const manyListenersLines=writeManyListenersLines();
-			const oneListenerLines=writeOneListenerLines();
+			const manyListenersLines=getManyListenersLines();
+			const oneListenerLines=getOneListenerLines();
 			return manyListenersLines.data.length<=oneListenerLines.data.length ? manyListenersLines : oneListenerLines;
 		};
 		const lines=super.getJsInitLines(featureContext);
@@ -192,7 +196,7 @@ class Vector extends NumericFeature {
 			);
 		}
 		lines.a(
-			getSliderListenerLines(!someSpeeds && someValueSliders)
+			getSliderListenerLines(!someSpeeds)
 		);
 		if (this.values.some(v=>(v.input instanceof Input.MouseMove))) {
 			if (!someSpeeds && !someValueSliders) {

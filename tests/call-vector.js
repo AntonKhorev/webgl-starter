@@ -484,12 +484,11 @@ describe("CallVector",()=>{
 			featureContext.hasSliders=true;
 			featureContext.hasInputs=true;
 			assert.deepEqual(vector.getJsInitLines(featureContext).data,[
-				"document.getElementById('color.r').addEventListener('change',function(){",
-				"	console.log(this.id,'input value:',parseFloat(this.value));",
-				"});",
-				"document.getElementById('color.r.speed').addEventListener('change',function(){",
-				"	console.log(this.id,'input value:',parseFloat(this.value));",
-				"});"
+				`[].forEach.call(document.querySelectorAll('[id^="color."]'),function(el){`,
+				`	el.addEventListener('change',function(){`,
+				`		console.log(this.id,'input value:',parseFloat(this.value));`,
+				`	});`,
+				`});`
 			]);
 		});
 	});
