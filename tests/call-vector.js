@@ -333,4 +333,30 @@ describe("CallVector",()=>{
 			]);
 		});
 	});
+	context("with constant positive speed and mousemove on different component",()=>{
+		const options=new TestOptions({color:{
+			r:{value:0.5, speed:+0.123}, g:{value:0.4, input:'mousemovex'}, b:0.3, a:1.0
+		}});
+		const vector=new CallVector('color',options.fix().color,'setColor',[1.0,1.0,1.0,1.0]);
+		it("has state var for mousemove component",()=>{
+			const featureContext=new FeatureContext(false);
+			featureContext.hasStartTime=true; // animated
+			featureContext.hasInputs=true;
+			assert.deepEqual(vector.getJsInitLines(featureContext).data,[
+				"var colorG=0.400;"
+			]);
+			assert.deepEqual(featureContext.getJsAfterInitLines().data,[
+				"canvas.addEventListener('mousemove',function(ev){",
+				"	var rect=this.getBoundingClientRect();",
+				"	colorG=(ev.clientX-rect.left)/(rect.width-1);",
+				"});"
+			]);
+		});
+		it("has loop with constant increment",()=>{
+			assert.deepEqual(vector.getJsLoopLines().data,[
+				"var colorR=Math.min(1.000,0.500+0.123*(time-startTime)/1000);",
+				"setColor(colorR,colorG,0.300,1.000);"
+			]);
+		});
+	});
 });

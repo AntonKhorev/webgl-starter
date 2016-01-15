@@ -147,11 +147,8 @@ class Vector extends NumericFeature {
 		lines.a(
 			this.getJsDeclarationLines()
 		);
-		if (this.values.some(v=>v.speed!=0)) {
-			// TODO will likely fail for mousemove inputs
-			return lines;
-		}
-		if (this.modeConstant) {
+		const someSpeedNonzero=this.values.some(v=>v.speed!=0);
+		if (!someSpeedNonzero && this.modeConstant) {
 			lines.a(
 				this.getJsUpdateLines(this.makeInitialComponentValue())
 			);
@@ -159,14 +156,14 @@ class Vector extends NumericFeature {
 		}
 		const manyListenersLines=writeManyListenersLines();
 		const oneListenerLines=writeOneListenerLines();
-		if (this.nSliders>0) {
-			this.values.forEach((v,c)=>{
-				if (v.input instanceof Input.MouseMove) {
-					lines.a(
-						"var "+this.varNameC(c)+"="+fixOptHelp.formatNumber(v)+";"
-					);
-				}
-			});
+		this.values.forEach((v,c)=>{
+			if (v.input instanceof Input.MouseMove && (this.nSliders>0 || someSpeedNonzero)) {
+				lines.a(
+					"var "+this.varNameC(c)+"="+fixOptHelp.formatNumber(v)+";"
+				);
+			}
+		});
+		if (!someSpeedNonzero && this.nSliders>0) {
 			lines.a(
 				this.getJsUpdateLines(this.makeUpdatedComponentValue()).wrap(
 					"function "+this.updateFnName+"() {",
@@ -177,7 +174,7 @@ class Vector extends NumericFeature {
 			);
 		}
 		if (this.nMousemoves>0) {
-			if (this.nSliders<=0) {
+			if (!someSpeedNonzero && this.nSliders<=0) {
 				// didn't call update in (this.nSliders>0) branch
 				lines.a(
 					this.getJsUpdateLines(this.makeInitialComponentValue())
@@ -187,7 +184,7 @@ class Vector extends NumericFeature {
 			this.values.forEach((v,c)=>{
 				if (v.input instanceof Input.MouseMove) {
 					const fmt=fixOptHelp.makeFormatNumber(v);
-					if (this.nSliders==0) {
+					if (!someSpeedNonzero && this.nSliders==0) {
 						entry.minMaxVarFloat(v.input,this.varNameC(c),
 							fmt(v.min),
 							fmt(v.max)
@@ -199,15 +196,17 @@ class Vector extends NumericFeature {
 						);
 					}
 					entry.log("console.log('"+this.htmlName+"."+c+" input value:',"+this.varNameC(c)+");");
-					if (this.nSliders==0) {
+					if (!someSpeedNonzero && this.nSliders==0) {
 						this.addPostToListenerEntryForComponent(entry,c);
 					}
 				}
 			});
-			if (this.nSliders==0) {
-				this.addPostToListenerEntryAfterComponents(entry,this.makeUpdatedComponentValue());
-			} else {
-				entry.post(this.updateFnName+"();");
+			if (!someSpeedNonzero) {
+				if (this.nSliders==0) {
+					this.addPostToListenerEntryAfterComponents(entry,this.makeUpdatedComponentValue());
+				} else {
+					entry.post(this.updateFnName+"();");
+				}
 			}
 		}
 		return lines;
