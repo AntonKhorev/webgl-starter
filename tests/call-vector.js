@@ -278,7 +278,7 @@ describe("CallVector",()=>{
 			]);
 		});
 	});
-	context("with constant positive speed and slider",()=>{
+	context("with constant positive speed and slider on different component",()=>{
 		const options=new TestOptions({color:{
 			r:{value:0.5, speed:+0.123}, g:{value:0.4, input:'slider'}, b:0.3, a:1.0
 		}});
@@ -286,6 +286,8 @@ describe("CallVector",()=>{
 		it("has no state vars",()=>{
 			const featureContext=new FeatureContext(false);
 			featureContext.hasStartTime=true; // animated
+			featureContext.hasSliders=true;
+			featureContext.hasInputs=true;
 			assert.deepEqual(vector.getJsInitLines(featureContext).data,[
 			]);
 			assert.deepEqual(featureContext.getJsAfterInitLines().data,[
@@ -295,6 +297,39 @@ describe("CallVector",()=>{
 			assert.deepEqual(vector.getJsLoopLines().data,[
 				"var colorR=Math.min(1.000,0.500+0.123*(time-startTime)/1000);",
 				"setColor(colorR,parseFloat(document.getElementById('color.g').value),0.300,1.000);"
+			]);
+		});
+	});
+	context("with constant positive speed and slider on same component",()=>{
+		const options=new TestOptions({color:{
+			r:{value:0.5, input:'slider', speed:+0.123}, g:0.4, b:0.3, a:1.0
+		}});
+		const vector=new CallVector('color',options.fix().color,'setColor',[1.0,1.0,1.0,1.0]);
+		it("requests prev time and sliders",()=>{
+			const testFeatureContext={};
+			vector.requestFeatureContext(testFeatureContext);
+			assert.deepEqual(testFeatureContext,{
+				hasPrevTime: true,
+				hasSliders: true,
+				hasInputs: true,
+			});
+		});
+		it("has no state vars",()=>{
+			const featureContext=new FeatureContext(false);
+			featureContext.hasPrevTime=true; // animated
+			featureContext.hasSliders=true;
+			featureContext.hasInputs=true;
+			assert.deepEqual(vector.getJsInitLines(featureContext).data,[
+			]);
+			assert.deepEqual(featureContext.getJsAfterInitLines().data,[
+			]);
+		});
+		it("has loop with time difference increment and slider update",()=>{
+			assert.deepEqual(vector.getJsLoopLines().data,[
+				"var colorRInput=document.getElementById('color.r');",
+				"var colorR=Math.min(1.000,parseFloat(colorRInput.value)+0.123*(time-prevTime)/1000);",
+				"colorRInput.value=colorR;",
+				"setColor(colorR,0.400,0.300,1.000);"
 			]);
 		});
 	});

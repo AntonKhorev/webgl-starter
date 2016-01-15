@@ -77,15 +77,21 @@ class Vector extends NumericFeature {
 	}
 	requestFeatureContext(featureContext) {
 		super.requestFeatureContext(featureContext);
-		if (this.values.some(v=>v.input!='constant')) {
-			featureContext.hasInputs=true;
-		}
-		if (this.nSliders>0) {
-			featureContext.hasSliders=true;
-		}
-		if (this.values.some(v=>v.speed!=0)) {
-			featureContext.hasStartTime=true;
-		}
+		this.values.forEach(v=>{
+			if (v.input!='constant') {
+				featureContext.hasInputs=true;
+			}
+			if (v.input=='slider') {
+				featureContext.hasSliders=true;
+			}
+			if (v.speed!=0) {
+				if (v.input=='constant') {
+					featureContext.hasStartTime=true;
+				} else {
+					featureContext.hasPrevTime=true;
+				}
+			}
+		});
 	}
 	getHtmlControlMessageLines(i18n) {
 		const lines=super.getHtmlControlMessageLines(i18n);
@@ -222,9 +228,21 @@ class Vector extends NumericFeature {
 				needUpdate=true;
 				const fmt=fixOptHelp.makeFormatNumber(v);
 				const sfmt=fixOptHelp.makeFormatNumber(v.speed);
-				lines.a(
-					"var "+this.varNameC(c)+"=Math."+(v.speed<0?"max":"min")+"("+(v.speed<0?fmt(v.min):fmt(v.max))+","+fmt(v)+add(sfmt(v.speed))+"*(time-startTime)/1000);"
-				);
+				const varName=this.varNameC(c);
+				const incrementLine=(base,dt)=>
+					"var "+varName+"=Math."+(v.speed<0?"max":"min")+"("+(v.speed<0?fmt(v.min):fmt(v.max))+","+base+add(sfmt(v.speed))+"*"+dt+"/1000);";
+				if (v.input=='slider') {
+					const inputVarName=this.varNameC(c)+"Input";
+					lines.a(
+						"var "+inputVarName+"=document.getElementById('"+this.htmlName+"."+c+"');",
+						incrementLine("parseFloat("+inputVarName+".value)","(time-prevTime)"),
+						inputVarName+".value="+varName+";"
+					);
+				} else {
+					lines.a(
+						incrementLine(fmt(v),"(time-startTime)")
+					);
+				}
 			}
 		});
 		if (needUpdate) {
