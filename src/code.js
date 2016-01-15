@@ -160,18 +160,24 @@ module.exports=function(options,i18n){
 			");",
 			"gl.useProgram(program);"
 		);
-		features.forEach((feature,i)=>{
-			const featureLines=feature.getJsInitLines(featureContext);
+		const addWithCommentIfNotEmpty=(featureLines,comment)=>{
 			if (featureLines.data.length>0) {
 				lines.a(
 					"",
-					"// init "+featureNames[i], // TODO i18n
+					"// "+comment, // TODO i18n
 					featureLines
 				);
 			}
+		};
+		features.forEach((feature,i)=>{
+			addWithCommentIfNotEmpty(
+				feature.getJsInitLines(featureContext),
+				"init "+featureNames[i]
+			);
 		});
-		lines.a(
-			featureContext.getJsAfterInitLines()
+		addWithCommentIfNotEmpty(
+			featureContext.getJsAfterInitLines(),
+			"init mousemove listener"
 		);
 		return lines;
 	}
