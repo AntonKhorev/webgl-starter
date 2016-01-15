@@ -128,7 +128,7 @@ class GlslVector extends Vector {
 			lines.a(
 				"gl.uniform"+this.nVars+"f("+this.varName+"Loc"
 			);
-			if (this.nSliders==0) {
+			if (this.values.every(v=>v.input!='slider')) {
 				this.values.forEach((v,c)=>{
 					if (v.input!='constant') {
 						lines.t(

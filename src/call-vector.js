@@ -13,13 +13,17 @@ class CallVector extends Vector {
 	// private:
 	getJsUpdateLines(componentValue) {
 		const lines=new Lines;
+		let nValueSliders=0;
+		this.values.forEach(v=>{
+			nValueSliders+=v.input=='slider';
+		});
 		if (this.modeConstant && this.values.every((v,c,i)=>v==this.calledFnDefaultArgs[i])) {
 			// equal to default values, don't do anything
-		} else if (this.nSliders<=1) {
+		} else if (nValueSliders<=1) {
 			lines.a(
 				this.calledFn+"("+this.values.map(componentValue).join(",")+");"
 			);
-		} else if (this.nSliders==this.values.length) {
+		} else if (this.values.every(v=>v.input=='slider')) {
 			let obj=this.calledFn;
 			const dotIndex=obj.lastIndexOf('.');
 			if (dotIndex>=0) {

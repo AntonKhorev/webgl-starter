@@ -14,7 +14,6 @@ class Vector extends NumericFeature {
 		this.varName=this.convertStringToCamelCase(name); // js/glsl var name - ok to rewrite this property - Transforms does it
 		this.values=values;
 		this.nVars=0;
-		this.nSliders=0; // this is only for value sliders, not speed sliders; sliders are <input> elements with values that can be populated by the browser, disregarding default value
 		this.nMousemoves=0;
 		this.modeConstant=true; // all vector components are constants
 		this.modeFloats=false; // one/some vector components are variable, such components get their own glsl vars
@@ -25,7 +24,6 @@ class Vector extends NumericFeature {
 					this.modeFloats=true;
 				}
 			}
-			this.nSliders+=v.input=='slider';
 			this.nMousemoves+=(v.input instanceof Input.MouseMove);
 		});
 		if (this.nVars==1) {
@@ -165,12 +163,13 @@ class Vector extends NumericFeature {
 			);
 			return lines;
 		}
-		const someSpeedNonzero=this.values.some(v=>(v.speed!=0 || v.speed.input!='constant'));
+		const someSpeeds=this.values.some(v=>(v.speed!=0 || v.speed.input!='constant'));
+		const someValueSliders=this.values.some(v=>v.input=='slider');
 		const manyListenersLines=writeManyListenersLines();
 		const oneListenerLines=writeOneListenerLines();
 		this.values.forEach((v,c)=>{
 			if (
-				(v.input instanceof Input.MouseMove && (this.nSliders>0 || someSpeedNonzero)) || // mouse input required elsewhere
+				(v.input instanceof Input.MouseMove && (someValueSliders || someSpeeds)) || // mouse input required elsewhere
 				v.speed.input!='constant' // variable speed
 			) {
 				lines.a(
@@ -178,7 +177,7 @@ class Vector extends NumericFeature {
 				);
 			}
 		});
-		if (!someSpeedNonzero && this.nSliders>0) {
+		if (!someSpeeds && someValueSliders) {
 			lines.a(
 				this.getJsUpdateLines(this.makeUpdatedComponentValue()).wrap(
 					"function "+this.updateFnName+"() {",
@@ -189,8 +188,7 @@ class Vector extends NumericFeature {
 			);
 		}
 		if (this.nMousemoves>0) {
-			if (!someSpeedNonzero && this.nSliders<=0) {
-				// didn't call update in (this.nSliders>0) branch
+			if (!someSpeeds && !someValueSliders) {
 				lines.a(
 					this.getJsUpdateLines(this.makeInitialComponentValue())
 				);
@@ -199,7 +197,7 @@ class Vector extends NumericFeature {
 			this.values.forEach((v,c)=>{
 				if (v.input instanceof Input.MouseMove) {
 					const fmt=fixOptHelp.makeFormatNumber(v);
-					if (!someSpeedNonzero && this.nSliders==0) {
+					if (!someSpeeds && !someValueSliders) {
 						entry.minMaxVarFloat(v.input,this.varNameC(c),
 							fmt(v.min),
 							fmt(v.max)
@@ -211,13 +209,13 @@ class Vector extends NumericFeature {
 						);
 					}
 					entry.log("console.log('"+this.htmlName+"."+c+" input value:',"+this.varNameC(c)+");");
-					if (!someSpeedNonzero && this.nSliders==0) {
+					if (!someSpeeds && !someValueSliders) {
 						this.addPostToListenerEntryForComponent(entry,c);
 					}
 				}
 			});
-			if (!someSpeedNonzero) {
-				if (this.nSliders==0) {
+			if (!someSpeeds) {
+				if (!someValueSliders) {
 					this.addPostToListenerEntryAfterComponents(entry,this.makeUpdatedComponentValue());
 				} else {
 					entry.post(this.updateFnName+"();");

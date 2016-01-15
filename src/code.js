@@ -230,7 +230,7 @@ module.exports=function(options,i18n){
 			if (options[optName+'.speed.input']=='slider') {
 				var listener=new listeners.SliderListener(optName+'.speed');
 				listener.enter()
-					.log("console.log(this.id,'input value:',parseFloat(this.value));");
+					.log("console.log(this.id,'input value:',parseFloat(this.value));"); // !!!!!!! TODO test this in new code
 				writeListener(listener);
 			} else if (isMousemoveInput(optName+'.speed')) {
 				canvasMousemoveListener.enter()
