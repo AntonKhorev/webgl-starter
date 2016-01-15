@@ -255,6 +255,7 @@ describe("Option.LiveFloat",()=>{
 	it("exports object with speed number",()=>{
 		const options=new TestOptions;
 		const option=options.root.entries[0];
+		option.addSpeed=true;
 		option.speed.value=45;
 		assert.deepEqual(options.export(),{rotate:
 			{speed:45}
@@ -263,6 +264,7 @@ describe("Option.LiveFloat",()=>{
 	it("exports nothing b/c speed set to default",()=>{
 		const options=new TestOptions;
 		const option=options.root.entries[0];
+		option.addSpeed=true;
 		option.speed.value=0;
 		assert.deepEqual(options.export(),{});
 	});
@@ -270,6 +272,7 @@ describe("Option.LiveFloat",()=>{
 		const options=new TestOptions;
 		const option=options.root.entries[0];
 		option.value=12;
+		option.addSpeed=true;
 		option.speed.value=45;
 		assert.deepEqual(options.export(),{rotate:
 			{value:12,speed:45}
@@ -278,6 +281,7 @@ describe("Option.LiveFloat",()=>{
 	it("exports object with speed object with input",()=>{
 		const options=new TestOptions;
 		const option=options.root.entries[0];
+		option.addSpeed=true;
 		option.speed.input='slider';
 		assert.deepEqual(options.export(),{rotate:
 			{speed:{
@@ -288,6 +292,7 @@ describe("Option.LiveFloat",()=>{
 	it("exports object with speed object with everything",()=>{
 		const options=new TestOptions;
 		const option=options.root.entries[0];
+		option.addSpeed=true;
 		option.speed.value=30;
 		option.speed.min=-100;
 		option.speed.max=+100;
@@ -301,10 +306,22 @@ describe("Option.LiveFloat",()=>{
 			}}
 		});
 	});
+	it("doesn't export speed when addSpeed is not set",()=>{
+		const options=new TestOptions;
+		const option=options.root.entries[0];
+		option.value=42;
+		option.addSpeed=true;
+		option.speed.value=23;
+		option.addSpeed=false;
+		assert.deepEqual(options.export(),{rotate:
+			42
+		});
+	});
 	it("fixes data",()=>{
 		const options=new TestOptions;
 		const option=options.root.entries[0];
 		option.value=40;
+		option.addSpeed=true;
 		option.speed.value=30;
 		option.speed.min=-100;
 		option.speed.max=+100;
@@ -323,6 +340,17 @@ describe("Option.LiveFloat",()=>{
 		assert.equal(fixed.rotate.speed.availableMin,-360);
 		assert.equal(fixed.rotate.speed.availableMax,+360);
 		assert.equal(fixed.rotate.speed.step,0.1);
+	});
+	it("doesn't fix export speed when addSpeed is not set",()=>{
+		const options=new TestOptions;
+		const option=options.root.entries[0];
+		option.value=42;
+		option.addSpeed=true;
+		option.speed.value=23;
+		option.addSpeed=false;
+		const fixed=options.fix();
+		assert.equal(fixed.rotate,42);
+		assert.equal(fixed.rotate.speed,0);
 	});
 });
 
@@ -344,12 +372,15 @@ describe("Option.LiveColor",()=>{
 		const r=option.entries[0];
 		assert.equal(r.value,1);
 		assert.equal(r.speed.value,0);
+		assert.equal(r.addSpeed,false);
 		const g=option.entries[1];
 		assert.equal(g.value,0);
 		assert.equal(g.speed.value,0);
+		assert.equal(g.addSpeed,false);
 		const b=option.entries[2];
-		assert.equal(g.value,0);
-		assert.equal(g.speed.value,0);
+		assert.equal(b.value,0);
+		assert.equal(b.speed.value,0);
+		assert.equal(b.addSpeed,false);
 	});
 	it("imports numbers",()=>{
 		const options=new TestOptions({color:{
@@ -361,12 +392,15 @@ describe("Option.LiveColor",()=>{
 		const r=option.entries[0];
 		assert.equal(r.value,0.2);
 		assert.equal(r.speed.value,0);
+		assert.equal(r.addSpeed,false);
 		const g=option.entries[1];
 		assert.equal(g.value,0);
 		assert.equal(g.speed.value,0);
+		assert.equal(g.addSpeed,false);
 		const b=option.entries[2];
 		assert.equal(b.value,0.4);
 		assert.equal(b.speed.value,0);
+		assert.equal(b.addSpeed,false);
 	});
 	it("imports objects",()=>{
 		const options=new TestOptions({color:{
@@ -383,12 +417,15 @@ describe("Option.LiveColor",()=>{
 		const r=option.entries[0];
 		assert.equal(r.value,1);
 		assert.equal(r.speed.value,0);
+		assert.equal(r.addSpeed,false);
 		const g=option.entries[1];
 		assert.equal(g.value,0.3);
 		assert.equal(g.speed.value,-0.1);
+		assert.equal(g.addSpeed,true);
 		const b=option.entries[2];
 		assert.equal(b.value,0.7);
 		assert.equal(b.speed.value,0);
+		assert.equal(b.addSpeed,false);
 	});
 	it("exports numbers",()=>{
 		const options=new TestOptions;
@@ -407,9 +444,11 @@ describe("Option.LiveColor",()=>{
 		const option=options.root.entries[0];
 		const g=option.entries[1];
 		g.value=0.3;
+		g.addSpeed=true;
 		g.speed.value=-0.1;
 		const b=option.entries[2];
 		b.value=0.7;
+		b.addSpeed=true;
 		b.speed.input='slider';
 		assert.deepEqual(options.export(),{color:{
 			g:{
@@ -429,9 +468,11 @@ describe("Option.LiveColor",()=>{
 		const option=options.root.entries[0];
 		const g=option.entries[1];
 		g.value=0.3;
+		g.addSpeed=true;
 		g.speed.value=-0.1;
 		const b=option.entries[2];
 		b.value=0.7;
+		b.addSpeed=true;
 		b.speed.input='slider';
 		const fixed=options.fix();
 		assert.equal(fixed.color.r,1.0);

@@ -71,8 +71,19 @@ class LiveNumber extends RangeInput {
 	export() {
 		return this.exportHelper(this,{});
 	}
+	fixToDefaultHelper(src) {
+		const fixed=new Number(src.defaultValue);
+		fixed.min=src.availableMin;
+		fixed.max=src.availableMax;
+		fixed.input=Input.createFromString('constant');
+		// needed for formatting:
+		fixed.availableMin=src.availableMin;
+		fixed.availableMax=src.availableMax;
+		fixed.step=src.step;
+		return fixed;
+	}
 	fixHelper(src) {
-		const fixed=new Number(src.value);
+		const fixed=new Number(src.value); // TODO try it's own class like Input
 		fixed.min=src.min;
 		fixed.max=src.max;
 		fixed.input=Input.createFromString(src.input);
@@ -226,13 +237,18 @@ class LiveFloat extends LiveNumber {
 	}
 	export() {
 		const data={};
-		const speedData=this.exportHelper(this.speed,{});
+		let speedData=null;
+		if (this.addSpeed) speedData=this.exportHelper(this.speed,{});
 		if (speedData!==null) data.speed=speedData;
 		return this.exportHelper(this,data);
 	}
 	fix() {
 		const fixed=this.fixHelper(this);
-		fixed.speed=this.fixHelper(this.speed);
+		if (this.addSpeed) {
+			fixed.speed=this.fixHelper(this.speed);
+		} else {
+			fixed.speed=this.fixToDefaultHelper(this.speed);
+		}
 		return fixed;
 	}
 }
