@@ -275,15 +275,21 @@ class Vector extends NumericFeature {
 				} else {
 					addSpeed=add(sfmt(v.speed));
 				}
-				let limitFn=x=>x;
-				if (component.wrapped) {
-					limitFn=x=>"wrap("+x+","+fmt(v.max)+")";
-				} else if (component.clamped) {
-					limitFn=x=>"clamp("+x+","+fmt(v.min)+","+fmt(v.max)+")";
-				} else if (component.capped) {
-					limitFn=x=>"Math."+(v.speed<0?"max":"min")+"("+x+","+(v.speed<0?fmt(v.min):fmt(v.max))+")";
+				let limitFn=(x,dx)=>{
+					if (x==component.varName) {
+						return dx.charAt(0)+"="+dx.slice(1);
+					} else {
+						return "="+x+dx;
+					}
 				}
-				const incrementLine=(base,dt)=>component.varName+"="+limitFn(base+addSpeed+"*"+dt+"/1000")+";";
+				if (component.wrapped) {
+					limitFn=(x,dx)=>"=wrap("+x+dx+","+fmt(v.max)+")";
+				} else if (component.clamped) {
+					limitFn=(x,dx)=>"=clamp("+x+dx+","+fmt(v.min)+","+fmt(v.max)+")";
+				} else if (component.capped) {
+					limitFn=(x,dx)=>"=Math."+(v.speed<0?"max":"min")+"("+x+dx+","+(v.speed<0?fmt(v.min):fmt(v.max))+")";
+				}
+				const incrementLine=(base,dt)=>component.varName+limitFn(base,addSpeed+"*"+dt+"/1000")+";";
 				if (v.input=='slider') {
 					lines.a(
 						"var "+component.varNameInput+"=document.getElementById('"+component.name+"');",
