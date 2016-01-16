@@ -523,15 +523,15 @@ describe("CallVector",()=>{
 			assert.deepEqual(featureContext.getJsAfterInitLines().data,[
 				"canvas.addEventListener('mousemove',function(ev){",
 				"	var rect=this.getBoundingClientRect();",
-				"	var minColorRSpeed=-360;",
-				"	var maxColorRSpeed=+360;",
+				"	var minColorRSpeed=-1.000;",
+				"	var maxColorRSpeed=+1.000;",
 				"	colorRSpeed=minColorRSpeed+(maxColorRSpeed-minColorRSpeed)*(ev.clientX-rect.left)/(rect.width-1);",
 				"});"
 			]);
 		});
 		it("has loop with constant increment",()=>{
 			assert.deepEqual(vector.getJsLoopLines().data,[
-				"var colorR=clamp(colorR+colorRSpeed*(time-startTime)/1000,0.000,1.000);",
+				"colorR=clamp(colorR+colorRSpeed*(time-prevTime)/1000,0.000,1.000);",
 				"setColor(colorR,0.400,0.300,1.000);"
 			]);
 		});

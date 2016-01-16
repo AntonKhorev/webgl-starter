@@ -188,6 +188,11 @@ class Vector extends NumericFeature {
 					"var "+this.varNameC(c)+"="+fixOptHelp.formatNumber(v)+";"
 				);
 			}
+			if (v.speed.input instanceof Input.MouseMove) {
+				lines.a(
+					"var "+this.varNameC(c)+"Speed="+fixOptHelp.formatNumber(v.speed)+";"
+				);
+			}
 		});
 		if (!someSpeeds && someValueSliders) {
 			lines.a(
@@ -211,18 +216,13 @@ class Vector extends NumericFeature {
 			this.values.forEach((v,c)=>{
 				if (v.input instanceof Input.MouseMove) {
 					const fmt=fixOptHelp.makeFormatNumber(v);
+					const varName=this.varNameC(c);
 					if (!someSpeeds && !someValueSliders) {
-						entry.minMaxVarFloat(v.input,this.varNameC(c),
-							fmt(v.min),
-							fmt(v.max)
-						);
+						entry.minMaxVarFloat(v.input,varName,fmt(v.min),fmt(v.max));
 					} else {
-						entry.minMaxFloat(v.input,this.varNameC(c),
-							fmt(v.min),
-							fmt(v.max)
-						);
+						entry.minMaxFloat(v.input,varName,fmt(v.min),fmt(v.max));
 					}
-					entry.log("console.log('"+this.htmlName+"."+c+" input value:',"+this.varNameC(c)+");");
+					entry.log("console.log('"+this.htmlName+"."+c+" input value:',"+varName+");");
 					if (!someSpeeds && !someValueSliders) {
 						this.addPostToListenerEntryForComponent(entry,c);
 					}
@@ -235,6 +235,17 @@ class Vector extends NumericFeature {
 					entry.post(this.updateFnName+"();");
 				}
 			}
+		}
+		if (this.values.some(v=>(v.speed.input instanceof Input.MouseMove))) {
+			const entry=featureContext.canvasMousemoveListener.enter();
+			this.values.forEach((v,c)=>{
+				const fmt=fixOptHelp.makeFormatNumber(v.speed);
+				const varName=this.varNameC(c)+'Speed';
+				if (v.speed.input instanceof Input.MouseMove) {
+					entry.minMaxFloat(v.speed.input,varName,fmt(v.speed.min),fmt(v.speed.max))
+						.log("console.log('"+this.htmlName+"."+c+".speed input value:',"+varName+");");
+				}
+			});
 		}
 		return lines;
 	}
@@ -256,9 +267,13 @@ class Vector extends NumericFeature {
 				const sfmt=fixOptHelp.makeFormatNumber(v.speed);
 				const varName=this.varNameC(c);
 				const htmlName=this.htmlName+"."+c;
-				let addSpeed=add(sfmt(v.speed));
+				let addSpeed;
 				if (v.speed.input=='slider') {
 					addSpeed="+parseFloat(document.getElementById('"+htmlName+".speed').value)";
+				} else if (v.speed.input instanceof Input.MouseMove) {
+					addSpeed="+"+varName+"Speed";
+				} else {
+					addSpeed=add(sfmt(v.speed));
 				}
 				let limitFn;
 				if (v.speed.input=='constant') {
@@ -274,7 +289,7 @@ class Vector extends NumericFeature {
 						"var "+incrementLine("parseFloat("+inputVarName+".value)","(time-prevTime)"),
 						inputVarName+".value="+varName+";"
 					);
-				} else if (v.input instanceof Input.MouseMove || v.speed.input=='slider') {
+				} else if (v.input instanceof Input.MouseMove || v.speed.input!='constant') {
 					lines.a(
 						incrementLine(varName,"(time-prevTime)")
 					);
