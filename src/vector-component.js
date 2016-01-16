@@ -14,20 +14,18 @@ class VectorComponent {
 		this.suffix=suffix; // usually one letter
 		this.wrapMode=!!wrapMode; // if true and components min/max == their default values, use wrap() instead of clamp()
 	}
-	get name() {
-		return this.vectorName+'.'+this.suffix;
-	}
-	get varName() {
-		return toCamelCase(this.name);
-	}
-	get varNameLoc() {
-		return this.varName+'Loc';
-	}
-	get varNameSpeed() {
-		return this.varName+'Speed';
-	}
+	get name() { return this.vectorName+'.'+this.suffix; }
+	get varName() { return toCamelCase(this.name); }
+	get varNameLoc() { return this.varName+'Loc'; }
+	get varNameSpeed() { return this.varName+'Speed'; }
+	get varNameInput() { return this.varName+'Input'; }
+	get minVarName() { return toCamelCase('min.'+this.name); }
+	get maxVarName() { return toCamelCase('max.'+this.name); }
 	get variable() {
-		return this.value.input!='constant' || this.value.speed!=0 || this.value.speed.input!='constant';
+		return this.value.input!='constant' || this.hasSpeed();
+	}
+	hasSpeed() {
+		return this.value.speed!=0 || this.value.speed.input!='constant';
 	}
 	hasInput() {
 		return this.value.input!='constant' || this.value.speed.input!='constant';
@@ -43,8 +41,7 @@ class VectorComponent {
 	}
 	get wrapped() {
 		return (
-			this.wrapMode &&
-			(this.value.speed!=0 || this.value.speed.input!='constant') &&
+			this.wrapMode && this.hasSpeed() &&
 			this.value.min==this.value.availableMin && this.value.max==this.value.availableMin && // can wrap only if limits are not changed
 			this.value.input=='slider' // need to wrap only if input with state is used
 		);

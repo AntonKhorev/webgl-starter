@@ -18,7 +18,6 @@ class Vector extends NumericFeature {
 	constructor(name,values,wrapMode) {
 		super();
 		this.name=name; // name with dots like "material.color", transformed into "materialColor" for js var names
-		this.values=values; // TODO remove once this.components are in use
 		this.components=[];
 		this.componentsByName={}; // TODO rename to components by suffix
 		values.forEach((v,c)=>{
@@ -28,9 +27,6 @@ class Vector extends NumericFeature {
 		});
 		// { TODO extra ctor args
 		this.i18nId=name;
-		// }
-		// { TODO convert to props
-		this.varName=toCamelCase(name); // js/glsl var name - ok to rewrite this property - Transforms does it
 		// }
 		this.nVars=0;
 		this.modeConstant=true; // all vector components are constants
@@ -48,8 +44,11 @@ class Vector extends NumericFeature {
 		}
 		this.modeVector=(!this.modeConstant && !this.modeFloats); // first consecutive components are variable, packed into one glsl vector
 	}
+	get varName() { // js/glsl var name
+		return toCamelCase(this.name);
+	}
 	get updateFnName() {
-		return toCamelCase('update.'+this.varName);
+		return toCamelCase('update.'+this.name);
 	}
 	// fns that can be mapped over components:
 	makeInitialComponentValue() {
@@ -98,10 +97,10 @@ class Vector extends NumericFeature {
 	}
 	getHtmlControlMessageLines(i18n) {
 		const lines=super.getHtmlControlMessageLines(i18n);
-		this.values.forEach((v,c)=>{
+		this.components.forEach(component=>{
 			lines.a(
-				this.getHtmlControlMessageForValue(i18n,v,this.i18nId+'.'+c),
-				this.getHtmlControlMessageForValue(i18n,v.speed,this.i18nId+'.'+c+'.speed')
+				this.getHtmlControlMessageForValue(i18n,component.value,this.i18nId+'.'+component.suffix),
+				this.getHtmlControlMessageForValue(i18n,component.value.speed,this.i18nId+'.'+component.suffix+'.speed')
 			);
 		});
 		return lines;
@@ -181,8 +180,8 @@ class Vector extends NumericFeature {
 			);
 			return lines;
 		}
-		const someSpeeds=this.values.some(v=>(v.speed!=0 || v.speed.input!='constant'));
-		const someValueSliders=this.values.some(v=>v.input=='slider');
+		const someSpeeds=this.components.some(component=>component.hasSpeed());
+		const someValueSliders=this.components.some(component=>component.value.input=='slider');
 		this.components.forEach(component=>{
 			if (
 				(component.value.input instanceof Input.MouseMove && (someValueSliders || someSpeeds)) || // mouse input required elsewhere
@@ -210,7 +209,7 @@ class Vector extends NumericFeature {
 		lines.a(
 			getSliderListenerLines(!someSpeeds)
 		);
-		if (this.values.some(v=>(v.input instanceof Input.MouseMove))) {
+		if (this.components.some(component=>(component.value.input instanceof Input.MouseMove))) {
 			if (!someSpeeds && !someValueSliders) {
 				lines.a(
 					this.getJsUpdateLines(this.makeInitialComponentValue())
@@ -239,7 +238,7 @@ class Vector extends NumericFeature {
 				}
 			}
 		}
-		if (this.values.some(v=>(v.speed.input instanceof Input.MouseMove))) {
+		if (this.components.some(component=>(component.value.speed.input instanceof Input.MouseMove))) {
 			const entry=featureContext.canvasMousemoveListener.enter();
 			this.components.forEach(component=>{
 				const fmt=fixOptHelp.makeFormatNumber(component.value.speed);
@@ -262,8 +261,8 @@ class Vector extends NumericFeature {
 			}
 		};
 		let needUpdate=false;
-		this.values.forEach((v,c)=>{
-			const component=this.componentsByName[c];
+		this.components.forEach(component=>{
+			const v=component.value;
 			if (v.speed!=0 || v.speed.input!='constant') {
 				needUpdate=true;
 				const fmt=fixOptHelp.makeFormatNumber(v);
@@ -272,7 +271,7 @@ class Vector extends NumericFeature {
 				if (v.speed.input=='slider') {
 					addSpeed="+parseFloat(document.getElementById('"+component.name+".speed').value)";
 				} else if (v.speed.input instanceof Input.MouseMove) {
-					addSpeed="+"+component.varName+"Speed";
+					addSpeed="+"+component.varNameSpeed;
 				} else {
 					addSpeed=add(sfmt(v.speed));
 				}
@@ -284,11 +283,10 @@ class Vector extends NumericFeature {
 				}
 				const incrementLine=(base,dt)=>component.varName+"="+limitFn(base+addSpeed+"*"+dt+"/1000")+";";
 				if (v.input=='slider') {
-					const inputVarName=component.varName+"Input";
 					lines.a(
-						"var "+inputVarName+"=document.getElementById('"+component.name+"');",
-						"var "+incrementLine("parseFloat("+inputVarName+".value)","(time-prevTime)"),
-						inputVarName+".value="+component.varName+";"
+						"var "+component.varNameInput+"=document.getElementById('"+component.name+"');",
+						"var "+incrementLine("parseFloat("+component.varNameInput+".value)","(time-prevTime)"),
+						component.varNameInput+".value="+component.varName+";"
 					);
 				} else if (v.input instanceof Input.MouseMove || v.speed.input!='constant') {
 					lines.a(
@@ -307,13 +305,12 @@ class Vector extends NumericFeature {
 			} else if (v.input instanceof Input.Gamepad) {
 				needUpdate=true;
 				const fmt=fixOptHelp.makeFormatNumber(v);
-				const VarName=component.varName.charAt(0).toUpperCase()+component.varName.slice(1);
 				lines.a(
-					"var min"+VarName+"="+fmt(v.min)+";",
-					"var max"+VarName+"="+fmt(v.max)+";",
+					"var "+component.minVarName+"="+fmt(v.min)+";",
+					"var "+component.maxVarName+"="+fmt(v.max)+";",
 					"var "+component.varName+"="+fmt(v)+";",
 					"if (gamepad && gamepad.axes.length>"+v.input.axis+") {",
-					"	"+component.varName+"=min"+VarName+"+(max"+VarName+"-min"+VarName+")*(gamepad.axes["+v.input.axis+"]+1)/2;",
+					"	"+component.varName+"="+component.minVarName+"+("+component.maxVarName+"-"+component.minVarName+")*(gamepad.axes["+v.input.axis+"]+1)/2;",
 					"}"
 				);
 				if (featureContext && featureContext.debugOptions.inputs) { // TODO always pass featureContext
