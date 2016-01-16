@@ -16,8 +16,8 @@ class Vector extends NumericFeature {
 		this.nVars=0;
 		this.modeConstant=true; // all vector components are constants
 		this.modeFloats=false; // one/some vector components are variable, such components get their own glsl vars
-		values.map((v,c,i)=>{
-			if (v.input!='constant' || v.speed!=0 || v.speed.input!='constant') {
+		values.forEach((v,c,i)=>{
+			if (this.isVariableComponent(v)) {
 				this.modeConstant=false;
 				if (this.nVars++!=i) {
 					this.modeFloats=true;
@@ -41,6 +41,9 @@ class Vector extends NumericFeature {
 	// fns that can be mapped over values/components:
 	varNameC(c) {
 		return this.convertStringToCamelCase(this.varName+'.'+c);
+	}
+	isVariableComponent(v) {
+		return v.input!='constant' || v.speed!=0 || v.speed.input!='constant';
 	}
 	makeInitialComponentValue() {
 		return (v,c)=>{

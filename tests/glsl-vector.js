@@ -14,6 +14,12 @@ describe("GlslVector",()=>{
 					['LiveFloat','y',[-4.0,+4.0,-4.0,+4.0],+2.0],
 					['LiveFloat','z',[-4.0,+4.0,-4.0,+4.0],+3.0],
 				]],
+				['Group','debug',[
+					['Checkbox','shaders',true],
+					['Checkbox','arrays'],
+					['Checkbox','inputs'],
+					['Checkbox','animations'],
+				]],
 			];
 		}
 	}
@@ -51,58 +57,58 @@ describe("GlslVector",()=>{
 			]);
 		});
 	});
-	context('with equal-component constant vector',function(){
+	context("with equal-component constant vector",()=>{
 		const options=new TestOptions({foo:{
 			x:2.0, y:2.0, z:2.0
 		}});
 		const vector=new GlslVector('foo',options.fix().foo);
-		it('returns empty declaration',function(){
+		it("returns empty declaration",()=>{
 			assert.deepEqual(vector.getGlslDeclarationLines().data,[
 			]);
 		});
-		it('returns constant vec3 with one component as value',function(){
+		it("returns constant vec3 with one component as value",()=>{
 			assert.equal(vector.getGlslValue(),
 				"vec3(+2.000)"
 			);
 		});
-		it('returns constant vec2 with one component',function(){
+		it("returns constant vec2 with one component",()=>{
 			assert.equal(vector.getGlslComponentsValue('yz'),
 				"vec2(+2.000)"
 			);
 		});
-		it('returns empty js interface',function(){
+		it("returns empty js interface",()=>{
 			const featureContext=new FeatureContext(false);
 			featureContext.hasStartTime=true; // animated
 			assert.deepEqual(vector.getJsInitLines(featureContext).data,[
 			]);
 		});
 	});
-	context('with 1 first component out of 3 variable vector',function(){
+	context("with 1 first component out of 3 variable vector",()=>{
 		const options=new TestOptions({foo:{
 			x:{input:'slider'}
 		}});
 		const vector=new GlslVector('foo',options.fix().foo);
-		it('returns float declaration',function(){
+		it("returns float declaration",()=>{
 			assert.deepEqual(vector.getGlslDeclarationLines().data,[
 				"uniform float fooX;"
 			]);
 		});
-		it('returns vec3 made of float and constants as value',function(){
+		it("returns vec3 made of float and constants as value",()=>{
 			assert.equal(vector.getGlslValue(),
 				"vec3(fooX,+2.000,+3.000)"
 			);
 		});
-		it('returns vec2 of float and constant as xy components',function(){
+		it("returns vec2 of float and constant as xy components",()=>{
 			assert.equal(vector.getGlslComponentsValue('xy'),
 				"vec2(fooX,+2.000)"
 			);
 		});
-		it('returns float as x component',function(){
+		it("returns float as x component",()=>{
 			assert.equal(vector.getGlslComponentsValue('x'),
 				"fooX"
 			);
 		});
-		it('returns interface with 1 location and 1 simple listener',function(){
+		it("returns interface with 1 location and 1 simple listener",()=>{
 			const featureContext=new FeatureContext(false);
 			featureContext.hasStartTime=true; // animated
 			assert.deepEqual(vector.getJsInitLines(featureContext).data,[
@@ -114,7 +120,7 @@ describe("GlslVector",()=>{
 				"document.getElementById('foo.x').addEventListener('change',updateFoo);"
 			]);
 		});
-		it("doesn't write empty mousemove listener code",function(){
+		it("doesn't write empty mousemove listener code",()=>{
 			const featureContext=new FeatureContext(false);
 			vector.getJsInitLines(featureContext);
 			assert.deepEqual(featureContext.getJsAfterInitLines().data,[
@@ -441,6 +447,54 @@ describe("GlslVector",()=>{
 			assert.equal(vector.getGlslMapComponentValue('c','z'),
 				"cz"
 			);
+		});
+	});
+	context("with constant positive speed",()=>{
+		const options=new TestOptions({foo:{
+			x:{value:0.5, speed:+0.123}, y:0.4, z:0.3
+		}});
+		const vector=new GlslVector('foo',options.fix().foo);
+		it("returns float declaration",()=>{
+			assert.deepEqual(vector.getGlslDeclarationLines().data,[
+				"uniform float fooX;"
+			]);
+		});
+		it("returns vec3 made of float and constants as value",()=>{
+			assert.equal(vector.getGlslValue(),
+				"vec3(fooX,+0.400,+0.300)"
+			);
+		});
+		it("returns vec2 of float and constant as xy components",()=>{
+			assert.equal(vector.getGlslComponentsValue('xy'),
+				"vec2(fooX,+0.400)"
+			);
+		});
+		it("returns float as x component",()=>{
+			assert.equal(vector.getGlslComponentsValue('x'),
+				"fooX"
+			);
+		});
+		it("requests start time",()=>{
+			const testFeatureContext={};
+			vector.requestFeatureContext(testFeatureContext);
+			assert.deepEqual(testFeatureContext,{
+				hasStartTime: true,
+			});
+		});
+		it("has no state vars",()=>{
+			const featureContext=new FeatureContext(options.fix().debug);
+			featureContext.hasStartTime=true; // animated
+			assert.deepEqual(vector.getJsInitLines(featureContext).data,[
+				"var fooXLoc=gl.getUniformLocation(program,'fooX');"
+			]);
+			assert.deepEqual(featureContext.getJsAfterInitLines().data,[
+			]);
+		});
+		it("has loop with constant increment",()=>{
+			assert.deepEqual(vector.getJsLoopLines().data,[
+				"var fooX=Math.min(+0.500+0.123*(time-startTime)/1000,+4.000);",
+				"gl.uniform1f(fooXLoc,fooX);"
+			]);
 		});
 	});
 });

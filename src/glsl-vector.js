@@ -15,10 +15,11 @@ class GlslVector extends Vector {
 		} else if (this.modeFloats) {
 			const lines=new Lines;
 			this.values.forEach((v,c)=>{
-				if (v.input=='constant') return;
-				lines.a(
-					"uniform float "+this.varNameC(c)+";"
-				);
+				if (this.isVariableComponent(v)) {
+					lines.a(
+						"uniform float "+this.varNameC(c)+";"
+					);
+				}
 			});
 			return lines;
 		} else {
@@ -55,7 +56,7 @@ class GlslVector extends Vector {
 		};
 		for (let j=0;j<selectedComponents.length;j++) {
 			const c=selectedComponents.charAt(j);
-			if (this.values[c].input=='constant') {
+			if (!this.isVariableComponent(this.values[c])) {
 				results.push([true,c]);
 			} else {
 				if (this.modeVector && results.length>0) {
@@ -110,10 +111,11 @@ class GlslVector extends Vector {
 		}
 		if (this.modeFloats) {
 			this.values.forEach((v,c)=>{
-				if (v.input=='constant') return;
-				lines.a(
-					"var "+this.varNameC(c)+"Loc=gl.getUniformLocation(program,'"+this.varNameC(c)+"');"
-				);
+				if (this.isVariableComponent(v)) {
+					lines.a(
+						"var "+this.varNameC(c)+"Loc=gl.getUniformLocation(program,'"+this.varNameC(c)+"');"
+					);
+				}
 			});
 		} else {
 			lines.a(
@@ -128,9 +130,9 @@ class GlslVector extends Vector {
 			lines.a(
 				"gl.uniform"+this.nVars+"f("+this.varName+"Loc"
 			);
-			if (this.values.every(v=>v.input!='slider')) {
+			if (this.values.every(v=>v.input!='slider')) { // all values are short, no getElement... queries
 				this.values.forEach((v,c)=>{
-					if (v.input!='constant') {
+					if (this.isVariableComponent(v)) {
 						lines.t(
 							","+componentValue(v,c)
 						);
@@ -141,11 +143,12 @@ class GlslVector extends Vector {
 				);
 			} else {
 				this.values.forEach((v,c)=>{
-					if (v.input=='constant') return;
-					lines.t(
-						",",
-						"	"+componentValue(v,c)
-					);
+					if (this.isVariableComponent(v)) {
+						lines.t(
+							",",
+							"	"+componentValue(v,c)
+						);
+					}
 				});
 				lines.a(
 					");"
@@ -153,10 +156,11 @@ class GlslVector extends Vector {
 			}
 		} else {
 			this.values.forEach((v,c)=>{
-				if (v.input=='constant') return;
-				lines.a(
-					"gl.uniform1f("+this.varNameC(c)+"Loc,"+componentValue(v,c)+");"
-				);
+				if (this.isVariableComponent(v)) {
+					lines.a(
+						"gl.uniform1f("+this.varNameC(c)+"Loc,"+componentValue(v,c)+");"
+					);
+				}
 			});
 		}
 		return lines;

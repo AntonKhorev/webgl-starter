@@ -14,6 +14,7 @@ describe("CallVector",()=>{
 					['Checkbox','shaders',true],
 					['Checkbox','arrays'],
 					['Checkbox','inputs'],
+					['Checkbox','animations'],
 				]],
 			];
 		}
