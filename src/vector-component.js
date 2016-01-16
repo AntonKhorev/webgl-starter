@@ -42,7 +42,8 @@ class VectorComponent {
 	get wrapped() {
 		return (
 			this.wrapMode && this.hasSpeed() &&
-			this.value.min==this.value.availableMin && this.value.max==this.value.availableMin && // can wrap only if limits are not changed
+			this.value.min==this.value.availableMin && this.value.max==this.value.availableMax && // can wrap only if limits are not changed
+			this.value.min==-this.value.max && // currently can limit only by absolute value
 			this.value.input=='slider' // need to wrap only if input with state is used
 		);
 	}

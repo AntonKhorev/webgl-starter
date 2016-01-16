@@ -275,11 +275,13 @@ class Vector extends NumericFeature {
 				} else {
 					addSpeed=add(sfmt(v.speed));
 				}
-				let limitFn;
-				if (v.speed.input=='constant') {
-					limitFn=x=>"Math."+(v.speed<0?"max":"min")+"("+x+","+(v.speed<0?fmt(v.min):fmt(v.max))+")";
-				} else {
+				let limitFn=x=>x;
+				if (component.wrapped) {
+					limitFn=x=>"wrap("+x+","+fmt(v.max)+")";
+				} else if (component.clamped) {
 					limitFn=x=>"clamp("+x+","+fmt(v.min)+","+fmt(v.max)+")";
+				} else if (v.speed.input=='constant') {
+					limitFn=x=>"Math."+(v.speed<0?"max":"min")+"("+x+","+(v.speed<0?fmt(v.min):fmt(v.max))+")";
 				}
 				const incrementLine=(base,dt)=>component.varName+"="+limitFn(base+addSpeed+"*"+dt+"/1000")+";";
 				if (v.input=='slider') {

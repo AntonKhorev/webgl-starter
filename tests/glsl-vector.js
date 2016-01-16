@@ -127,42 +127,42 @@ describe("GlslVector",()=>{
 			]);
 		});
 	});
-	context('with 2 first components out of 3 variable vector',function(){
+	context("with 2 first components out of 3 variable vector",()=>{
 		const options=new TestOptions({foo:{
 			x:{input:'slider'}, y:{input:'slider'}
 		}});
 		const vector=new GlslVector('foo',options.fix().foo);
-		it('returns vec2 declaration',function(){
+		it("returns vec2 declaration",()=>{
 			assert.deepEqual(vector.getGlslDeclarationLines().data,[
 				"uniform vec2 foo;"
 			]);
 		});
-		it('returns vec3 made of vec2 and constant as value',function(){
+		it("returns vec3 made of vec2 and constant as value",()=>{
 			assert.equal(vector.getGlslValue(),
 				"vec3(foo,+3.000)"
 			);
 		});
-		it('returns original vec2 .x as components',function(){
+		it("returns original vec2 .x as components",()=>{
 			assert.equal(vector.getGlslComponentsValue('x'),
 				"foo.x"
 			);
 		});
-		it('returns original vec2 as components',function(){
+		it("returns original vec2 as components",()=>{
 			assert.equal(vector.getGlslComponentsValue('xy'),
 				"foo"
 			);
 		});
-		it('returns original vec2 with swizzling as components',function(){
+		it("returns original vec2 with swizzling as components",()=>{
 			assert.equal(vector.getGlslComponentsValue('yx'),
 				"foo.yx"
 			);
 		});
-		it('returns original vec2 component and constant as components',function(){
+		it("returns original vec2 component and constant as components",()=>{
 			assert.equal(vector.getGlslComponentsValue('yz'),
 				"vec2(foo.y,+3.000)"
 			);
 		});
-		it('returns interface with 1 location and 2 simple listeners',function(){
+		it("returns interface with 1 location and 2 simple listeners",()=>{
 			const featureContext=new FeatureContext(false);
 			featureContext.hasStartTime=true; // animated
 			assert.deepEqual(vector.getJsInitLines(featureContext).data,[
@@ -178,7 +178,7 @@ describe("GlslVector",()=>{
 				"document.getElementById('foo.y').addEventListener('change',updateFoo);"
 			]);
 		});
-		it('returns interface with one location and query listener with frame sheduling',function(){
+		it("returns interface with one location and query listener with frame sheduling",()=>{
 			const featureContext=new FeatureContext(false);
 			assert.deepEqual(vector.getJsInitLines(featureContext).data,[
 				"var fooLoc=gl.getUniformLocation(program,'foo');",
@@ -198,12 +198,12 @@ describe("GlslVector",()=>{
 			]);
 		});
 	});
-	context('with 2 first components out of 3 variable vector with dot in name',function(){
+	context("with 2 first components out of 3 variable vector with dot in name",()=>{
 		const options=new TestOptions({foo:{
 			x:{input:'slider'}, y:{input:'slider'}
 		}});
 		const vector=new GlslVector('foo.bar',options.fix().foo);
-		it('returns interface with 1 location and 2 simple listeners',function(){
+		it("returns interface with 1 location and 2 simple listeners",()=>{
 			const featureContext=new FeatureContext(false);
 			featureContext.hasStartTime=true; // animated
 			assert.deepEqual(vector.getJsInitLines(featureContext).data,[
@@ -220,23 +220,23 @@ describe("GlslVector",()=>{
 			]);
 		});
 	});
-	context('with first and third components out of 3 variable vector',function(){
+	context("with first and third components out of 3 variable vector",()=>{
 		const options=new TestOptions({foo:{
 			x:{input:'slider'}, z:{input:'slider'}
 		}});
 		const vector=new GlslVector('foo',options.fix().foo);
-		it('returns 2 float declarations',function(){
+		it("returns 2 float declarations",()=>{
 			assert.deepEqual(vector.getGlslDeclarationLines().data,[
 				"uniform float fooX;",
 				"uniform float fooZ;"
 			]);
 		});
-		it('returns vec3 made of floats and constant as value',function(){
+		it("returns vec3 made of floats and constant as value",()=>{
 			assert.equal(vector.getGlslValue(),
 				"vec3(fooX,+2.000,fooZ)"
 			);
 		});
-		it('returns interface with 2 locations and 2 simple listeners',function(){
+		it("returns interface with 2 locations and 2 simple listeners",()=>{
 			const featureContext=new FeatureContext(false);
 			featureContext.hasStartTime=true; // animated
 			assert.deepEqual(vector.getJsInitLines(featureContext).data,[
@@ -252,28 +252,28 @@ describe("GlslVector",()=>{
 			]);
 		});
 	});
-	context('with all-variable 3 component vector',function(){
+	context("with all-variable 3 component vector",()=>{
 		const options=new TestOptions({foo:{
 			x:{input:'slider'}, y:{input:'slider'}, z:{input:'slider'}
 		}});
 		const vector=new GlslVector('foo',options.fix().foo);
-		it('returns vec3 declaration',function(){
+		it("returns vec3 declaration",()=>{
 			assert.deepEqual(vector.getGlslDeclarationLines().data,[
 				"uniform vec3 foo;"
 			]);
 		});
-		it('returns value equal to declaration',function(){
+		it("returns value equal to declaration",()=>{
 			assert.equal(vector.getGlslValue(),
 				"foo"
 			);
 		});
 	});
-	context('with 2 first components (slider, mousemove) out of 3 variable vector',function(){
+	context("with 2 first components (slider, mousemove) out of 3 variable vector",()=>{
 		const options=new TestOptions({foo:{
 			x:{input:'slider'}, y:{input:'mousemovex'}
 		}});
 		const vector=new GlslVector('foo',options.fix().foo);
-		it('returns interface with 1 location, 1 state var and 1 simple listener and mousemove listener',function(){
+		it("returns interface with 1 location, 1 state var and 1 simple listener and mousemove listener",()=>{
 			const featureContext=new FeatureContext(false);
 			featureContext.hasStartTime=true; // animated
 			assert.deepEqual(vector.getJsInitLines(featureContext).data,[
@@ -299,12 +299,12 @@ describe("GlslVector",()=>{
 			]);
 		});
 	});
-	context('with 1 mousemove component out of 3 variable vector',function(){
+	context("with 1 mousemove component out of 3 variable vector",()=>{
 		const options=new TestOptions({foo:{
 			y:{value:2.5,input:'mousemovey'}
 		}});
 		const vector=new GlslVector('bar',options.fix().foo);
-		it('returns interface without update fn',function(){
+		it("returns interface without update fn",()=>{
 			const featureContext=new FeatureContext(false);
 			featureContext.hasStartTime=true; // animated
 			assert.deepEqual(vector.getJsInitLines(featureContext).data,[
@@ -322,12 +322,12 @@ describe("GlslVector",()=>{
 			]);
 		});
 	});
-	context('with 2 first mousemove components out of 3 variable vector',function(){
+	context("with 2 first mousemove components out of 3 variable vector",()=>{
 		const options=new TestOptions({foo:{
 			x:{value:1.5,input:'mousemovex'}, y:{value:2.5,input:'mousemovey'}
 		}});
 		const vector=new GlslVector('bar',options.fix().foo);
-		it('returns interface without update fn',function(){
+		it('returns interface without update fn',()=>{
 			const featureContext=new FeatureContext(false);
 			featureContext.hasStartTime=true; // animated
 			assert.deepEqual(vector.getJsInitLines(featureContext).data,[
@@ -348,12 +348,12 @@ describe("GlslVector",()=>{
 			]);
 		});
 	});
-	context('with 2 non-first mousemove components out of 3 variable vector',function(){
+	context("with 2 non-first mousemove components out of 3 variable vector",()=>{
 		const options=new TestOptions({foo:{
 			x:1.5, y:{value:2.5,input:'mousemovey'}, z:{input:'mousemovex'}
 		}});
 		const vector=new GlslVector('bar',options.fix().foo);
-		it('returns interface without update fn',function(){
+		it("returns interface without update fn",()=>{
 			const featureContext=new FeatureContext(false);
 			featureContext.hasStartTime=true; // animated
 			assert.deepEqual(vector.getJsInitLines(featureContext).data,[
@@ -377,7 +377,7 @@ describe("GlslVector",()=>{
 			]);
 		});
 	});
-	context('with nonnegative limits',function(){
+	context("with nonnegative limits",()=>{
 		class NonnegativeTestOptions extends Options {
 			get entriesDescription() {
 				return [
@@ -387,28 +387,28 @@ describe("GlslVector",()=>{
 		}
 		const options=new NonnegativeTestOptions;
 		const vector=new GlslVector('color',options.fix().color);
-		it('returns unsigned value',function(){
+		it("returns unsigned value",()=>{
 			assert.equal(vector.getGlslValue(),
 				"vec4(0.200,0.300,0.400,0.500)"
 			);
 		});
 	});
-	context('with all-variable 3 component vector and name with dot',function(){
+	context("with all-variable 3 component vector and name with dot",()=>{
 		const options=new TestOptions({foo:{
 			x:{input:'slider'}, y:{input:'slider'}, z:{input:'slider'}
 		}});
 		const vector=new GlslVector('my.foo',options.fix().foo);
-		it('returns vec3 declaration',function(){
+		it("returns vec3 declaration",()=>{
 			assert.deepEqual(vector.getGlslDeclarationLines().data,[
 				"uniform vec3 myFoo;"
 			]);
 		});
-		it('returns value equal to declaration',function(){
+		it("returns value equal to declaration",()=>{
 			assert.equal(vector.getGlslValue(),
 				"myFoo"
 			);
 		});
-		it('returns .x component of declared vec3',function(){
+		it("returns .x component of declared vec3",()=>{
 			assert.equal(vector.getGlslComponentsValue('x'),
 				"myFoo.x"
 			);
@@ -493,6 +493,30 @@ describe("GlslVector",()=>{
 		it("has loop with constant increment",()=>{
 			assert.deepEqual(vector.getJsLoopLines().data,[
 				"var fooX=Math.min(+0.500+0.123*(time-startTime)/1000,+4.000);",
+				"gl.uniform1f(fooXLoc,fooX);"
+			]);
+		});
+	});
+	context("with controlled speed and wrap mode",()=>{
+		const options=new TestOptions({foo:{
+			x:{input:'slider', speed:{input:'mousemovex'}}
+		}});
+		const vector=new GlslVector('foo',options.fix().foo,true);
+		it("requests prev time and wrap fn",()=>{
+			const testFeatureContext={};
+			vector.requestFeatureContext(testFeatureContext);
+			assert.deepEqual(testFeatureContext,{
+				hasPrevTime: true,
+				hasWrapFn: true,
+				hasSliders: true,
+				hasInputs: true,
+			});
+		});
+		it("has loop with constant increment",()=>{
+			assert.deepEqual(vector.getJsLoopLines().data,[
+				"var fooXInput=document.getElementById('foo.x');",
+				"var fooX=wrap(parseFloat(fooXInput.value)+fooXSpeed*(time-prevTime)/1000,+4.000);",
+				"fooXInput.value=fooX;",
 				"gl.uniform1f(fooXLoc,fooX);"
 			]);
 		});
