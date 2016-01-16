@@ -49,7 +49,7 @@ class Transforms extends Feature {
 			}
 			const suffix=(nLayers>1?String(i):'');
 			const makeVector=(values,names)=>{
-				const vector=new GlslVector('transforms.model.rotate',fixOptHelp.makeCollection(values,names,Options));
+				const vector=new GlslVector('transforms.model.rotate',fixOptHelp.makeCollection(values,names,Options),true);
 				vector.varName='rotate'+suffix;
 				vector.htmlName='transforms.model.rotate'+(nLayers>1?'.'+i:'');
 				this.features.push(vector);

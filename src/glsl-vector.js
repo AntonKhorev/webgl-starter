@@ -5,8 +5,8 @@ const Lines=require('./lines.js');
 const Vector=require('./vector.js');
 
 class GlslVector extends Vector {
-	constructor(name,values) {
-		super(name,values);
+	constructor(name,values,wrapMode) {
+		super(name,values,wrapMode);
 	}
 	// public:
 	getGlslDeclarationLines() {

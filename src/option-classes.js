@@ -87,7 +87,7 @@ class LiveNumber extends RangeInput {
 		fixed.min=src.min;
 		fixed.max=src.max;
 		fixed.input=Input.createFromString(src.input);
-		// needed for formatting:
+		// needed for formatting and to decide on clamp()/wrap():
 		fixed.availableMin=src.availableMin;
 		fixed.availableMax=src.availableMax;
 		fixed.step=src.step;

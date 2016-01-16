@@ -4,15 +4,19 @@ const fixOptHelp=require('./fixed-options-helpers.js');
 const Input=require('./input-classes.js');
 const Lines=require('./lines.js');
 const Listener=require('./listener-classes.js');
+const VectorComponent=require('./vector-component.js');
 const NumericFeature=require('./numeric-feature.js');
 
 class Vector extends NumericFeature {
-	constructor(name,values) {
+	constructor(name,values,wrapMode) {
 		super();
 		this.name=name; // name with dots like "material.color", transformed into "materialColor" for js var names
+		this.values=values;
+		this.components=values.map(value=>new VectorComponent(value,wrapMode));
+		// { TODO pass those as ctor args
 		this.htmlName=name; // html id - ok to rewrite this property - Transforms does it
 		this.varName=this.convertStringToCamelCase(name); // js/glsl var name - ok to rewrite this property - Transforms does it
-		this.values=values;
+		// }
 		this.nVars=0;
 		this.modeConstant=true; // all vector components are constants
 		this.modeFloats=false; // one/some vector components are variable, such components get their own glsl vars
@@ -72,30 +76,18 @@ class Vector extends NumericFeature {
 	addPostToListenerEntryAfterComponents(entry,componentValue) {}
 	// public:
 	hasInputs() {
-		return super.hasInputs() || this.values.some(v=>v.input!='constant');
+		return super.hasInputs() || this.components.some(component=>component.hasInput());
 	}
 	requestFeatureContext(featureContext) {
 		super.requestFeatureContext(featureContext);
-		this.values.forEach(v=>{
-			if (v.input!='constant' || v.speed.input!='constant') {
-				featureContext.hasInputs=true;
-			}
-			if (v.input=='slider' || v.speed.input=='slider') {
-				featureContext.hasSliders=true;
-			}
-			if (v.input instanceof Input.Gamepad || v.speed.input instanceof Input.Gamepad) {
-				featureContext.pollsGamepad=true;
-			}
-			if (v.speed!=0 || v.speed.input!='constant') {
-				if (v.input=='constant' && v.speed.input=='constant') {
-					featureContext.hasStartTime=true;
-				} else {
-					featureContext.hasPrevTime=true;
-				}
-			}
-			if (v.speed.input!='constant') {
-				featureContext.hasClampFn=true;
-			}
+		this.components.forEach(component=>{
+			if (component.hasInput()) featureContext.hasInputs=true;
+			if (component.hasInputClass(Input.Slider)) featureContext.hasSliders=true;
+			if (component.hasInputClass(Input.Gamepad)) featureContext.pollsGamepad=true;
+			if (component.usesStartTime()) featureContext.hasStartTime=true;
+			if (component.usesPrevTime()) featureContext.hasPrevTime=true;
+			if (component.wrapped) featureContext.hasWrapFn=true;
+			if (component.clamped) featureContext.hasClampFn=true;
 		});
 	}
 	getHtmlControlMessageLines(i18n) {

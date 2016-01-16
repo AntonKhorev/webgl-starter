@@ -247,8 +247,17 @@ module.exports=function(options,i18n){
 		const innerLines=new Lines;
 		if (featureContext.hasClampFn) {
 			innerLines.a(
-				"function clamp(x,min,max) {",
-				"	return Math.min(Math.max(x,min),max);",
+				"function clamp(v,min,max) {",
+				"	return Math.min(Math.max(v,min),max);",
+				"}"
+			);
+		}
+		if (featureContext.hasWrapFn) {
+			innerLines.a(
+				"function wrap(v,maxAbs) {",
+				"	v%=maxAbs*2;",
+				"	if (Math.abs(v)<=maxAbs) return v;",
+				"	return v-(v>0?1:-1)*maxAbs*2;",
 				"}"
 			);
 		}
