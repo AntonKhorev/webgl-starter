@@ -30,7 +30,6 @@ class Vector extends NumericFeature {
 		this.i18nId=name;
 		// }
 		// { TODO convert to props
-		this.htmlName=name; // html id - TODO remove it
 		this.varName=toCamelCase(name); // js/glsl var name - ok to rewrite this property - Transforms does it
 		// }
 		this.nVars=0;
@@ -121,16 +120,16 @@ class Vector extends NumericFeature {
 				"</div>"
 			);
 		};
-		this.values.forEach((v,c)=>{
+		this.components.forEach(component=>{
 			writeInput(
-				v,
-				'options.'+this.i18nId+'.'+c,
-				this.htmlName+'.'+c
+				component.value,
+				'options.'+this.i18nId+'.'+component.suffix,
+				component.name
 			);
 			writeInput(
-				v.speed,
-				'options.'+this.i18nId+'.'+c+'.speed',
-				this.htmlName+'.'+c+'.speed'
+				component.value.speed,
+				'options.'+this.i18nId+'.'+component.suffix+'.speed',
+				component.name+'.speed'
 			);
 		});
 		return lines;
@@ -151,14 +150,14 @@ class Vector extends NumericFeature {
 						featureContext.getListenerLines(listener)
 					);
 				}
-				this.values.forEach((v,c)=>{
-					writeListener(v,this.htmlName+'.'+c);
-					writeListener(v.speed,this.htmlName+'.'+c+'.speed');
+				this.components.forEach(component=>{
+					writeListener(component.value,component.name);
+					writeListener(component.value.speed,component.name+'.speed');
 				});
 				return lines;
 			};
 			const getOneListenerLines=()=>{
-				const listener=new Listener.MultipleSlider("[id^=\""+this.htmlName+".\"]"); // will also handle speed sliders, but it's ok
+				const listener=new Listener.MultipleSlider("[id^=\""+this.name+".\"]"); // will also handle speed sliders, but it's ok
 				const entry=listener.enter();
 				entry.log("console.log(this.id,'input value:',parseFloat(this.value));");
 				if (doUpdate) {
@@ -265,14 +264,13 @@ class Vector extends NumericFeature {
 		let needUpdate=false;
 		this.values.forEach((v,c)=>{
 			const component=this.componentsByName[c];
-			const htmlName=this.htmlName+"."+c;
 			if (v.speed!=0 || v.speed.input!='constant') {
 				needUpdate=true;
 				const fmt=fixOptHelp.makeFormatNumber(v);
 				const sfmt=fixOptHelp.makeFormatNumber(v.speed);
 				let addSpeed;
 				if (v.speed.input=='slider') {
-					addSpeed="+parseFloat(document.getElementById('"+htmlName+".speed').value)";
+					addSpeed="+parseFloat(document.getElementById('"+component.name+".speed').value)";
 				} else if (v.speed.input instanceof Input.MouseMove) {
 					addSpeed="+"+component.varName+"Speed";
 				} else {
@@ -288,7 +286,7 @@ class Vector extends NumericFeature {
 				if (v.input=='slider') {
 					const inputVarName=component.varName+"Input";
 					lines.a(
-						"var "+inputVarName+"=document.getElementById('"+htmlName+"');",
+						"var "+inputVarName+"=document.getElementById('"+component.name+"');",
 						"var "+incrementLine("parseFloat("+inputVarName+".value)","(time-prevTime)"),
 						inputVarName+".value="+component.varName+";"
 					);
@@ -303,7 +301,7 @@ class Vector extends NumericFeature {
 				}
 				if (featureContext && featureContext.debugOptions.animations) { // TODO always pass featureContext
 					lines.a(
-						"console.log('"+htmlName+" animation value:',"+component.varName+");"
+						"console.log('"+component.name+" animation value:',"+component.varName+");"
 					);
 				}
 			} else if (v.input instanceof Input.Gamepad) {
@@ -320,7 +318,7 @@ class Vector extends NumericFeature {
 				);
 				if (featureContext && featureContext.debugOptions.inputs) { // TODO always pass featureContext
 					lines.a(
-						"console.log('"+htmlName+" input value:',"+component.varName+");"
+						"console.log('"+component.name+" input value:',"+component.varName+");"
 					);
 				}
 			}
