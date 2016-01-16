@@ -6,7 +6,7 @@ const Options=require('../src/options.js');
 const FeatureContext=require('../src/feature-context.js');
 const Illumination=require('../src/illumination.js');
 
-describe('Illumination',function(){
+describe("Illumination",()=>{
 	class TestOptions extends Options {
 		get entriesDescription() {
 			return [

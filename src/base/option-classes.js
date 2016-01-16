@@ -124,16 +124,16 @@ class Array extends Base {
 		this._entries=[];
 		if (typeof data == 'object') {
 			for (let i in data) {
-				const entryTypeAndData=data[i];
-				let entryType,entryData;
-				if (typeof entryTypeAndData == 'string') {
-					entryType=entryTypeAndData;
-				} else if (typeof entryTypeAndData == 'object') {
-					entryType=entryTypeAndData.type;
-					entryData=entryTypeAndData.data;
+				const entryTypeAndValue=data[i];
+				let entryType,entryValue;
+				if (typeof entryTypeAndValue == 'string') {
+					entryType=entryTypeAndValue;
+				} else if (typeof entryTypeAndValue == 'object') {
+					entryType=entryTypeAndValue.type;
+					entryValue=entryTypeAndValue.value;
 				}
 				if (availableConstructors[entryType]) {
-					this._entries.push(availableConstructors[entryType](entryData));
+					this._entries.push(availableConstructors[entryType](entryValue));
 				}
 			}
 		}

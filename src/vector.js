@@ -26,8 +26,11 @@ class Vector extends NumericFeature {
 			this.components.push(component);
 			this.componentsByName[c]=component;
 		});
-		// { TODO pass those as ctor args
-		this.htmlName=name; // html id - ok to rewrite this property - Transforms does it
+		// { TODO extra ctor args
+		this.i18nId=name;
+		// }
+		// { TODO convert to props
+		this.htmlName=name; // html id - TODO remove it
 		this.varName=toCamelCase(name); // js/glsl var name - ok to rewrite this property - Transforms does it
 		// }
 		this.nVars=0;
@@ -98,8 +101,8 @@ class Vector extends NumericFeature {
 		const lines=super.getHtmlControlMessageLines(i18n);
 		this.values.forEach((v,c)=>{
 			lines.a(
-				this.getHtmlControlMessageForValue(i18n,v,this.name+'.'+c),
-				this.getHtmlControlMessageForValue(i18n,v.speed,this.name+'.'+c+'.speed')
+				this.getHtmlControlMessageForValue(i18n,v,this.i18nId+'.'+c),
+				this.getHtmlControlMessageForValue(i18n,v.speed,this.i18nId+'.'+c+'.speed')
 			);
 		});
 		return lines;
@@ -121,12 +124,12 @@ class Vector extends NumericFeature {
 		this.values.forEach((v,c)=>{
 			writeInput(
 				v,
-				'options.'+this.name+'.'+c,
+				'options.'+this.i18nId+'.'+c,
 				this.htmlName+'.'+c
 			);
 			writeInput(
 				v.speed,
-				'options.'+this.name+'.'+c+'.speed',
+				'options.'+this.i18nId+'.'+c+'.speed',
 				this.htmlName+'.'+c+'.speed'
 			);
 		});

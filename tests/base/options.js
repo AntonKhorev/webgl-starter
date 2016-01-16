@@ -223,8 +223,8 @@ describe("Base/Options",()=>{
 			const options=new TestOptions({
 				chk: true,
 				arr: [
-					{type: 'scope', data: 'face'},
-					{type: 'shape', data: 'cube'},
+					{type: 'scope', value: 'face'},
+					{type: 'shape', value: 'cube'},
 					'projection',
 					{type: 'scope'},
 				]
