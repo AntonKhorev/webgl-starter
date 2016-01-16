@@ -14,23 +14,24 @@ class CallVector extends Vector {
 	getJsUpdateLines(componentValue) {
 		const lines=new Lines;
 		let nValueSliders=0;
-		this.values.forEach(v=>{
-			nValueSliders+=v.input=='slider';
+		this.components.forEach(component=>{
+			nValueSliders+=component.value.input=='slider';
 		});
-		if (this.modeConstant && this.values.every((v,c,i)=>v==this.calledFnDefaultArgs[i])) {
+		if (this.modeConstant && this.components.every((component,i)=>component.value==this.calledFnDefaultArgs[i])) {
 			// equal to default values, don't do anything
 		} else if (nValueSliders<=1) {
 			lines.a(
-				this.calledFn+"("+this.values.map(componentValue).join(",")+");"
+				this.calledFn+"("+this.components.map(componentValue).join(",")+");"
 			);
-		} else if (this.values.every(v=>v.input=='slider')) {
+		} else if (this.components.every(component=>component.value.input=='slider')) {
 			let obj=this.calledFn;
 			const dotIndex=obj.lastIndexOf('.');
 			if (dotIndex>=0) {
 				obj=obj.slice(0,dotIndex);
 			}
+			const suffixArray="["+this.components.map(component=>"'"+component.suffix+"'").join(",")+"]";
 			lines.a(
-				this.calledFn+".apply("+obj+",["+this.values.map((v,c)=>"'"+c+"'").join(",")+"].map(function(c){",
+				this.calledFn+".apply("+obj+","+suffixArray+".map(function(c){",
 				"	return parseFloat(document.getElementById('"+this.name+".'+c).value);",
 				"}));"
 			);
@@ -38,12 +39,12 @@ class CallVector extends Vector {
 			lines.a(
 				this.calledFn+"("
 			);
-			this.values.forEach((v,c,i)=>{
+			this.components.forEach((component,i)=>{
 				if (i>0) {
 					lines.t(",");
 				}
 				lines.a(
-					"	"+componentValue(v,c)
+					"	"+componentValue(component)
 				);
 			});
 			lines.a(
@@ -54,7 +55,7 @@ class CallVector extends Vector {
 	}
 	addPostToListenerEntryAfterComponents(entry,componentValue) {
 		entry.post(
-			this.calledFn+"("+this.values.map(componentValue).join(",")+");"
+			this.calledFn+"("+this.components.map(componentValue).join(",")+");"
 		);
 	}
 }

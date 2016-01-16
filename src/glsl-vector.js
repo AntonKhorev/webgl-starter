@@ -14,10 +14,10 @@ class GlslVector extends Vector {
 			return new Lines;
 		} else if (this.modeFloats) {
 			const lines=new Lines;
-			this.values.forEach((v,c)=>{
-				if (this.isVariableComponent(v)) {
+			this.components.forEach(component=>{
+				if (component.variable) {
 					lines.a(
-						"uniform float "+this.varNameC(c)+";"
+						"uniform float "+component.varName+";"
 					);
 				}
 			});
@@ -29,34 +29,34 @@ class GlslVector extends Vector {
 		}
 	}
 	getGlslValue() {
-		return this.getGlslComponentsValue(this.values.map((v,c)=>c).join(''));
+		return this.getGlslComponentsValue(this.components.map(component=>component.suffix).join(''));
 	}
 	getGlslComponentsValue(selectedComponents) {
+		const allSuffixString=this.components.map(component=>component.suffix).slice(0,this.nVars).join('');
 		const results=[]; // [[isConstant,componentName]]
 		const showResult=result=>{
 			if (result[0]) {
-				return fixOptHelp.formatNumber(this.values[result[1]]);
+				return fixOptHelp.formatNumber(this.componentsByName[result[1]].value);
 			} else {
 				if (this.modeVector) {
-					const resultPartEqualToWholeVector=result[1]==this.values.map((v,c)=>c).slice(0,this.nVars).join('');
-					if (resultPartEqualToWholeVector) {
+					if (result[1]==allSuffixString) {
 						return this.varName;
 					} else {
 						return this.varName+"."+result[1];
 					}
-				} else {
-					return this.varNameC(result[1]);
-				}
+ 				} else {
+					return this.componentsByName[result[1]].varName;
+ 				}
 			}
 		};
 		const allSameConstant=()=>{
 			if (!results[0][0]) return false;
-			const cmp=fixOptHelp.formatNumber(this.values[results[0][1]]);
-			return results.every(result=>(result[0] && fixOptHelp.formatNumber(this.values[result[1]])==cmp));
+			const cmp=fixOptHelp.formatNumber(this.componentsByName[results[0][1]].value);
+			return results.every(result=>(result[0] && fixOptHelp.formatNumber(this.componentsByName[result[1]].value)==cmp));
 		};
 		for (let j=0;j<selectedComponents.length;j++) {
 			const c=selectedComponents.charAt(j);
-			if (!this.isVariableComponent(this.values[c])) {
+			if (!this.componentsByName[c].variable) {
 				results.push([true,c]);
 			} else {
 				if (this.modeVector && results.length>0) {
@@ -72,7 +72,7 @@ class GlslVector extends Vector {
 			}
 		}
 		if (results.length==1) {
-			if (this.modeVector && selectedComponents==this.values.map((v,c)=>c).slice(0,this.nVars).join('')) {
+			if (this.modeVector && selectedComponents==allSuffixString) {
 				return this.varName;
 			} else {
 				return showResult(results[0]);
@@ -86,18 +86,18 @@ class GlslVector extends Vector {
 		}
 	}
 	getGlslMapDeclarationLines(mapName,mapFn) {
-		if (this.values.length>1) {
+		if (this.components.length>1) {
 			return new Lines(
-				"vec"+this.values.length+" "+mapName+"="+mapFn(this.getGlslValue())+";"
+				"vec"+this.components.length+" "+mapName+"="+mapFn(this.getGlslValue())+";"
 			);
 		} else {
 			return new Lines(
-				"float "+mapName+this.values.map((v,c)=>c)[0]+"="+mapFn(this.getGlslValue())+";"
+				"float "+mapName+this.components[0].suffix+"="+mapFn(this.getGlslValue())+";"
 			);
 		}
 	}
 	getGlslMapComponentValue(mapName,selectedComponent) {
-		if (this.values.length>1) {
+		if (this.components.length>1) {
 			return mapName+"."+selectedComponent;
 		} else {
 			return mapName+selectedComponent;
@@ -110,10 +110,10 @@ class GlslVector extends Vector {
 			return lines;
 		}
 		if (this.modeFloats) {
-			this.values.forEach((v,c)=>{
-				if (this.isVariableComponent(v)) {
+			this.components.forEach(component=>{
+				if (component.variable) {
 					lines.a(
-						"var "+this.varNameC(c)+"Loc=gl.getUniformLocation(program,'"+this.varNameC(c)+"');"
+						"var "+component.varNameLoc+"=gl.getUniformLocation(program,'"+component.varName+"');"
 					);
 				}
 			});
@@ -130,11 +130,11 @@ class GlslVector extends Vector {
 			lines.a(
 				"gl.uniform"+this.nVars+"f("+this.varName+"Loc"
 			);
-			if (this.values.every(v=>v.input!='slider')) { // all values are short, no getElement... queries
-				this.values.forEach((v,c)=>{
-					if (this.isVariableComponent(v)) {
+			if (this.components.every(component=>component.value.input!='slider')) { // all values are short, no getElement... queries
+				this.components.forEach(component=>{
+					if (component.variable) {
 						lines.t(
-							","+componentValue(v,c)
+							","+componentValue(component)
 						);
 					}
 				});
@@ -142,11 +142,11 @@ class GlslVector extends Vector {
 					");"
 				);
 			} else {
-				this.values.forEach((v,c)=>{
-					if (this.isVariableComponent(v)) {
+				this.components.forEach(component=>{
+					if (component.variable) {
 						lines.t(
 							",",
-							"	"+componentValue(v,c)
+							"	"+componentValue(component)
 						);
 					}
 				});
@@ -155,29 +155,29 @@ class GlslVector extends Vector {
 				);
 			}
 		} else {
-			this.values.forEach((v,c)=>{
-				if (this.isVariableComponent(v)) {
+			this.components.forEach(component=>{
+				if (component.variable) {
 					lines.a(
-						"gl.uniform1f("+this.varNameC(c)+"Loc,"+componentValue(v,c)+");"
+						"gl.uniform1f("+component.varNameLoc+","+componentValue(component)+");"
 					);
 				}
 			});
 		}
 		return lines;
 	}
-	addPostToListenerEntryForComponent(entry,c) {
+	addPostToListenerEntryForComponent(entry,component) {
 		if (this.modeVector) {
 			// written at the end as a vector
 		} else {
-			entry.post("gl.uniform1f("+this.varNameC(c)+"Loc,"+this.varNameC(c)+");");
+			entry.post("gl.uniform1f("+component.varNameLoc+","+component.varName+");");
 		}
 	}
 	addPostToListenerEntryAfterComponents(entry,componentValue) {
 		if (this.modeVector) {
 			const vs=[];
-			this.values.forEach((v,c,i)=>{
+			this.components.forEach((component,i)=>{
 				if (i<this.nVars) {
-					vs.push(this.varNameC(c));
+					vs.push(component.varName);
 				}
 			});
 			entry.post("gl.uniform"+this.nVars+"f("+this.varName+"Loc,"+vs.join(",")+");");

@@ -50,7 +50,7 @@ class Transforms extends Feature {
 			const suffix=(nLayers>1?String(i):'');
 			const makeVector=(values,names)=>{
 				const vector=new GlslVector('transforms.model.rotate',fixOptHelp.makeCollection(values,names,Options),true);
-				vector.varName='rotate'+suffix;
+				vector.varName='rotate'+suffix; // TODO overwrite i18n id instead
 				vector.htmlName='transforms.model.rotate'+(nLayers>1?'.'+i:'');
 				this.features.push(vector);
 				this.rotateVectorEntries.push({

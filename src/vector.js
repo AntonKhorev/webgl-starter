@@ -7,21 +7,34 @@ const Listener=require('./listener-classes.js');
 const VectorComponent=require('./vector-component.js');
 const NumericFeature=require('./numeric-feature.js');
 
+function capitalize(s) {
+	return s.charAt(0).toUpperCase()+s.slice(1);
+}
+function toCamelCase(s) {
+	return s.split('.').map((w,i)=>i>0?capitalize(w):w).join('');
+}
+
 class Vector extends NumericFeature {
 	constructor(name,values,wrapMode) {
 		super();
 		this.name=name; // name with dots like "material.color", transformed into "materialColor" for js var names
-		this.values=values;
-		this.components=values.map(value=>new VectorComponent(value,wrapMode));
+		this.values=values; // TODO remove once this.components are in use
+		this.components=[];
+		this.componentsByName={}; // TODO rename to components by suffix
+		values.forEach((v,c)=>{
+			const component=new VectorComponent(v,name,c,wrapMode);
+			this.components.push(component);
+			this.componentsByName[c]=component;
+		});
 		// { TODO pass those as ctor args
 		this.htmlName=name; // html id - ok to rewrite this property - Transforms does it
-		this.varName=this.convertStringToCamelCase(name); // js/glsl var name - ok to rewrite this property - Transforms does it
+		this.varName=toCamelCase(name); // js/glsl var name - ok to rewrite this property - Transforms does it
 		// }
 		this.nVars=0;
 		this.modeConstant=true; // all vector components are constants
 		this.modeFloats=false; // one/some vector components are variable, such components get their own glsl vars
-		values.forEach((v,c,i)=>{
-			if (this.isVariableComponent(v)) {
+		this.components.forEach((component,i)=>{
+			if (component.variable) {
 				this.modeConstant=false;
 				if (this.nVars++!=i) {
 					this.modeFloats=true;
@@ -33,47 +46,38 @@ class Vector extends NumericFeature {
 		}
 		this.modeVector=(!this.modeConstant && !this.modeFloats); // first consecutive components are variable, packed into one glsl vector
 	}
-	convertStringToCamelCase(s) { // TODO static
-		function capitalize(s) {
-			return s.charAt(0).toUpperCase()+s.slice(1);
-		}
-		return s.split('.').map((w,i)=>i>0?capitalize(w):w).join('');
-	}
 	get updateFnName() {
-		return this.convertStringToCamelCase('update.'+this.varName);
+		return toCamelCase('update.'+this.varName);
 	}
-	// fns that can be mapped over values/components:
-	varNameC(c) {
-		return this.convertStringToCamelCase(this.varName+'.'+c);
-	}
-	isVariableComponent(v) {
-		return v.input!='constant' || v.speed!=0 || v.speed.input!='constant';
-	}
+	// fns that can be mapped over components:
 	makeInitialComponentValue() {
-		return (v,c)=>{
-			if (v.input=='slider') {
-				return "parseFloat(document.getElementById('"+this.htmlName+"."+c+"').value)"; // b/c slider could be init'd to a value different than the default
+		return component=>{
+			if (component.value.input=='slider') {
+				return "parseFloat(document.getElementById('"+component.name+"').value)"; // b/c slider could be init'd to a value different than the default
 			} else {
-				return fixOptHelp.formatNumber(v);
+				return fixOptHelp.formatNumber(component.value);
 			}
 		}
 	}
 	makeUpdatedComponentValue() {
-		return (v,c)=>{
-			if (v.speed!=0 || v.speed.input!='constant' || v.input instanceof Input.MouseMove || v.input instanceof Input.Gamepad) {
-				return this.varNameC(c);
-			} else if (v.input=='slider') {
-				return "parseFloat(document.getElementById('"+this.htmlName+"."+c+"').value)";
+		return component=>{
+			if (
+				component.value.speed!=0 || component.value.speed.input!='constant' ||
+				component.value.input instanceof Input.MouseMove || component.value.input instanceof Input.Gamepad
+			) {
+				return component.varName;
+			} else if (component.value.input=='slider') {
+				return "parseFloat(document.getElementById('"+component.name+"').value)";
 			} else {
-				return fixOptHelp.formatNumber(v);
+				return fixOptHelp.formatNumber(component.value);
 			}
 		}
 	}
 	// abstract fns:
 	getJsDeclarationLines() { return new Lines; } // Locs etc
 	getJsUpdateLines(componentValue) { return new Lines; }
-	addPostToListenerEntryForComponent(entry,c) {} // do necessary entry.post()
-	addPostToListenerEntryAfterComponents(entry,componentValue) {}
+	addPostToListenerEntryForComponent(entry,component) {} // do necessary entry.post()
+	addPostToListenerEntryAfterComponents(entry,componentValue) {} // TODO check if we need componentValue - GlslVector doesn't use it
 	// public:
 	hasInputs() {
 		return super.hasInputs() || this.components.some(component=>component.hasInput());
@@ -177,18 +181,18 @@ class Vector extends NumericFeature {
 		}
 		const someSpeeds=this.values.some(v=>(v.speed!=0 || v.speed.input!='constant'));
 		const someValueSliders=this.values.some(v=>v.input=='slider');
-		this.values.forEach((v,c)=>{
+		this.components.forEach(component=>{
 			if (
-				(v.input instanceof Input.MouseMove && (someValueSliders || someSpeeds)) || // mouse input required elsewhere
-				(v.speed.input!='constant' && v.input!='slider') // variable speed and no value input capable of storing the state
+				(component.value.input instanceof Input.MouseMove && (someValueSliders || someSpeeds)) || // mouse input required elsewhere
+				(component.value.speed.input!='constant' && component.value.input!='slider') // variable speed and no value input capable of storing the state
 			) {
 				lines.a(
-					"var "+this.varNameC(c)+"="+fixOptHelp.formatNumber(v)+";"
+					"var "+component.varName+"="+fixOptHelp.formatNumber(component.value)+";"
 				);
 			}
-			if (v.speed.input instanceof Input.MouseMove) {
+			if (component.value.speed.input instanceof Input.MouseMove) {
 				lines.a(
-					"var "+this.varNameC(c)+"Speed="+fixOptHelp.formatNumber(v.speed)+";"
+					"var "+component.varNameSpeed+"="+fixOptHelp.formatNumber(component.value.speed)+";"
 				);
 			}
 		});
@@ -211,18 +215,17 @@ class Vector extends NumericFeature {
 				);
 			}
 			const entry=featureContext.canvasMousemoveListener.enter();
-			this.values.forEach((v,c)=>{
-				if (v.input instanceof Input.MouseMove) {
-					const fmt=fixOptHelp.makeFormatNumber(v);
-					const varName=this.varNameC(c);
+			this.components.forEach(component=>{
+				if (component.value.input instanceof Input.MouseMove) {
+					const fmt=fixOptHelp.makeFormatNumber(component.value);
+					((!someSpeeds && !someValueSliders) ? entry.minMaxVarFloat : entry.minMaxFloat)(
+						component.value.input,component.varName,
+						fmt(component.value.min),
+						fmt(component.value.max)
+					);
+					entry.log("console.log('"+component.name+" input value:',"+component.varName+");");
 					if (!someSpeeds && !someValueSliders) {
-						entry.minMaxVarFloat(v.input,varName,fmt(v.min),fmt(v.max));
-					} else {
-						entry.minMaxFloat(v.input,varName,fmt(v.min),fmt(v.max));
-					}
-					entry.log("console.log('"+this.htmlName+"."+c+" input value:',"+varName+");");
-					if (!someSpeeds && !someValueSliders) {
-						this.addPostToListenerEntryForComponent(entry,c);
+						this.addPostToListenerEntryForComponent(entry,component);
 					}
 				}
 			});
@@ -236,12 +239,11 @@ class Vector extends NumericFeature {
 		}
 		if (this.values.some(v=>(v.speed.input instanceof Input.MouseMove))) {
 			const entry=featureContext.canvasMousemoveListener.enter();
-			this.values.forEach((v,c)=>{
-				const fmt=fixOptHelp.makeFormatNumber(v.speed);
-				const varName=this.varNameC(c)+'Speed';
-				if (v.speed.input instanceof Input.MouseMove) {
-					entry.minMaxFloat(v.speed.input,varName,fmt(v.speed.min),fmt(v.speed.max))
-						.log("console.log('"+this.htmlName+"."+c+".speed input value:',"+varName+");");
+			this.components.forEach(component=>{
+				const fmt=fixOptHelp.makeFormatNumber(component.value.speed);
+				if (component.value.speed.input instanceof Input.MouseMove) {
+					entry.minMaxFloat(component.value.speed.input,component.varNameSpeed,fmt(component.value.speed.min),fmt(component.value.speed.max))
+						.log("console.log('"+component.name+".speed input value:',"+component.varNameSpeed+");");
 				}
 			});
 		}
@@ -259,7 +261,7 @@ class Vector extends NumericFeature {
 		};
 		let needUpdate=false;
 		this.values.forEach((v,c)=>{
-			const varName=this.varNameC(c);
+			const component=this.componentsByName[c];
 			const htmlName=this.htmlName+"."+c;
 			if (v.speed!=0 || v.speed.input!='constant') {
 				needUpdate=true;
@@ -269,7 +271,7 @@ class Vector extends NumericFeature {
 				if (v.speed.input=='slider') {
 					addSpeed="+parseFloat(document.getElementById('"+htmlName+".speed').value)";
 				} else if (v.speed.input instanceof Input.MouseMove) {
-					addSpeed="+"+varName+"Speed";
+					addSpeed="+"+component.varName+"Speed";
 				} else {
 					addSpeed=add(sfmt(v.speed));
 				}
@@ -279,17 +281,17 @@ class Vector extends NumericFeature {
 				} else {
 					limitFn=x=>"clamp("+x+","+fmt(v.min)+","+fmt(v.max)+")";
 				}
-				const incrementLine=(base,dt)=>varName+"="+limitFn(base+addSpeed+"*"+dt+"/1000")+";";
+				const incrementLine=(base,dt)=>component.varName+"="+limitFn(base+addSpeed+"*"+dt+"/1000")+";";
 				if (v.input=='slider') {
-					const inputVarName=varName+"Input";
+					const inputVarName=component.varName+"Input";
 					lines.a(
 						"var "+inputVarName+"=document.getElementById('"+htmlName+"');",
 						"var "+incrementLine("parseFloat("+inputVarName+".value)","(time-prevTime)"),
-						inputVarName+".value="+varName+";"
+						inputVarName+".value="+component.varName+";"
 					);
 				} else if (v.input instanceof Input.MouseMove || v.speed.input!='constant') {
 					lines.a(
-						incrementLine(varName,"(time-prevTime)")
+						incrementLine(component.varName,"(time-prevTime)")
 					);
 				} else {
 					lines.a(
@@ -298,24 +300,24 @@ class Vector extends NumericFeature {
 				}
 				if (featureContext && featureContext.debugOptions.animations) { // TODO always pass featureContext
 					lines.a(
-						"console.log('"+htmlName+" animation value:',"+varName+");"
+						"console.log('"+htmlName+" animation value:',"+component.varName+");"
 					);
 				}
 			} else if (v.input instanceof Input.Gamepad) {
 				needUpdate=true;
 				const fmt=fixOptHelp.makeFormatNumber(v);
-				const VarName=varName.charAt(0).toUpperCase()+varName.slice(1);
+				const VarName=component.varName.charAt(0).toUpperCase()+component.varName.slice(1);
 				lines.a(
 					"var min"+VarName+"="+fmt(v.min)+";",
 					"var max"+VarName+"="+fmt(v.max)+";",
-					"var "+varName+"="+fmt(v)+";",
+					"var "+component.varName+"="+fmt(v)+";",
 					"if (gamepad && gamepad.axes.length>"+v.input.axis+") {",
-					"	"+varName+"=min"+VarName+"+(max"+VarName+"-min"+VarName+")*(gamepad.axes["+v.input.axis+"]+1)/2;",
+					"	"+component.varName+"=min"+VarName+"+(max"+VarName+"-min"+VarName+")*(gamepad.axes["+v.input.axis+"]+1)/2;",
 					"}"
 				);
 				if (featureContext && featureContext.debugOptions.inputs) { // TODO always pass featureContext
 					lines.a(
-						"console.log('"+htmlName+" input value:',"+varName+");"
+						"console.log('"+htmlName+" input value:',"+component.varName+");"
 					);
 				}
 			}
