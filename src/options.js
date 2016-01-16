@@ -49,6 +49,7 @@ class Options extends BaseOptions {
 				['Checkbox','shaders',true],
 				['Checkbox','arrays'],
 				['Checkbox','inputs'], // TODO hide if no inputs?
+				['Checkbox','animations'],
 			]],
 			['Group','formatting',[
 				['Select','indent',['tab','2','4','8']],

@@ -230,7 +230,7 @@ module.exports=function(options,i18n){
 			if (options[optName+'.speed.input']=='slider') {
 				var listener=new listeners.SliderListener(optName+'.speed');
 				listener.enter()
-					.log("console.log(this.id,'input value:',parseFloat(this.value));"); // !!!!!!! TODO test this in new code
+					.log("console.log(this.id,'input value:',parseFloat(this.value));");
 				writeListener(listener);
 			} else if (isMousemoveInput(optName+'.speed')) {
 				canvasMousemoveListener.enter()
@@ -246,7 +246,7 @@ module.exports=function(options,i18n){
 	function getJsLoopLines() {
 		const innerLines=new Lines;
 		features.forEach(feature=>{
-			innerLines.a(feature.getJsLoopLines());
+			innerLines.a(feature.getJsLoopLines(featureContext));
 		});
 		/*
 		var needStartTime=false; // set by renderInner()

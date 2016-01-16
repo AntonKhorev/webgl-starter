@@ -235,8 +235,8 @@ class Vector extends NumericFeature {
 		}
 		return lines;
 	}
-	getJsLoopLines() {
-		const lines=super.getJsLoopLines();
+	getJsLoopLines(featureContext) {
+		const lines=super.getJsLoopLines(featureContext);
 		const add=(s)=>{
 			const c=s.charAt(0);
 			if (c=='-' || c=='+') {
@@ -252,16 +252,17 @@ class Vector extends NumericFeature {
 				const fmt=fixOptHelp.makeFormatNumber(v);
 				const sfmt=fixOptHelp.makeFormatNumber(v.speed);
 				const varName=this.varNameC(c);
+				const htmlName=this.htmlName+"."+c;
 				let addSpeed=add(sfmt(v.speed));
 				if (v.speed.input=='slider') {
-					addSpeed="+parseFloat(document.getElementById('"+this.htmlName+"."+c+".speed').value)";
+					addSpeed="+parseFloat(document.getElementById('"+htmlName+".speed').value)";
 				}
 				const incrementLine=(base,dt)=>
 					varName+"=Math."+(v.speed<0?"max":"min")+"("+(v.speed<0?fmt(v.min):fmt(v.max))+","+base+addSpeed+"*"+dt+"/1000);";
 				if (v.input=='slider') {
-					const inputVarName=this.varNameC(c)+"Input";
+					const inputVarName=varName+"Input";
 					lines.a(
-						"var "+inputVarName+"=document.getElementById('"+this.htmlName+"."+c+"');",
+						"var "+inputVarName+"=document.getElementById('"+htmlName+"');",
 						"var "+incrementLine("parseFloat("+inputVarName+".value)","(time-prevTime)"),
 						inputVarName+".value="+varName+";"
 					);
@@ -272,6 +273,11 @@ class Vector extends NumericFeature {
 				} else {
 					lines.a(
 						"var "+incrementLine(fmt(v),"(time-startTime)")
+					);
+				}
+				if (featureContext && featureContext.debugOptions.animations) { // TODO always pass featureContext
+					lines.a(
+						"console.log('"+htmlName+" animation value:',"+varName+");"
 					);
 				}
 			}

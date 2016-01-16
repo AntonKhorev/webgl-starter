@@ -14,8 +14,8 @@ class Background extends Feature {
 			);
 		}
 	}
-	getJsLoopLines() {
-		const lines=super.getJsLoopLines();
+	getJsLoopLines(featureContext) {
+		const lines=super.getJsLoopLines(featureContext);
 		if (this.isSolid) {
 			lines.a(
 				"gl.clear(gl.COLOR_BUFFER_BIT);"

@@ -90,6 +90,7 @@ const dataStrings={
 	'options.debug.shaders': "Log shader compilation errors",
 	'options.debug.arrays': "Log allocated array sizes",
 	'options.debug.inputs': "Log input values",
+	'options.debug.animations': "Log animated values",
 
 	'options.formatting': "Code formatting options",
 	'options.formatting.indent': "Indent",

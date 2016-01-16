@@ -32,7 +32,7 @@ class Feature {
 	getJsInitLines(featureContext) {
 		return this.getRecursiveLines('getJsInitLines',arguments);
 	}
-	getJsLoopLines() {
+	getJsLoopLines(featureContext) {
 		return this.getRecursiveLines('getJsLoopLines',arguments);
 	}
 }

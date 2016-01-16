@@ -167,8 +167,8 @@ class Shape extends Feature {
 		}
 		return lines;
 	}
-	getJsLoopLines() {
-		const lines=super.getJsLoopLines();
+	getJsLoopLines(featureContext) {
+		const lines=super.getJsLoopLines(featureContext);
 		if (this.usesElements()) {
 			lines.a("gl.drawElements(gl."+this.glPrimitive+",nElements,"+this.getElementIndexGlType()+",0);");
 		} else {

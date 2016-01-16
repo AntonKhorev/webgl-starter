@@ -492,4 +492,43 @@ describe("CallVector",()=>{
 			]);
 		});
 	});
+	context("with mousemove-controlled speed",()=>{
+		const options=new TestOptions({color:{
+			r:{value:0.5, speed:{value:-0.321, input:'mousemovex'}}, g:0.4, b:0.3, a:1.0
+		}});
+		const vector=new CallVector('color',options.fix().color,'setColor',[1.0,1.0,1.0,1.0]);
+		it("requests prev time",()=>{
+			const testFeatureContext={};
+			vector.requestFeatureContext(testFeatureContext);
+			assert.deepEqual(testFeatureContext,{
+				hasPrevTime: true,
+				hasInputs: true,
+			});
+		});
+		it("has state vars for value and speed",()=>{
+			const featureContext=new FeatureContext(options.fix().debug);
+			featureContext.hasPrevTime=true; // animated
+			featureContext.hasInputs=true;
+			assert.deepEqual(vector.getJsInitLines(featureContext).data,[
+				"var colorR=0.500;",
+				"var colorRSpeed=-0.321;",
+			]);
+			assert.deepEqual(featureContext.getJsAfterInitLines().data,[
+				"canvas.addEventListener('mousemove',function(ev){",
+				"	var rect=this.getBoundingClientRect();",
+				"	var minColorRSpeed=-360;",
+				"	var maxColorRSpeed=+360;",
+				"	colorRSpeed=minColorRSpeed+(maxColorRSpeed-minColorRSpeed)*(ev.clientX-rect.left)/(rect.width-1);",
+				"});"
+			]);
+		});
+		/*
+		it("has loop with constant increment",()=>{
+			assert.deepEqual(vector.getJsLoopLines().data,[
+				"var colorR=Math.min(1.000,colorR+colorRSpeed*(time-startTime)/1000);", // TODO oops in other tests! how do we know if it's min or max?
+				"setColor(colorR,0.400,0.300,1.000);"
+			]);
+		});
+		*/
+	});
 });
