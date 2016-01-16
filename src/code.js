@@ -252,6 +252,18 @@ module.exports=function(options,i18n){
 				"}"
 			);
 		}
+		if (featureContext.pollsGamepad) {
+			innerLines.a(
+				"var gamepad;",
+				"var gamepads=(navigator.getGamepads ? navigator.getGamepads() : []);",
+				"for (var i=0;i<gamepads.length;i++) {",
+				"	if (gamepads[i]) {",
+				"		gamepad=gamepads[i];",
+				"		break;",
+				"	}",
+				"}"
+			);
+		}
 		features.forEach(feature=>{
 			innerLines.a(feature.getJsLoopLines(featureContext));
 		});

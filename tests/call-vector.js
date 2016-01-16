@@ -536,4 +536,38 @@ describe("CallVector",()=>{
 			]);
 		});
 	});
+	context("with gamepad input",()=>{
+		const options=new TestOptions({color:{
+			r:{value:0.5, input:'gamepad3'}, g:0.4, b:0.3, a:1.0
+		}});
+		const vector=new CallVector('color',options.fix().color,'setColor',[1.0,1.0,1.0,1.0]);
+		it("requests gamepad",()=>{
+			const testFeatureContext={};
+			vector.requestFeatureContext(testFeatureContext);
+			assert.deepEqual(testFeatureContext,{
+				pollsGamepad: true,
+				hasInputs: true,
+			});
+		});
+		it("has no state vars",()=>{
+			const featureContext=new FeatureContext(options.fix().debug);
+			featureContext.pollsGamepad=true;
+			featureContext.hasInputs=true;
+			assert.deepEqual(vector.getJsInitLines(featureContext).data,[
+			]);
+			assert.deepEqual(featureContext.getJsAfterInitLines().data,[
+			]);
+		});
+		it("has loop with constant increment",()=>{
+			assert.deepEqual(vector.getJsLoopLines().data,[
+				"var minColorR=0.000;",
+				"var maxColorR=1.000;",
+				"var colorR=0.500;",
+				"if (gamepad && gamepad.axes.length>3) {",
+				"	colorR=minColorR+(maxColorR-minColorR)*(gamepad.axes[3]+1)/2;",
+				"}",
+				"setColor(colorR,0.400,0.300,1.000);"
+			]);
+		});
+	});
 });

@@ -53,7 +53,7 @@ class Vector extends NumericFeature {
 	}
 	makeUpdatedComponentValue() {
 		return (v,c)=>{
-			if (v.speed!=0 || v.speed.input!='constant' || v.input instanceof Input.MouseMove) {
+			if (v.speed!=0 || v.speed.input!='constant' || v.input instanceof Input.MouseMove || v.input instanceof Input.Gamepad) {
 				return this.varNameC(c);
 			} else if (v.input=='slider') {
 				return "parseFloat(document.getElementById('"+this.htmlName+"."+c+"').value)";
@@ -79,6 +79,9 @@ class Vector extends NumericFeature {
 			}
 			if (v.input=='slider' || v.speed.input=='slider') {
 				featureContext.hasSliders=true;
+			}
+			if (v.input instanceof Input.Gamepad || v.speed.input instanceof Input.Gamepad) {
+				featureContext.pollsGamepad=true;
 			}
 			if (v.speed!=0 || v.speed.input!='constant') {
 				if (v.input=='constant' && v.speed.input=='constant') {
@@ -261,12 +264,12 @@ class Vector extends NumericFeature {
 		};
 		let needUpdate=false;
 		this.values.forEach((v,c)=>{
+			const varName=this.varNameC(c);
+			const htmlName=this.htmlName+"."+c;
 			if (v.speed!=0 || v.speed.input!='constant') {
 				needUpdate=true;
 				const fmt=fixOptHelp.makeFormatNumber(v);
 				const sfmt=fixOptHelp.makeFormatNumber(v.speed);
-				const varName=this.varNameC(c);
-				const htmlName=this.htmlName+"."+c;
 				let addSpeed;
 				if (v.speed.input=='slider') {
 					addSpeed="+parseFloat(document.getElementById('"+htmlName+".speed').value)";
@@ -301,6 +304,23 @@ class Vector extends NumericFeature {
 				if (featureContext && featureContext.debugOptions.animations) { // TODO always pass featureContext
 					lines.a(
 						"console.log('"+htmlName+" animation value:',"+varName+");"
+					);
+				}
+			} else if (v.input instanceof Input.Gamepad) {
+				needUpdate=true;
+				const fmt=fixOptHelp.makeFormatNumber(v);
+				const VarName=varName.charAt(0).toUpperCase()+varName.slice(1);
+				lines.a(
+					"var min"+VarName+"="+fmt(v.min)+";",
+					"var max"+VarName+"="+fmt(v.max)+";",
+					"var "+varName+"="+fmt(v)+";",
+					"if (gamepad && gamepad.axes.length>"+v.input.axis+") {",
+					"	"+varName+"=min"+VarName+"+(max"+VarName+"-min"+VarName+")*(gamepad.axes["+v.input.axis+"]+1)/2;",
+					"}"
+				);
+				if (featureContext && featureContext.debugOptions.inputs) { // TODO always pass featureContext
+					lines.a(
+						"console.log('"+htmlName+" input value:',"+varName+");"
 					);
 				}
 			}
