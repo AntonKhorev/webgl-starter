@@ -317,6 +317,17 @@ describe("Option.LiveFloat",()=>{
 			42
 		});
 	});
+	it("doesn't export speed when input is gamepad",()=>{
+		const options=new TestOptions;
+		const option=options.root.entries[0];
+		option.value=42;
+		option.addSpeed=true;
+		option.speed.value=23;
+		option.input='gamepad0';
+		assert.deepEqual(options.export(),{rotate:
+			{value:42, input:'gamepad0'}
+		});
+	});
 	it("fixes data",()=>{
 		const options=new TestOptions;
 		const option=options.root.entries[0];
@@ -341,7 +352,7 @@ describe("Option.LiveFloat",()=>{
 		assert.equal(fixed.rotate.speed.availableMax,+360);
 		assert.equal(fixed.rotate.speed.step,0.1);
 	});
-	it("doesn't fix export speed when addSpeed is not set",()=>{
+	it("doesn't fix speed when addSpeed is not set",()=>{
 		const options=new TestOptions;
 		const option=options.root.entries[0];
 		option.value=42;
@@ -350,6 +361,18 @@ describe("Option.LiveFloat",()=>{
 		option.addSpeed=false;
 		const fixed=options.fix();
 		assert.equal(fixed.rotate,42);
+		assert.equal(fixed.rotate.speed,0);
+	});
+	it("doesn't fix speed when input is gamepad",()=>{
+		const options=new TestOptions;
+		const option=options.root.entries[0];
+		option.value=42;
+		option.addSpeed=true;
+		option.speed.value=23;
+		option.input='gamepad0';
+		const fixed=options.fix();
+		assert.equal(fixed.rotate,42);
+		assert.equal(fixed.rotate.input,'gamepad0');
 		assert.equal(fixed.rotate.speed,0);
 	});
 });

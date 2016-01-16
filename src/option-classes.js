@@ -236,15 +236,17 @@ class LiveFloat extends LiveNumber {
 		this.updateInternalVisibility();
 	}
 	export() {
+		const notGamepad=['gamepad0','gamepad1','gamepad2','gamepad3'].indexOf(this.input)<0
 		const data={};
 		let speedData=null;
-		if (this.addSpeed) speedData=this.exportHelper(this.speed,{});
+		if (notGamepad && this.addSpeed) speedData=this.exportHelper(this.speed,{});
 		if (speedData!==null) data.speed=speedData;
 		return this.exportHelper(this,data);
 	}
 	fix() {
+		const notGamepad=['gamepad0','gamepad1','gamepad2','gamepad3'].indexOf(this.input)<0
 		const fixed=this.fixHelper(this);
-		if (this.addSpeed) {
+		if (notGamepad && this.addSpeed) {
 			fixed.speed=this.fixHelper(this.speed);
 		} else {
 			fixed.speed=this.fixToDefaultHelper(this.speed);
