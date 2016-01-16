@@ -36,7 +36,7 @@ class GlslVector extends Vector {
 		const results=[]; // [[isConstant,componentName]]
 		const showResult=result=>{
 			if (result[0]) {
-				return fixOptHelp.formatNumber(this.componentsByName[result[1]].value);
+				return fixOptHelp.formatNumber(this.componentsBySuffix[result[1]].value);
 			} else {
 				if (this.modeVector) {
 					if (result[1]==allSuffixString) {
@@ -45,18 +45,18 @@ class GlslVector extends Vector {
 						return this.varName+"."+result[1];
 					}
  				} else {
-					return this.componentsByName[result[1]].varName;
+					return this.componentsBySuffix[result[1]].varName;
  				}
 			}
 		};
 		const allSameConstant=()=>{
 			if (!results[0][0]) return false;
-			const cmp=fixOptHelp.formatNumber(this.componentsByName[results[0][1]].value);
-			return results.every(result=>(result[0] && fixOptHelp.formatNumber(this.componentsByName[result[1]].value)==cmp));
+			const cmp=fixOptHelp.formatNumber(this.componentsBySuffix[results[0][1]].value);
+			return results.every(result=>(result[0] && fixOptHelp.formatNumber(this.componentsBySuffix[result[1]].value)==cmp));
 		};
 		for (let j=0;j<selectedComponents.length;j++) {
 			const c=selectedComponents.charAt(j);
-			if (!this.componentsByName[c].variable) {
+			if (!this.componentsBySuffix[c].variable) {
 				results.push([true,c]);
 			} else {
 				if (this.modeVector && results.length>0) {

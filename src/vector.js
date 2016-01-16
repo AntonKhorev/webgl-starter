@@ -19,11 +19,11 @@ class Vector extends NumericFeature {
 		super();
 		this.name=name; // name with dots like "material.color", transformed into "materialColor" for js var names
 		this.components=[];
-		this.componentsByName={}; // TODO rename to components by suffix
+		this.componentsBySuffix={};
 		values.forEach((v,c)=>{
 			const component=new VectorComponent(v,name,c,wrapMode);
 			this.components.push(component);
-			this.componentsByName[c]=component;
+			this.componentsBySuffix[c]=component;
 		});
 		// { TODO extra ctor args
 		this.i18nId=name;
