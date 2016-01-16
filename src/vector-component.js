@@ -39,16 +39,21 @@ class VectorComponent {
 	usesPrevTime() {
 		return (this.value.input!='constant' && this.value.speed!=0) || this.value.speed.input!='constant';
 	}
-	get wrapped() {
+	get wrapReady() {
 		return (
-			this.wrapMode && this.hasSpeed() &&
+			this.wrapMode &&
 			this.value.min==this.value.availableMin && this.value.max==this.value.availableMax && // can wrap only if limits are not changed
-			this.value.min==-this.value.max && // currently can limit only by absolute value
-			this.value.input=='slider' // need to wrap only if input with state is used
+			this.value.min==-this.value.max // currently can limit only by absolute value
 		);
 	}
+	get wrapped() {
+		return this.hasSpeed() && this.wrapReady && this.value.input=='slider'; // need to wrap only if input with state is used
+	}
 	get clamped() {
-		return !this.wrapped && this.value.speed.input!='constant';
+		return !this.wrapped && this.value.speed.input!='constant' && !this.wrapReady;
+	}
+	get capped() {
+		return !this.wrapped && !this.clamped && this.hasSpeed() && !this.wrapReady;
 	}
 }
 

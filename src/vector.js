@@ -263,7 +263,7 @@ class Vector extends NumericFeature {
 		let needUpdate=false;
 		this.components.forEach(component=>{
 			const v=component.value;
-			if (v.speed!=0 || v.speed.input!='constant') {
+			if (component.hasSpeed()) {
 				needUpdate=true;
 				const fmt=fixOptHelp.makeFormatNumber(v);
 				const sfmt=fixOptHelp.makeFormatNumber(v.speed);
@@ -280,7 +280,7 @@ class Vector extends NumericFeature {
 					limitFn=x=>"wrap("+x+","+fmt(v.max)+")";
 				} else if (component.clamped) {
 					limitFn=x=>"clamp("+x+","+fmt(v.min)+","+fmt(v.max)+")";
-				} else if (v.speed.input=='constant') {
+				} else if (component.capped) {
 					limitFn=x=>"Math."+(v.speed<0?"max":"min")+"("+x+","+(v.speed<0?fmt(v.min):fmt(v.max))+")";
 				}
 				const incrementLine=(base,dt)=>component.varName+"="+limitFn(base+addSpeed+"*"+dt+"/1000")+";";

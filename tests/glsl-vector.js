@@ -497,7 +497,46 @@ describe("GlslVector",()=>{
 			]);
 		});
 	});
-	context("with controlled speed and wrap mode",()=>{
+	context("with no value input, constant speed and wrap mode",()=>{
+		const options=new TestOptions({foo:{
+			x:{speed:-3.456}
+		}});
+		const vector=new GlslVector('foo',options.fix().foo,true);
+		it("requests start time",()=>{
+			const testFeatureContext={};
+			vector.requestFeatureContext(testFeatureContext);
+			assert.deepEqual(testFeatureContext,{
+				hasStartTime: true,
+			});
+		});
+		it("has loop with no limit fn",()=>{
+			assert.deepEqual(vector.getJsLoopLines().data,[
+				"var fooX=+1.000-3.456*(time-startTime)/1000;",
+				"gl.uniform1f(fooXLoc,fooX);"
+			]);
+		});
+	});
+	context("with no value input, controlled speed and wrap mode",()=>{
+		const options=new TestOptions({foo:{
+			x:{speed:{input:'mousemovex'}}
+		}});
+		const vector=new GlslVector('foo',options.fix().foo,true);
+		it("requests prev time",()=>{
+			const testFeatureContext={};
+			vector.requestFeatureContext(testFeatureContext);
+			assert.deepEqual(testFeatureContext,{
+				hasPrevTime: true,
+				hasInputs: true,
+			});
+		});
+		it("has loop with no limit fn",()=>{
+			assert.deepEqual(vector.getJsLoopLines().data,[
+				"fooX+=fooXSpeed*(time-prevTime)/1000;",
+				"gl.uniform1f(fooXLoc,fooX);"
+			]);
+		});
+	});
+	context("with slider value input, controlled speed and wrap mode",()=>{
 		const options=new TestOptions({foo:{
 			x:{input:'slider', speed:{input:'mousemovex'}}
 		}});
@@ -512,7 +551,7 @@ describe("GlslVector",()=>{
 				hasInputs: true,
 			});
 		});
-		it("has loop with constant increment",()=>{
+		it("has loop with wrap()",()=>{
 			assert.deepEqual(vector.getJsLoopLines().data,[
 				"var fooXInput=document.getElementById('foo.x');",
 				"var fooX=wrap(parseFloat(fooXInput.value)+fooXSpeed*(time-prevTime)/1000,+4.000);",
