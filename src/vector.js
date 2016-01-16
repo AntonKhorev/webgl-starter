@@ -262,7 +262,7 @@ class Vector extends NumericFeature {
 				}
 				let limitFn;
 				if (v.speed.input=='constant') {
-					limitFn=x=>"Math."+(v.speed<0?"max":"min")+"("+(v.speed<0?fmt(v.min):fmt(v.max))+","+x+")";
+					limitFn=x=>"Math."+(v.speed<0?"max":"min")+"("+x+","+(v.speed<0?fmt(v.min):fmt(v.max))+")";
 				} else {
 					limitFn=x=>"clamp("+x+","+fmt(v.min)+","+fmt(v.max)+")";
 				}

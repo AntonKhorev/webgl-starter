@@ -251,7 +251,7 @@ describe("CallVector",()=>{
 		});
 		it("has loop with constant increment",()=>{
 			assert.deepEqual(vector.getJsLoopLines().data,[
-				"var colorR=Math.min(1.000,0.500+0.123*(time-startTime)/1000);",
+				"var colorR=Math.min(0.500+0.123*(time-startTime)/1000,1.000);",
 				"setColor(colorR,0.400,0.300,1.000);"
 			]);
 		});
@@ -278,7 +278,7 @@ describe("CallVector",()=>{
 		});
 		it("has loop with constant increment",()=>{
 			assert.deepEqual(vector.getJsLoopLines().data,[
-				"var colorR=Math.max(0.000,0.500-0.100*(time-startTime)/1000);",
+				"var colorR=Math.max(0.500-0.100*(time-startTime)/1000,0.000);",
 				"setColor(colorR,0.400,0.300,1.000);"
 			]);
 		});
@@ -300,7 +300,7 @@ describe("CallVector",()=>{
 		});
 		it("has loop with constant increment",()=>{
 			assert.deepEqual(vector.getJsLoopLines().data,[
-				"var colorR=Math.min(1.000,0.500+0.123*(time-startTime)/1000);",
+				"var colorR=Math.min(0.500+0.123*(time-startTime)/1000,1.000);",
 				"setColor(colorR,parseFloat(document.getElementById('color.g').value),0.300,1.000);"
 			]);
 		});
@@ -332,7 +332,7 @@ describe("CallVector",()=>{
 		it("has loop with time difference increment and slider update",()=>{
 			assert.deepEqual(vector.getJsLoopLines().data,[
 				"var colorRInput=document.getElementById('color.r');",
-				"var colorR=Math.min(1.000,parseFloat(colorRInput.value)+0.123*(time-prevTime)/1000);",
+				"var colorR=Math.min(parseFloat(colorRInput.value)+0.123*(time-prevTime)/1000,1.000);",
 				"colorRInput.value=colorR;",
 				"setColor(colorR,0.400,0.300,1.000);"
 			]);
@@ -367,7 +367,7 @@ describe("CallVector",()=>{
 		});
 		it("has loop with constant increment",()=>{
 			assert.deepEqual(vector.getJsLoopLines().data,[
-				"var colorR=Math.min(1.000,0.500+0.123*(time-startTime)/1000);",
+				"var colorR=Math.min(0.500+0.123*(time-startTime)/1000,1.000);",
 				"setColor(colorR,colorG,0.300,1.000);"
 			]);
 		});
@@ -401,7 +401,7 @@ describe("CallVector",()=>{
 		});
 		it("has loop with time difference increment",()=>{
 			assert.deepEqual(vector.getJsLoopLines().data,[
-				"colorR=Math.min(1.000,colorR+0.123*(time-prevTime)/1000);",
+				"colorR=Math.min(colorR+0.123*(time-prevTime)/1000,1.000);",
 				"setColor(colorR,0.400,0.300,1.000);"
 			]);
 		});
