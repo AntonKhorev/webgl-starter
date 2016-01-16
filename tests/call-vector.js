@@ -411,11 +411,12 @@ describe("CallVector",()=>{
 			r:{value:0.5, speed:{input:'slider'}}, g:0.4, b:0.3, a:1.0
 		}});
 		const vector=new CallVector('color',options.fix().color,'setColor',[1.0,1.0,1.0,1.0]);
-		it("requests prev time",()=>{
+		it("requests prev time, clamp fn and sliders",()=>{
 			const testFeatureContext={};
 			vector.requestFeatureContext(testFeatureContext);
 			assert.deepEqual(testFeatureContext,{
 				hasPrevTime: true,
+				hasClampFn: true,
 				hasSliders: true,
 				hasInputs: true,
 			});
@@ -423,6 +424,7 @@ describe("CallVector",()=>{
 		it("has state var for component with speed",()=>{
 			const featureContext=new FeatureContext(options.fix().debug);
 			featureContext.hasPrevTime=true; // animated
+			featureContext.hasClampFn=true;
 			featureContext.hasSliders=true;
 			featureContext.hasInputs=true;
 			assert.deepEqual(vector.getJsInitLines(featureContext).data,[
@@ -433,7 +435,7 @@ describe("CallVector",()=>{
 		});
 		it("has loop with time difference increment",()=>{
 			assert.deepEqual(vector.getJsLoopLines().data,[
-				"colorR=Math.min(1.000,colorR+parseFloat(document.getElementById('color.r.speed').value)*(time-prevTime)/1000);",
+				"colorR=clamp(colorR+parseFloat(document.getElementById('color.r.speed').value)*(time-prevTime)/1000,0.000,1.000);",
 				"setColor(colorR,0.400,0.300,1.000);"
 			]);
 		});
@@ -443,11 +445,12 @@ describe("CallVector",()=>{
 			r:{value:0.5, input:'slider', speed:{input:'slider'}}, g:0.4, b:0.3, a:1.0
 		}});
 		const vector=new CallVector('color',options.fix().color,'setColor',[1.0,1.0,1.0,1.0]);
-		it("requests prev time",()=>{
+		it("requests prev time, clamp fn and sliders",()=>{
 			const testFeatureContext={};
 			vector.requestFeatureContext(testFeatureContext);
 			assert.deepEqual(testFeatureContext,{
 				hasPrevTime: true,
+				hasClampFn: true,
 				hasSliders: true,
 				hasInputs: true,
 			});
@@ -455,6 +458,7 @@ describe("CallVector",()=>{
 		it("has no state vars",()=>{
 			const featureContext=new FeatureContext(options.fix().debug);
 			featureContext.hasPrevTime=true; // animated
+			featureContext.hasClampFn=true;
 			featureContext.hasSliders=true;
 			featureContext.hasInputs=true;
 			assert.deepEqual(vector.getJsInitLines(featureContext).data,[
@@ -465,7 +469,7 @@ describe("CallVector",()=>{
 		it("has loop with time difference increment",()=>{
 			assert.deepEqual(vector.getJsLoopLines().data,[
 				"var colorRInput=document.getElementById('color.r');",
-				"var colorR=Math.min(1.000,parseFloat(colorRInput.value)+parseFloat(document.getElementById('color.r.speed').value)*(time-prevTime)/1000);",
+				"var colorR=clamp(parseFloat(colorRInput.value)+parseFloat(document.getElementById('color.r.speed').value)*(time-prevTime)/1000,0.000,1.000);",
 				"colorRInput.value=colorR;",
 				"setColor(colorR,0.400,0.300,1.000);"
 			]);
@@ -481,6 +485,7 @@ describe("CallVector",()=>{
 		it("has input value logging",()=>{
 			const featureContext=new FeatureContext(options.fix().debug);
 			featureContext.hasPrevTime=true; // animated
+			featureContext.hasClampFn=true;
 			featureContext.hasSliders=true;
 			featureContext.hasInputs=true;
 			assert.deepEqual(vector.getJsInitLines(featureContext).data,[
@@ -497,17 +502,19 @@ describe("CallVector",()=>{
 			r:{value:0.5, speed:{value:-0.321, input:'mousemovex'}}, g:0.4, b:0.3, a:1.0
 		}});
 		const vector=new CallVector('color',options.fix().color,'setColor',[1.0,1.0,1.0,1.0]);
-		it("requests prev time",()=>{
+		it("requests prev time and clamp fn",()=>{
 			const testFeatureContext={};
 			vector.requestFeatureContext(testFeatureContext);
 			assert.deepEqual(testFeatureContext,{
 				hasPrevTime: true,
+				hasClampFn: true,
 				hasInputs: true,
 			});
 		});
 		it("has state vars for value and speed",()=>{
 			const featureContext=new FeatureContext(options.fix().debug);
 			featureContext.hasPrevTime=true; // animated
+			featureContext.hasClampFn=true;
 			featureContext.hasInputs=true;
 			assert.deepEqual(vector.getJsInitLines(featureContext).data,[
 				"var colorR=0.500;",
@@ -522,13 +529,11 @@ describe("CallVector",()=>{
 				"});"
 			]);
 		});
-		/*
 		it("has loop with constant increment",()=>{
 			assert.deepEqual(vector.getJsLoopLines().data,[
-				"var colorR=Math.min(1.000,colorR+colorRSpeed*(time-startTime)/1000);", // TODO oops in other tests! how do we know if it's min or max?
+				"var colorR=clamp(colorR+colorRSpeed*(time-startTime)/1000,0.000,1.000);",
 				"setColor(colorR,0.400,0.300,1.000);"
 			]);
 		});
-		*/
 	});
 });

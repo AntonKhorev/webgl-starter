@@ -14,6 +14,7 @@ class FeatureContext {
 		this.hasStartTime=false;
 		this.hasPrevTime=false;
 		this.pollsGamepad=false;
+		this.hasClampFn=false;
 	}
 	get hasTime() {
 		return this.hasStartTime || this.hasPrevTime;

@@ -87,6 +87,9 @@ class Vector extends NumericFeature {
 					featureContext.hasPrevTime=true;
 				}
 			}
+			if (v.speed.input!='constant') {
+				featureContext.hasClampFn=true;
+			}
 		});
 	}
 	getHtmlControlMessageLines(i18n) {
@@ -257,8 +260,13 @@ class Vector extends NumericFeature {
 				if (v.speed.input=='slider') {
 					addSpeed="+parseFloat(document.getElementById('"+htmlName+".speed').value)";
 				}
-				const incrementLine=(base,dt)=>
-					varName+"=Math."+(v.speed<0?"max":"min")+"("+(v.speed<0?fmt(v.min):fmt(v.max))+","+base+addSpeed+"*"+dt+"/1000);";
+				let limitFn;
+				if (v.speed.input=='constant') {
+					limitFn=x=>"Math."+(v.speed<0?"max":"min")+"("+(v.speed<0?fmt(v.min):fmt(v.max))+","+x+")";
+				} else {
+					limitFn=x=>"clamp("+x+","+fmt(v.min)+","+fmt(v.max)+")";
+				}
+				const incrementLine=(base,dt)=>varName+"="+limitFn(base+addSpeed+"*"+dt+"/1000")+";";
 				if (v.input=='slider') {
 					const inputVarName=varName+"Input";
 					lines.a(

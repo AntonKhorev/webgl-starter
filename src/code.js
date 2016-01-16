@@ -245,6 +245,13 @@ module.exports=function(options,i18n){
 	*/
 	function getJsLoopLines() {
 		const innerLines=new Lines;
+		if (featureContext.hasClampFn) {
+			innerLines.a(
+				"function clamp(x,min,max) {",
+				"	return Math.min(Math.max(x,min),max);",
+				"}"
+			);
+		}
 		features.forEach(feature=>{
 			innerLines.a(feature.getJsLoopLines(featureContext));
 		});
