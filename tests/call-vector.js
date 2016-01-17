@@ -559,7 +559,7 @@ describe("CallVector",()=>{
 			assert.deepEqual(featureContext.getJsAfterInitLines().data,[
 			]);
 		});
-		it("has loop with constant increment",()=>{
+		it("has loop with gamepad",()=>{
 			assert.deepEqual(vector.getJsLoopLines().data,[
 				"var minColorR=0.000;",
 				"var maxColorR=1.000;",
@@ -594,7 +594,7 @@ describe("CallVector",()=>{
 			assert.deepEqual(featureContext.getJsAfterInitLines().data,[
 			]);
 		});
-		it("has loop with constant increment",()=>{
+		it("has loop with gamepad",()=>{
 			assert.deepEqual(vector.getJsLoopLines().data,[
 				"var minColorR=0.000;",
 				"var maxColorR=1.000;",
@@ -603,6 +603,45 @@ describe("CallVector",()=>{
 				"	colorR=minColorR+(maxColorR-minColorR)*(gamepad.axes[3]+1)/2;",
 				"}",
 				"setColor(colorR,parseFloat(document.getElementById('color.g').value),0.300,1.000);"
+			]);
+		});
+	});
+	context("with gamepad and mousemove input",()=>{
+		const options=new TestOptions({color:{
+			r:{value:0.5, input:'gamepad3'}, g:{value:0.4, input:'mousemovex'}, b:0.3, a:1.0
+		}});
+		const vector=new CallVector('color',options.fix().color,'setColor',[1.0,1.0,1.0,1.0]);
+		it("requests gamepad",()=>{
+			const testFeatureContext={};
+			vector.requestFeatureContext(testFeatureContext);
+			assert.deepEqual(testFeatureContext,{
+				pollsGamepad: true,
+				hasInputs: true,
+			});
+		});
+		it("has state var for mousemove component",()=>{
+			const featureContext=new FeatureContext(options.fix().debug);
+			featureContext.pollsGamepad=true; // animated
+			featureContext.hasInputs=true;
+			assert.deepEqual(vector.getJsInitLines(featureContext).data,[
+				"var colorG=0.400;"
+			]);
+			assert.deepEqual(featureContext.getJsAfterInitLines().data,[
+				"canvas.addEventListener('mousemove',function(ev){",
+				"	var rect=this.getBoundingClientRect();",
+				"	colorG=(ev.clientX-rect.left)/(rect.width-1);",
+				"});"
+			]);
+		});
+		it("has loop with gamepad",()=>{
+			assert.deepEqual(vector.getJsLoopLines().data,[
+				"var minColorR=0.000;",
+				"var maxColorR=1.000;",
+				"var colorR=0.500;",
+				"if (gamepad && gamepad.axes.length>3) {",
+				"	colorR=minColorR+(maxColorR-minColorR)*(gamepad.axes[3]+1)/2;",
+				"}",
+				"setColor(colorR,colorG,0.300,1.000);"
 			]);
 		});
 	});

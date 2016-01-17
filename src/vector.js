@@ -185,7 +185,7 @@ class Vector extends NumericFeature {
 		const someGamepads=this.components.some(component=>component.hasInputClass(Input.Gamepad));
 		this.components.forEach(component=>{
 			if (
-				(component.value.input instanceof Input.MouseMove && (someValueSliders || someSpeeds)) || // mouse input required elsewhere
+				(component.value.input instanceof Input.MouseMove && (someValueSliders || someSpeeds || someGamepads)) || // mouse input required elsewhere
 				(component.value.speed.input!='constant' && component.value.input!='slider') // variable speed and no value input capable of storing the state
 			) {
 				lines.a(
@@ -211,7 +211,7 @@ class Vector extends NumericFeature {
 			getSliderListenerLines(!someSpeeds && !someGamepads)
 		);
 		if (this.components.some(component=>(component.value.input instanceof Input.MouseMove))) {
-			if (!someSpeeds && !someValueSliders) {
+			if (!someSpeeds && !someValueSliders && !someGamepads) {
 				lines.a(
 					this.getJsUpdateLines(this.makeInitialComponentValue())
 				);
@@ -220,18 +220,18 @@ class Vector extends NumericFeature {
 			this.components.forEach(component=>{
 				if (component.value.input instanceof Input.MouseMove) {
 					const fmt=fixOptHelp.makeFormatNumber(component.value);
-					((!someSpeeds && !someValueSliders) ? entry.minMaxVarFloat : entry.minMaxFloat)(
+					((!someSpeeds && !someValueSliders && !someGamepads) ? entry.minMaxVarFloat : entry.minMaxFloat)(
 						component.value.input,component.varName,
 						fmt(component.value.min),
 						fmt(component.value.max)
 					);
 					entry.log("console.log('"+component.name+" input value:',"+component.varName+");");
-					if (!someSpeeds && !someValueSliders) {
+					if (!someSpeeds && !someValueSliders && !someGamepads) {
 						this.addPostToListenerEntryForComponent(entry,component);
 					}
 				}
 			});
-			if (!someSpeeds) {
+			if (!someSpeeds && !someGamepads) {
 				if (!someValueSliders) {
 					this.addPostToListenerEntryAfterComponents(entry,this.makeUpdatedComponentValue());
 				} else {
