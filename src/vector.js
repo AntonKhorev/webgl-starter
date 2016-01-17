@@ -182,6 +182,7 @@ class Vector extends NumericFeature {
 		}
 		const someSpeeds=this.components.some(component=>component.hasSpeed());
 		const someValueSliders=this.components.some(component=>component.value.input=='slider');
+		const someGamepads=this.components.some(component=>component.hasInputClass(Input.Gamepad));
 		this.components.forEach(component=>{
 			if (
 				(component.value.input instanceof Input.MouseMove && (someValueSliders || someSpeeds)) || // mouse input required elsewhere
@@ -197,7 +198,7 @@ class Vector extends NumericFeature {
 				);
 			}
 		});
-		if (!someSpeeds && someValueSliders) {
+		if (!someSpeeds && someValueSliders && !someGamepads) {
 			lines.a(
 				this.getJsUpdateLines(this.makeUpdatedComponentValue()).wrap(
 					"function "+this.updateFnName+"() {",
@@ -207,7 +208,7 @@ class Vector extends NumericFeature {
 			);
 		}
 		lines.a(
-			getSliderListenerLines(!someSpeeds)
+			getSliderListenerLines(!someSpeeds && !someGamepads)
 		);
 		if (this.components.some(component=>(component.value.input instanceof Input.MouseMove))) {
 			if (!someSpeeds && !someValueSliders) {
