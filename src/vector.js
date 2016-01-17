@@ -262,8 +262,29 @@ class Vector extends NumericFeature {
 			}
 		};
 		let needUpdate=false;
+		const writeGamepad=(component,v,dotSuffix,varSuffix)=>{
+			if (v.input instanceof Input.Gamepad) {
+				needUpdate=true;
+				const fmt=fixOptHelp.makeFormatNumber(v);
+				lines.a(
+					"var "+component.minVarName+varSuffix+"="+fmt(v.min)+";",
+					"var "+component.maxVarName+varSuffix+"="+fmt(v.max)+";",
+					"var "+component.varName+varSuffix+"="+fmt(v)+";",
+					"if (gamepad && gamepad.axes.length>"+v.input.axis+") {",
+					"	"+component.varName+varSuffix+"="+component.minVarName+varSuffix+"+("+component.maxVarName+varSuffix+"-"+component.minVarName+varSuffix+")*(gamepad.axes["+v.input.axis+"]+1)/2;",
+					"}"
+				);
+				if (featureContext && featureContext.debugOptions.inputs) { // TODO always pass featureContext
+					lines.a(
+						"console.log('"+component.name+dotSuffix+" input value:',"+component.varName+varSuffix+");"
+					);
+				}
+			}
+		};
 		this.components.forEach(component=>{
 			const v=component.value;
+			writeGamepad(component,v,'','');
+			writeGamepad(component,v.speed,'.speed','Speed');
 			if (component.hasSpeed()) {
 				needUpdate=true;
 				const fmt=fixOptHelp.makeFormatNumber(v);
@@ -271,7 +292,7 @@ class Vector extends NumericFeature {
 				let addSpeed;
 				if (v.speed.input=='slider') {
 					addSpeed="+parseFloat(document.getElementById('"+component.name+".speed').value)";
-				} else if (v.speed.input instanceof Input.MouseMove) {
+				} else if (v.speed.input instanceof Input.MouseMove || v.speed.input instanceof Input.Gamepad) {
 					addSpeed="+"+component.varNameSpeed;
 				} else {
 					addSpeed=add(sfmt(v.speed));
@@ -309,22 +330,6 @@ class Vector extends NumericFeature {
 				if (featureContext && featureContext.debugOptions.animations) { // TODO always pass featureContext
 					lines.a(
 						"console.log('"+component.name+" animation value:',"+component.varName+");"
-					);
-				}
-			} else if (v.input instanceof Input.Gamepad) {
-				needUpdate=true;
-				const fmt=fixOptHelp.makeFormatNumber(v);
-				lines.a(
-					"var "+component.minVarName+"="+fmt(v.min)+";",
-					"var "+component.maxVarName+"="+fmt(v.max)+";",
-					"var "+component.varName+"="+fmt(v)+";",
-					"if (gamepad && gamepad.axes.length>"+v.input.axis+") {",
-					"	"+component.varName+"="+component.minVarName+"+("+component.maxVarName+"-"+component.minVarName+")*(gamepad.axes["+v.input.axis+"]+1)/2;",
-					"}"
-				);
-				if (featureContext && featureContext.debugOptions.inputs) { // TODO always pass featureContext
-					lines.a(
-						"console.log('"+component.name+" input value:',"+component.varName+");"
 					);
 				}
 			}

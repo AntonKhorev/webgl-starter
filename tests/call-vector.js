@@ -645,4 +645,44 @@ describe("CallVector",()=>{
 			]);
 		});
 	});
+	context("with gamepad speed input",()=>{
+		const options=new TestOptions({color:{
+			r:{value:0.5, speed:{value:+0.321, input:'gamepad3'}}, g:0.4, b:0.3, a:1.0
+		}});
+		const vector=new CallVector('color',options.fix().color,'setColor',[1.0,1.0,1.0,1.0]);
+		it("requests prev time, clamp fn and gamepad",()=>{
+			const testFeatureContext={};
+			vector.requestFeatureContext(testFeatureContext);
+			assert.deepEqual(testFeatureContext,{
+				hasPrevTime: true,
+				hasClampFn: true,
+				pollsGamepad: true,
+				hasInputs: true,
+			});
+		});
+		it("has state var for value",()=>{
+			const featureContext=new FeatureContext(options.fix().debug);
+			featureContext.hasPrevTime=true;
+			featureContext.hasClampFn=true;
+			featureContext.pollsGamepad=true;
+			featureContext.hasInputs=true;
+			assert.deepEqual(vector.getJsInitLines(featureContext).data,[
+				"var colorR=0.500;",
+			]);
+			assert.deepEqual(featureContext.getJsAfterInitLines().data,[
+			]);
+		});
+		it("has loop with gamepad",()=>{
+			assert.deepEqual(vector.getJsLoopLines().data,[
+				"var minColorRSpeed=-1.000;",
+				"var maxColorRSpeed=+1.000;",
+				"var colorRSpeed=+0.321;",
+				"if (gamepad && gamepad.axes.length>3) {",
+				"	colorRSpeed=minColorRSpeed+(maxColorRSpeed-minColorRSpeed)*(gamepad.axes[3]+1)/2;",
+				"}",
+				"colorR=clamp(colorR+colorRSpeed*(time-prevTime)/1000,0.000,1.000);",
+				"setColor(colorR,0.400,0.300,1.000);"
+			]);
+		});
+	});
 });
