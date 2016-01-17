@@ -8,7 +8,6 @@ class Base {
 	}
 	enter() {
 		const entry={
-			state: [],
 			pre: [],
 			cond: null,
 			log: [],
@@ -24,7 +23,6 @@ class Base {
 			};
 		}
 		const proxy={
-			state: makePushArgs(entry.state),
 			pre: makePushArgs(entry.pre),
 			cond: function(cond){
 				entry.cond=cond;
@@ -45,7 +43,6 @@ class Base {
 		return line;
 	}
 	write(haveToUpdateCanvas,haveToLogInput) {
-		const outerLines=new Lines;
 		const innerLinesGraph={};
 		const innerLinesRoot=[];
 		let innerLinesPrev=null;
@@ -124,7 +121,6 @@ class Base {
 			return new Lines(lines);
 		};
 		this.entries.forEach((entry)=>{
-			outerLines.a(entry.state);
 			entry.pre.forEach(line=>{
 				addInnerLine(line,null);
 			});
@@ -152,27 +148,23 @@ class Base {
 		if (innerLines.data.length==1) {
 			const match=/^(\w+)\(\);$/.exec(innerLines.data[0]);
 			if (match) {
-				return outerLines.a(
-					this.wrapCall(
-						new Lines(
-							br[0]+match[1]+br[1]
-						)
+				return this.wrapCall(
+					new Lines(
+						br[0]+match[1]+br[1]
 					)
 				);
 			}
 			// TODO what if no match?
 		}
 		if (innerLines.data.length) {
-			return outerLines.a(
-				this.wrapCall(
-					innerLines.wrap(
-						br[0]+"function("+this.bracketFnArg()+"){",
-						"}"+br[1]
-					)
+			return this.wrapCall(
+				innerLines.wrap(
+					br[0]+"function("+this.bracketFnArg()+"){",
+					"}"+br[1]
 				)
 			);
 		} else {
-			return outerLines;
+			return new Lines;
 		}
 	}
 }
