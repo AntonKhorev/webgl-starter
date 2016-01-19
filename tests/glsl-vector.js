@@ -4,7 +4,7 @@ const assert=require('assert');
 const Options=require('../src/options.js');
 const FeatureContext=require('../src/feature-context.js');
 const GlslVector=require('../src/glsl-vector.js');
-/*
+
 describe("GlslVector",()=>{
 	class TestOptions extends Options {
 		get entriesDescription() {
@@ -561,4 +561,3 @@ describe("GlslVector",()=>{
 		});
 	});
 });
-*/

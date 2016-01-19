@@ -8,12 +8,12 @@ function toCamelCase(s) {
 }
 
 class VectorComponent {
-	constructor(value,vectorName,suffix,wrapMode) {
+	constructor(value,vectorName,wrapMode) {
 		this.value=value; // value from options.fix()
 		this.vectorName=vectorName;
-		this.suffix=suffix; // usually one letter
 		this.wrapMode=!!wrapMode; // if true and components min/max == their default values, use wrap() instead of clamp()
 	}
+	get suffix() { return this.value.name; }
 	get name() { return this.vectorName+'.'+this.suffix; }
 	get varName() { return toCamelCase(this.name); }
 	get varNameLoc() { return this.varName+'Loc'; }

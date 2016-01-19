@@ -35,7 +35,7 @@ function makeFormatNumber(contextNumber) {
 	const prec=(splitStep.length>1 ? splitStep[1].length : 0);
 	const width=lead+prec+(prec>0);
 	const spaces='          '; // http://stackoverflow.com/q/10073699
-	const fmt=n=>(spaces+n.toFixed(prec)).slice(-width);
+	const fmt=n=>(spaces+(+n).toFixed(prec)).slice(-width);
 	if (nonnegativeLimits) {
 		return n=>fmt(n);
 	} else {
