@@ -9,7 +9,7 @@ const Group=imports.Group;
 // abstract classes
 
 class LiveNumber extends RangeInput {
-	constructor(name,data,isVisible,updateCallback,fullName,availableRange,defaultValue) {
+	constructor(name,availableRange,defaultValue,data,fullName,isVisible,updateCallback) {
 		let dataValue,dataMin,dataMax,dataInput;
 		if (typeof data == 'object') {
 			dataValue=data.value;
@@ -19,7 +19,7 @@ class LiveNumber extends RangeInput {
 		} else {
 			dataValue=data;
 		}
-		super(name,dataValue,isVisible,updateCallback,fullName,availableRange,defaultValue);
+		super(name,availableRange,defaultValue,dataValue,fullName,isVisible,updateCallback);
 		this._min=(dataMin!==undefined)?dataMin:this.availableMin;
 		this._max=(dataMax!==undefined)?dataMax:this.availableMax;
 		this._input=(dataInput!==undefined)?dataInput:'constant';
@@ -116,7 +116,7 @@ class CanvasLiveInt extends LiveInt {
 }
 
 class LiveFloat extends LiveNumber {
-	constructor(name,data,isVisible,updateCallback,fullName,availableRange,defaultValue) {
+	constructor(name,availableRange,defaultValue,data,fullName,isVisible,updateCallback) {
 		let dataSpeedValue,dataSpeedMin,dataSpeedMax,dataSpeedInput;
 		if (typeof data == 'object') {
 			if (typeof data.speed == 'object') {
@@ -128,7 +128,7 @@ class LiveFloat extends LiveNumber {
 				dataSpeedValue=data.speed;
 			}
 		}
-		super(name,data,isVisible,updateCallback,fullName,availableRange,defaultValue);
+		super(...arguments);
 		this._speedValue=(dataSpeedValue!==undefined)?dataSpeedValue:0;
 		this._speedAvailableMin=availableRange[2]; this._speedMin=(dataSpeedMin!==undefined)?dataSpeedMin:this._speedAvailableMin;
 		this._speedAvailableMax=availableRange[3]; this._speedMax=(dataSpeedMax!==undefined)?dataSpeedMax:this._speedAvailableMax;
@@ -256,14 +256,14 @@ class LiveFloat extends LiveNumber {
 }
 
 class LiveColor extends Group {
-	constructor(name,data,isVisible,updateCallback,fullName,colorComponentDefaultValues) {
+	constructor(name,colorComponentDefaultValues,_,data,fullName,isVisible,updateCallback) {
 		const cs='rgba';
-		super(name,undefined,isVisible,updateCallback,fullName,colorComponentDefaultValues.map((defaultValue,i)=>{
+		super(name,colorComponentDefaultValues.map((defaultValue,i)=>{
 			const c=cs.charAt(i);
 			let subData;
 			if (typeof data == 'object') subData=data[c];
-			return new LiveFloat(c,subData,()=>true,updateCallback,fullName+'.'+c,[0,1,-1,+1],defaultValue);
-		}));
+			return new LiveFloat(c,[0,1,-1,+1],defaultValue,subData,fullName+'.'+c,()=>true,updateCallback);
+		}),undefined,undefined,fullName,isVisible,updateCallback);
 	}
 }
 

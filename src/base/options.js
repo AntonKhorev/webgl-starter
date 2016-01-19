@@ -2,7 +2,7 @@
 
 class Options {
 	constructor(data) { // data = imported values, import is done in ctor to avoid calling updateCallback later
-		this.updateCallback=null; // general update callback for stuff like regenerating the code
+		this.updateCallback=undefined; // general update callback for stuff like regenerating the code
 		const simpleUpdateCallback=()=>{
 			if (this.updateCallback) this.updateCallback();
 		};
@@ -41,9 +41,7 @@ class Options {
 					throw new Error("unknown argument type");
 				}
 			}
-			const ctorArgs=[null,name,data,()=>true,simpleUpdateCallback,fullName,contents,defaultValue];
-			const option=new (Function.prototype.bind.apply(Option[className],ctorArgs));
-			return option;
+			return new Option[className](name,contents,defaultValue,data,fullName,()=>true,simpleUpdateCallback);
 		};
 		const makeEntry=(description,fullNamePath,data)=>{
 			const className=description[0];
@@ -121,8 +119,7 @@ class Options {
 				}
 				if (this.updateCallback) this.updateCallback();
 			};
-			const ctorArgs=[null,name,data,isVisible,updateCallback,fullName,contents,defaultValueOrConstructors];
-			const option=new (Function.prototype.bind.apply(Option[className],ctorArgs));
+			const option=new Option[className](name,contents,defaultValueOrConstructors,data,fullName,isVisible,updateCallback);
 			optionByFullName[fullName]=option;
 			for (let testName in visibilityData) {
 				if (optionsWithVisibilityAffectedByFullName[testName]===undefined) {
@@ -133,12 +130,12 @@ class Options {
 			return option;
 		};
 		this.root=new Option.Root(
-			null,data,()=>true,simpleUpdateCallback,null,this.entriesDescription.map(description=>{
+			null,this.entriesDescription.map(description=>{
 				const subName=description[1];
 				let subData;
 				if (typeof data == 'object') subData=data[subName];
 				return makeEntry(description,'',subData);
-			})
+			}),undefined,data,null,()=>true,simpleUpdateCallback
 		);
 	}
 	// methods to be redefined by subclasses

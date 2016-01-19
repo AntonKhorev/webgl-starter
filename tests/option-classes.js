@@ -392,6 +392,7 @@ describe("Option.LiveColor",()=>{
 		const options=new TestOptions;
 		const option=options.root.entries[0];
 		assert.equal(option.entries.length,3);
+		assert.equal(option.fullName,'color');
 		const r=option.entries[0];
 		assert.equal(r.value,1);
 		assert.equal(r.speed.value,0);

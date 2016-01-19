@@ -1,9 +1,15 @@
 'use strict';
 
+// constructors typically called from Options class
+// to call them manually, use the following args:
+//	name,contents/availableValues,defaultValue,data - similar to entriesDescription()
+// the rest of arguments' order is not settled, don't use them
+// 	+ TODO not sure about data
+
 // abstract classes
 
 class Base {
-	constructor(name,_,isVisible,updateCallback,fullName) {
+	constructor(name,_1,_2,_3,fullName,isVisible,updateCallback) {
 		this.name=name;
 		this.isVisible=isVisible;
 		this.updateCallback=updateCallback;
@@ -23,8 +29,8 @@ class Base {
 }
 
 class Input extends Base {
-	constructor(name,data,isVisible,updateCallback,fullName,availableValues,defaultValue) {
-		super(name,data,isVisible,updateCallback,fullName);
+	constructor(name,availableValues,defaultValue,data,fullName,isVisible,updateCallback) {
+		super(...arguments);
 		if (defaultValue!==undefined) {
 			this.defaultValue=defaultValue;
 		} else {
@@ -52,23 +58,23 @@ class Input extends Base {
 }
 
 class FactorInput extends Input {
-	constructor(name,data,isVisible,updateCallback,fullName,availableValues,defaultValue) {
-		super(name,data,isVisible,updateCallback,fullName,availableValues,defaultValue);
+	constructor(name,availableValues,defaultValue,data,fullName,isVisible,updateCallback) {
+		super(...arguments);
 		this.availableValues=availableValues;
 	}
 }
 
 class RangeInput extends Input {
-	constructor(name,data,isVisible,updateCallback,fullName,availableRange,defaultValue) {
-		super(name,data,isVisible,updateCallback,fullName,availableRange,defaultValue);
+	constructor(name,availableRange,defaultValue,data,fullName,isVisible,updateCallback) {
+		super(...arguments);
 		this.availableMin=availableRange[0];
 		this.availableMax=availableRange[1];
 	}
 }
 
 class Collection extends Base {
-	constructor(name,_,isVisible,updateCallback,fullName,entries) {
-		super(name,_,isVisible,updateCallback,fullName);
+	constructor(name,entries,_1,_2,fullName,isVisible,updateCallback) {
+		super(...arguments);
 		this.entries=entries;
 	}
 	export() {
@@ -102,8 +108,8 @@ class Collection extends Base {
 // concrete classes
 
 class Checkbox extends Input {
-	constructor(name,data,isVisible,updateCallback,fullName,_,defaultValue) {
-		super(name,data,isVisible,updateCallback,fullName,_,!!defaultValue);
+	constructor(name,_,defaultValue,data,fullName,isVisible,updateCallback) {
+		super(name,undefined,!!defaultValue,data,fullName,isVisible,updateCallback);
 	}
 }
 
@@ -117,8 +123,8 @@ class Group extends Collection {
 }
 
 class Array extends Base {
-	constructor(name,data,isVisible,updateCallback,fullName,availableTypes,availableConstructors) {
-		super(name,undefined,isVisible,updateCallback,fullName);
+	constructor(name,availableTypes,availableConstructors,data,fullName,isVisible,updateCallback) {
+		super(name,undefined,undefined,undefined,fullName,isVisible,updateCallback);
 		this.availableTypes=availableTypes;
 		this.availableConstructors=availableConstructors;
 		this._entries=[];

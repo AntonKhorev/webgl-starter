@@ -38,6 +38,10 @@ describe("Base/Options",()=>{
 			const options=new Options;
 			assert(options.root instanceof Option.Root);
 		});
+		it("root is visible",()=>{
+			const options=new Options;
+			assert(options.root.isVisible());
+		});
 		it("exports data",()=>{
 			const options=new Options;
 			assert.deepEqual(options.export(),{
