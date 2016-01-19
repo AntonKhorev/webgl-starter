@@ -4,7 +4,7 @@ const assert=require('assert');
 const Options=require('../src/options.js');
 const FeatureContext=require('../src/feature-context.js');
 const CallVector=require('../src/call-vector.js');
-
+/*
 describe("CallVector",()=>{
 	class TestOptions extends Options {
 		get entriesDescription() {
@@ -23,7 +23,7 @@ describe("CallVector",()=>{
 		const options=new TestOptions({color:{
 			r:0.2, g:0.3, b:0.4, a:0.5
 		}});
-		const vector=new CallVector('color',options.fix().color,'do.something',[1.0,1.0,1.0,1.0]);
+		const vector=new CallVector('color',options.fix().color.entries,'do.something',[1.0,1.0,1.0,1.0]);
 		it("makes a call during init",()=>{
 			const featureContext=new FeatureContext(options.fix().debug);
 			featureContext.hasStartTime=true; // animated
@@ -40,7 +40,7 @@ describe("CallVector",()=>{
 	});
 	context("with constant components equal to default value",()=>{
 		const options=new TestOptions;
-		const vector=new CallVector('color',options.fix().color,'do.something',[1.0,1.0,1.0,1.0]);
+		const vector=new CallVector('color',options.fix().color.entries,'do.something',[1.0,1.0,1.0,1.0]);
 		it("doesn't make a call during init",()=>{
 			const featureContext=new FeatureContext(options.fix().debug);
 			featureContext.hasStartTime=true; // animated
@@ -52,7 +52,7 @@ describe("CallVector",()=>{
 		const options=new TestOptions({color:{
 			r:{value:0.2,input:'slider'}, g:0.3, b:0.4, a:0.5
 		}});
-		const vector=new CallVector('color',options.fix().color,'up',[0.0,0.0,0.0,0.0]);
+		const vector=new CallVector('color',options.fix().color.entries,'up',[0.0,0.0,0.0,0.0]);
 		it("requests sliders",()=>{
 			const testFeatureContext={};
 			vector.requestFeatureContext(testFeatureContext);
@@ -85,7 +85,7 @@ describe("CallVector",()=>{
 		const options=new TestOptions({color:{
 			r:{value:0.2,input:'slider'}, g:0.3, b:{value:0.4,input:'slider'}, a:1.0
 		}});
-		const vector=new CallVector('color',options.fix().color,'up',[0.0,0.0,0.0,0.0]);
+		const vector=new CallVector('color',options.fix().color.entries,'up',[0.0,0.0,0.0,0.0]);
 		it("returns interface with update fn and 2 slider listeners",()=>{
 			const featureContext=new FeatureContext(options.fix().debug);
 			featureContext.hasStartTime=true; // animated
@@ -110,7 +110,7 @@ describe("CallVector",()=>{
 		const options=new TestOptions({color:{
 			r:{value:0.2,input:'slider'}, g:{value:0.3,input:'slider'}, b:{value:0.4,input:'slider'}, a:{value:1.0,input:'slider'}
 		}});
-		const vector=new CallVector('color',options.fix().color,'obj.up',[0.0,0.0,0.0,0.0]);
+		const vector=new CallVector('color',options.fix().color.entries,'obj.up',[0.0,0.0,0.0,0.0]);
 		it("returns interface with map update fn and query slider listener",()=>{
 			const featureContext=new FeatureContext(options.fix().debug);
 			featureContext.hasStartTime=true; // animated
@@ -133,7 +133,7 @@ describe("CallVector",()=>{
 		const options=new TestOptions({color:{
 			r:{value:0.2,input:'mousemovex'}, g:0.3, b:0.4, a:1.0
 		}});
-		const vector=new CallVector('color',options.fix().color,'up',[0.0,0.0,0.0,0.0]);
+		const vector=new CallVector('color',options.fix().color.entries,'up',[0.0,0.0,0.0,0.0]);
 		it("returns interface with mousemove listener",()=>{
 			const featureContext=new FeatureContext(options.fix().debug);
 			featureContext.hasStartTime=true; // animated
@@ -153,7 +153,7 @@ describe("CallVector",()=>{
 		const options=new TestOptions({color:{
 			r:{value:0.2,input:'mousemovex'}, g:0.3, b:0.4, a:{value:1.0,input:'mousemovey'}
 		}});
-		const vector=new CallVector('color',options.fix().color,'up',[0.0,0.0,0.0,0.0]);
+		const vector=new CallVector('color',options.fix().color.entries,'up',[0.0,0.0,0.0,0.0]);
 		it("returns interface with mousemove listener",()=>{
 			const featureContext=new FeatureContext(options.fix().debug);
 			featureContext.hasStartTime=true; // animated
@@ -174,7 +174,7 @@ describe("CallVector",()=>{
 		const options=new TestOptions({color:{
 			r:{value:0.2,input:'mousemovex'}, g:{value:0.3,input:'slider'}, b:0.4, a:{value:1.0,input:'mousemovey'}
 		}});
-		const vector=new CallVector('color',options.fix().color,'up',[0.0,0.0,0.0,0.0]);
+		const vector=new CallVector('color',options.fix().color.entries,'up',[0.0,0.0,0.0,0.0]);
 		it("returns interface with 2 state vars, update fn, slider listener and mousemove listener",()=>{
 			const featureContext=new FeatureContext(options.fix().debug);
 			featureContext.hasStartTime=true; // animated
@@ -201,7 +201,7 @@ describe("CallVector",()=>{
 		const options=new TestOptions({color:{
 			r:{value:0.2,input:'mousemovex'}, g:{value:0.3,input:'slider'}, b:{value:0.4,input:'slider'}, a:{value:1.0,input:'mousemovey'}
 		}});
-		const vector=new CallVector('color',options.fix().color,'up',[0.0,0.0,0.0,0.0]);
+		const vector=new CallVector('color',options.fix().color.entries,'up',[0.0,0.0,0.0,0.0]);
 		it("returns interface with 2 state vars, update fn, 2 slider listeners and mousemove listener",()=>{
 			const featureContext=new FeatureContext(options.fix().debug);
 			featureContext.hasStartTime=true; // animated
@@ -234,7 +234,7 @@ describe("CallVector",()=>{
 		const options=new TestOptions({color:{
 			r:{value:0.5, speed:+0.123}, g:0.4, b:0.3, a:1.0
 		}});
-		const vector=new CallVector('color',options.fix().color,'setColor',[1.0,1.0,1.0,1.0]);
+		const vector=new CallVector('color',options.fix().color.entries,'setColor',[1.0,1.0,1.0,1.0]);
 		it("requests start time",()=>{
 			const testFeatureContext={};
 			vector.requestFeatureContext(testFeatureContext);
@@ -261,7 +261,7 @@ describe("CallVector",()=>{
 		const options=new TestOptions({color:{
 			r:{value:0.5, speed:-0.1}, g:0.4, b:0.3, a:1.0
 		}});
-		const vector=new CallVector('color',options.fix().color,'setColor',[1.0,1.0,1.0,1.0]);
+		const vector=new CallVector('color',options.fix().color.entries,'setColor',[1.0,1.0,1.0,1.0]);
 		it("requests start time",()=>{
 			const testFeatureContext={};
 			vector.requestFeatureContext(testFeatureContext);
@@ -288,7 +288,7 @@ describe("CallVector",()=>{
 		const options=new TestOptions({color:{
 			r:{value:0.5, speed:+0.123}, g:{value:0.4, input:'slider'}, b:0.3, a:1.0
 		}});
-		const vector=new CallVector('color',options.fix().color,'setColor',[1.0,1.0,1.0,1.0]);
+		const vector=new CallVector('color',options.fix().color.entries,'setColor',[1.0,1.0,1.0,1.0]);
 		it("has no state vars",()=>{
 			const featureContext=new FeatureContext(options.fix().debug);
 			featureContext.hasStartTime=true; // animated
@@ -310,7 +310,7 @@ describe("CallVector",()=>{
 		const options=new TestOptions({color:{
 			r:{value:0.5, input:'slider', speed:+0.123}, g:0.4, b:0.3, a:1.0
 		}});
-		const vector=new CallVector('color',options.fix().color,'setColor',[1.0,1.0,1.0,1.0]);
+		const vector=new CallVector('color',options.fix().color.entries,'setColor',[1.0,1.0,1.0,1.0]);
 		it("requests prev time and sliders",()=>{
 			const testFeatureContext={};
 			vector.requestFeatureContext(testFeatureContext);
@@ -343,7 +343,7 @@ describe("CallVector",()=>{
 		const options=new TestOptions({color:{
 			r:{value:0.5, speed:+0.123}, g:{value:0.4, input:'mousemovex'}, b:0.3, a:1.0
 		}});
-		const vector=new CallVector('color',options.fix().color,'setColor',[1.0,1.0,1.0,1.0]);
+		const vector=new CallVector('color',options.fix().color.entries,'setColor',[1.0,1.0,1.0,1.0]);
 		it("requests start time",()=>{
 			const testFeatureContext={};
 			vector.requestFeatureContext(testFeatureContext);
@@ -377,7 +377,7 @@ describe("CallVector",()=>{
 		const options=new TestOptions({color:{
 			r:{value:0.5, input:'mousemovex', speed:+0.123}, g:0.4, b:0.3, a:1.0
 		}});
-		const vector=new CallVector('color',options.fix().color,'setColor',[1.0,1.0,1.0,1.0]);
+		const vector=new CallVector('color',options.fix().color.entries,'setColor',[1.0,1.0,1.0,1.0]);
 		it("requests prev time",()=>{
 			const testFeatureContext={};
 			vector.requestFeatureContext(testFeatureContext);
@@ -411,7 +411,7 @@ describe("CallVector",()=>{
 		const options=new TestOptions({color:{
 			r:{value:0.5, speed:{input:'slider'}}, g:0.4, b:0.3, a:1.0
 		}});
-		const vector=new CallVector('color',options.fix().color,'setColor',[1.0,1.0,1.0,1.0]);
+		const vector=new CallVector('color',options.fix().color.entries,'setColor',[1.0,1.0,1.0,1.0]);
 		it("requests prev time, clamp fn and sliders",()=>{
 			const testFeatureContext={};
 			vector.requestFeatureContext(testFeatureContext);
@@ -445,7 +445,7 @@ describe("CallVector",()=>{
 		const options=new TestOptions({color:{
 			r:{value:0.5, input:'slider', speed:{input:'slider'}}, g:0.4, b:0.3, a:1.0
 		}});
-		const vector=new CallVector('color',options.fix().color,'setColor',[1.0,1.0,1.0,1.0]);
+		const vector=new CallVector('color',options.fix().color.entries,'setColor',[1.0,1.0,1.0,1.0]);
 		it("requests prev time, clamp fn and sliders",()=>{
 			const testFeatureContext={};
 			vector.requestFeatureContext(testFeatureContext);
@@ -482,7 +482,7 @@ describe("CallVector",()=>{
 		}, debug:{
 			inputs: true
 		}});
-		const vector=new CallVector('color',options.fix().color,'setColor',[1.0,1.0,1.0,1.0]);
+		const vector=new CallVector('color',options.fix().color.entries,'setColor',[1.0,1.0,1.0,1.0]);
 		it("has input value logging",()=>{
 			const featureContext=new FeatureContext(options.fix().debug);
 			featureContext.hasPrevTime=true; // animated
@@ -502,7 +502,7 @@ describe("CallVector",()=>{
 		const options=new TestOptions({color:{
 			r:{value:0.5, speed:{value:-0.321, input:'mousemovex'}}, g:0.4, b:0.3, a:1.0
 		}});
-		const vector=new CallVector('color',options.fix().color,'setColor',[1.0,1.0,1.0,1.0]);
+		const vector=new CallVector('color',options.fix().color.entries,'setColor',[1.0,1.0,1.0,1.0]);
 		it("requests prev time and clamp fn",()=>{
 			const testFeatureContext={};
 			vector.requestFeatureContext(testFeatureContext);
@@ -541,7 +541,7 @@ describe("CallVector",()=>{
 		const options=new TestOptions({color:{
 			r:{value:0.5, input:'gamepad3'}, g:0.4, b:0.3, a:1.0
 		}});
-		const vector=new CallVector('color',options.fix().color,'setColor',[1.0,1.0,1.0,1.0]);
+		const vector=new CallVector('color',options.fix().color.entries,'setColor',[1.0,1.0,1.0,1.0]);
 		it("requests gamepad",()=>{
 			const testFeatureContext={};
 			vector.requestFeatureContext(testFeatureContext);
@@ -575,7 +575,7 @@ describe("CallVector",()=>{
 		const options=new TestOptions({color:{
 			r:{value:0.5, input:'gamepad3'}, g:{value:0.4, input:'slider'}, b:0.3, a:1.0
 		}});
-		const vector=new CallVector('color',options.fix().color,'setColor',[1.0,1.0,1.0,1.0]);
+		const vector=new CallVector('color',options.fix().color.entries,'setColor',[1.0,1.0,1.0,1.0]);
 		it("requests gamepad",()=>{
 			const testFeatureContext={};
 			vector.requestFeatureContext(testFeatureContext);
@@ -610,7 +610,7 @@ describe("CallVector",()=>{
 		const options=new TestOptions({color:{
 			r:{value:0.5, input:'gamepad3'}, g:{value:0.4, input:'mousemovex'}, b:0.3, a:1.0
 		}});
-		const vector=new CallVector('color',options.fix().color,'setColor',[1.0,1.0,1.0,1.0]);
+		const vector=new CallVector('color',options.fix().color.entries,'setColor',[1.0,1.0,1.0,1.0]);
 		it("requests gamepad",()=>{
 			const testFeatureContext={};
 			vector.requestFeatureContext(testFeatureContext);
@@ -649,7 +649,7 @@ describe("CallVector",()=>{
 		const options=new TestOptions({color:{
 			r:{value:0.5, speed:{value:+0.321, input:'gamepad3'}}, g:0.4, b:0.3, a:1.0
 		}});
-		const vector=new CallVector('color',options.fix().color,'setColor',[1.0,1.0,1.0,1.0]);
+		const vector=new CallVector('color',options.fix().color.entries,'setColor',[1.0,1.0,1.0,1.0]);
 		it("requests prev time, clamp fn and gamepad",()=>{
 			const testFeatureContext={};
 			vector.requestFeatureContext(testFeatureContext);
@@ -686,3 +686,4 @@ describe("CallVector",()=>{
 		});
 	});
 });
+*/

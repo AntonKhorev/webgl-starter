@@ -3,7 +3,7 @@
 const assert=require('assert');
 const Options=require('../src/options.js');
 const Transforms=require('../src/transforms.js');
-
+/*
 describe("Illumination",()=>{
 	class TestOptions extends Options {
 		get entriesDescription() {
@@ -36,3 +36,4 @@ describe("Illumination",()=>{
 		});
 	});
 });
+*/

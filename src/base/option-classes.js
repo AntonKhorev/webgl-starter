@@ -6,9 +6,23 @@
 // the rest of arguments' order is not settled, don't use them
 // 	+ TODO not sure about data
 
+/*
+fixed options spec:
+	input option returns its value in primitive context (possibly with valueOf() method)
+		value has primitive type
+	options have the following properties in order of priority (most important first)
+		'type' if option is an array member
+		suboption-named properties equal to suboptions for collections
+		'entries' array of suboptions for array and collection
+		'value' and 'name' properties for non-boolean options
+	TODO decide on: boolean option cannot be an array member (where to store it's type?)
+*/
+
+const Option={};
+
 // abstract classes
 
-class Base {
+Option.Base = class {
 	constructor(name,_1,_2,_3,fullName,isVisible,updateCallback) {
 		this.name=name;
 		this.isVisible=isVisible;
@@ -26,15 +40,34 @@ class Base {
 	updateVisibility() {
 		if (this.$) this.$.toggle(this.isVisible());
 	}
-}
+	shortenExport(data) { // used by parent
+		const dataKeys=Object.keys(data);
+		if (dataKeys.length==1 && dataKeys[0]=='value') {
+			return data.value;
+		} else {
+			return data;
+		}
+	}
+	shortenExportAssign(data,parentData,name) {
+		const dataKeys=Object.keys(data);
+		if (dataKeys.length==1 && dataKeys[0]=='value') {
+			parentData[name]=data.value;
+		} else if (dataKeys.length>0) {
+			parentData[name]=data;
+		}
+	}
+};
 
-class Input extends Base {
+Option.Input = class extends Option.Base {
 	constructor(name,availableValues,defaultValue,data,fullName,isVisible,updateCallback) {
 		super(...arguments);
 		if (defaultValue!==undefined) {
 			this.defaultValue=defaultValue;
 		} else {
 			this.defaultValue=availableValues[0];
+		}
+		if (typeof data == 'object') {
+			data=data.value;
 		}
 		if (data!==undefined) {
 			this._value=data;
@@ -50,29 +83,46 @@ class Input extends Base {
 		this.updateCallback();
 	}
 	export() {
-		return this.value!=this.defaultValue ? this.value : null;
+		const data={};
+		if (this.value!=this.defaultValue) data.value=this.value;
+		return data;
 	}
+};
+
+Option.BooleanInput = class extends Option.Input {
 	fix() {
 		return this.value;
 	}
-}
+};
 
-class FactorInput extends Input {
+Option.NonBooleanInput = class extends Option.Input {
+	fix() {
+		const value=this.value;
+		return { // can't use fixed value in boolean context
+			name: this.name,
+			value,
+			valueOf() { return value; },
+			toString() { return String(value); },
+		};
+	}
+};
+
+Option.FactorInput = class extends Option.NonBooleanInput {
 	constructor(name,availableValues,defaultValue,data,fullName,isVisible,updateCallback) {
 		super(...arguments);
 		this.availableValues=availableValues;
 	}
-}
+};
 
-class RangeInput extends Input {
+Option.RangeInput = class extends Option.NonBooleanInput {
 	constructor(name,availableRange,defaultValue,data,fullName,isVisible,updateCallback) {
 		super(...arguments);
 		this.availableMin=availableRange[0];
 		this.availableMax=availableRange[1];
 	}
-}
+};
 
-class Collection extends Base {
+Option.Collection = class extends Option.Base {
 	constructor(name,entries,_1,_2,fullName,isVisible,updateCallback) {
 		super(...arguments);
 		this.entries=entries;
@@ -80,67 +130,57 @@ class Collection extends Base {
 	export() {
 		const data={};
 		this.entries.forEach(entry=>{
-			const subData=entry.export();
-			if (subData!==null) data[entry.name]=subData;
-		});
-		return Object.keys(data).length>0 ? data : null;
-	}
-	fixFromIterateOver(iterateOver) {
-		const defineFn=fn=>((callback,thisArg)=>fn.call(iterateOver,vci=>callback.apply(thisArg,vci)));
-		const data={
-			length: iterateOver.length,
-			map: defineFn([].map),
-			every: defineFn([].every),
-			some: defineFn([].some),
-			forEach: defineFn([].forEach),
-		};
-		iterateOver.forEach((vci)=>{
-			data[vci[1]]=vci[0];
+			entry.shortenExportAssign(entry.export(),data,entry.name);
 		});
 		return data;
 	}
 	fix() {
-		const iterateOver=this.entries.map((entry,i)=>[entry.fix(),entry.name,i]);
-		return this.fixFromIterateOver(iterateOver);
+		const fixedEntries=[];
+		const fixed={
+			name: this.name,
+			entries: fixedEntries,
+		};
+		this.entries.forEach(entry=>{
+			fixedEntries.push(fixed[entry.name]=entry.fix());
+		});
+		return fixed;
 	}
-}
+};
 
 // concrete classes
 
-class Checkbox extends Input {
+Option.Checkbox = class extends Option.BooleanInput {
 	constructor(name,_,defaultValue,data,fullName,isVisible,updateCallback) {
 		super(name,undefined,!!defaultValue,data,fullName,isVisible,updateCallback);
 	}
-}
+};
 
-class Select extends FactorInput {
-}
+Option.Select = class extends Option.FactorInput {};
 
-class Root extends Collection {
-}
+Option.Root = class extends Option.Collection {};
 
-class Group extends Collection {
-}
+Option.Group = class extends Option.Collection {};
 
-class Array extends Base {
+Option.Array = class extends Option.Base {
 	constructor(name,availableTypes,availableConstructors,data,fullName,isVisible,updateCallback) {
 		super(name,undefined,undefined,undefined,fullName,isVisible,updateCallback);
 		this.availableTypes=availableTypes;
 		this.availableConstructors=availableConstructors;
 		this._entries=[];
-		if (typeof data == 'object') {
-			for (let i in data) {
-				const entryTypeAndValue=data[i];
-				let entryType,entryValue;
-				if (typeof entryTypeAndValue == 'string') {
-					entryType=entryTypeAndValue;
-				} else if (typeof entryTypeAndValue == 'object') {
-					entryType=entryTypeAndValue.type;
-					entryValue=entryTypeAndValue.value;
-				}
-				if (availableConstructors[entryType]) {
-					this._entries.push(availableConstructors[entryType](entryValue));
-				}
+		let subDatas=[];
+		if (Array.isArray(data)) {
+			subDatas=data;
+		} else if (typeof data == 'object') {
+			subDatas=data.value;
+		}
+		for (let i=0;i<subDatas.length;i++) {
+			const subData=subDatas[i];
+			let subType=availableTypes[0];
+			if (typeof subData == 'object' && subData.type!==undefined) {
+				subType=subData.type;
+			}
+			if (availableConstructors[subType]) {
+				this._entries.push(availableConstructors[subType](subData));
 			}
 		}
 	}
@@ -158,29 +198,25 @@ class Array extends Base {
 		return entry;
 	}
 	export() {
-		return this._entries.map(entry=>{
-			const subData=entry.export();
-			if (subData!==null) {
-				return {type: entry.name, value: subData};
-			} else {
-				return entry.name;
-			}
-		});
+		return {
+			value: this._entries.map(entry=>{
+				const subData=entry.export();
+				const subType=entry.name;
+				if (subType!=this.availableTypes[0]) subData.type=subType;
+				return entry.shortenExport(subData);
+			}),
+		};
 	}
 	fix() {
-		return this._entries.map(entry=>{
-			return {type: entry.name, value: entry.fix()};
-		});
+		return {
+			name: this.name,
+			entries: this._entries.map(entry=>{
+				const subFixed=entry.fix();
+				if (typeof subFixed == 'object') subFixed.type=entry.name;
+				return subFixed;
+			}),
+		};
 	}
-}
+};
 
-exports.Base=Base;
-exports.Input=Input;
-exports.Checkbox=Checkbox;
-exports.FactorInput=FactorInput;
-exports.RangeInput=RangeInput;
-exports.Collection=Collection;
-exports.Select=Select;
-exports.Root=Root;
-exports.Group=Group;
-exports.Array=Array;
+module.exports=Option;

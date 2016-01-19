@@ -6,6 +6,32 @@ const imports=require('./base/option-classes.js');
 const RangeInput=imports.RangeInput;
 const Group=imports.Group;
 
+class FixedLiveNumber {
+	constructor(src,setToDefault) {
+		if (!setToDefault) {
+			this.value=src.value;
+			this.min=src.min;
+			this.max=src.max;
+			this.input=Input.createFromString(src.input);
+		} else {
+			this.value=src.defaultValue
+			this.min=src.availableMin;
+			this.max=src.availableMax;
+			this.input=Input.createFromString('constant');
+		}
+		// needed for formatting and to decide on clamp()/wrap():
+		this.availableMin=src.availableMin;
+		this.availableMax=src.availableMax;
+		this.step=src.step;
+	}
+	valueOf() {
+		return this.value;
+	}
+	toString() {
+		return String(this.value);
+	}
+}
+
 // abstract classes
 
 class LiveNumber extends RangeInput {
@@ -57,44 +83,21 @@ class LiveNumber extends RangeInput {
 		this._$range=$range;
 		this.updateInternalVisibility();
 	}
-	exportHelper(src,data) {
+	exportHelper(src) {
+		const data={};
+		if (src.value!=src.defaultValue) data.value=src.value;
 		if (src.min!=src.availableMin) data.min=src.min;
 		if (src.max!=src.availableMax) data.max=src.max;
 		if (src.input!='constant') data.input=src.input;
-		if (Object.keys(data).length>0) {
-			if (src.value!=src.defaultValue) data.value=src.value;
-			return data;
-		} else {
-			return src.value!=src.defaultValue ? src.value : null;
-		}
+		return data;
 	}
 	export() {
-		return this.exportHelper(this,{});
-	}
-	fixToDefaultHelper(src) {
-		const fixed=new Number(src.defaultValue);
-		fixed.min=src.availableMin;
-		fixed.max=src.availableMax;
-		fixed.input=Input.createFromString('constant');
-		// needed for formatting:
-		fixed.availableMin=src.availableMin;
-		fixed.availableMax=src.availableMax;
-		fixed.step=src.step;
-		return fixed;
-	}
-	fixHelper(src) {
-		const fixed=new Number(src.value); // TODO try it's own class like Input
-		fixed.min=src.min;
-		fixed.max=src.max;
-		fixed.input=Input.createFromString(src.input);
-		// needed for formatting and to decide on clamp()/wrap():
-		fixed.availableMin=src.availableMin;
-		fixed.availableMax=src.availableMax;
-		fixed.step=src.step;
-		return fixed;
+		return this.exportHelper(this);
 	}
 	fix() {
-		return this.fixHelper(this);
+		const fixed=new FixedLiveNumber(this);
+		fixed.name=this.name;
+		return fixed;
 	}
 }
 
@@ -237,19 +240,19 @@ class LiveFloat extends LiveNumber {
 	}
 	export() {
 		const notGamepad=['gamepad0','gamepad1','gamepad2','gamepad3'].indexOf(this.input)<0
-		const data={};
-		let speedData=null;
-		if (notGamepad && this.addSpeed) speedData=this.exportHelper(this.speed,{});
-		if (speedData!==null) data.speed=speedData;
-		return this.exportHelper(this,data);
+		const data=this.exportHelper(this);
+		if (notGamepad && this.addSpeed) {
+			this.shortenExportAssign(this.exportHelper(this.speed),data,'speed');
+		}
+		return data;
 	}
 	fix() {
+		const fixed=super.fix();
 		const notGamepad=['gamepad0','gamepad1','gamepad2','gamepad3'].indexOf(this.input)<0
-		const fixed=this.fixHelper(this);
 		if (notGamepad && this.addSpeed) {
-			fixed.speed=this.fixHelper(this.speed);
+			fixed.speed=new FixedLiveNumber(this.speed);
 		} else {
-			fixed.speed=this.fixToDefaultHelper(this.speed);
+			fixed.speed=new FixedLiveNumber(this.speed,true);
 		}
 		return fixed;
 	}

@@ -3,7 +3,7 @@
 const assert=require('assert');
 const Options=require('../src/options.js');
 const fixOptHelp=require('../src/fixed-options-helpers.js');
-
+/*
 describe("fixOptHelp.extendCollection",()=>{
 	class TestOptions extends Options {
 		get entriesDescription() {
@@ -117,3 +117,4 @@ describe("fixOptHelp.makeFormatNumber",()=>{
 		assert.equal(fixOptHelp.makeFormatNumber(n)(418),' 418');
 	});
 });
+*/

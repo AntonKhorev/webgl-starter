@@ -4,7 +4,7 @@ const assert=require('assert');
 const Options=require('../src/options.js');
 const FeatureContext=require('../src/feature-context.js');
 const GlslVector=require('../src/glsl-vector.js');
-
+/*
 describe("GlslVector",()=>{
 	class TestOptions extends Options {
 		get entriesDescription() {
@@ -25,7 +25,7 @@ describe("GlslVector",()=>{
 	}
 	context("with constant vector",()=>{
 		const options=new TestOptions;
-		const vector=new GlslVector('foo',options.fix().foo);
+		const vector=new GlslVector('foo',options.fix().foo.entries);
 		it("returns empty declaration",()=>{
 			assert.deepEqual(vector.getGlslDeclarationLines().data,[
 			]);
@@ -61,7 +61,7 @@ describe("GlslVector",()=>{
 		const options=new TestOptions({foo:{
 			x:2.0, y:2.0, z:2.0
 		}});
-		const vector=new GlslVector('foo',options.fix().foo);
+		const vector=new GlslVector('foo',options.fix().foo.entries);
 		it("returns empty declaration",()=>{
 			assert.deepEqual(vector.getGlslDeclarationLines().data,[
 			]);
@@ -87,7 +87,7 @@ describe("GlslVector",()=>{
 		const options=new TestOptions({foo:{
 			x:{input:'slider'}
 		}});
-		const vector=new GlslVector('foo',options.fix().foo);
+		const vector=new GlslVector('foo',options.fix().foo.entries);
 		it("returns float declaration",()=>{
 			assert.deepEqual(vector.getGlslDeclarationLines().data,[
 				"uniform float fooX;"
@@ -131,7 +131,7 @@ describe("GlslVector",()=>{
 		const options=new TestOptions({foo:{
 			x:{input:'slider'}, y:{input:'slider'}
 		}});
-		const vector=new GlslVector('foo',options.fix().foo);
+		const vector=new GlslVector('foo',options.fix().foo.entries);
 		it("returns vec2 declaration",()=>{
 			assert.deepEqual(vector.getGlslDeclarationLines().data,[
 				"uniform vec2 foo;"
@@ -202,7 +202,7 @@ describe("GlslVector",()=>{
 		const options=new TestOptions({foo:{
 			x:{input:'slider'}, y:{input:'slider'}
 		}});
-		const vector=new GlslVector('foo.bar',options.fix().foo);
+		const vector=new GlslVector('foo.bar',options.fix().foo.entries);
 		it("returns interface with 1 location and 2 simple listeners",()=>{
 			const featureContext=new FeatureContext(false);
 			featureContext.hasStartTime=true; // animated
@@ -224,7 +224,7 @@ describe("GlslVector",()=>{
 		const options=new TestOptions({foo:{
 			x:{input:'slider'}, z:{input:'slider'}
 		}});
-		const vector=new GlslVector('foo',options.fix().foo);
+		const vector=new GlslVector('foo',options.fix().foo.entries);
 		it("returns 2 float declarations",()=>{
 			assert.deepEqual(vector.getGlslDeclarationLines().data,[
 				"uniform float fooX;",
@@ -256,7 +256,7 @@ describe("GlslVector",()=>{
 		const options=new TestOptions({foo:{
 			x:{input:'slider'}, y:{input:'slider'}, z:{input:'slider'}
 		}});
-		const vector=new GlslVector('foo',options.fix().foo);
+		const vector=new GlslVector('foo',options.fix().foo.entries);
 		it("returns vec3 declaration",()=>{
 			assert.deepEqual(vector.getGlslDeclarationLines().data,[
 				"uniform vec3 foo;"
@@ -272,7 +272,7 @@ describe("GlslVector",()=>{
 		const options=new TestOptions({foo:{
 			x:{input:'slider'}, y:{input:'mousemovex'}
 		}});
-		const vector=new GlslVector('foo',options.fix().foo);
+		const vector=new GlslVector('foo',options.fix().foo.entries);
 		it("returns interface with 1 location, 1 state var and 1 simple listener and mousemove listener",()=>{
 			const featureContext=new FeatureContext(false);
 			featureContext.hasStartTime=true; // animated
@@ -303,7 +303,7 @@ describe("GlslVector",()=>{
 		const options=new TestOptions({foo:{
 			y:{value:2.5,input:'mousemovey'}
 		}});
-		const vector=new GlslVector('bar',options.fix().foo);
+		const vector=new GlslVector('bar',options.fix().foo.entries);
 		it("returns interface without update fn",()=>{
 			const featureContext=new FeatureContext(false);
 			featureContext.hasStartTime=true; // animated
@@ -326,7 +326,7 @@ describe("GlslVector",()=>{
 		const options=new TestOptions({foo:{
 			x:{value:1.5,input:'mousemovex'}, y:{value:2.5,input:'mousemovey'}
 		}});
-		const vector=new GlslVector('bar',options.fix().foo);
+		const vector=new GlslVector('bar',options.fix().foo.entries);
 		it('returns interface without update fn',()=>{
 			const featureContext=new FeatureContext(false);
 			featureContext.hasStartTime=true; // animated
@@ -352,7 +352,7 @@ describe("GlslVector",()=>{
 		const options=new TestOptions({foo:{
 			x:1.5, y:{value:2.5,input:'mousemovey'}, z:{input:'mousemovex'}
 		}});
-		const vector=new GlslVector('bar',options.fix().foo);
+		const vector=new GlslVector('bar',options.fix().foo.entries);
 		it("returns interface without update fn",()=>{
 			const featureContext=new FeatureContext(false);
 			featureContext.hasStartTime=true; // animated
@@ -386,7 +386,7 @@ describe("GlslVector",()=>{
 			}
 		}
 		const options=new NonnegativeTestOptions;
-		const vector=new GlslVector('color',options.fix().color);
+		const vector=new GlslVector('color',options.fix().color.entries);
 		it("returns unsigned value",()=>{
 			assert.equal(vector.getGlslValue(),
 				"vec4(0.200,0.300,0.400,0.500)"
@@ -397,7 +397,7 @@ describe("GlslVector",()=>{
 		const options=new TestOptions({foo:{
 			x:{input:'slider'}, y:{input:'slider'}, z:{input:'slider'}
 		}});
-		const vector=new GlslVector('my.foo',options.fix().foo);
+		const vector=new GlslVector('my.foo',options.fix().foo.entries);
 		it("returns vec3 declaration",()=>{
 			assert.deepEqual(vector.getGlslDeclarationLines().data,[
 				"uniform vec3 myFoo;"
@@ -427,7 +427,7 @@ describe("GlslVector",()=>{
 		const options=new OneComponentTestOptions({rotate:{
 			z:{input:'slider'}
 		}});
-		const vector=new GlslVector('rotate',options.fix().rotate);
+		const vector=new GlslVector('rotate',options.fix().rotate.entries);
 		it("returns float declaration",()=>{
 			assert.deepEqual(vector.getGlslDeclarationLines().data,[
 				"uniform float rotateZ;"
@@ -453,7 +453,7 @@ describe("GlslVector",()=>{
 		const options=new TestOptions({foo:{
 			x:{value:0.5, speed:+0.123}, y:0.4, z:0.3
 		}});
-		const vector=new GlslVector('foo',options.fix().foo);
+		const vector=new GlslVector('foo',options.fix().foo.entries);
 		it("returns float declaration",()=>{
 			assert.deepEqual(vector.getGlslDeclarationLines().data,[
 				"uniform float fooX;"
@@ -501,7 +501,7 @@ describe("GlslVector",()=>{
 		const options=new TestOptions({foo:{
 			x:{speed:-3.456}
 		}});
-		const vector=new GlslVector('foo',options.fix().foo,true);
+		const vector=new GlslVector('foo',options.fix().foo.entries,true);
 		it("requests start time",()=>{
 			const testFeatureContext={};
 			vector.requestFeatureContext(testFeatureContext);
@@ -520,7 +520,7 @@ describe("GlslVector",()=>{
 		const options=new TestOptions({foo:{
 			x:{speed:{input:'mousemovex'}}
 		}});
-		const vector=new GlslVector('foo',options.fix().foo,true);
+		const vector=new GlslVector('foo',options.fix().foo.entries,true);
 		it("requests prev time",()=>{
 			const testFeatureContext={};
 			vector.requestFeatureContext(testFeatureContext);
@@ -540,7 +540,7 @@ describe("GlslVector",()=>{
 		const options=new TestOptions({foo:{
 			x:{input:'slider', speed:{input:'mousemovex'}}
 		}});
-		const vector=new GlslVector('foo',options.fix().foo,true);
+		const vector=new GlslVector('foo',options.fix().foo.entries,true);
 		it("requests prev time and wrap fn",()=>{
 			const testFeatureContext={};
 			vector.requestFeatureContext(testFeatureContext);
@@ -561,3 +561,4 @@ describe("GlslVector",()=>{
 		});
 	});
 });
+*/

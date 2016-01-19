@@ -103,6 +103,8 @@ describe("Option.LiveInt",()=>{
 		option.input='slider';
 		const fixed=options.fix();
 		assert.equal(fixed.lod,7);
+		assert.equal(fixed.lod.value,7);
+		assert.equal(fixed.lod.name,'lod');
 		assert.equal(fixed.lod.min,0);
 		assert.equal(fixed.lod.max,9);
 		assert.equal(fixed.lod.input,'slider');
@@ -338,6 +340,8 @@ describe("Option.LiveFloat",()=>{
 		option.speed.max=+100;
 		const fixed=options.fix();
 		assert.equal(fixed.rotate,40);
+		assert.equal(fixed.rotate.value,40);
+		assert.equal(fixed.rotate.name,'rotate');
 		assert.equal(fixed.rotate.min,-180);
 		assert.equal(fixed.rotate.max,+180);
 		assert.equal(fixed.rotate.input,'constant');
@@ -345,6 +349,7 @@ describe("Option.LiveFloat",()=>{
 		assert.equal(fixed.rotate.availableMax,+180);
 		assert.equal(fixed.rotate.step,0.1);
 		assert.equal(fixed.rotate.speed,30);
+		assert.equal(fixed.rotate.speed.value,30);
 		assert.equal(fixed.rotate.speed.min,-100);
 		assert.equal(fixed.rotate.speed.max,+100);
 		assert.equal(fixed.rotate.speed.input,'constant');
@@ -500,6 +505,8 @@ describe("Option.LiveColor",()=>{
 		b.speed.input='slider';
 		const fixed=options.fix();
 		assert.equal(fixed.color.r,1.0);
+		assert.equal(fixed.color.r.value,1.0);
+		assert.equal(fixed.color.r.name,'r');
 		assert.equal(fixed.color.r.min,0.0);
 		assert.equal(fixed.color.r.max,1.0);
 		assert.equal(fixed.color.r.input,'constant');
@@ -508,6 +515,8 @@ describe("Option.LiveColor",()=>{
 		assert.equal(fixed.color.r.speed.max,+1.0);
 		assert.equal(fixed.color.r.speed.input,'constant');
 		assert.equal(fixed.color.g,0.3);
+		assert.equal(fixed.color.g.value,0.3);
+		assert.equal(fixed.color.g.name,'g');
 		assert.equal(fixed.color.g.min,0.0);
 		assert.equal(fixed.color.g.max,1.0);
 		assert.equal(fixed.color.g.input,'constant');
@@ -516,6 +525,8 @@ describe("Option.LiveColor",()=>{
 		assert.equal(fixed.color.g.speed.max,+1.0);
 		assert.equal(fixed.color.g.speed.input,'constant');
 		assert.equal(fixed.color.b,0.7);
+		assert.equal(fixed.color.b.value,0.7);
+		assert.equal(fixed.color.b.name,'b');
 		assert.equal(fixed.color.b.min,0.0);
 		assert.equal(fixed.color.b.max,1.0);
 		assert.equal(fixed.color.b.input,'constant');
@@ -523,5 +534,9 @@ describe("Option.LiveColor",()=>{
 		assert.equal(fixed.color.b.speed.min,-1.0);
 		assert.equal(fixed.color.b.speed.max,+1.0);
 		assert.equal(fixed.color.b.speed.input,'slider');
+		assert.equal(fixed.color.entries.length,3);
+		assert.equal(fixed.color.entries[0].name,'r');
+		assert.equal(fixed.color.entries[1].name,'g');
+		assert.equal(fixed.color.entries[2].name,'b');
 	});
 });

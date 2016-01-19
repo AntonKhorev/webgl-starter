@@ -148,8 +148,7 @@ class Options {
 	}
 	// public methods
 	export() {
-		const data=this.root.export();
-		return data!==null ? data : {};
+		return this.root.shortenExport(this.root.export());
 	}
 	fix() {
 		return this.root.fix();

@@ -99,18 +99,15 @@ describe("Base/Options",()=>{
 			options.root.entries[0].value='bar';
 			const fixed=options.fix();
 			assert.equal(fixed.foobar,'bar');
+			assert.equal(fixed.foobar.value,'bar');
+			assert.equal(fixed.foobar.name,'foobar');
 			assert.equal(fixed.letter,'c');
-			assert.equal(fixed.length,2,"has wrong length");
-			assert.deepEqual(fixed.map((v,c,i)=>[String(v),c,i]),[
-				['bar','foobar',0],
-				['c','letter',1],
-			],"maps to wrong values");
-			assert.equal(fixed.every((v,c)=>c.length==6),true,".every() condition check is wrong");
-			let nForEachCalls=0;
-			fixed.forEach((v,c,i)=>{
-				nForEachCalls++;
-			});
-			assert.equal(nForEachCalls,2,"makes wrong number of .forEach() calls");
+			assert.equal(fixed.letter.value,'c');
+			assert.equal(fixed.letter.name,'letter');
+			assert.equal(fixed.entries.length,2,"has wrong length");
+			assert.deepEqual(fixed.entries.map(entry=>String(entry)),['bar','c']);
+			assert.deepEqual(fixed.entries.map(entry=>entry.value),['bar','c']);
+			assert.deepEqual(fixed.entries.map(entry=>entry.name),['foobar','letter']);
 		});
 	});
 	context("groups and selects",()=>{
@@ -227,18 +224,19 @@ describe("Base/Options",()=>{
 			const options=new TestOptions({
 				chk: true,
 				arr: [
-					{type: 'scope', value: 'face'},
-					{type: 'shape', value: 'cube'},
-					'projection',
-					{type: 'scope'},
+					{type:'scope', value:'face'},
+					{type:'shape', value:'cube'},
+					{type:'projection'},
+					'hat',
+					{},
 				]
 			});
 			assert.equal(options.root.entries.length,2);
 			assert.equal(options.root.entries[0].value,true);
-			assert.equal(options.root.entries[1].entries.length,4);
-			const names=['scope','shape','projection','scope'];
-			const fullNames=['arr.scope','arr.shape','arr.projection','arr.scope'];
-			const values=['face','cube','ortho','global'];
+			assert.equal(options.root.entries[1].entries.length,5);
+			const names=['scope','shape','projection','shape','shape'];
+			const fullNames=['arr.scope','arr.shape','arr.projection','arr.shape','arr.shape'];
+			const values=['face','cube','ortho','hat','square'];
 			options.root.entries[1].entries.forEach((option,i)=>{
 				assert.equal(option.name,names[i]);
 				assert.equal(option.fullName,fullNames[i]);
@@ -251,11 +249,16 @@ describe("Base/Options",()=>{
 			options.root.entries[1].addEntry('scope');
 			options.root.entries[1].addEntry('shape');
 			options.root.entries[1].entries[1].value='triangle';
+			options.root.entries[1].addEntry('shape');
+			options.root.entries[1].addEntry('projection');
+			options.root.entries[1].entries[3].value='perspective';
 			assert.deepEqual(options.export(),{
 				chk: true,
 				arr: [
-					'scope',
-					{type: 'shape', value: 'triangle'},
+					{type:'scope'},
+					'triangle',
+					{},
+					{type:'projection', value:'perspective'},
 				],
 			});
 		});
@@ -267,11 +270,13 @@ describe("Base/Options",()=>{
 			options.root.entries[1].entries[1].value='triangle';
 			const fixed=options.fix();
 			assert.equal(fixed.chk,true);
-			assert.equal(fixed.arr.length,2);
-			assert.equal(fixed.arr[0].type,'scope');
-			assert.equal(fixed.arr[0].value,'global');
-			assert.equal(fixed.arr[1].type,'shape');
-			assert.equal(fixed.arr[1].value,'triangle');
+			assert.equal(fixed.arr.entries.length,2);
+			assert.equal(fixed.arr.entries[0].type,'scope');
+			assert.equal(fixed.arr.entries[0],'global');
+			assert.equal(fixed.arr.entries[0].value,'global');
+			assert.equal(fixed.arr.entries[1].type,'shape');
+			assert.equal(fixed.arr.entries[1],'triangle');
+			assert.equal(fixed.arr.entries[1].value,'triangle');
 		});
 		it("calls update when adding entry to array",()=>{
 			const options=new TestOptions;
