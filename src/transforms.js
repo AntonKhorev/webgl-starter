@@ -1,7 +1,5 @@
 'use strict';
 
-const Options=require('./options.js');
-const fixOptHelp=require('./fixed-options-helpers.js');
 const Lines=require('./lines.js');
 const Feature=require('./feature.js');
 const GlslVector=require('./glsl-vector.js');
@@ -11,12 +9,12 @@ class Transforms extends Feature {
 		super();
 		this.options=options;
 		this.rotateVectorEntries=[]; // [{vector,suffix}] like features, but vectors have additional methods that don't follow feature interfaces
-		this.transformSequence=new Array(options.model.length); // [{vector,component,suffix}]
+		this.transformSequence=new Array(options.model.entries.length); // [{vector,component,suffix}]
 		const possibleComponents=['x','y','z'];
 		const rotate=[[],[],[]];
-		options.model.forEach((tr,iTr)=>{
+		options.model.entries.forEach((tr,iTr)=>{
 			const trData={
-				transform: tr.value,
+				transform: tr,
 				index: iTr,
 			};
 			if (tr.type=='rotate.x') {
@@ -49,20 +47,20 @@ class Transforms extends Feature {
 			}
 			const suffix=(nLayers>1?String(i):'');
 			const makeVector=(values,names)=>{
-				const vector=new GlslVector('rotate'+(nLayers>1?'.'+i:''),fixOptHelp.makeCollection(values,names,Options),true);
+				const vector=new GlslVector('rotate'+(nLayers>1?'.'+i:''),values,true);
 				vector.i18nId='transforms.model.rotate';
 				this.features.push(vector);
 				this.rotateVectorEntries.push({
-					vector: vector,
-					suffix: suffix,
+					vector,
+					suffix,
 				});
 				return vector;
 			};
 			const storeSequenceElement=(vector,j)=>{
 				this.transformSequence[rotate[j][i].index]={
-					vector: vector,
+					vector,
 					component: possibleComponents[j],
-					suffix: suffix,
+					suffix,
 				};
 			};
 			if (isStraight) {

@@ -1,16 +1,5 @@
 'use strict';
 
-function makeCollection(values,names,Options) {
-	class EmptyOptions extends Options {
-		get entriesDescription() {
-			return [];
-		}
-	}
-	const emptyOptions=new EmptyOptions;
-	const iterateOver=values.map((v,i)=>[v,names[i],i]);
-	return emptyOptions.root.fixFromIterateOver(iterateOver);
-}
-
 // fixed-width number formatting - don't use it for min width
 function makeFormatNumber(contextNumber) {
 	const nonnegativeLimits=(contextNumber.availableMin>=0 && contextNumber.availableMax>=0);
@@ -46,7 +35,6 @@ function capNumber(number,maxValue) {
 	return capped;
 }
 
-exports.makeCollection=makeCollection;
 exports.makeFormatNumber=makeFormatNumber;
 exports.formatNumber=formatNumber;
 exports.capNumber=capNumber;

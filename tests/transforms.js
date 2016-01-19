@@ -3,7 +3,7 @@
 const assert=require('assert');
 const Options=require('../src/options.js');
 const Transforms=require('../src/transforms.js');
-/*
+
 describe("Illumination",()=>{
 	class TestOptions extends Options {
 		get entriesDescription() {
@@ -22,8 +22,8 @@ describe("Illumination",()=>{
 	context("with 2 slider x-rotations",()=>{
 		const options=new TestOptions({transforms:{
 			model:[
-				{type:'rotate.x', value:{input:'slider'}},
-				{type:'rotate.x', value:{input:'slider'}},
+				{type:'rotate.x', input:'slider'},
+				{type:'rotate.x', input:'slider'},
 			]
 		}});
 		const transforms=new Transforms(options.fix().transforms);
@@ -36,4 +36,3 @@ describe("Illumination",()=>{
 		});
 	});
 });
-*/

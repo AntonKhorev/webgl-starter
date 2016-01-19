@@ -13,7 +13,14 @@ class VectorComponent {
 		this.vectorName=vectorName;
 		this.wrapMode=!!wrapMode; // if true and components min/max == their default values, use wrap() instead of clamp()
 	}
-	get suffix() { return this.value.name; }
+	get suffix() {
+		const dotIndex=this.value.name.lastIndexOf('.');
+		if (dotIndex<0) {
+			return this.value.name;
+		} else {
+			return this.value.name.slice(dotIndex+1);
+		}
+	}
 	get name() { return this.vectorName+'.'+this.suffix; }
 	get varName() { return toCamelCase(this.name); }
 	get varNameLoc() { return this.varName+'Loc'; }
