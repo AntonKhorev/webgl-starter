@@ -5,7 +5,7 @@ const Lines=require('../src/lines.js');
 const Options=require('../src/options.js');
 const FeatureContext=require('../src/feature-context.js');
 const Illumination=require('../src/illumination.js');
-/*
+
 describe("Illumination",()=>{
 	class TestOptions extends Options {
 		get entriesDescription() {
@@ -776,4 +776,3 @@ describe("Illumination",()=>{
 		});
 	});
 });
-*/

@@ -1,18 +1,5 @@
 'use strict';
 
-function extendCollection(fixedOptionGroup,Options,additionalEntriesDescription) {
-	class AdditionalOptions extends Options {
-		get entriesDescription() {
-			return additionalEntriesDescription;
-		}
-	}
-	const additionalOptions=new AdditionalOptions;
-	const fog=fixedOptionGroup;
-	const afog=additionalOptions.fix();
-	const iterateOver=fog.map((v,c,i)=>[v,c,i]).concat(afog.map((v,c,i)=>[v,c,i+fog.length]));
-	return additionalOptions.root.fixFromIterateOver(iterateOver);
-}
-
 function makeCollection(values,names,Options) {
 	class EmptyOptions extends Options {
 		get entriesDescription() {
@@ -59,7 +46,6 @@ function capNumber(number,maxValue) {
 	return capped;
 }
 
-exports.extendCollection=extendCollection;
 exports.makeCollection=makeCollection;
 exports.makeFormatNumber=makeFormatNumber;
 exports.formatNumber=formatNumber;

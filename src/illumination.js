@@ -1,7 +1,6 @@
 'use strict';
 
-const Options=require('./options.js');
-const fixOptHelp=require('./fixed-options-helpers.js');
+const Option=require('./option-classes.js');
 const Lines=require('./lines.js');
 const Feature=require('./feature.js');
 const GlslVector=require('./glsl-vector.js');
@@ -22,31 +21,26 @@ class Illumination extends Feature {
 		if (material.scope=='global') {
 			if (material.data=='one') {
 				this.features.push(
-					this.colorVector=new GlslVector('material.color',material.color)
+					this.colorVector=new GlslVector('material.color',material.color.entries)
 				);
 			} else if (light.type!='off') {
 				this.features.push(
-					this.specularColorVector=new GlslVector('material.specularColor',material.specularColor),
-					this.diffuseColorVector =new GlslVector('material.diffuseColor' ,material.diffuseColor),
-					this.ambientColorVector =new GlslVector('material.ambientColor' ,material.ambientColor)
+					this.specularColorVector=new GlslVector('material.specularColor',material.specularColor.entries),
+					this.diffuseColorVector =new GlslVector('material.diffuseColor' ,material.diffuseColor.entries),
+					this.ambientColorVector =new GlslVector('material.ambientColor' ,material.ambientColor.entries)
 				);
 			} else {
-				const extendedAmbientColor=fixOptHelp.extendCollection(
-					material.ambientColor,
-					Options,
-					[
-						['LiveFloat','a',[0,1],1],
-					]
-				);
 				this.features.push(
-					this.ambientColorVector=new GlslVector('material.ambientColor',extendedAmbientColor)
+					this.ambientColorVector=new GlslVector('material.ambientColor',[
+						...material.ambientColor.entries, (new Option.LiveFloat('a',[0,1,-1,+1],1)).fix()
+					])
 				);
 				// TODO consider extendind .specularColor and .diffuseColor, b/c they would be present if vertex scope is chosen
 			}
 		}
 		if (light.type!='off') {
 			this.features.push(
-				this.lightDirectionVector=new GlslVector('light.direction',light.direction)
+				this.lightDirectionVector=new GlslVector('light.direction',light.direction.entries)
 			);
 		}
 	}
