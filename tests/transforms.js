@@ -4,7 +4,7 @@ const assert=require('assert');
 const Options=require('../src/options.js');
 const Transforms=require('../src/transforms.js');
 
-describe("Illumination",()=>{
+describe("Transforms",()=>{
 	class TestOptions extends Options {
 		get entriesDescription() {
 			return [
