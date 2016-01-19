@@ -15,7 +15,8 @@ module.exports=function(options,i18n){
 	const transforms=new Transforms(options.transforms);
 	const illumination=new Illumination(options.material,options.light);
 	function makeShape() {
-		const className=options.shape.type.charAt(0).toUpperCase()+options.shape.type.slice(1);
+		const shapeType=String(options.shape.type);
+		const className=shapeType.charAt(0).toUpperCase()+shapeType.slice(1);
 		return new Shape[className](
 			options.shape,
 			options.light.type!='off',
