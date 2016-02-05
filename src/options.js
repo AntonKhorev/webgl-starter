@@ -1,6 +1,6 @@
 'use strict';
 
-var BaseOptions=require('./base/options.js');
+const BaseOptions=require('./base/options.js');
 
 class Options extends BaseOptions {
 	get optionClasses() {
