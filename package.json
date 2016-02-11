@@ -4,11 +4,12 @@
   "license": "ISC",
   "devDependencies": {
     "crnx-build": "github:antonkhorev/crnx-build#v0.0.0",
-    "gulp": "^3.9.1"
+    "gulp": "^3.9.1",
+    "mocha": "^2.4.5"
   },
   "scripts": {
     "gulp": "gulp",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha"
   },
   "repository": "AntonKhorev/webgl-starter",
   "keywords": [
