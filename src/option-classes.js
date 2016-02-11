@@ -1,7 +1,7 @@
 'use strict';
 
 const Input=require('./input-classes.js');
-const imports=require('./base/option-classes.js');
+const imports=require('crnx-base/option-classes');
 
 const RangeInput=imports.RangeInput;
 const Group=imports.Group;
