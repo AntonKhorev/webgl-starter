@@ -1,6 +1,6 @@
 'use strict';
 
-const Lines=require('./lines.js');
+const Lines=require('crnx-base/lines');
 const Feature=require('./feature.js');
 const CallVector=require('./call-vector.js');
 

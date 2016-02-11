@@ -1,7 +1,7 @@
 'use strict';
 
 const fixOptHelp=require('./fixed-options-helpers.js');
-const Lines=require('./lines.js');
+const Lines=require('crnx-base/lines');
 const Vector=require('./vector.js');
 
 class GlslVector extends Vector {

@@ -1,7 +1,7 @@
 'use strict';
 
 const Input=require('./input-classes.js');
-const Lines=require('./lines.js');
+const Lines=require('crnx-base/lines');
 const Feature=require('./feature.js');
 
 class NumericFeature extends Feature {

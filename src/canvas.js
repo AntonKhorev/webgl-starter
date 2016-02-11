@@ -1,6 +1,6 @@
 'use strict';
 
-const Lines=require('./lines.js');
+const Lines=require('crnx-base/lines');
 const Listener=require('./listener-classes.js');
 const Feature=require('./feature.js');
 const IntFeature=require('./int-feature.js');

@@ -1,6 +1,6 @@
 'use strict';
 
-const Lines=require('../lines.js');
+const Lines=require('crnx-base/lines');
 const Colorgen=require('../colorgen.js');
 const Shape=require('./shape.js');
 

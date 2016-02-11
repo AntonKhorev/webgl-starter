@@ -1,6 +1,6 @@
 'use strict';
 
-const Lines=require('../lines.js');
+const Lines=require('crnx-base/lines');
 const LodShape=require('./lodshape.js');
 
 class Gasket extends LodShape {

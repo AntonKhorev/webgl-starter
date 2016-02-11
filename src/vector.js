@@ -2,7 +2,7 @@
 
 const fixOptHelp=require('./fixed-options-helpers.js');
 const Input=require('./input-classes.js');
-const Lines=require('./lines.js');
+const Lines=require('crnx-base/lines');
 const Listener=require('./listener-classes.js');
 const VectorComponent=require('./vector-component.js');
 const NumericFeature=require('./numeric-feature.js');

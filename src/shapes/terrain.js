@@ -1,6 +1,6 @@
 'use strict';
 
-const Lines=require('../lines.js');
+const Lines=require('crnx-base/lines');
 const Mesh=require('./mesh.js');
 
 class Terrain extends Mesh {
