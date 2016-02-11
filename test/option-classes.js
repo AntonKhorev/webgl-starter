@@ -3,7 +3,7 @@
 const assert=require('assert');
 const Input=require('../src/input-classes.js');
 const Option=require('../src/option-classes.js');
-const Options=require('../src/base/options.js');
+const Options=require('crnx-base/options');
 
 describe("Option.LiveInt",()=>{
 	class TestOptions extends Options {

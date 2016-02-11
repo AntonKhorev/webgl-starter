@@ -1,7 +1,7 @@
 'use strict';
 
 const assert=require('assert');
-const Lines=require('../src/lines.js');
+const Lines=require('crnx-base/lines');
 const Options=require('../src/options.js');
 const FeatureContext=require('../src/feature-context.js');
 const Illumination=require('../src/illumination.js');
