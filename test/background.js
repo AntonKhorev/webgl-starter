@@ -1,9 +1,9 @@
-'use strict';
+'use strict'
 
-const assert=require('assert');
-const Options=require('../src/options.js');
-const FeatureContext=require('../src/feature-context.js');
-const Background=require('../src/background.js');
+const assert=require('assert')
+const Options=require('../src/options')
+const FeatureContext=require('../src/feature-context')
+const Background=require('../src/background')
 
 describe("Background",()=>{
 	class TestOptions extends Options {
@@ -19,20 +19,20 @@ describe("Background",()=>{
 					['Checkbox','inputs'],
 					['Checkbox','animations'],
 				]],
-			];
+			]
 		}
 	}
 	context("with solid background",()=>{
 		const options=new TestOptions({background:{
 			type:'solid'
-		}});
-		const fixed=options.fix();
-		const background=new Background(fixed.background);
-		const featureContext=new FeatureContext(fixed.debug);
+		}})
+		const fixed=options.fix()
+		const background=new Background(fixed.background)
+		const featureContext=new FeatureContext(fixed.debug)
 		it("calls gl.clearColor",()=>{
-			assert.deepEqual(background.getJsInitLines(featureContext).data,[
-				"gl.clearColor(1.000,1.000,1.000,1.000);",
-			]);
-		});
-	});
-});
+			assert.deepEqual(background.getJsInitLines(featureContext).get(),[
+				"gl.clearColor(1.000,1.000,1.000,1.000)",
+			])
+		})
+	})
+})
