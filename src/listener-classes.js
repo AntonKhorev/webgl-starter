@@ -18,9 +18,7 @@ class Base {
 		this.entries.push(entry)
 		function makePushArgs(where){
 			return function(){
-				for (let i=0;i<arguments.length;i++) {
-					where.push(arguments[i])
-				}
+				where.push(...arguments)
 				return proxy
 			}
 		}
