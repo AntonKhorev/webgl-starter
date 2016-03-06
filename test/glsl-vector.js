@@ -42,7 +42,7 @@ describe("GlslVector",()=>{
 		})
 		it("returns vec3 map declaration",()=>{
 			assert.deepEqual(vector.getGlslMapDeclarationLines('ololo',v=>"lol("+v+")").get(),[
-				"vec3 ololo=lol(vec3(+1.000,+2.000,+3.000))"
+				"vec3 ololo=lol(vec3(+1.000,+2.000,+3.000));"
 			])
 		})
 		it("returns vec3 map component",()=>{
@@ -90,7 +90,7 @@ describe("GlslVector",()=>{
 		const vector=new GlslVector('foo',options.fix().foo.entries)
 		it("returns float declaration",()=>{
 			assert.deepEqual(vector.getGlslDeclarationLines().get(),[
-				"uniform float fooX"
+				"uniform float fooX;"
 			])
 		})
 		it("returns vec3 made of float and constants as value",()=>{
@@ -134,7 +134,7 @@ describe("GlslVector",()=>{
 		const vector=new GlslVector('foo',options.fix().foo.entries)
 		it("returns vec2 declaration",()=>{
 			assert.deepEqual(vector.getGlslDeclarationLines().get(),[
-				"uniform vec2 foo"
+				"uniform vec2 foo;"
 			])
 		})
 		it("returns vec3 made of vec2 and constant as value",()=>{
@@ -227,8 +227,8 @@ describe("GlslVector",()=>{
 		const vector=new GlslVector('foo',options.fix().foo.entries)
 		it("returns 2 float declarations",()=>{
 			assert.deepEqual(vector.getGlslDeclarationLines().get(),[
-				"uniform float fooX",
-				"uniform float fooZ"
+				"uniform float fooX;",
+				"uniform float fooZ;"
 			])
 		})
 		it("returns vec3 made of floats and constant as value",()=>{
@@ -259,7 +259,7 @@ describe("GlslVector",()=>{
 		const vector=new GlslVector('foo',options.fix().foo.entries)
 		it("returns vec3 declaration",()=>{
 			assert.deepEqual(vector.getGlslDeclarationLines().get(),[
-				"uniform vec3 foo"
+				"uniform vec3 foo;"
 			])
 		})
 		it("returns value equal to declaration",()=>{
@@ -400,7 +400,7 @@ describe("GlslVector",()=>{
 		const vector=new GlslVector('my.foo',options.fix().foo.entries)
 		it("returns vec3 declaration",()=>{
 			assert.deepEqual(vector.getGlslDeclarationLines().get(),[
-				"uniform vec3 myFoo"
+				"uniform vec3 myFoo;"
 			])
 		})
 		it("returns value equal to declaration",()=>{
@@ -430,7 +430,7 @@ describe("GlslVector",()=>{
 		const vector=new GlslVector('rotate',options.fix().rotate.entries)
 		it("returns float declaration",()=>{
 			assert.deepEqual(vector.getGlslDeclarationLines().get(),[
-				"uniform float rotateZ"
+				"uniform float rotateZ;"
 			])
 		})
 		it("returns value equal to declaration",()=>{
@@ -440,7 +440,7 @@ describe("GlslVector",()=>{
 		})
 		it("returns float map declaration",()=>{
 			assert.deepEqual(vector.getGlslMapDeclarationLines('c',v=>"cos("+v+")").get(),[
-				"float cz=cos(rotateZ)"
+				"float cz=cos(rotateZ);"
 			])
 		})
 		it("returns float map",()=>{
@@ -456,7 +456,7 @@ describe("GlslVector",()=>{
 		const vector=new GlslVector('foo',options.fix().foo.entries)
 		it("returns float declaration",()=>{
 			assert.deepEqual(vector.getGlslDeclarationLines().get(),[
-				"uniform float fooX"
+				"uniform float fooX;"
 			])
 		})
 		it("returns vec3 made of float and constants as value",()=>{
