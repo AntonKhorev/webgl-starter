@@ -1,10 +1,11 @@
-'use strict';
+'use strict'
 
-const Lines=require('crnx-base/lines');
+const JsLines=require('crnx-base/js-lines')
+const WrapLines=require('crnx-base/wrap-lines')
 
 class Base {
 	constructor() {
-		this.entries=[];
+		this.entries=[]
 	}
 	enter() {
 		const entry={
@@ -12,186 +13,185 @@ class Base {
 			cond: null,
 			log: [],
 			post: [],
-		};
-		this.entries.push(entry);
+		}
+		this.entries.push(entry)
 		function makePushArgs(where){
 			return function(){
 				for (let i=0;i<arguments.length;i++) {
 					where.push(arguments[i]);
 				}
-				return proxy;
-			};
+				return proxy
+			}
 		}
 		const proxy={
 			pre: makePushArgs(entry.pre),
 			cond: function(cond){
-				entry.cond=cond;
-				return proxy;
+				entry.cond=cond
+				return proxy
 			},
 			log: makePushArgs(entry.log),
 			post: makePushArgs(entry.post),
-		};
-		return proxy;
+		}
+		return proxy
 	}
 	innerPrependedLines() {
-		return [];
+		return []
 	}
 	bracketFnArg() {
-		return "";
+		return ""
 	}
-	wrapCall(line) {
-		return line;
+	wrapCall(lines) {
+		return lines
 	}
 	write(haveToUpdateCanvas,haveToLogInput) {
-		const innerLinesGraph={};
-		const innerLinesRoot=[];
-		let innerLinesPrev=null;
-		const WHITE=0;
-		const GRAY=1;
-		const BLACK=2;
+		const innerLinesGraph={}
+		const innerLinesRoot=[]
+		let innerLinesPrev=null
+		const WHITE=0
+		const GRAY=1
+		const BLACK=2
 		const addInnerLine=(line,cond)=>{
-			let vertex;
+			let vertex
 			if (line in innerLinesGraph) {
-				vertex=innerLinesGraph[line];
+				vertex=innerLinesGraph[line]
 			} else {
 				vertex=innerLinesGraph[line]={
 					prevs: [],
 					conds: [],
 					mark: WHITE,
-				};
+				}
 			}
 			if (vertex.conds!==null) {
 				if (cond===null) {
-					vertex.conds=null;
+					vertex.conds=null
 				} else {
-					vertex.conds.push(cond);
+					vertex.conds.push(cond)
 				}
 			}
 			if (innerLinesPrev!==null) {
-				vertex.prevs.push(innerLinesPrev);
+				vertex.prevs.push(innerLinesPrev)
 			}
-			innerLinesPrev=line;
-		};
+			innerLinesPrev=line
+		}
 		const closeEntryInnerLines=()=>{
 			if (innerLinesPrev!==null) {
-				innerLinesRoot.push(innerLinesPrev);
+				innerLinesRoot.push(innerLinesPrev)
 			}
-			innerLinesPrev=null;
-		};
+			innerLinesPrev=null
+		}
 		const writeInnerLines=()=>{
-			const lines=[];
-			let currentCond=null;
+			const lines=[]
+			let currentCond=null
 			const writeLine=(line,vertex)=>{
-				let newCond=null;
+				let newCond=null
 				if (vertex.conds!==null) {
-					newCond=vertex.conds.join(' || ');
+					newCond=vertex.conds.join(' || ')
 				}
 				if (newCond!=currentCond) {
 					if (currentCond!==null) {
-						lines.push("}");
+						lines.push("}")
 					}
-					currentCond=newCond;
+					currentCond=newCond
 					if (currentCond!==null) {
-						lines.push("if ("+currentCond+") {");
+						lines.push("if ("+currentCond+") {")
 					}
 				}
 				if (currentCond!==null) {
-					lines.push('\t'+line);
+					lines.push('\t'+line)
 				} else {
-					lines.push(line);
+					lines.push(line)
 				}
-			};
+			}
 			const recVertex=(line,vertex)=>{
-				vertex.mark=GRAY;
-				recPrevs(vertex.prevs);
-				vertex.mark=BLACK;
-				writeLine(line,vertex);
-			};
+				vertex.mark=GRAY
+				recPrevs(vertex.prevs)
+				vertex.mark=BLACK
+				writeLine(line,vertex)
+			}
 			const recPrevs=(prevs)=>{
 				prevs.forEach((line)=>{
 					if (innerLinesGraph[line].mark==WHITE) {
-						recVertex(line,innerLinesGraph[line]);
+						recVertex(line,innerLinesGraph[line])
 					}
-				});
-			};
-			recPrevs(innerLinesRoot);
-			if (currentCond!==null) {
-				lines.push("}");
+				})
 			}
-			return new Lines(lines);
-		};
+			recPrevs(innerLinesRoot)
+			if (currentCond!==null) {
+				lines.push("}")
+			}
+			return lines
+		}
 		this.entries.forEach((entry)=>{
 			entry.pre.forEach(line=>{
-				addInnerLine(line,null);
-			});
+				addInnerLine(line,null)
+			})
 			if (haveToLogInput) {
 				entry.log.forEach(line=>{
-					addInnerLine(line,entry.cond);
-				});
+					addInnerLine(line,entry.cond)
+				})
 			}
 			entry.post.forEach(line=>{
-				addInnerLine(line,entry.cond);
-			});
+				addInnerLine(line,entry.cond)
+			})
 			if (haveToUpdateCanvas) {
-				addInnerLine("scheduleFrame();",entry.cond);
+				addInnerLine("scheduleFrame();",entry.cond)
 			}
-			closeEntryInnerLines();
-		});
-		const br=this.bracketListener();
-		let innerLines=writeInnerLines();
-		if (!innerLines.isEmpty()) {
-			innerLines=new Lines(
-				this.innerPrependedLines(),
-				innerLines
-			);
+			closeEntryInnerLines()
+		})
+		const br=this.bracketListener()
+		let innerLines=writeInnerLines() // TODO rename innerLines here and above to innerLineArray b/c it's not Lines class
+		if (innerLines.length>0) {
+			innerLines=[...this.innerPrependedLines(),...innerLines]
 		}
-		if (innerLines.data.length==1) {
-			const match=/^(\w+)\(\);$/.exec(innerLines.data[0]);
+		if (innerLines.length==1) {
+			const match=/^(\w+)\(\);$/.exec(innerLines[0])
 			if (match) {
 				return this.wrapCall(
-					new Lines(
+					JsLines.bae(
 						br[0]+match[1]+br[1]
 					)
-				);
+				)
 			}
 			// TODO what if no match?
 		}
-		if (innerLines.data.length) {
+		if (innerLines.length>0) {
 			return this.wrapCall(
-				innerLines.wrap(
-					br[0]+"function("+this.bracketFnArg()+"){",
-					"}"+br[1]
+				WrapLines.b(
+					JsLines.bae(br[0]+"function("+this.bracketFnArg()+"){"),
+					JsLines.bae("}"+br[1])
+				).ae(
+					JsLines.bae(...innerLines)
 				)
-			);
+			)
 		} else {
-			return new Lines;
+			return JsLines.be()
 		}
 	}
 }
 
 class Slider extends Base {
 	constructor(id) {
-		super();
-		this.id=id;
+		super()
+		this.id=id
 	}
 	bracketListener() {
-		return ["document.getElementById('"+this.id+"').addEventListener('change',",");"];
+		return ["document.getElementById('"+this.id+"').addEventListener('change',",");"]
 	}
 }
 
 class MultipleSlider extends Base {
 	constructor(query) {
-		super();
-		this.query=query;
-	}
-	wrapCall(lines) {
-		return lines.wrap(
-			"[].forEach.call(document.querySelectorAll('"+this.query+"'),function(el){",
-			"});"
-		);
+		super()
+		this.query=query
 	}
 	bracketListener() {
-		return ["el.addEventListener('change',",");"];
+		return ["el.addEventListener('change',",");"]
+	}
+	wrapCall(lines) {
+		return WrapLines.b(
+			JsLines.bae(";[].forEach.call(document.querySelectorAll('"+this.query+"'),function(el){"),
+			JsLines.bae("});")
+		).ae(lines)
 	}
 }
 
@@ -206,51 +206,51 @@ class CanvasMousemove extends Base {
 			} else {
 				proxy.pre("var min"+VarName+"="+minValue+";");
 				proxy.pre("var max"+VarName+"="+maxValue+";");
-				dest=(varFlag?"var ":"")+varName+"=min"+VarName+"+(max"+VarName+"-min"+VarName+")*";
+				dest=(varFlag?"var ":"")+varName+"=min"+VarName+"+(max"+VarName+"-min"+VarName+")*"
 			}
 			return proxy.prexy(
 				inputType,
 				dest+"(ev.clientX-rect.left)/(rect.width-1);",
 				dest+"(rect.bottom-1-ev.clientY)/(rect.height-1);"
-			);
-		};
+			)
+		}
 		proxy.prexy=function(inputType,xLine,yLine){
 			if (inputType.axis=='x') {
-				return proxy.pre(xLine);
+				return proxy.pre(xLine)
 			} else if (inputType.axis=='y') {
-				return proxy.pre(yLine);
+				return proxy.pre(yLine)
 			}
-			return proxy;
-		};
+			return proxy
+		}
 		proxy.minMaxFloat=function(inputType,varName,minValue,maxValue){
-			return floatHelper(true,false,inputType,varName,minValue,maxValue);
-		};
+			return floatHelper(true,false,inputType,varName,minValue,maxValue)
+		}
 		proxy.minMaxVarFloat=function(inputType,varName,minValue,maxValue){
-			return floatHelper(true,true,inputType,varName,minValue,maxValue);
-		};
+			return floatHelper(true,true,inputType,varName,minValue,maxValue)
+		}
 		proxy.newVarInt=function(inputType,varName){
-			const VarName=varName.charAt(0).toUpperCase()+varName.slice(1);
+			const VarName=varName.charAt(0).toUpperCase()+varName.slice(1)
 			return proxy.prexy(
 				inputType,
 				"var new"+VarName+"=Math.floor(min"+VarName+"+(max"+VarName+"-min"+VarName+"+1)*(ev.clientX-rect.left)/rect.width);",
 				"var new"+VarName+"=Math.floor(min"+VarName+"+(max"+VarName+"-min"+VarName+"+1)*(rect.bottom-1-ev.clientY)/rect.height);"
-			);
-		};
-		return proxy;
+			)
+		}
+		return proxy
 	}
 	bracketListener() {
-		return ["canvas.addEventListener('mousemove',",");"];
+		return ["canvas.addEventListener('mousemove',",");"]
 	}
 	bracketFnArg() {
-		return "ev";
+		return "ev"
 	}
 	innerPrependedLines() {
 		return [
 			"var rect=this.getBoundingClientRect();",
-		];
+		]
 	}
 }
 
-exports.Slider=Slider;
-exports.MultipleSlider=MultipleSlider;
-exports.CanvasMousemove=CanvasMousemove;
+exports.Slider=Slider
+exports.MultipleSlider=MultipleSlider
+exports.CanvasMousemove=CanvasMousemove
