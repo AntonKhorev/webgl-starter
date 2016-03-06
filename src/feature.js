@@ -1,40 +1,38 @@
-'use strict';
+'use strict'
 
-const Lines=require('crnx-base/lines');
+const Lines=require('crnx-base/lines')
 
 class Feature {
 	constructor() {
-		this.features=[];
+		this.features=[]
 	}
 	// private:
 	getRecursiveLines(method,args) {
-		const lines=new Lines;
-		this.features.forEach(feature=>{
-			lines.a(feature[method].apply(feature,args));
-		});
-		return lines;
+		return Lines.bae(...this.features.map(feature=>feature[method].apply(feature,args)))
+		// TODO test:
+		// return Lines.bae(...this.features.map(feature=>feature[method](...args)))
 	}
 	// methods to be redefined:
 	hasInputs() {
-		return this.features.some(feature=>feature.hasInputs());
+		return this.features.some(feature=>feature.hasInputs())
 	}
 	requestFeatureContext(featureContext) {
 		this.features.forEach(feature=>{
-			feature.requestFeatureContext(featureContext);
-		});
+			feature.requestFeatureContext(featureContext)
+		})
 	}
 	getHtmlInputLines(i18n) {
-		return this.getRecursiveLines('getHtmlInputLines',arguments);
+		return this.getRecursiveLines('getHtmlInputLines',arguments)
 	}
 	getHtmlControlMessageLines(i18n) {
-		return this.getRecursiveLines('getHtmlControlMessageLines',arguments);
+		return this.getRecursiveLines('getHtmlControlMessageLines',arguments)
 	}
 	getJsInitLines(featureContext) {
-		return this.getRecursiveLines('getJsInitLines',arguments);
+		return this.getRecursiveLines('getJsInitLines',arguments)
 	}
 	getJsLoopLines(featureContext) {
-		return this.getRecursiveLines('getJsLoopLines',arguments);
+		return this.getRecursiveLines('getJsLoopLines',arguments)
 	}
 }
 
-module.exports=Feature;
+module.exports=Feature

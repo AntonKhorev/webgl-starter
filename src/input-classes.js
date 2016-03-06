@@ -1,14 +1,14 @@
-'use strict';
+'use strict'
 
 class Base {
 	constructor(str) {
-		this._str=str;
+		this._str=str
 	}
 	toString() {
-		return this._str;
+		return this._str
 	}
 	valueOf() {
-		return this._str;
+		return this._str
 	}
 }
 
@@ -23,15 +23,15 @@ class Slider extends Variable {
 
 class MouseMove extends Variable {
 	constructor(str) {
-		super(str);
-		this.axis=str.slice(-1);
+		super(str)
+		this.axis=str.slice(-1)
 	}
 }
 
 class Gamepad extends Variable {
 	constructor(str) {
-		super(str);
-		this.axis=Number(str.slice(-1));
+		super(str)
+		this.axis=Number(str.slice(-1))
 	}
 }
 
@@ -45,13 +45,13 @@ function createFromString(str) {
 		'gamepad1':   Gamepad,
 		'gamepad2':   Gamepad,
 		'gamepad3':   Gamepad,
-	}[str](str);
+	}[str](str)
 }
 
-exports.Base=Base;
-exports.Constant=Constant;
-exports.Variable=Variable;
-exports.Slider=Slider;
-exports.MouseMove=MouseMove;
-exports.Gamepad=Gamepad;
-exports.createFromString=createFromString;
+exports.Base=Base
+exports.Constant=Constant
+exports.Variable=Variable
+exports.Slider=Slider
+exports.MouseMove=MouseMove
+exports.Gamepad=Gamepad
+exports.createFromString=createFromString

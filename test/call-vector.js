@@ -125,7 +125,7 @@ describe("CallVector",()=>{
 				"	el.addEventListener('change',updateColor)",
 				"})"
 			])
-			assert.deepEqual(featureContext.getJsAfterInitLines().data,[
+			assert.deepEqual(featureContext.getJsAfterInitLines().get(),[
 			])
 		})
 	})
@@ -251,7 +251,7 @@ describe("CallVector",()=>{
 			])
 		})
 		it("has loop with constant increment",()=>{
-			assert.deepEqual(vector.getJsLoopLines().data,[
+			assert.deepEqual(vector.getJsLoopLines().get(),[
 				"var colorR=Math.min(0.500+0.123*(time-startTime)/1000,1.000)",
 				"setColor(colorR,0.400,0.300,1.000)"
 			])
