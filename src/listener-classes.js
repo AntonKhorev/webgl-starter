@@ -1,5 +1,6 @@
 'use strict'
 
+const capitalize=require('crnx-base/fake-lodash/capitalize')
 const JsLines=require('crnx-base/js-lines')
 const WrapLines=require('crnx-base/wrap-lines')
 
@@ -18,7 +19,7 @@ class Base {
 		function makePushArgs(where){
 			return function(){
 				for (let i=0;i<arguments.length;i++) {
-					where.push(arguments[i]);
+					where.push(arguments[i])
 				}
 				return proxy
 			}
@@ -197,15 +198,15 @@ class MultipleSlider extends Base {
 
 class CanvasMousemove extends Base {
 	enter() {
-		const proxy=super.enter();
+		const proxy=super.enter()
 		const floatHelper=(minMaxFlag,varFlag,inputType,varName,minValue,maxValue)=>{
-			const VarName=varName.charAt(0).toUpperCase()+varName.slice(1);
-			let dest;
+			const VarName=capitalize(varName)
+			let dest
 			if (minValue==0 && maxValue==1) {
-				dest=(varFlag?"var ":"")+varName+"=";
+				dest=(varFlag?"var ":"")+varName+"="
 			} else {
-				proxy.pre("var min"+VarName+"="+minValue+";");
-				proxy.pre("var max"+VarName+"="+maxValue+";");
+				proxy.pre("var min"+VarName+"="+minValue+";")
+				proxy.pre("var max"+VarName+"="+maxValue+";")
 				dest=(varFlag?"var ":"")+varName+"=min"+VarName+"+(max"+VarName+"-min"+VarName+")*"
 			}
 			return proxy.prexy(
@@ -229,7 +230,7 @@ class CanvasMousemove extends Base {
 			return floatHelper(true,true,inputType,varName,minValue,maxValue)
 		}
 		proxy.newVarInt=function(inputType,varName){
-			const VarName=varName.charAt(0).toUpperCase()+varName.slice(1)
+			const VarName=capitalize(varName)
 			return proxy.prexy(
 				inputType,
 				"var new"+VarName+"=Math.floor(min"+VarName+"+(max"+VarName+"-min"+VarName+"+1)*(ev.clientX-rect.left)/rect.width);",
