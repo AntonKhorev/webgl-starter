@@ -35,7 +35,7 @@ class Base {
 		}
 		return proxy
 	}
-	innerPrependedLines() {
+	prependedStatements() {
 		return []
 	}
 	bracketFnArg() {
@@ -45,18 +45,18 @@ class Base {
 		return lines
 	}
 	write(haveToUpdateCanvas,haveToLogInput) {
-		const innerLinesGraph={}
-		const innerLinesRoot=[]
-		let innerLinesPrev=null
+		const statementsGraph={}
+		const statementsRoot=[]
+		let statementsPrev=null
 		const WHITE=0
 		const GRAY=1
 		const BLACK=2
-		const addInnerLine=(line,cond)=>{
+		const addStatement=(statement,cond)=>{
 			let vertex
-			if (line in innerLinesGraph) {
-				vertex=innerLinesGraph[line]
+			if (statement in statementsGraph) {
+				vertex=statementsGraph[statement]
 			} else {
-				vertex=innerLinesGraph[line]={
+				vertex=statementsGraph[statement]={
 					prevs: [],
 					conds: [],
 					mark: WHITE,
@@ -69,83 +69,83 @@ class Base {
 					vertex.conds.push(cond)
 				}
 			}
-			if (innerLinesPrev!==null) {
-				vertex.prevs.push(innerLinesPrev)
+			if (statementsPrev!==null) {
+				vertex.prevs.push(statementsPrev)
 			}
-			innerLinesPrev=line
+			statementsPrev=statement
 		}
-		const closeEntryInnerLines=()=>{
-			if (innerLinesPrev!==null) {
-				innerLinesRoot.push(innerLinesPrev)
+		const closeEntryStatements=()=>{
+			if (statementsPrev!==null) {
+				statementsRoot.push(statementsPrev)
 			}
-			innerLinesPrev=null
+			statementsPrev=null
 		}
-		const writeInnerLines=()=>{
-			const lines=[]
+		const getStatements=()=>{
+			const statements=[]
 			let currentCond=null
-			const writeLine=(line,vertex)=>{
+			const writeStatement=(statement,vertex)=>{
 				let newCond=null
 				if (vertex.conds!==null) {
 					newCond=vertex.conds.join(' || ')
 				}
 				if (newCond!=currentCond) {
 					if (currentCond!==null) {
-						lines.push("}")
+						statements.push("}")
 					}
 					currentCond=newCond
 					if (currentCond!==null) {
-						lines.push("if ("+currentCond+") {")
+						statements.push("if ("+currentCond+") {")
 					}
 				}
 				if (currentCond!==null) {
-					lines.push('\t'+line)
+					statements.push('\t'+statement)
 				} else {
-					lines.push(line)
+					statements.push(statement)
 				}
 			}
-			const recVertex=(line,vertex)=>{
+			const recVertex=(statement,vertex)=>{
 				vertex.mark=GRAY
 				recPrevs(vertex.prevs)
 				vertex.mark=BLACK
-				writeLine(line,vertex)
+				writeStatement(statement,vertex)
 			}
 			const recPrevs=(prevs)=>{
-				prevs.forEach((line)=>{
-					if (innerLinesGraph[line].mark==WHITE) {
-						recVertex(line,innerLinesGraph[line])
+				prevs.forEach((statement)=>{
+					if (statementsGraph[statement].mark==WHITE) {
+						recVertex(statement,statementsGraph[statement])
 					}
 				})
 			}
-			recPrevs(innerLinesRoot)
+			recPrevs(statementsRoot)
 			if (currentCond!==null) {
-				lines.push("}")
+				statements.push("}")
 			}
-			return lines
+			return statements
 		}
 		this.entries.forEach((entry)=>{
-			entry.pre.forEach(line=>{
-				addInnerLine(line,null)
+			entry.pre.forEach(statement=>{
+				addStatement(statement,null)
 			})
 			if (haveToLogInput) {
-				entry.log.forEach(line=>{
-					addInnerLine(line,entry.cond)
+				entry.log.forEach(statement=>{
+					addStatement(statement,entry.cond)
 				})
 			}
-			entry.post.forEach(line=>{
-				addInnerLine(line,entry.cond)
+			entry.post.forEach(statement=>{
+				addStatement(statement,entry.cond)
 			})
 			if (haveToUpdateCanvas) {
-				addInnerLine("scheduleFrame();",entry.cond)
+				addStatement("scheduleFrame();",entry.cond)
 			}
-			closeEntryInnerLines()
+			closeEntryStatements()
 		})
 		const br=this.bracketListener()
-		let innerLines=writeInnerLines() // TODO rename innerLines here and above to innerLineArray b/c it's not Lines class
-		if (innerLines.length>0) {
-			innerLines=[...this.innerPrependedLines(),...innerLines]
+		let statements=getStatements()
+		if (statements.length>0) {
+			statements=[...this.prependedStatements(),...statements]
 		}
-		if (innerLines.length==1) {
-			const match=/^(\w+)\(\);$/.exec(innerLines[0])
+		if (statements.length==1) {
+			const match=/^(\w+)\(\);$/.exec(statements[0])
 			if (match) {
 				return this.wrapCall(
 					JsLines.bae(
@@ -155,13 +155,13 @@ class Base {
 			}
 			// TODO what if no match?
 		}
-		if (innerLines.length>0) {
+		if (statements.length>0) {
 			return this.wrapCall(
 				WrapLines.b(
 					JsLines.bae(br[0]+"function("+this.bracketFnArg()+"){"),
 					JsLines.bae("}"+br[1])
 				).ae(
-					JsLines.bae(...innerLines)
+					JsLines.bae(...statements)
 				)
 			)
 		} else {
@@ -215,11 +215,11 @@ class CanvasMousemove extends Base {
 				dest+"(rect.bottom-1-ev.clientY)/(rect.height-1);"
 			)
 		}
-		proxy.prexy=function(inputType,xLine,yLine){
+		proxy.prexy=function(inputType,xStatement,yStatement){
 			if (inputType.axis=='x') {
-				return proxy.pre(xLine)
+				return proxy.pre(xStatement)
 			} else if (inputType.axis=='y') {
-				return proxy.pre(yLine)
+				return proxy.pre(yStatement)
 			}
 			return proxy
 		}
@@ -245,7 +245,7 @@ class CanvasMousemove extends Base {
 	bracketFnArg() {
 		return "ev"
 	}
-	innerPrependedLines() {
+	prependedStatements() {
 		return [
 			"var rect=this.getBoundingClientRect();",
 		]
