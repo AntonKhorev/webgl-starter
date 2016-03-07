@@ -1,21 +1,20 @@
-'use strict';
+'use strict'
 
 function number(n) {
-	return n.toString().replace('-','−');
+	return n.toString().replace('-','−')
 }
 function plural(n,word) {
 	if (n==1) {
-		return word;
+		return word
 	} else {
-		return word+'s';
+		return word+'s'
 	}
 }
-const plainValue=x=>number(x);
-const pixelValue=n=>number(n)+" <abbr title='"+plural(n,'pixel')+"'>px</abbr>";
+const plainValue=x=>number(x)
+const pixelValue=n=>number(n)+" <abbr title='"+plural(n,'pixel')+"'>px</abbr>"
 
-const dataStrings={
-	'message.hljs': "<a href='https://highlightjs.org/'>highlight.js</a> (hosted on cdnjs.cloudflare.com) is not loaded. Syntax highlighting is disabled.",
-	'message.elements': "choosing 8- or 16-bit index may limit available shape detail levels",
+let dataStrings={
+	'message.elements': "choosing 8- or 16-bit index may limit available shape detail levels", // TODO change prefix to options-output
 
 	'options.canvas': "Canvas",
 	'options.canvas.{width,height}': "Canvas {width,height}",
@@ -111,43 +110,45 @@ const dataStrings={
 	'controls.type.mousemovex': "Move the mouse pointer horizontally over the canvas",
 	'controls.type.mousemovey': "Move the mouse pointer vertically over the canvas",
 	'controls.to': "to update",
-};
+}
 
-const strings={};
-const expandRegexp=/^([^{]*)\{([^}]*)\}(.*)$/;
+dataStrings=require('crnx-base/code-output-i18n')(dataStrings)
+
+const strings={}
+const expandRegexp=/^([^{]*)\{([^}]*)\}(.*)$/
 function expandIdAndString(id,string) {
-	let match;
+	let match
 	if (match=expandRegexp.exec(id)) {
-		const idStart=match[1];
-		const idMids=match[2].split(',');
-		const idEnd=match[3];
+		const idStart=match[1]
+		const idMids=match[2].split(',')
+		const idEnd=match[3]
 		if ((typeof string=='string') && (match=expandRegexp.exec(string))) {
-			const stringStart=match[1];
-			const stringMids=match[2].split(',');
-			const stringEnd=match[3];
+			const stringStart=match[1]
+			const stringMids=match[2].split(',')
+			const stringEnd=match[3]
 			idMids.forEach((idMid,i)=>{
-				const stringMid=stringMids[i];
-				expandIdAndString(idStart+idMid+idEnd,stringStart+stringMid+stringEnd);
-			});
+				const stringMid=stringMids[i]
+				expandIdAndString(idStart+idMid+idEnd,stringStart+stringMid+stringEnd)
+			})
 		} else {
 			idMids.forEach(idMid=>{
-				expandIdAndString(idStart+idMid+idEnd,string);
-			});
+				expandIdAndString(idStart+idMid+idEnd,string)
+			})
 		}
 	} else {
-		strings[id]=string;
+		strings[id]=string
 	}
 }
 for (let id in dataStrings) {
-	expandIdAndString(id,dataStrings[id]);
+	expandIdAndString(id,dataStrings[id])
 }
 
 module.exports=function(id,n){
 	if (strings[id]===undefined) {
-		throw new Error("undefined string "+id);
+		throw new Error("undefined string "+id)
 	} if (typeof strings[id] == 'string') {
-		return strings[id];
+		return strings[id]
 	} else {
-		return strings[id](n);
+		return strings[id](n)
 	}
-};
+}
