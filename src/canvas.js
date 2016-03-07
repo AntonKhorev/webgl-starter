@@ -1,80 +1,79 @@
-'use strict';
+'use strict'
 
-const Lines=require('crnx-base/lines');
-const Listener=require('./listener-classes.js');
-const Feature=require('./feature.js');
-const IntFeature=require('./int-feature.js');
+const Lines=require('crnx-base/lines')
+const JsLines=require('crnx-base/js-lines')
+const Listener=require('./listener-classes')
+const Feature=require('./feature')
+const IntFeature=require('./int-feature')
 
 class Canvas extends Feature {
 	constructor(options) {
-		super();
-		this.width=options.width;
-		this.height=options.height;
+		super()
+		this.width=options.width
+		this.height=options.height
 		this.features.push(
 			new IntFeature('canvas.width' ,options.width),
 			new IntFeature('canvas.height',options.height)
-		);
+		)
 	}
 	getHtmlCanvasLines() {
-		return new Lines(
+		return Lines.bae(
 			"<div>",
-			"	<canvas id='myCanvas' width='"+this.width+"' height='"+this.height+"'></canvas>",
+			Lines.html`	<canvas id=myCanvas width=${this.width} height=${this.height}></canvas>`,
 			"</div>"
-		);
+		)
 	}
 	getGlslVertexDeclarationLines() {
 		if (this.hasInputs()) {
-			return new Lines("uniform float aspect;");
+			return Lines.bae("uniform float aspect;")
 		} else {
-			return new Lines;
+			return Lines.be()
 		}
 	}
 	getGlslVertexOutputLines() {
-		const needAspectConstant=!this.hasInputs() && Number(this.width)!=Number(this.height);
+		const needAspectConstant=!this.hasInputs() && Number(this.width)!=Number(this.height)
 		if (needAspectConstant) {
-			return new Lines(
+			return Lines.bae(
 				"float aspect="+this.width+".0/"+this.height+".0;"
-			);
+			)
 		} else {
-			return new Lines;
+			return Lines.be()
 		}
 	}
 	providesAspect() {
-		return this.hasInputs() || Number(this.width)!=Number(this.height);
+		return this.hasInputs() || Number(this.width)!=Number(this.height)
 	}
 	getJsInitLines(featureContext) {
-		const lines=super.getJsInitLines(featureContext);
+		const a=JsLines.ba(super.getJsInitLines(featureContext))
 		const canvasUpdater=()=>{
-			lines.a(
+			a(
 				"function updateAspect() {",
 				"	gl.viewport(0,0,canvas.width,canvas.height);",
 				"	gl.uniform1f(aspectLoc,canvas.width/canvas.height);",
 				"}",
 				"updateAspect();"
-			);
-		};
+			)
+		}
 		const canvasListener=wh=>{
 			if (this[wh].input=='slider') {
-				const listener=new Listener.Slider('canvas.'+wh);
+				const listener=new Listener.Slider('canvas.'+wh)
 				listener.enter()
 					.log("console.log(this.id,'input value:',parseInt(this.value));")
 					.post("canvas."+wh+"=parseInt(this.value);")
-					.post("updateAspect();");
-				lines.a(
+					.post("updateAspect();")
+				a(
 					featureContext.getListenerLines(listener)
-				);
+				)
 			}
-		};
-		if (this.hasInputs()) {
-			lines.a(
-				"var aspectLoc=gl.getUniformLocation(program,'aspect');"
-			);
-			canvasUpdater();
-			canvasListener('width');
-			canvasListener('height');
 		}
-		return lines;
+		if (this.hasInputs()) {
+			a("var aspectLoc=gl.getUniformLocation(program,'aspect');")
+			canvasUpdater()
+			canvasListener('width')
+			canvasListener('height')
+		}
+		return a.e()
 	}
 }
 
-module.exports=Canvas;
+module.exports=Canvas

@@ -7,6 +7,8 @@
   },
   "devDependencies": {
     "crnx-build": "github:antonkhorev/crnx-build#v0.1.0",
+    "glsl-parser": "^2.0.0",
+    "glsl-tokenizer": "^2.1.1",
     "gulp": "^3.9.1",
     "mocha": "^2.4.5",
     "syntax-error": "^1.1.5"
