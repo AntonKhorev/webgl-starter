@@ -1,25 +1,25 @@
-'use strict';
+'use strict'
 
-const Lines=require('crnx-base/lines');
-const Colorgen=require('../colorgen.js');
-const Shape=require('./shape.js');
+const JsLines=require('crnx-base/js-lines')
+const Colorgen=require('../colorgen')
+const Shape=require('./shape')
 
 class Square extends Shape {
-	get glPrimitive() { return 'TRIANGLE_FAN'; }
+	get glPrimitive() { return 'TRIANGLE_FAN' }
 	writeArrays() {
-		const colorgen=new Colorgen(this.colorAttrs,0);
-		let colorDataForFace;
+		const colorgen=new Colorgen(this.colorAttrs,0)
+		let colorDataForFace
 		const writeColorData=()=>{
 			if (this.hasColorsPerFace && !this.hasColorsPerVertex) {
 				if (colorDataForFace===undefined) {
-					colorDataForFace=colorgen.getNextColorString();
+					colorDataForFace=colorgen.getNextColorString()
 				}
-				return colorDataForFace;
+				return colorDataForFace
 			} else {
-				return colorgen.getNextColorString();
+				return colorgen.getNextColorString()
 			}
-		};
-		const lines=new Lines(
+		}
+		const a=JsLines.ba(
 			"var nVertices=4;",
 			"var vertices=new Float32Array([",
 			"	// x    y"+colorgen.getHeaderString(),
@@ -28,15 +28,15 @@ class Square extends Shape {
 			"	+0.5,+0.5,"+writeColorData(),
 			"	-0.5,+0.5,"+writeColorData(),
 			"]);"
-		);
+		)
 		if (this.usesElements()) {
-			lines.a(
+			a(
 				"var nElements=4;",
 				"var elements=new "+this.getElementIndexJsArray()+"([0,1,2,3]);"
-			);
+			)
 		}
-		return lines;
+		return a.e()
 	}
 }
 
-module.exports=Square;
+module.exports=Square

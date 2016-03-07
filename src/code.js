@@ -7,7 +7,6 @@ const Background=require('./background')
 const Transforms=require('./transforms')
 const Illumination=require('./illumination')
 
-const capitalize=require('crnx-base/fake-lodash/capitalize')
 const Lines=require('crnx-base/lines')
 const JsLines=require('crnx-base/js-lines')
 const WrapLines=require('crnx-base/wrap-lines')
@@ -27,8 +26,7 @@ class Code extends BaseWebCode {
 		this.transforms=new Transforms(options.transforms)
 		this.illumination=new Illumination(options.material,options.light)
 		const makeShape=()=>{
-			const className=capitalize(String(options.shape.type))
-			return new Shape[className](
+			return new Shape[String(options.shape.type)](
 				options.shape,
 				options.light.type!='off',
 				options.material.scope=='vertex',

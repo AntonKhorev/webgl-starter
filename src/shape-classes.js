@@ -1,8 +1,8 @@
-'use strict';
+'use strict'
 
-exports.Square=require('./shapes/square.js');
-exports.Triangle=require('./shapes/triangle.js');
-exports.Gasket=require('./shapes/gasket.js');
-exports.Cube=require('./shapes/cube.js');
-exports.Hat=require('./shapes/hat.js');
-exports.Terrain=require('./shapes/terrain.js');
+exports.square=require('./shapes/square')
+exports.triangle=require('./shapes/triangle')
+exports.gasket=require('./shapes/gasket')
+exports.cube=require('./shapes/cube')
+exports.hat=require('./shapes/hat')
+exports.terrain=require('./shapes/terrain')
