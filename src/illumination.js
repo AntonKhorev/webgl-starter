@@ -1,15 +1,16 @@
-'use strict';
+'use strict'
 
-const Option=require('./option-classes.js');
-const Lines=require('crnx-base/lines');
-const Feature=require('./feature.js');
-const GlslVector=require('./glsl-vector.js');
+const Option=require('./option-classes')
+const Lines=require('crnx-base/lines')
+const WrapLines=require('crnx-base/wrap-lines')
+const Feature=require('./feature')
+const GlslVector=require('./glsl-vector')
 
 class Illumination extends Feature {
 	constructor(material,light) {
-		super();
-		this.material=material;
-		this.light=light;
+		super()
+		this.material=material
+		this.light=light
 		// possible options checks:
 		// material.scope=='global': constant or user input -> uniform
 		// material.scope!='global': colors in model data -> attribute
@@ -22,210 +23,212 @@ class Illumination extends Feature {
 			if (material.data=='one') {
 				this.features.push(
 					this.colorVector=new GlslVector('material.color',material.color.entries)
-				);
+				)
 			} else if (light.type!='off') {
 				this.features.push(
 					this.specularColorVector=new GlslVector('material.specularColor',material.specularColor.entries),
 					this.diffuseColorVector =new GlslVector('material.diffuseColor' ,material.diffuseColor.entries),
 					this.ambientColorVector =new GlslVector('material.ambientColor' ,material.ambientColor.entries)
-				);
+				)
 			} else {
 				this.features.push(
 					this.ambientColorVector=new GlslVector('material.ambientColor',[
 						...material.ambientColor.entries, (new Option.LiveFloat('a',[0,1,-1,+1],1)).fix()
 					])
-				);
+				)
 				// TODO consider extendind .specularColor and .diffuseColor, b/c they would be present if vertex scope is chosen
 			}
 		}
 		if (light.type!='off') {
 			this.features.push(
 				this.lightDirectionVector=new GlslVector('light.direction',light.direction.entries)
-			);
+			)
 		}
 	}
 	getColorAttrs() {
 		if (this.material.scope=='global') {
-			return [];
+			return []
 		} else {
 			if (this.material.data=='one') {
 				return [
 					{name:"color",enabled:true,weight:1.0}
-				];
+				]
 			} else {
 				return [
 					{name:"specularColor",enabled:this.light.type!='off',weight:0.4},
 					{name:"diffuseColor" ,enabled:this.light.type!='off',weight:0.4},
 					{name:"ambientColor" ,enabled:true                  ,weight:0.2}
-				];
+				]
 			}
 		}
 	}
 	wantsTransformedPosition(eyeAtInfinity) {
-		return !eyeAtInfinity && this.light.type!='off' && this.material.data!='one';
+		return !eyeAtInfinity && this.light.type!='off' && this.material.data!='one'
 	}
 	getGlslVertexDeclarationLines(eyeAtInfinity,hasNormalAttr) {
-		const lines=new Lines;
+		const a=Lines.b()
 		if (this.wantsTransformedPosition(eyeAtInfinity)) {
-			lines.a("varying vec3 interpolatedView;");
+			a("varying vec3 interpolatedView;")
 		}
 		if (this.light.type!='off') {
 			if (hasNormalAttr) {
-				lines.a("attribute vec3 normal;");
+				a("attribute vec3 normal;")
 			}
-			lines.a("varying vec3 interpolatedNormal;");
+			a("varying vec3 interpolatedNormal;")
 		}
 		if (this.material.scope!='global') {
 			if (this.material.data=='one') {
-				lines.a("attribute vec4 color;");
-				lines.a("varying vec4 interpolatedColor;");
+				a("attribute vec4 color;")
+				a("varying vec4 interpolatedColor;")
 			} else {
 				if (this.light.type=='off') {
-					lines.a("attribute vec4 ambientColor;");
-					lines.a("varying vec4 interpolatedColor;");
+					a("attribute vec4 ambientColor;")
+					a("varying vec4 interpolatedColor;")
 				} else {
-					lines.a(
+					a(
 						"attribute vec3 specularColor;",
 						"attribute vec3 diffuseColor;",
 						"attribute vec3 ambientColor;",
 						"varying vec3 interpolatedSpecularColor;",
 						"varying vec3 interpolatedDiffuseColor;",
 						"varying vec3 interpolatedAmbientColor;"
-					);
+					)
 				}
 			}
 		}
-		return lines;
+		return a.e()
 	}
 	getGlslVertexOutputLines(eyeAtInfinity,hasNormalAttr,normalTransformLines) {
-		const lines=new Lines;
+		const a=Lines.b()
 		if (this.wantsTransformedPosition(eyeAtInfinity)) {
-			lines.a("interpolatedView=-transformedPosition.xyz;");
+			a("interpolatedView=-transformedPosition.xyz;")
 		}
 		if (this.light.type!='off') {
-			lines.a("interpolatedNormal=");
+			a("interpolatedNormal=")
 			if (hasNormalAttr) {
-				lines.t("normal");
+				a.t("normal")
 			} else {
-				lines.t("vec3(0.0,0.0,1.0)");
+				a.t("vec3(0.0,0.0,1.0)")
 			}
-			lines.t(normalTransformLines);
-			lines.t(";");
+			a.t(normalTransformLines)
+			a.t(";")
 		}
 		if (this.material.scope!='global') {
 			if (this.material.data=='one') {
-				lines.a("interpolatedColor=color;");
+				a("interpolatedColor=color;")
 			} else {
 				if (this.light.type=='off') {
-					lines.a("interpolatedColor=ambientColor;");
+					a("interpolatedColor=ambientColor;")
 				} else {
-					lines.a(
+					a(
 						"interpolatedSpecularColor=specularColor;",
 						"interpolatedDiffuseColor=diffuseColor;",
 						"interpolatedAmbientColor=ambientColor;"
-					);
+					)
 				}
 			}
 		}
-		return lines;
+		return a.e()
 	}
 	getGlslFragmentDeclarationLines(eyeAtInfinity) {
-		const lines=new Lines;
+		const a=Lines.b()
 		if (this.wantsTransformedPosition(eyeAtInfinity)) {
-			lines.a("varying vec3 interpolatedView;");
+			a("varying vec3 interpolatedView;")
 		}
 		if (this.light.type!='off') {
-			lines.a(
+			a(
 				this.lightDirectionVector.getGlslDeclarationLines(),
 				"varying vec3 interpolatedNormal;"
-			);
+			)
 		}
 		if (this.material.scope=='global') {
 			if (this.material.data=='one') {
-				lines.a(this.colorVector.getGlslDeclarationLines());
+				a(this.colorVector.getGlslDeclarationLines())
 			} else {
 				if (this.light.type!='off') {
-					lines.a(this.specularColorVector.getGlslDeclarationLines());
-					lines.a(this.diffuseColorVector.getGlslDeclarationLines());
+					a(this.specularColorVector.getGlslDeclarationLines())
+					a(this.diffuseColorVector.getGlslDeclarationLines())
 				}
-				lines.a(this.ambientColorVector.getGlslDeclarationLines());
+				a(this.ambientColorVector.getGlslDeclarationLines())
 			}
 		} else {
 			if (this.material.data=='one' || this.light.type=='off') {
-				lines.a("varying vec4 interpolatedColor;");
+				a("varying vec4 interpolatedColor;")
 			} else {
-				lines.a(
+				a(
 					"varying vec3 interpolatedSpecularColor;",
 					"varying vec3 interpolatedDiffuseColor;",
 					"varying vec3 interpolatedAmbientColor;"
-				);
+				)
 			}
 		}
-		return lines;
+		return a.e()
 	}
 	getGlslFragmentOutputLines(eyeAtInfinity,twoSided) {
-		const lines=new Lines;
-		let colorRGB,colorA,colorRGBA;
+		const a=Lines.b()
+		let colorRGB,colorA,colorRGBA
 		if (this.material.scope=='global') {
 			const vector=(this.material.data=='one'
 				? this.colorVector
 				: this.ambientColorVector
-			);
-			colorRGB =()=>vector.getGlslComponentsValue('rgb');
-			colorA   =()=>vector.getGlslComponentsValue('a');
-			colorRGBA=()=>vector.getGlslValue();
+			)
+			colorRGB =()=>vector.getGlslComponentsValue('rgb')
+			colorA   =()=>vector.getGlslComponentsValue('a')
+			colorRGBA=()=>vector.getGlslValue()
 		} else {
-			colorRGB =()=>"interpolatedColor.rgb"; // TODO don't pass it as vec4 if light is on
-			colorA   =()=>"interpolatedColor.a";
-			colorRGBA=()=>"interpolatedColor";
+			colorRGB =()=>"interpolatedColor.rgb" // TODO don't pass it as vec4 if light is on
+			colorA   =()=>"interpolatedColor.a"
+			colorRGBA=()=>"interpolatedColor"
 		}
 		if (this.light.type=='off') {
-			lines.a("gl_FragColor="+colorRGBA()+";");
+			a("gl_FragColor="+colorRGBA()+";")
 		} else {
-			lines.a("vec3 N=normalize(interpolatedNormal);");
+			a("vec3 N=normalize(interpolatedNormal);")
 			if (twoSided) {
-				lines.a("if (!gl_FrontFacing) N=-N;");
+				a("if (!gl_FrontFacing) N=-N;")
 			}
-			lines.a("vec3 L=normalize("+this.lightDirectionVector.getGlslValue()+");");
+			a("vec3 L=normalize("+this.lightDirectionVector.getGlslValue()+");")
 			if (this.material.data=='one') {
-				lines.a(
+				a(
 					"gl_FragColor=vec4("+colorRGB()+"*max(0.0,dot(L,N)),"+colorA()+");"
-				);
+				)
 			} else {
 				if (this.wantsTransformedPosition(eyeAtInfinity)) {
-					lines.a("vec3 V=normalize(interpolatedView);");
+					a("vec3 V=normalize(interpolatedView);")
 				} else {
-					lines.a("vec3 V=vec3(0.0,0.0,1.0);");
+					a("vec3 V=vec3(0.0,0.0,1.0);")
 				}
-				let specularDotArgs="H,N";
-				let shininessCorrection="";
+				let specularDotArgs="H,N"
+				let shininessCorrection=""
 				if (this.light.type=='blinn') {
-					lines.a("vec3 H=normalize(L+V);");
+					a("vec3 H=normalize(L+V);")
 				} else {
-					lines.a("vec3 R=reflect(-L,N);");
-					specularDotArgs="R,V";
-					shininessCorrection="/4.0";
+					a("vec3 R=reflect(-L,N);")
+					specularDotArgs="R,V"
+					shininessCorrection="/4.0"
 				}
-				lines.a("float shininess=100.0;");
-				lines.a((this.material.scope=='global'
-					? new Lines(
-						"+"+this.specularColorVector.getGlslValue()+"*pow(max(0.0,dot("+specularDotArgs+")),shininess"+shininessCorrection+")",
-						"+"+this.diffuseColorVector.getGlslValue()+"*max(0.0,dot(L,N))",
-						"+"+this.ambientColorVector.getGlslValue()
+				a("float shininess=100.0;")
+				a(
+					WrapLines.b(
+						"gl_FragColor=vec4(",
+						",1.0);"
+					).ae(this.material.scope=='global'
+						? Lines.bae(
+							"+"+this.specularColorVector.getGlslValue()+"*pow(max(0.0,dot("+specularDotArgs+")),shininess"+shininessCorrection+")",
+							"+"+this.diffuseColorVector.getGlslValue()+"*max(0.0,dot(L,N))",
+							"+"+this.ambientColorVector.getGlslValue()
+						)
+						: Lines.bae(
+							"+interpolatedSpecularColor*pow(max(0.0,dot("+specularDotArgs+")),shininess"+shininessCorrection+")",
+							"+interpolatedDiffuseColor*max(0.0,dot(L,N))",
+							"+interpolatedAmbientColor"
+						)
 					)
-					: new Lines(
-						"+interpolatedSpecularColor*pow(max(0.0,dot("+specularDotArgs+")),shininess"+shininessCorrection+")",
-						"+interpolatedDiffuseColor*max(0.0,dot(L,N))",
-						"+interpolatedAmbientColor"
-					)
-				).wrap(
-					"gl_FragColor=vec4(",
-					",1.0);"
-				));
+				)
 			}
 		}
-		return lines;
+		return a.e()
 	}
 }
 
-module.exports=Illumination;
+module.exports=Illumination
