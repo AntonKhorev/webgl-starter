@@ -1,10 +1,10 @@
-'use strict';
+'use strict'
 
-const BaseOptions=require('crnx-base/options');
+const BaseOptions=require('crnx-base/options')
 
 class Options extends BaseOptions {
 	get optionClasses() {
-		return require('./option-classes.js');
+		return require('./option-classes')
 	}
 	get entriesDescription() {
 		return [
@@ -51,11 +51,8 @@ class Options extends BaseOptions {
 				['Checkbox','inputs'], // TODO hide if no inputs?
 				['Checkbox','animations'],
 			]],
-			['Group','formatting',[
-				['Select','indent',['tab','2','4','8']],
-			]],
-		];
+		]
 	}
 }
 
-module.exports=Options;
+module.exports=Options

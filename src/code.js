@@ -1,52 +1,72 @@
-'use strict';
+'use strict'
 
-const Lines=require('crnx-base/lines');
-const Shape=require('./shape-classes.js');
-const FeatureContext=require('./feature-context.js');
-const Canvas=require('./canvas.js');
-const Background=require('./background.js');
-const Transforms=require('./transforms.js');
-const Illumination=require('./illumination.js');
+const Shape=require('./shape-classes')
+const FeatureContext=require('./feature-context')
+const Canvas=require('./canvas')
+const Background=require('./background')
+const Transforms=require('./transforms')
+const Illumination=require('./illumination')
 
-module.exports=function(options,i18n){
-	const featureContext=new FeatureContext(options.debug);
-	const canvas=new Canvas(options.canvas);
-	const background=new Background(options.background);
-	const transforms=new Transforms(options.transforms);
-	const illumination=new Illumination(options.material,options.light);
-	function makeShape() {
-		const shapeType=String(options.shape.type);
-		const className=shapeType.charAt(0).toUpperCase()+shapeType.slice(1);
-		return new Shape[className](
-			options.shape,
-			options.light.type!='off',
-			options.material.scope=='vertex',
-			options.material.scope=='face',
-			illumination.getColorAttrs()
-		);
+const capitalize=require('crnx-base/fake-lodash/capitalize')
+const Lines=require('crnx-base/lines')
+const JsLines=require('crnx-base/js-lines')
+const WrapLines=require('crnx-base/wrap-lines')
+const NoseWrapLines=require('crnx-base/nose-wrap-lines')
+const InterleaveLines=require('crnx-base/interleave-lines')
+const IndentLines=require('crnx-base/indent-lines')
+const BaseWebCode=require('crnx-base/web-code')
+
+class Code extends BaseWebCode {
+	constructor(options,i18n) {
+		super()
+		this.options=options
+		this.i18n=i18n
+		this.featureContext=new FeatureContext(options.debug)
+		this.canvas=new Canvas(options.canvas)
+		this.background=new Background(options.background)
+		this.transforms=new Transforms(options.transforms)
+		this.illumination=new Illumination(options.material,options.light)
+		const makeShape=()=>{
+			const className=capitalize(String(options.shape.type))
+			return new Shape[className](
+				options.shape,
+				options.light.type!='off',
+				options.material.scope=='vertex',
+				options.material.scope=='face',
+				this.illumination.getColorAttrs()
+			)
+		}
+		this.shape=makeShape()
+		this.features=[
+			this.canvas,
+			this.background,
+			this.transforms,
+			this.illumination,
+			this.shape,
+		]
+		this.featureNames=[
+			'canvas',
+			'background',
+			'transforms',
+			'illumination',
+			'shape',
+		]
+		this.features.forEach(feature=>{
+			feature.requestFeatureContext(this.featureContext)
+		})
 	}
-	const shape=makeShape();
-	const features=[
-		canvas,
-		background,
-		transforms,
-		illumination,
-		shape,
-	];
-	const featureNames=[
-		'canvas',
-		'background',
-		'transforms',
-		'illumination',
-		'shape',
-	];
-	features.forEach(feature=>{
-		feature.requestFeatureContext(featureContext);
-	});
-
-	function getHtmlStyleLines() {
-		var lines=new Lines;
-		if (featureContext.hasSliders) {
+	get basename() {
+		return 'webgl'
+	}
+	get lang() {
+		return 'en'
+	}
+	get title() {
+		return "WebGL example - Generated code"
+	}
+	get styleLines() {
+		const a=Lines.b()
+		if (this.featureContext.hasSliders) {
 			lines.a(
 				"label {",
 				"	display: inline-block;",
@@ -63,249 +83,217 @@ module.exports=function(options,i18n){
 				"	width: 4em;",
 				"	text-align: left;",
 				"}"
-			);
+			)
 		}
-		return lines.wrapIfNotEmpty(
-			"<style>",
-			"</style>"
-		);
+		return a.e()
 	}
-	function getVertexShaderLines() {
-		const needTransformedPosition=illumination.wantsTransformedPosition(transforms.eyeAtInfinity);
-		return new Lines(
-			canvas.getGlslVertexDeclarationLines(),
-			transforms.getGlslVertexDeclarationLines(shape.dim==2),
-			illumination.getGlslVertexDeclarationLines(transforms.eyeAtInfinity,shape.dim>2),
-			(new Lines(
-				canvas.getGlslVertexOutputLines(),
-				transforms.getGlslVertexOutputLines(shape.dim==2,canvas.providesAspect(),needTransformedPosition),
-				illumination.getGlslVertexOutputLines(transforms.eyeAtInfinity,shape.hasNormals,transforms.getGlslVertexNormalTransformLines())
-			)).wrap(
-				"void main() {",
-				"}"
+	get headLines() {
+		const getVertexShaderLines=()=>{
+			const needTransformedPosition=this.illumination.wantsTransformedPosition(this.transforms.eyeAtInfinity)
+			return Lines.bae(
+				this.canvas.getGlslVertexDeclarationLines(),
+				this.transforms.getGlslVertexDeclarationLines(this.shape.dim==2),
+				this.illumination.getGlslVertexDeclarationLines(this.transforms.eyeAtInfinity,this.shape.dim>2),
+				WrapLines.b(
+					"void main() {",
+					"}"
+				).ae(
+					this.canvas.getGlslVertexOutputLines(),
+					this.transforms.getGlslVertexOutputLines(this.shape.dim==2,this.canvas.providesAspect(),needTransformedPosition),
+					this.illumination.getGlslVertexOutputLines(this.transforms.eyeAtInfinity,this.shape.hasNormals,this.transforms.getGlslVertexNormalTransformLines())
+				)
 			)
-		);
-	}
-	function getFragmentShaderLines() {
-		return new Lines(
-			"precision mediump float;",
-			illumination.getGlslFragmentDeclarationLines(transforms.eyeAtInfinity),
-			illumination.getGlslFragmentOutputLines(transforms.eyeAtInfinity,shape.twoSided).wrap(
-				"void main() {",
-				"}"
+		}
+		const getFragmentShaderLines=()=>{
+			return Lines.bae(
+				"precision mediump float;",
+				this.illumination.getGlslFragmentDeclarationLines(this.transforms.eyeAtInfinity),
+				WrapLines.b(
+					"void main() {",
+					"}"
+				).ae(
+					this.illumination.getGlslFragmentOutputLines(this.transforms.eyeAtInfinity,this.shape.twoSided)
+				)
 			)
-		);
+		}
+		return Lines.bae(
+			WrapLines.b(
+				"<script id=myVertexShader type=x-shader/x-vertex>",
+				"</script>"
+			).ae(
+				getVertexShaderLines()
+			),
+			WrapLines.b(
+				"<script id=myFragmentShader type=x-shader/x-fragment>",
+				"</script>"
+			).ae(
+				getFragmentShaderLines()
+			)
+		)
 	}
-	function getHtmlControlMessageLines() {
-		var lines=new Lines;
-		features.forEach(feature=>{
-			lines.a(feature.getHtmlControlMessageLines(i18n));
-		});
-		return lines.wrapIfNotEmpty(
-			"<ul>",
-			"</ul>"
-		);
+	get bodyLines() {
+		return Lines.bae(
+			this.canvas.getHtmlCanvasLines(),
+			NoseWrapLines.b(
+				"<ul>",
+				"</ul>"
+			).ae(
+				...this.features.map(feature=>feature.getHtmlControlMessageLines(i18n))
+			),
+			...this.features.map(feature=>feature.getHtmlInputLines(i18n))
+		)
 	}
-	function getHtmlInputLines() {
-		var lines=new Lines;
-		features.forEach(feature=>{
-			lines.a(feature.getHtmlInputLines(i18n));
-		});
-		return lines;
-	}
-	function getJsInitLines() {
-		function getMakeProgramLines() {
-			const lines=new Lines;
-			lines.a(
+	get scriptLines() {
+		const getMakeProgramLines=()=>{
+			const a=JsLines.b()
+			a(
 				"var vertexShader=gl.createShader(gl.VERTEX_SHADER);",
 				"gl.shaderSource(vertexShader,vertexShaderSrc);",
 				"gl.compileShader(vertexShader);"
-			);
-			if (options.debugShaders) {
-				lines.a(
-					"if (!gl.getShaderParameter(vertexShader,gl.COMPILE_STATUS)) console.log(gl.getShaderInfoLog(vertexShader));"
-				);
+			)
+			if (this.options.debugShaders) {
+				a("if (!gl.getShaderParameter(vertexShader,gl.COMPILE_STATUS)) console.log(gl.getShaderInfoLog(vertexShader));")
 			}
-			lines.a(
+			a(
 				"var fragmentShader=gl.createShader(gl.FRAGMENT_SHADER);",
 				"gl.shaderSource(fragmentShader,fragmentShaderSrc);",
 				"gl.compileShader(fragmentShader);"
-			);
-			if (options.debugShaders) {
-				lines.a(
-					"if (!gl.getShaderParameter(fragmentShader,gl.COMPILE_STATUS)) console.log(gl.getShaderInfoLog(fragmentShader));"
-				);
+			)
+			if (this.options.debugShaders) {
+				a("if (!gl.getShaderParameter(fragmentShader,gl.COMPILE_STATUS)) console.log(gl.getShaderInfoLog(fragmentShader));")
 			}
-			lines.a(
+			a(
 				"var program=gl.createProgram();",
 				"gl.attachShader(program,vertexShader);",
 				"gl.attachShader(program,fragmentShader);",
 				"gl.linkProgram(program);",
 				"return program;"
-			);
-			return lines.wrap(
-				"function makeProgram(vertexShaderSrc,fragmentShaderSrc) {",
-				"}"
-			);
+			)
+			return a.e()
 		}
-		const lines=new Lines;
-		lines.a(
-			getMakeProgramLines(),
-			"var canvas=document.getElementById('myCanvas');",
-			"var gl=canvas.getContext('webgl')||canvas.getContext('experimental-webgl');"
-		);
-		lines.a(
-			"var program=makeProgram(",
-			"	document.getElementById('myVertexShader').text,",
-			"	document.getElementById('myFragmentShader').text",
-			");",
-			"gl.useProgram(program);"
-		);
-		const addWithCommentIfNotEmpty=(featureLines,comment)=>{
-			if (featureLines.data.length>0) {
-				lines.a(
-					"",
-					"// "+comment, // TODO i18n
-					featureLines
-				);
+		const getJsInitLines=()=>{
+			const a=JsLines.b()
+			a(
+				WrapLines.b(
+					JsLines.bae("function makeProgram(vertexShaderSrc,fragmentShaderSrc) {"),
+					JsLines.bae("}")
+				).ae(
+					getMakeProgramLines()
+				),
+				"var canvas=document.getElementById('myCanvas');",
+				"var gl=canvas.getContext('webgl')||canvas.getContext('experimental-webgl');",
+				"var program=makeProgram(",
+				"	document.getElementById('myVertexShader').text,",
+				"	document.getElementById('myFragmentShader').text",
+				");",
+				"gl.useProgram(program);"
+			)
+			const addWithCommentIfNotEmpty=(featureLines,comment)=>{
+				if (featureLines.data.length>0) {
+					a(
+						"",
+						"// "+comment, // TODO i18n
+						featureLines
+					)
+				}
 			}
-		};
-		features.forEach((feature,i)=>{
+			this.features.forEach((feature,i)=>{
+				addWithCommentIfNotEmpty(
+					feature.getJsInitLines(this.featureContext),
+					"init "+this.featureNames[i]
+				)
+			})
 			addWithCommentIfNotEmpty(
-				feature.getJsInitLines(featureContext),
-				"init "+featureNames[i]
-			);
-		});
-		addWithCommentIfNotEmpty(
-			featureContext.getJsAfterInitLines(),
-			"init mousemove listener"
-		);
-		return lines;
-	}
-	function getJsLoopLines() {
-		const innerLines=new Lines;
-		if (featureContext.hasClampFn) {
-			innerLines.a(
-				"function clamp(v,min,max) {",
-				"	return Math.min(Math.max(v,min),max);",
-				"}"
-			);
+				this.featureContext.getJsAfterInitLines(),
+				"init mousemove listener"
+			)
+			return a.e()
 		}
-		if (featureContext.hasWrapFn) {
-			innerLines.a(
-				"function wrap(v,maxAbs) {",
-				"	v%=maxAbs*2;",
-				"	if (Math.abs(v)<=maxAbs) return v;",
-				"	return v-(v>0?1:-1)*maxAbs*2;",
-				"}"
-			);
+		const getJsInnerLoopLines=()=>{
+			const a=JsLines.b()
+			if (this.featureContext.hasClampFn) {
+				a(
+					"function clamp(v,min,max) {",
+					"	return Math.min(Math.max(v,min),max);",
+					"}"
+				)
+			}
+			if (this.featureContext.hasWrapFn) {
+				a(
+					"function wrap(v,maxAbs) {",
+					"	v%=maxAbs*2;",
+					"	if (Math.abs(v)<=maxAbs) return v;",
+					"	return v-(v>0?1:-1)*maxAbs*2;",
+					"}"
+				)
+			}
+			if (this.featureContext.pollsGamepad) {
+				a(
+					"var gamepad;",
+					"var gamepads=(navigator.getGamepads ? navigator.getGamepads() : []);",
+					"for (var i=0;i<gamepads.length;i++) {",
+					"	if (gamepads[i]) {",
+					"		gamepad=gamepads[i];",
+					"		break;",
+					"	}",
+					"}"
+				)
+			}
+			a(
+				...this.features.map(feature=>feature.getJsLoopLines(this.featureContext))
+			)
+			return a.e()
 		}
-		if (featureContext.pollsGamepad) {
-			innerLines.a(
-				"var gamepad;",
-				"var gamepads=(navigator.getGamepads ? navigator.getGamepads() : []);",
-				"for (var i=0;i<gamepads.length;i++) {",
-				"	if (gamepads[i]) {",
-				"		gamepad=gamepads[i];",
-				"		break;",
-				"	}",
-				"}"
-			);
-		}
-		features.forEach(feature=>{
-			innerLines.a(feature.getJsLoopLines(featureContext));
-		});
-		var lines=new Lines;
-		if (featureContext.hasStartTime && featureContext.hasPrevTime) {
-			lines.a(
-				"var startTime=performance.now();",
-				"var prevTime=startTime;"
-			);
-		} else if (featureContext.hasStartTime) {
-			lines.a(
-				"var startTime=performance.now();"
-			);
-		} else if (featureContext.hasPrevTime) {
-			lines.a(
-				"var prevTime=performance.now();"
-			);
-		}
-		// wrap inner render lines in function if needed
-		if (featureContext.isAnimated) {
-			if (featureContext.hasTime) {
-				lines.a(
-					"function renderFrame(time) {"
-				);
+		const getJsLoopLines=()=>{
+			const a=JsLines.b()
+			if (this.featureContext.hasStartTime && this.featureContext.hasPrevTime) {
+				a("var startTime=performance.now();")
+				a("var prevTime=startTime;")
+			} else if (this.featureContext.hasStartTime) {
+				a("var startTime=performance.now();")
+			} else if (this.featureContext.hasPrevTime) {
+				a("var prevTime=performance.now();")
+			}
+			// wrap inner render lines in function if needed
+			if (this.featureContext.isAnimated) {
+				if (this.featureContext.hasTime) {
+					a("function renderFrame(time) {")
+				} else {
+					a("function renderFrame() {")
+				}
+				a(IndentLines.bae(getJsInnerLoopLines()))
+				if (this.featureContext.hasPrevTime) {
+					a("	prevTime=time;")
+				}
+				a(
+					"	requestAnimationFrame(renderFrame);",
+					"}",
+					"requestAnimationFrame(renderFrame);"
+				)
+			} else if (this.featureContext.hasInputs) {
+				a(
+					"var frameId=null;",
+					"function renderFrame() {",
+					IndentLines.bae(getJsInnerLoopLines()),
+					"	frameId=null;",
+					"}",
+					"function scheduleFrame() {",
+					"	if (frameId===null) {",
+					"		frameId=requestAnimationFrame(renderFrame);",
+					"	}",
+					"}",
+					"scheduleFrame();"
+				)
 			} else {
-				lines.a(
-					"function renderFrame() {"
-				);
+				a(getJsInnerLoopLines())
 			}
-			lines.a(
-				innerLines.indent()
-			);
-			if (featureContext.hasPrevTime) {
-				lines.a(
-					"	prevTime=time;"
-				);
-			}
-			lines.a(
-				"	requestAnimationFrame(renderFrame);",
-				"}",
-				"requestAnimationFrame(renderFrame);"
-			);
-		} else if (featureContext.hasInputs) {
-			lines.a(
-				"var frameId=null;",
-				"function renderFrame() {",
-				innerLines.indent(),
-				"	frameId=null;",
-				"}",
-				"function scheduleFrame() {",
-				"	if (frameId===null) {",
-				"		frameId=requestAnimationFrame(renderFrame);",
-				"	}",
-				"}",
-				"scheduleFrame();"
-			);
-		} else {
-			lines.a(innerLines);
+			return a.e()
 		}
-		return lines;
+		return InterleaveLines.bae(
+			getJsInitLines(),
+			getJsLoopLines()
+		)
 	}
+}
 
-	const scriptLines=new Lines;
-	scriptLines.interleave(
-		getJsInitLines(),
-		getJsLoopLines()
-	).wrap(
-		"<script>",
-		"</script>"
-	);
-	const lines=new Lines;
-	lines.a(
-		"<!DOCTYPE html>",
-		"<html lang='en'>",
-		"<head>",
-		"<meta charset='utf-8' />",
-		"<title>Generated code</title>",
-		getHtmlStyleLines(),
-		"<script id='myVertexShader' type='x-shader/x-vertex'>",
-		getVertexShaderLines().indent(),
-		"</script>",
-		"<script id='myFragmentShader' type='x-shader/x-fragment'>",
-		getFragmentShaderLines().indent(),
-		"</script>",
-		"</head>",
-		"<body>",
-		canvas.getHtmlCanvasLines(),
-		getHtmlControlMessageLines(),
-		getHtmlInputLines(),
-		scriptLines,
-		"</body>",
-		"</html>"
-	);
-	return lines.join(
-		options.formatting.indent=='tab' ? '\t' : Array(parseInt(options.formatting.indent)+1).join(' ')
-	);
-};
+module.exports=Code
