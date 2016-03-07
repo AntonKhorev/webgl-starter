@@ -29,9 +29,9 @@ describe("Transforms",()=>{
 		const transforms=new Transforms(options.fix().transforms)
 		it("has 2 declarations of form rotate#X",()=>{
 			assert.deepEqual(transforms.getGlslVertexDeclarationLines(false).get(),[
-				"uniform float rotate0X",
-				"uniform float rotate1X",
-				"attribute vec4 position"
+				"uniform float rotate0X;",
+				"uniform float rotate1X;",
+				"attribute vec4 position;"
 			])
 		})
 	})
