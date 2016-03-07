@@ -136,9 +136,9 @@ class Code extends BaseWebCode {
 				"<ul>",
 				"</ul>"
 			).ae(
-				...this.features.map(feature=>feature.getHtmlControlMessageLines(i18n))
+				...this.features.map(feature=>feature.getHtmlControlMessageLines(this.i18n))
 			),
-			...this.features.map(feature=>feature.getHtmlInputLines(i18n))
+			...this.features.map(feature=>feature.getHtmlInputLines(this.i18n))
 		)
 	}
 	get scriptLines() {
@@ -187,7 +187,7 @@ class Code extends BaseWebCode {
 				"gl.useProgram(program);"
 			)
 			const addWithCommentIfNotEmpty=(featureLines,comment)=>{
-				if (featureLines.data.length>0) {
+				if (featureLines.count()>0) {
 					a(
 						"",
 						"// "+comment, // TODO i18n
