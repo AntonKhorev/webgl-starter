@@ -22,11 +22,21 @@ const testJsLinesValidity=(shapeType,jsLinesFnName)=>{
 	const err=syntaxCheck(code)
 	assert.equal(err,undefined,String(err))
 }
+
 describe("Shape/Square",()=>{
 	it("writes valid init lines",()=>{
 		testJsLinesValidity('square','getJsInitLines')
 	})
 	it("writes valid loop lines",()=>{
 		testJsLinesValidity('square','getJsLoopLines')
+	})
+})
+
+describe("Shape/Triangle",()=>{
+	it("writes valid init lines",()=>{
+		testJsLinesValidity('triangle','getJsInitLines')
+	})
+	it("writes valid loop lines",()=>{
+		testJsLinesValidity('triangle','getJsLoopLines')
 	})
 })

@@ -1,24 +1,24 @@
-'use strict';
+'use strict'
 
-const Lines=require('crnx-base/lines');
-const Colorgen=require('../colorgen.js');
-const Shape=require('./shape.js');
+const JsLines=require('crnx-base/js-lines')
+const Colorgen=require('../colorgen')
+const Shape=require('./shape')
 
 class Triangle extends Shape {
 	writeArrays() {
-		const colorgen=new Colorgen(this.colorAttrs,0);
-		let colorDataForFace;
+		const colorgen=new Colorgen(this.colorAttrs,0)
+		let colorDataForFace
 		const writeColorData=()=>{
 			if (this.hasColorsPerFace && !this.hasColorsPerVertex) {
 				if (colorDataForFace===undefined) {
-					colorDataForFace=colorgen.getNextColorString();
+					colorDataForFace=colorgen.getNextColorString()
 				}
-				return colorDataForFace;
+				return colorDataForFace
 			} else {
-				return colorgen.getNextColorString();
+				return colorgen.getNextColorString()
 			}
-		};
-		const lines=new Lines(
+		}
+		const a=JsLines.ba(
 			"var nVertices=3;",
 			"var vertices=new Float32Array([",
 			"	//                   x                      y"+colorgen.getHeaderString(),
@@ -26,15 +26,15 @@ class Triangle extends Shape {
 			"	-Math.sin(2/3*Math.PI), Math.cos(2/3*Math.PI),"+writeColorData(),
 			"	-Math.sin(4/3*Math.PI), Math.cos(4/3*Math.PI),"+writeColorData(),
 			"]);"
-		);
+		)
 		if (this.usesElements()) {
-			lines.a(
+			a(
 				"var nElements=3;",
 				"var elements=new "+this.getElementIndexJsArray()+"([0,1,2]);"
-			);
+			)
 		}
-		return lines;
+		return a.e()
 	}
 }
 
-module.exports=Triangle;
+module.exports=Triangle
