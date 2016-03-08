@@ -151,7 +151,7 @@ class Transforms extends Feature {
 				["0.0","0.0","0.0","1.0"],
 			],"move center of coords inside view")
 		}
-		return a.e
+		return a.e()
 	}
 	// public:
 	getGlslVertexDeclarationLines(flatShape) {
