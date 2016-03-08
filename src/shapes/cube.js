@@ -1,12 +1,13 @@
-'use strict';
+'use strict'
 
-const Lines=require('crnx-base/lines');
-const Colorgen=require('../colorgen.js');
-const Shape=require('./shape.js');
+const JsLines=require('crnx-base/js-lines')
+const WrapLines=require('crnx-base/wrap-lines')
+const Colorgen=require('../colorgen')
+const Shape=require('./shape')
 
 class Cube extends Shape {
-	get dim() { return 3; }
-	get twoSided() { return false; }
+	get dim() { return 3 }
+	get twoSided() { return false }
 	writeArrays() {
 		const colorgen=new Colorgen(
 			this.colorAttrs,
@@ -21,11 +22,11 @@ class Cube extends Shape {
 				[0.0, 1.0, 1.0],
 				[1.0, 1.0, 1.0],
 			]
-		);
-		const nCubeVertices=8;
-		const cubeColors=[];
+		)
+		const nCubeVertices=8
+		const cubeColors=[]
 		for (let i=0;i<nCubeVertices;i++) {
-			cubeColors.push(colorgen.getNextColorString());
+			cubeColors.push(colorgen.getNextColorString())
 		}
 		const cubeVertexPositions=[
 			"-0.5,-0.5,-0.5,",
@@ -36,8 +37,8 @@ class Cube extends Shape {
 			"+0.5,-0.5,+0.5,",
 			"-0.5,+0.5,+0.5,",
 			"+0.5,+0.5,+0.5,",
-		];
-		const nCubeFaces=6;
+		]
+		const nCubeFaces=6
 		const cubeFaceNames=[
 			"left",
 			"right",
@@ -45,7 +46,7 @@ class Cube extends Shape {
 			"top",
 			"back",
 			"front",
-		];
+		]
 		const cubeFaceNormals=[
 			"-1.0, 0.0, 0.0,",
 			"+1.0, 0.0, 0.0,",
@@ -53,7 +54,7 @@ class Cube extends Shape {
 			" 0.0,+1.0, 0.0,",
 			" 0.0, 0.0,-1.0,",
 			" 0.0, 0.0,+1.0,",
-		];
+		]
 		const cubeFaceVertices=[
 			[4, 6, 0, 2],
 			[1, 3, 5, 7],
@@ -61,53 +62,53 @@ class Cube extends Shape {
 			[2, 6, 3, 7],
 			[0, 2, 1, 3],
 			[5, 7, 4, 6],
-		];
-		const quadToTriangleMap=[0, 1, 2, 2, 1, 3];
-		const vertexLines=new Lines;
-		vertexLines.a("// x    y    z");
+		]
+		const quadToTriangleMap=[0, 1, 2, 2, 1, 3]
+		const vertexCtor=JsLines.b()
+		vertexCtor("// x    y    z")
 		if (this.hasNormals) {
-			vertexLines.t("  n.x  n.y  n.z");
+			vertexCtor.t("  n.x  n.y  n.z")
 		}
-		vertexLines.t(colorgen.getHeaderString());
+		vertexCtor.t(colorgen.getHeaderString())
 		const appendVertex=(iFace,iVertex,firstInFace)=>{
-			vertexLines.a(cubeVertexPositions[iVertex]);
+			vertexCtor(cubeVertexPositions[iVertex])
 			if (this.hasNormals) {
-				vertexLines.t(cubeFaceNormals[iFace]);
+				vertexCtor.t(cubeFaceNormals[iFace])
 			}
 			if (this.hasColorsPerVertex) {
-				vertexLines.t(cubeColors[iVertex]);
+				vertexCtor.t(cubeColors[iVertex])
 			} else if (this.hasColorsPerFace) {
-				vertexLines.t(cubeColors[iFace]);
+				vertexCtor.t(cubeColors[iFace])
 			}
 			if (firstInFace) {
-				vertexLines.t(" // "+cubeFaceNames[iFace]+" face");
+				vertexCtor.t(" // "+cubeFaceNames[iFace]+" face")
 			}
-		};
+		}
+		const wrapVertices=()=>WrapLines.b(
+			JsLines.bae("var vertices=new Float32Array(["),
+			JsLines.bae("]);")
+		).ae(
+			vertexCtor.e()
+		)
 		if (!this.usesElements()) {
 			for (let i=0;i<nCubeFaces;i++) {
 				quadToTriangleMap.forEach(function(j,k){
-					appendVertex(i,cubeFaceVertices[i][j],k==0);
-				});
+					appendVertex(i,cubeFaceVertices[i][j],k==0)
+				})
 			}
-			return new Lines(
+			return JsLines.bae(
 				"var nVertices=36;",
-				vertexLines.wrap(
-					"var vertices=new Float32Array([",
-					"]);"
-				)
-			);
+				wrapVertices()
+			)
 		} else if (this.hasColorsPerFace || this.hasNormals) {
 			// elements, face data
 			for (let i=0;i<nCubeFaces;i++) {
 				cubeFaceVertices[i].forEach(function(j,k){
-					appendVertex(i,j,k==0);
-				});
+					appendVertex(i,j,k==0)
+				})
 			}
-			return new Lines(
-				vertexLines.wrap(
-					"var vertices=new Float32Array([",
-					"]);"
-				),
+			return JsLines.bae(
+				wrapVertices(),
 				"var nElements=36;",
 				"var elements=new "+this.getElementIndexJsArray()+"([",
 				"	 0,  1,  2,  2,  1,  3, // left face",
@@ -117,36 +118,36 @@ class Cube extends Shape {
 				"	16, 17, 18, 18, 17, 19, // back face",
 				"	20, 21, 22, 22, 21, 23, // front face",
 				"]);"
-			);
+			)
 		} else {
 			// elements, no face data
 			for (let i=0;i<nCubeVertices;i++) {
-				vertexLines.a(cubeVertexPositions[i]);
+				vertexCtor(cubeVertexPositions[i])
 				if (this.hasColorsPerVertex) {
-					vertexLines.t(cubeColors[i]);
+					vertexCtor.t(cubeColors[i])
 				}
 			}
-			const elementLines=new Lines;
+			const elementCtor=JsLines.b()
 			for (let i=0;i<nCubeFaces;i++) {
-				elementLines.a("");
+				elementCtor("")
 				quadToTriangleMap.forEach(function(j){
-					elementLines.t(cubeFaceVertices[i][j]+", ");
-				});
-				elementLines.t("// "+cubeFaceNames[i]+" face");
+					elementCtor.t(cubeFaceVertices[i][j]+", ")
+				})
+				elementCtor.t("// "+cubeFaceNames[i]+" face")
 			}
+			const wrapElements=()=>WrapLines.b(
+				JsLines.bae("var elements=new "+this.getElementIndexJsArray()+"(["),
+				JsLines.bae("]);")
+			).ae(
+				elementCtor.e()
+			)
 			return new Lines(
-				vertexLines.wrap(
-					"var vertices=new Float32Array([",
-					"]);"
-				),
+				wrapVertices(),
 				"var nElements=36;",
-				elementLines.wrap(
-					"var elements=new "+this.getElementIndexJsArray()+"([",
-					"]);"
-				)
-			);
+				wrapElements()
+			)
 		}
 	}
 }
 
-module.exports=Cube;
+module.exports=Cube
