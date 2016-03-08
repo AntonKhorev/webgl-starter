@@ -14,8 +14,6 @@ const plainValue=x=>number(x)
 const pixelValue=n=>number(n)+" <abbr title='"+plural(n,'pixel')+"'>px</abbr>"
 
 let dataStrings={
-	'message.elements': "choosing 8- or 16-bit index may limit available shape detail levels", // TODO change prefix to options-output
-
 	'options.canvas': "Canvas",
 	'options.canvas.{width,height}': "Canvas {width,height}",
 	'options.canvas.{width,height}.value': pixelValue,
@@ -106,6 +104,7 @@ let dataStrings={
 	'options-output.addSpeed': "Add speed",
 	'options-output.drag': "Drag or press up/down while in focus to reorder transforms",
 	'options-output.delete': "Delete transform",
+	'options-output.elements': "choosing 8- or 16-bit index may limit available shape detail levels",
 
 	'controls.type.mousemovex': "Move the mouse pointer horizontally over the canvas",
 	'controls.type.mousemovey': "Move the mouse pointer vertically over the canvas",
