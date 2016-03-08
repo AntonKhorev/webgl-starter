@@ -65,7 +65,7 @@ class Code extends BaseWebCode {
 	get styleLines() {
 		const a=Lines.b()
 		if (this.featureContext.hasSliders) {
-			lines.a(
+			a(
 				"label {",
 				"	display: inline-block;",
 				"	width: 15em;",
