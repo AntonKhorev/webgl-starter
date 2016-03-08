@@ -1,51 +1,89 @@
 .webgl-starter {
-	.draggable-with-handle {
-		position: relative;
-		&.ghost {
-			opacity: .4;
+	.options-output {
+		@inter-option-margin: .3em;
+		@label-margin: 15em;
+		@drag-control-width: 1em;
+		margin: 1em 0;
+		.option {
+			margin: @inter-option-margin 0 @inter-option-margin @label-margin;
+			&.void {
+				margin-left: 1em;
+			}
+			label:first-child {
+				margin-left: -@label-margin;
+				display: inline-block;
+				width: @label-margin;
+				text-align: right;
+			}
+			.min {
+				display: inline-block;
+				width: 4em;
+				text-align: right;
+			}
+			.max {
+				display: inline-block;
+				width: 4em;
+				text-align: left;
+			}
+			input[type="number"] {
+				width: 4.5em;
+			}
+			input[type="text"] {
+				width: 30em;
+			}
+			input:invalid {
+				background: #F8A;
+			}
 		}
-		[draggable] { // drag handle
-			position: absolute;
-			top: 0.2em;
-			bottom: 0.2em;
-			width: 1em;
-			cursor: move;
-			// http://www.patternify.com/
-			background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAkAAAAJCAYAAADgkQYQAAAAGUlEQVQYlWNgIAYYGxv/J4SJMog4MFStAwDfUCsJGefs4gAAAABJRU5ErkJggg==) center no-repeat, url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAkAAAAJCAYAAADgkQYQAAAAF0lEQVQYlWNgIBZ0dHT8J8SmIhiK1gEAJMkXUFw51ewAAAAASUVORK5CYII=) center;
+		.draggable-with-handle {
+			position: relative;
+			margin: @inter-option-margin @drag-control-width;
+			&.ghost {
+				opacity: .4;
+			}
+			.option {
+				margin-top: 0;
+				margin-bottom: 0;
+			}
+			[draggable], .delete {
+				position: absolute;
+				top: 0;
+				bottom: 0;
+				width: @drag-control-width;
+			}
+			[draggable] { // drag handle
+				left: -@drag-control-width;
+				cursor: move;
+				// http://www.patternify.com/
+				background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAkAAAAJCAYAAADgkQYQAAAAGUlEQVQYlWNgIAYYGxv/J4SJMog4MFStAwDfUCsJGefs4gAAAABJRU5ErkJggg==) center no-repeat, url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAkAAAAJCAYAAADgkQYQAAAAF0lEQVQYlWNgIBZ0dHT8J8SmIhiK1gEAJMkXUFw51ewAAAAASUVORK5CYII=) center;
+			}
+			.delete {
+				right: -@drag-control-width;
+				cursor: default;
+				border: dotted 1px #888;
+				// http://www.patternify.com/
+				background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAkAAAAJCAYAAADgkQYQAAAAJklEQVQYlWNgIBYYGxv/J0ocXQCXRrgETgUETSDaJIJuItp3+AAAbDIUubYyZeYAAAAASUVORK5CYII=) center no-repeat;
+			}
 		}
-		.delete {
-			position: absolute;
-			top: 0.2em;
-			bottom: 0.2em;
-			width: 1em;
-			right: 0;
-			cursor: default;
-			border: dotted 1px #888;
-			background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAkAAAAJCAYAAADgkQYQAAAAJklEQVQYlWNgIBYYGxv/J0ocXQCXRrgETgUETSDaJIJuItp3+AAAbDIUubYyZeYAAAAASUVORK5CYII=) center no-repeat;
+	}
+	.code-output {
+		margin: 1em 0;
+		.code {
+			pre {
+				border: solid 1px #000;
+			}
+			p {
+				border: solid 1px #444;
+				color: #444;
+				padding: 0.5em;
+			}
 		}
-	}
-	label:first-child {
-		display: inline-block;
-		width: 15em;
-		text-align: right;
-	}
-	.min {
-		display: inline-block;
-		width: 4em;
-		text-align: right;
-	}
-	.max {
-		display: inline-block;
-		width: 4em;
-		text-align: left;
-	}
-	input[type="number"] {
-		width: 4.5em;
-	}
-	input:invalid {
-		background: #F8A;
-	}
-	pre {
-		border: solid 1px #000;
+		details {
+			display: block;
+			margin: 1em 0;
+		}
+		input[type="number"] {
+			width: 3em;
+		}
 	}
 }

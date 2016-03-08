@@ -40,7 +40,7 @@ class OptionsOutput extends BaseOptionsOutput {
 				const inputSelectId=generateId()
 				let $sliderInput,$numberInput,$inputSelect
 				let $rangeMinInput,$rangeMaxInput
-				return $("<div>").append("<label for='"+id+"'>"+i18n('options.'+option.fullName)+":</label>")
+				return $("<div class='option'>").append("<label for='"+id+"'>"+i18n('options.'+option.fullName)+":</label>")
 					.append(" <span class='min'>"+i18n(`options.${option.fullName}.value`,option.availableMin)+"</span> ")
 					.append($sliderInput=setInputAttrsAndListeners(
 						$("<input type='range' id='"+id+"'>"),
