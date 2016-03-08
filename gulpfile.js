@@ -7,5 +7,6 @@ gulpTasks(
 	gulp,
 	"WebGL starter code generator",
 	['http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.7/styles/default.min.css'],
-	['http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.7/highlight.min.js']
+	['http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.7/highlight.min.js'],
+	[require.resolve('crnx-base')]
 )
