@@ -1,22 +1,23 @@
-'use strict';
+'use strict'
 
-const Lines=require('crnx-base/lines');
-const LodShape=require('./lodshape.js');
+const JsLines=require('crnx-base/js-lines')
+const IndentLines=require('crnx-base/indent-lines')
+const LodShape=require('./lodshape')
 
 class Mesh extends LodShape {
-	get dim() { return 3; }
+	get dim() { return 3 }
 	getDistinctVertexCount(lodSymbol) {
-		return "Math.pow((1<<"+lodSymbol+")+1,2)";
+		return "Math.pow((1<<"+lodSymbol+")+1,2)"
 	}
 	getFaceVertexCount(lodSymbol) {
-		return "Math.pow((1<<"+lodSymbol+"),2)*4";
+		return "Math.pow((1<<"+lodSymbol+"),2)*4"
 	}
 	getTotalVertexCount(lodSymbol) {
-		return "Math.pow((1<<"+lodSymbol+"),2)*6";
+		return "Math.pow((1<<"+lodSymbol+"),2)*6"
 	}
 	writeMeshVertexColors(iv) {
 		if (this.hasColorsPerVertex || this.hasColorsPerFace) {
-			return new Lines(
+			return JsLines.bae(
 				((!this.usesElements() && !this.hasColorsPerFace)
 					?"var ic=((i+di)&1)*2+((j+dj)&1);"
 					:"var ic=(i&1)*2+(j&1);"
@@ -24,53 +25,49 @@ class Mesh extends LodShape {
 				"colors[ic].forEach(function(cc,icc){",
 				"	vertices[vertexOffset+"+iv+"+icc]=cc;",
 				"});"
-			);
+			)
 		} else {
-			return new Lines;
+			return JsLines.be()
 		}
 	}
 	// abstract writeMeshInit() {}
 	// abstract writeMeshVertex() {}
 	writeStoreShape() {
-		const lines=new Lines;
-		lines.a(
-			"var res=(1<<shapeLod);"
-		);
+		const a=JsLines.b()
+		a("var res=(1<<shapeLod);")
 		if (!this.usesElements()) {
-			lines.a(
+			a(
 				"function vertexElement(i,j,k) {",
 				"	return (i*res+j)*6+k;",
 				"}"
-			);
+			)
 		} else if (this.hasColorsPerFace) {
-			lines.a(
+			a(
 				"function vertexElement(i,j,k) {",
 				"	return (i*res+j)*4+k;",
 				"}"
-			);
+			)
 		} else {
-			lines.a(
+			a(
 				"function vertexElement(i,j) {",
 				"	return i*(res+1)+j;",
 				"}"
-			);
+			)
 		}
 		if (this.hasNormals) {
-			lines.a(
+			a(
 				"function normalize(v) {",
 				"	var l=Math.sqrt(v[0]*v[0]+v[1]*v[1]+v[2]*v[2]);",
 				"	return [v[0]/l,v[1]/l,v[2]/l];",
 				"}"
-			);
+			)
 		}
 		if (this.hasColorsPerVertex || this.hasColorsPerFace) {
-			lines.a(this.writeColorData());
+			a(this.writeColorData())
 		}
-		lines.a(
-			this.writeMeshInit()
-		);
+		a(this.writeMeshInit())
 		if (!this.usesElements()) {
-			lines.a(
+			a(
 				"for (var i=0;i<res;i++) {",
 				"	for (var j=0;j<res;j++) {",
 				"		for (var k=0;k<6;k++) {",
@@ -79,13 +76,13 @@ class Mesh extends LodShape {
 				"			var y=(i+di)/res*xyRange*2-xyRange;",
 				"			var x=(j+dj)/res*xyRange*2-xyRange;",
 				"			var vertexOffset=vertexElement(i,j,k)*"+this.getNumbersPerVertex()+";",
-				this.writeMeshVertex().indent(3),
+				IndentLines.b(3).ae(this.writeMeshVertex()),
 				"		}",
 				"	}",
 				"}"
-			);
+			)
 		} else if (this.hasColorsPerFace) {
-			lines.a(
+			a(
 				"var i,j;",
 				"for (i=0;i<res;i++) {",
 				"	for (j=0;j<res;j++) {",
@@ -95,7 +92,7 @@ class Mesh extends LodShape {
 				"			var y=(i+di)/res*xyRange*2-xyRange;",
 				"			var x=(j+dj)/res*xyRange*2-xyRange;",
 				"			var vertexOffset=vertexElement(i,j,k)*"+this.getNumbersPerVertex()+";",
-				this.writeMeshVertex().indent(3),
+				IndentLines.b(3).ae(this.writeMeshVertex()),
 				"		}",
 				"	}",
 				"}",
@@ -110,16 +107,16 @@ class Mesh extends LodShape {
 				"		elements[elementOffset+5]=vertexElement(i,j,3);",
 				"	}",
 				"}"
-			);
+			)
 		} else {
-			lines.a(
+			a(
 				"var i,j;",
 				"for (i=0;i<=res;i++) {",
 				"	var y=i/res*xyRange*2-xyRange;",
 				"	for (j=0;j<=res;j++) {",
 				"		var x=j/res*xyRange*2-xyRange;",
 				"		var vertexOffset=vertexElement(i,j)*"+this.getNumbersPerVertex()+";",
-				this.writeMeshVertex().indent(2),
+				IndentLines.b(2).ae(this.writeMeshVertex()),
 				"	}",
 				"}",
 				"for (i=0;i<res;i++) {",
@@ -133,10 +130,10 @@ class Mesh extends LodShape {
 				"		elements[elementOffset+5]=vertexElement(i+1,j+1);",
 				"	}",
 				"}"
-			);
+			)
 		}
-		return lines;
+		return a.e()
 	}
 }
 
-module.exports=Mesh;
+module.exports=Mesh
