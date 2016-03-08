@@ -34,5 +34,10 @@ describe("Background",()=>{
 				"gl.clearColor(1.000,1.000,1.000,1.000)",
 			])
 		})
+		it("calls gl.clear",()=>{
+			assert.deepEqual(background.getJsLoopLines(featureContext).get(),[
+				"gl.clear(gl.COLOR_BUFFER_BIT)",
+			])
+		})
 	})
 })
