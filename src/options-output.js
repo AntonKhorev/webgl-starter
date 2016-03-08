@@ -79,20 +79,25 @@ class OptionsOutput extends BaseOptionsOutput {
 						})
 					)
 			}
-			option.$=writeSubOption(option)
 			if (option instanceof Option.LiveFloat) {
-				option.$.append(
-					option.$addSpeed=$("<label> "+i18n('options-output.addSpeed')+"</label>").prepend(
-						$("<input type='checkbox'>")
-							.prop('checked',option.addSpeed)
-							.change(function(){
-								option.addSpeed=this.checked
-							})
+				return option.$=$("<div>")
+					.append(
+						writeSubOption(option)
+						.append(" ")
+						.append(
+							option.$addSpeed=$("<label> "+i18n('options-output.addSpeed')+"</label>").prepend(
+								$("<input type='checkbox'>")
+									.prop('checked',option.addSpeed)
+									.change(function(){
+										option.addSpeed=this.checked
+									})
+							)
+						)
 					)
-				)
-				option.$.append(" ").append(option.speed.$=writeSubOption(option.speed))
+					.append(option.speed.$=writeSubOption(option.speed))
+			} else {
+				return option.$=writeSubOption(option)
 			}
-			return option.$
 		})
 	}
 }
