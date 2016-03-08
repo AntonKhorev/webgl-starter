@@ -23,7 +23,7 @@ const testJsLinesValidity=(shapeType,jsLinesFnName)=>{
 	assert.equal(err,undefined,String(err))
 }
 
-;['square','triangle','gasket','cube','hat'].forEach(shapeType=>{
+;['square','triangle','gasket','cube','hat','terrain'].forEach(shapeType=>{
 	describe("Shape."+shapeType,()=>{
 		it("writes valid init lines",()=>{
 			testJsLinesValidity(shapeType,'getJsInitLines')

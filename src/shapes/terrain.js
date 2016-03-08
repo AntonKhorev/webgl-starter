@@ -1,13 +1,13 @@
-'use strict';
+'use strict'
 
-const Lines=require('crnx-base/lines');
-const Mesh=require('./mesh.js');
+const JsLines=require('crnx-base/js-lines')
+const Mesh=require('./mesh')
 
 class Terrain extends Mesh {
 	writeMeshInit() {
-		const noFaces=(this.usesElements() && !this.hasColorsPerFace);
-		const lines=new Lines;
-		lines.a(
+		const noFaces=(this.usesElements() && !this.hasColorsPerFace)
+		const a=JsLines.b()
+		a(
 			"var xyRange=1/Math.sqrt(2);",
 			"var zRange=xyRange;",
 			"var mask=res-1;",
@@ -56,30 +56,30 @@ class Terrain extends Mesh {
 			"		}",
 			"	}",
 			"}"
-		);
+		)
 		if (noFaces) {
-			lines.a(
+			a(
 				"for (i0=0;i0<res;i0++) vertices[zOffset(i0,res)]=vertices[zOffset(i0,0)];",
 				"for (j0=0;j0<res;j0++) vertices[zOffset(res,j0)]=vertices[zOffset(0,j0)];",
 				"vertices[zOffset(res,res)]=vertices[zOffset(0,0)];"
-			);
+			)
 		}
-		return lines;
+		return a.e()
 	}
 	writeMeshVertex() {
-		const noFaces=(this.usesElements() && !this.hasColorsPerFace);
-		const lines=new Lines;
-		lines.a(
+		const noFaces=(this.usesElements() && !this.hasColorsPerFace)
+		const a=JsLines.b()
+		a(
 			"vertices[vertexOffset+0]=x;",
 			"vertices[vertexOffset+1]=y;",
 			(noFaces
 				?"// vertices[vertexOffset+2] already written"
 				:"vertices[vertexOffset+2]=vertices[zOffset((i+di)&mask,(j+dj)&mask)];"
 			)
-		);
-		let iv=3;
+		)
+		let iv=3
 		if (this.hasNormals) {
-			lines.a(
+			a(
 				"var d=4*xyRange/res;",
 				"var normal=normalize([",
 				(noFaces
@@ -94,11 +94,11 @@ class Terrain extends Mesh {
 				"vertices[vertexOffset+"+(iv++)+"]=normal[0];",
 				"vertices[vertexOffset+"+(iv++)+"]=normal[1];",
 				"vertices[vertexOffset+"+(iv++)+"]=normal[2];"
-			);
+			)
 		}
-		lines.a(this.writeMeshVertexColors(iv));
-		return lines;
+		a(this.writeMeshVertexColors(iv))
+		return a.e()
 	}
 }
 
-module.exports=Terrain;
+module.exports=Terrain
