@@ -23,20 +23,13 @@ const testJsLinesValidity=(shapeType,jsLinesFnName)=>{
 	assert.equal(err,undefined,String(err))
 }
 
-describe("Shape/Square",()=>{
-	it("writes valid init lines",()=>{
-		testJsLinesValidity('square','getJsInitLines')
-	})
-	it("writes valid loop lines",()=>{
-		testJsLinesValidity('square','getJsLoopLines')
-	})
-})
-
-describe("Shape/Triangle",()=>{
-	it("writes valid init lines",()=>{
-		testJsLinesValidity('triangle','getJsInitLines')
-	})
-	it("writes valid loop lines",()=>{
-		testJsLinesValidity('triangle','getJsLoopLines')
+;['square','triangle','gasket'].forEach(shapeType=>{
+	describe("Shape."+shapeType,()=>{
+		it("writes valid init lines",()=>{
+			testJsLinesValidity(shapeType,'getJsInitLines')
+		})
+		it("writes valid loop lines",()=>{
+			testJsLinesValidity(shapeType,'getJsLoopLines')
+		})
 	})
 })
