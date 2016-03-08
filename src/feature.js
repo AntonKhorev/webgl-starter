@@ -8,9 +8,7 @@ class Feature {
 	}
 	// private:
 	getRecursiveLines(method,args) {
-		return Lines.bae(...this.features.map(feature=>feature[method].apply(feature,args)))
-		// TODO test:
-		// return Lines.bae(...this.features.map(feature=>feature[method](...args)))
+		return Lines.bae(...this.features.map(feature=>feature[method](...args)))
 	}
 	// methods to be redefined:
 	hasInputs() {
