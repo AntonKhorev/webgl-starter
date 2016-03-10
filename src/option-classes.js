@@ -256,14 +256,12 @@ Option.LiveFloat = class extends Option.LiveNumber {
 }
 
 Option.LiveColor = class extends Option.Group {
-	constructor(name,colorComponentDefaultValues,_,data,fullName,isVisible,updateCallback) {
+	constructor(name,colorComponentDefaultValues,_,data,fullName,isVisible,updateCallback,makeEntry,isInsideArray) {
 		const cs='rgba'
 		super(name,colorComponentDefaultValues.map((defaultValue,i)=>{
 			const c=cs.charAt(i)
-			let subData
-			if (typeof data == 'object') subData=data[c]
-			return new Option.LiveFloat(c,[0,1,-1,+1],defaultValue,subData,fullName+'.'+c,()=>true,updateCallback)
-		}),undefined,undefined,fullName,isVisible,updateCallback)
+			return ['LiveFloat',c,[0,1,-1,+1],defaultValue]
+		}),undefined,data,fullName,isVisible,updateCallback,makeEntry,isInsideArray)
 	}
 }
 
