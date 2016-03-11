@@ -16,10 +16,10 @@ class FixedLiveNumber {
 			this.max=src.availableMax
 			this.input=Input.createFromString('constant')
 		}
-		// needed for formatting and to decide on clamp()/wrap():
+		// TODO remove it - needed for formatting and to decide on clamp()/wrap():
 		this.availableMin=src.availableMin
 		this.availableMax=src.availableMax
-		this.step=src.step
+		this.precision=src.precision
 	}
 	valueOf() {
 		return this.value
@@ -31,8 +31,11 @@ class FixedLiveNumber {
 
 // abstract classes
 
-Option.LiveNumber = class extends Option.RangeInput {
-	constructor(name,availableRange,defaultValue,data,fullName,isVisible,updateCallback) {
+Option.LiveNumber = class extends Option.NumberInput {
+	constructor(
+		name,arrayArg,scalarArg,objectArg,data,
+		fullName,optionByFullName,updateCallback,makeEntry,isInsideArray
+	) {
 		let dataValue,dataMin,dataMax,dataInput
 		if (typeof data == 'object') {
 			dataValue=data.value
@@ -42,7 +45,7 @@ Option.LiveNumber = class extends Option.RangeInput {
 		} else {
 			dataValue=data
 		}
-		super(name,availableRange,defaultValue,dataValue,fullName,isVisible,updateCallback)
+		super(...arguments)
 		this._min=(dataMin!==undefined)?dataMin:this.availableMin
 		this._max=(dataMax!==undefined)?dataMax:this.availableMax
 		this._input=(dataInput!==undefined)?dataInput:'constant'
@@ -101,8 +104,8 @@ Option.LiveNumber = class extends Option.RangeInput {
 // concrete classes
 
 Option.LiveInt = class extends Option.LiveNumber {
-	get step() {
-		return 1
+	get precision() {
+		return 0
 	}
 	get availableInputTypes() {
 		return ['constant','slider','mousemovex','mousemovey']
@@ -116,7 +119,10 @@ Option.CanvasLiveInt = class extends Option.LiveInt {
 }
 
 Option.LiveFloat = class extends Option.LiveNumber {
-	constructor(name,availableRange,defaultValue,data,fullName,isVisible,updateCallback) {
+	constructor(
+		name,arrayArg,scalarArg,objectArg,data,
+		fullName,optionByFullName,updateCallback,makeEntry,isInsideArray
+	) {
 		let dataSpeedValue,dataSpeedMin,dataSpeedMax,dataSpeedInput
 		if (typeof data == 'object') {
 			if (typeof data.speed == 'object') {
@@ -129,9 +135,36 @@ Option.LiveFloat = class extends Option.LiveNumber {
 			}
 		}
 		super(...arguments)
+		if (objectArg===undefined) objectArg={}
+		if (arrayArg===undefined) arrayArg=[]
+		if (objectArg.speed!==undefined && objectArg.speed.availableMin!==undefined) {
+			this._speedAvailableMin=objectArg.speed.availableMin
+		} else if (arrayArg.length>=3) {
+			this._speedAvailableMin=arrayArg[2]
+		} else {
+			throw new Error(`No min speed value provided for LiveFloat option ${fullName}`)
+		}
+		if (objectArg.speed!==undefined && objectArg.speed.availableMax!==undefined) {
+			this._speedAvailableMax=objectArg.speed.availableMax
+		} else if (arrayArg.length>=4) {
+			this._speedAvailableMax=arrayArg[3]
+		} else {
+			throw new Error(`No max speed value provided for LiveFloat option ${fullName}`)
+		}
+		if (objectArg.precision!==undefined) {
+			this.precision=objectArg.precision
+		} else {
+			if (this.availableMax>=100) {
+				this.precision=1
+			} else if (this.availableMax>=10) {
+				this.precision=2
+			} else {
+				this.precision=3
+			}
+		}
 		this._speedValue=(dataSpeedValue!==undefined)?dataSpeedValue:0
-		this._speedAvailableMin=availableRange[2]; this._speedMin=(dataSpeedMin!==undefined)?dataSpeedMin:this._speedAvailableMin
-		this._speedAvailableMax=availableRange[3]; this._speedMax=(dataSpeedMax!==undefined)?dataSpeedMax:this._speedAvailableMax
+		this._speedMin=(dataSpeedMin!==undefined)?dataSpeedMin:this._speedAvailableMin
+		this._speedMax=(dataSpeedMax!==undefined)?dataSpeedMax:this._speedAvailableMax
 		this._speedInput=(dataSpeedInput!==undefined)?dataSpeedInput:'constant'
 		this._addSpeed=!(
 			this._speedValue==0 &&
@@ -157,15 +190,6 @@ Option.LiveFloat = class extends Option.LiveNumber {
 		this._addSpeed=addSpeed
 		this.updateInternalVisibility()
 		this.updateCallback()
-	}
-	get step() {
-		if (this.availableMax>=100) {
-			return '0.1'
-		} else if (this.availableMax>=10) {
-			return '0.01'
-		} else {
-			return '0.001'
-		}
 	}
 	get availableInputTypes() {
 		return ['constant','slider','mousemovex','mousemovey','gamepad0','gamepad1','gamepad2','gamepad3']
@@ -213,8 +237,8 @@ Option.LiveFloat = class extends Option.LiveNumber {
 				option._speedMax=max
 				option.updateCallback()
 			},
-			get step() {
-				return option.step
+			get precision() {
+				return option.precision
 			},
 			get availableInputTypes() {
 				return option.availableInputTypes
@@ -256,12 +280,27 @@ Option.LiveFloat = class extends Option.LiveNumber {
 }
 
 Option.LiveColor = class extends Option.Group {
-	constructor(name,colorComponentDefaultValues,_,data,fullName,isVisible,updateCallback,makeEntry,isInsideArray) {
+	constructor(
+		name,arrayArg,scalarArg,objectArg,data,
+		fullName,optionByFullName,updateCallback,makeEntry,isInsideArray
+	) {
+		if (objectArg===undefined) objectArg={}
+		if (arrayArg===undefined) arrayArg=[]
+		objectArg=Object.create(objectArg)
+		let componentDefaultValues=arrayArg
+		if (objectArg.componentDefaultValues) {
+			componentDefaultValues=objectArg.componentDefaultValues
+		}
 		const cs='rgba'
-		super(name,colorComponentDefaultValues.map((defaultValue,i)=>{
+		objectArg.descriptions=componentDefaultValues.map((defaultValue,i)=>{
 			const c=cs.charAt(i)
 			return ['LiveFloat',c,[0,1,-1,+1],defaultValue]
-		}),undefined,data,fullName,isVisible,updateCallback,makeEntry,isInsideArray)
+		})
+		arrayArg=undefined
+		super(
+			name,arrayArg,scalarArg,objectArg,data,
+			fullName,optionByFullName,updateCallback,makeEntry,isInsideArray
+		)
 	}
 }
 

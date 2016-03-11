@@ -110,7 +110,7 @@ describe("Option.LiveInt",()=>{
 		assert.equal(fixed.lod.input,'slider')
 		assert.equal(fixed.lod.availableMin,0)
 		assert.equal(fixed.lod.availableMax,10)
-		assert.equal(fixed.lod.step,1)
+		assert.equal(fixed.lod.precision,0)
 	})
 	it("has Slider input class",()=>{
 		const options=new TestOptions({lod:
@@ -347,7 +347,7 @@ describe("Option.LiveFloat",()=>{
 		assert.equal(fixed.rotate.input,'constant')
 		assert.equal(fixed.rotate.availableMin,-180)
 		assert.equal(fixed.rotate.availableMax,+180)
-		assert.equal(fixed.rotate.step,0.1)
+		assert.equal(fixed.rotate.precision,1)
 		assert.equal(fixed.rotate.speed,30)
 		assert.equal(fixed.rotate.speed.value,30)
 		assert.equal(fixed.rotate.speed.min,-100)
@@ -355,7 +355,7 @@ describe("Option.LiveFloat",()=>{
 		assert.equal(fixed.rotate.speed.input,'constant')
 		assert.equal(fixed.rotate.speed.availableMin,-360)
 		assert.equal(fixed.rotate.speed.availableMax,+360)
-		assert.equal(fixed.rotate.speed.step,0.1)
+		assert.equal(fixed.rotate.speed.precision,1)
 	})
 	it("doesn't fix speed when addSpeed is not set",()=>{
 		const options=new TestOptions

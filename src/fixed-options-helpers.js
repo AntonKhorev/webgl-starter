@@ -7,8 +7,7 @@ function makeFormatNumber(contextNumber) {
 		String(Math.abs(contextNumber.availableMin)).split('.')[0].length,
 		String(Math.abs(contextNumber.availableMax)).split('.')[0].length
 	)
-	const splitStep=String(contextNumber.step).split('.') // http://stackoverflow.com/a/9553423
-	const prec=(splitStep.length>1 ? splitStep[1].length : 0)
+	const prec=contextNumber.precision
 	const width=lead+prec+(prec>0)
 	const spaces='          ' // http://stackoverflow.com/q/10073699
 	const fmt=n=>(spaces+(+n).toFixed(prec)).slice(-width)
@@ -24,14 +23,14 @@ function formatNumber(number) {
 }
 
 function capNumber(number,maxValue) {
-	const capped=new Number(Math.min(maxValue,number))
+	const capped=new Number(Math.min(maxValue,number)) // TODO Number was replaced by FixedLiveNumber in option-classes
 	capped.min=number.min
 	capped.max=Math.min(maxValue,number.max)
 	capped.input=number.input
 	// needed for formatting:
 	capped.availableMin=number.availableMin
 	capped.availableMax=number.availableMax
-	capped.step=number.step
+	capped.precision=number.precision
 	return capped
 }
 

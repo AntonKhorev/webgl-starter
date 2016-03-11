@@ -14,15 +14,25 @@ class Options extends BaseOptions {
 			]],
 			['Group','background',[
 				['Select','type',['none','solid']],
-				['LiveColor','color',[1,1,1,1],{'background.type':'solid'}],
+				['LiveColor','color',[1,1,1,1],{
+					visibilityData: {'background.type':'solid'},
+				}],
 			]],
 			['Group','material',[
 				['Select','scope',['global','vertex','face']], // partly related to shape
 				['Select','data',['one','sda']], // partly related to shape
-				['LiveColor','color',[1,0,0,1],{'material.scope':'global','material.data':'one'}],
-				['LiveColor','specularColor',[0.4,0.4,0.4],{'material.scope':'global','material.data':'sda'}],
-				['LiveColor','diffuseColor' ,[0.4,0.4,0.4],{'material.scope':'global','material.data':'sda'}],
-				['LiveColor','ambientColor' ,[0.2,0.2,0.2],{'material.scope':'global','material.data':'sda'}],
+				['LiveColor','color',[1,0,0,1],{
+					visibilityData: {'material.scope':'global','material.data':'one'},
+				}],
+				['LiveColor','specularColor',[0.4,0.4,0.4],{
+					visibilityData: {'material.scope':'global','material.data':'sda'},
+				}],
+				['LiveColor','diffuseColor' ,[0.4,0.4,0.4],{
+					visibilityData: {'material.scope':'global','material.data':'sda'}
+				}],
+				['LiveColor','ambientColor' ,[0.2,0.2,0.2],{
+					visibilityData: {'material.scope':'global','material.data':'sda'}
+				}],
 			]],
 			['Group','light',[
 				['Select','type',['off','phong','blinn']],
@@ -30,12 +40,16 @@ class Options extends BaseOptions {
 					['LiveFloat','x',[-4,+4,-4,+4],-1],
 					['LiveFloat','y',[-4,+4,-4,+4],+1],
 					['LiveFloat','z',[-4,+4,-4,+4],+1],
-				],{'light.type':['phong','blinn']}],
+				],{
+					visibilityData: {'light.type':['phong','blinn']}
+				}],
 			]],
 			['Group','shape',[
 				['Select','type',['square','triangle','gasket','cube','hat','terrain']],
 				['Select','elements',['0','8','16','32']],
-				['LiveInt','lod',[0,10],6,{'shape.type':['gasket','hat','terrain']}],
+				['LiveInt','lod',[0,10],6,{
+					visibilityData: {'shape.type':['gasket','hat','terrain']}
+				}],
 			]],
 			['Group','transforms',[
 				['Select','projection',['ortho','perspective']],
