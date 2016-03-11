@@ -31,7 +31,7 @@ class FixedLiveNumber {
 
 // abstract classes
 
-Option.LiveNumber = class extends Option.NumberInput {
+Option.LiveNumber = class extends Option.Number {
 	constructor(
 		name,arrayArg,scalarArg,objectArg,data,
 		fullName,optionByFullName,updateCallback,makeEntry,isInsideArray
