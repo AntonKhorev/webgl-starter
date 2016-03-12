@@ -160,10 +160,12 @@ Option.LiveFloat = class extends Option.LiveNumber {
 			this._speedInput=='constant'
 		)
 		this._speed$=null
+		this._speed$range=null
 		this._$addSpeed=null
 	}
 	updateInternalVisibility() {
 		super.updateInternalVisibility()
+		if (this._speed$range) this._speed$range.toggle(this._speedInput!='constant')
 		const notGamepad=['gamepad0','gamepad1','gamepad2','gamepad3'].indexOf(this._input)<0
 		if (this._speed$) this._speed$.toggle(
 			this._addSpeed && notGamepad
@@ -202,6 +204,7 @@ Option.LiveFloat = class extends Option.LiveNumber {
 			},
 			set input(input) {
 				option._speedInput=input
+				option.updateInternalVisibility()
 				option.updateCallback()
 			},
 			get availableMin() {
@@ -235,6 +238,13 @@ Option.LiveFloat = class extends Option.LiveNumber {
 			},
 			set $($) {
 				option._speed$=$
+				option.updateInternalVisibility()
+			},
+			get $range() {
+				return option._speed$range
+			},
+			set $range($range) {
+				option._speed$range=$range
 				option.updateInternalVisibility()
 			}
 		}
