@@ -33,7 +33,7 @@ class Illumination extends Feature {
 			} else {
 				this.features.push(
 					this.ambientColorVector=new GlslVector('material.ambientColor',[
-						...material.ambientColor.entries, (new Option.LiveFloat('a',[0,1,-1,+1],1)).fix()
+						...material.ambientColor.entries, Option.LiveFloat.make('a',[0,1,-1,+1],1)().fix()
 					])
 				)
 				// TODO consider extendind .specularColor and .diffuseColor, b/c they would be present if vertex scope is chosen

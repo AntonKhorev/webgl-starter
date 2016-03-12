@@ -32,10 +32,7 @@ class FixedLiveNumber {
 // abstract classes
 
 Option.LiveNumber = class extends Option.Number {
-	constructor(
-		name,arrayArg,scalarArg,objectArg,data,
-		fullName,optionByFullName,updateCallback,makeEntry,isInsideArray
-	) {
+	constructor(name,settings,data,fullName,optionByFullName,updateCallback,makeEntry,isInsideArray) {
 		let dataValue,dataMin,dataMax,dataInput
 		if (typeof data == 'object') {
 			dataValue=data.value
@@ -119,10 +116,14 @@ Option.CanvasLiveInt = class extends Option.LiveInt {
 }
 
 Option.LiveFloat = class extends Option.LiveNumber {
-	constructor(
-		name,arrayArg,scalarArg,objectArg,data,
-		fullName,optionByFullName,updateCallback,makeEntry,isInsideArray
-	) {
+	static collectArgs(scalarArg,arrayArg,settings) {
+		settings=Object.create(settings)
+		if (settings.speed===undefined) settings.speed={}
+		if (settings.speed.availableMin===undefined) settings.speed.availableMin=arrayArg[2]
+		if (settings.speed.availableMax===undefined) settings.speed.availableMax=arrayArg[3]
+		return super.collectArgs(scalarArg,arrayArg,settings)
+	}
+	constructor(name,settings,data,fullName,optionByFullName,updateCallback,makeEntry,isInsideArray) {
 		let dataSpeedValue,dataSpeedMin,dataSpeedMax,dataSpeedInput
 		if (typeof data == 'object') {
 			if (typeof data.speed == 'object') {
@@ -135,24 +136,10 @@ Option.LiveFloat = class extends Option.LiveNumber {
 			}
 		}
 		super(...arguments)
-		if (objectArg===undefined) objectArg={}
-		if (arrayArg===undefined) arrayArg=[]
-		if (objectArg.speed!==undefined && objectArg.speed.availableMin!==undefined) {
-			this._speedAvailableMin=objectArg.speed.availableMin
-		} else if (arrayArg.length>=3) {
-			this._speedAvailableMin=arrayArg[2]
-		} else {
-			throw new Error(`No min speed value provided for LiveFloat option ${fullName}`)
-		}
-		if (objectArg.speed!==undefined && objectArg.speed.availableMax!==undefined) {
-			this._speedAvailableMax=objectArg.speed.availableMax
-		} else if (arrayArg.length>=4) {
-			this._speedAvailableMax=arrayArg[3]
-		} else {
-			throw new Error(`No max speed value provided for LiveFloat option ${fullName}`)
-		}
-		if (objectArg.precision!==undefined) {
-			this.precision=objectArg.precision
+		this._speedAvailableMin=settings.speed.availableMin
+		this._speedAvailableMax=settings.speed.availableMax
+		if (settings.precision!==undefined) {
+			this.precision=settings.precision
 		} else {
 			if (this.availableMax>=100) {
 				this.precision=1
@@ -280,27 +267,15 @@ Option.LiveFloat = class extends Option.LiveNumber {
 }
 
 Option.LiveColor = class extends Option.Group {
-	constructor(
-		name,arrayArg,scalarArg,objectArg,data,
-		fullName,optionByFullName,updateCallback,makeEntry,isInsideArray
-	) {
-		if (objectArg===undefined) objectArg={}
-		if (arrayArg===undefined) arrayArg=[]
-		objectArg=Object.create(objectArg)
-		let componentDefaultValues=arrayArg
-		if (objectArg.componentDefaultValues) {
-			componentDefaultValues=objectArg.componentDefaultValues
-		}
+	static collectArgs(scalarArg,arrayArg,settings) {
+		settings=Object.create(settings)
+		if (settings.componentDefaultValues===undefined) settings.componentDefaultValues=arrayArg
 		const cs='rgba'
-		objectArg.descriptions=componentDefaultValues.map((defaultValue,i)=>{
+		settings.descriptions=settings.componentDefaultValues.map((defaultValue,i)=>{
 			const c=cs.charAt(i)
 			return ['LiveFloat',c,[0,1,-1,+1],defaultValue]
 		})
-		arrayArg=undefined
-		super(
-			name,arrayArg,scalarArg,objectArg,data,
-			fullName,optionByFullName,updateCallback,makeEntry,isInsideArray
-		)
+		return super.collectArgs(scalarArg,arrayArg,settings)
 	}
 }
 
