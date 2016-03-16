@@ -5,9 +5,6 @@ function capNumber(number,maxValue) {
 	capped.min=number.min
 	capped.max=Math.min(maxValue,number.max)
 	capped.input=number.input
-	// needed for formatting:
-	capped.availableMin=number.availableMin
-	capped.availableMax=number.availableMax
 	capped.precision=number.precision
 	return capped
 }

@@ -16,9 +16,6 @@ class FixedLiveNumber {
 			this.max=src.availableMax
 			this.input=Input.createFromString('constant')
 		}
-		// TODO remove it - needed for formatting and to decide on clamp()/wrap():
-		this.availableMin=src.availableMin
-		this.availableMax=src.availableMax
 		this.precision=src.precision
 	}
 	valueOf() {
