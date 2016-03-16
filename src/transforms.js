@@ -47,7 +47,7 @@ class Transforms extends Feature {
 			}
 			const suffix=(nLayers>1?String(i):'')
 			const makeVector=(values,names)=>{
-				const vector=new GlslVector('rotate'+(nLayers>1?'.'+i:''),values,true)
+				const vector=new GlslVector('rotate'+(nLayers>1?'.'+i:''),values,180)
 				vector.i18nId='transforms.model.rotate'
 				this.features.push(vector)
 				this.rotateVectorEntries.push({

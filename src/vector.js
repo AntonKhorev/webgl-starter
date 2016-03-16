@@ -11,13 +11,13 @@ const VectorComponent=require('./vector-component')
 const NumericFeature=require('./numeric-feature')
 
 class Vector extends NumericFeature {
-	constructor(name,values,wrapMode) {
+	constructor(name,values,wrapRange) {
 		super()
 		this.name=name // name with dots like "material.color", transformed into "materialColor" for js var names
 		this.components=[]
 		this.componentsBySuffix={}
 		values.forEach(v=>{
-			const component=new VectorComponent(v,name,wrapMode)
+			const component=new VectorComponent(v,name,wrapRange)
 			this.components.push(component)
 			this.componentsBySuffix[component.suffix]=component
 		})

@@ -3,10 +3,10 @@
 const camelCase=require('crnx-base/fake-lodash/camelcase')
 
 class VectorComponent {
-	constructor(value,vectorName,wrapMode) {
+	constructor(value,vectorName,wrapRange) {
 		this.value=value // value from options.fix()
 		this.vectorName=vectorName
-		this.wrapMode=!!wrapMode // if true and components min/max == their default values, use wrap() instead of clamp()
+		this.wrapRange=wrapRange // if defined and components min/max == -/+ this value, use wrap() instead of clamp()
 	}
 	get suffix() {
 		const dotIndex=this.value.name.lastIndexOf('.')
@@ -42,11 +42,7 @@ class VectorComponent {
 		return (this.value.input!='constant' && this.value.speed!=0) || this.value.speed.input!='constant'
 	}
 	get wrapReady() {
-		return (
-			this.wrapMode &&
-			this.value.min==this.value.availableMin && this.value.max==this.value.availableMax && // can wrap only if limits are not changed
-			this.value.min==-this.value.max // currently can limit only by absolute value
-		)
+		return this.wrapRange && this.value.min==-this.wrapRange && this.value.max==+this.wrapRange
 	}
 	get wrapped() {
 		return this.hasSpeed() && this.wrapReady && this.value.input=='slider' // need to wrap only if input with state is used

@@ -6,8 +6,8 @@ const JsLines=require('crnx-base/js-lines')
 const Vector=require('./vector')
 
 class GlslVector extends Vector {
-	constructor(name,values,wrapMode) {
-		super(name,values,wrapMode)
+	constructor(name,values,wrapRange) {
+		super(name,values,wrapRange)
 	}
 	// public:
 	getGlslDeclarationLines() {

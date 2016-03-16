@@ -501,7 +501,7 @@ describe("GlslVector",()=>{
 		const options=new TestOptions({foo:{
 			x:{speed:-3.456}
 		}})
-		const vector=new GlslVector('foo',options.fix().foo.entries,true)
+		const vector=new GlslVector('foo',options.fix().foo.entries,4.0)
 		it("requests start time",()=>{
 			const testFeatureContext={}
 			vector.requestFeatureContext(testFeatureContext)
@@ -520,7 +520,7 @@ describe("GlslVector",()=>{
 		const options=new TestOptions({foo:{
 			x:{speed:{input:'mousemovex'}}
 		}})
-		const vector=new GlslVector('foo',options.fix().foo.entries,true)
+		const vector=new GlslVector('foo',options.fix().foo.entries,4.0)
 		it("requests prev time",()=>{
 			const testFeatureContext={}
 			vector.requestFeatureContext(testFeatureContext)
@@ -540,7 +540,7 @@ describe("GlslVector",()=>{
 		const options=new TestOptions({foo:{
 			x:{input:'slider', speed:{input:'mousemovex'}}
 		}})
-		const vector=new GlslVector('foo',options.fix().foo.entries,true)
+		const vector=new GlslVector('foo',options.fix().foo.entries,4.0)
 		it("requests prev time and wrap fn",()=>{
 			const testFeatureContext={}
 			vector.requestFeatureContext(testFeatureContext)
