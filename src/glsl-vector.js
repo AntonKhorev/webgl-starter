@@ -1,6 +1,6 @@
 'use strict'
 
-const fixOptHelp=require('./fixed-options-helpers')
+const formatNumbers=require('crnx-base/format-numbers')
 const Lines=require('crnx-base/lines')
 const JsLines=require('crnx-base/js-lines')
 const Vector=require('./vector')
@@ -31,31 +31,12 @@ class GlslVector extends Vector {
 		return this.getGlslComponentsValue(this.components.map(component=>component.suffix).join(''))
 	}
 	getGlslComponentsValue(selectedComponents) {
-		const allSuffixString=this.components.map(component=>component.suffix).slice(0,this.nVars).join('')
+		const numbers={}
 		const results=[] // [[isConstant,componentName]]
-		const showResult=result=>{
-			if (result[0]) {
-				return fixOptHelp.formatNumber(this.componentsBySuffix[result[1]].value)
-			} else {
-				if (this.modeVector) {
-					if (result[1]==allSuffixString) {
-						return this.varName
-					} else {
-						return this.varName+"."+result[1]
-					}
- 				} else {
-					return this.componentsBySuffix[result[1]].varName
- 				}
-			}
-		}
-		const allSameConstant=()=>{
-			if (!results[0][0]) return false
-			const cmp=fixOptHelp.formatNumber(this.componentsBySuffix[results[0][1]].value)
-			return results.every(result=>(result[0] && fixOptHelp.formatNumber(this.componentsBySuffix[result[1]].value)==cmp))
-		}
 		for (let j=0;j<selectedComponents.length;j++) {
 			const c=selectedComponents.charAt(j)
 			if (!this.componentsBySuffix[c].variable) {
+				numbers[c]=this.componentsBySuffix[c].value
 				results.push([true,c])
 			} else {
 				if (this.modeVector && results.length>0) {
@@ -68,6 +49,28 @@ class GlslVector extends Vector {
 				} else {
 					results.push([false,c])
 				}
+			}
+		}
+		const fmt=formatNumbers.glsl(numbers)
+		const allSuffixString=this.components.map(component=>component.suffix).slice(0,this.nVars).join('')
+		const allSameConstant=()=>{
+			if (!results[0][0]) return false
+			const cmp=fmt[results[0][1]]
+			return results.every(result=>(result[0] && fmt[result[1]]==cmp))
+		}
+		const showResult=result=>{
+			if (result[0]) {
+				return fmt[result[1]]
+			} else {
+				if (this.modeVector) {
+					if (result[1]==allSuffixString) {
+						return this.varName
+					} else {
+						return this.varName+"."+result[1]
+					}
+ 				} else {
+					return this.componentsBySuffix[result[1]].varName
+ 				}
 			}
 		}
 		if (results.length==1) {

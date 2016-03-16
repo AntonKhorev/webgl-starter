@@ -32,17 +32,17 @@ describe("GlslVector",()=>{
 		})
 		it("returns constant vec3 value",()=>{
 			assert.equal(vector.getGlslValue(),
-				"vec3(+1.000,+2.000,+3.000)"
+				"vec3(1.0,2.0,3.0)"
 			)
 		})
 		it("returns constant vec2 components",()=>{
 			assert.equal(vector.getGlslComponentsValue('yz'),
-				"vec2(+2.000,+3.000)"
+				"vec2(2.0,3.0)"
 			)
 		})
 		it("returns vec3 map declaration",()=>{
 			assert.deepEqual(vector.getGlslMapDeclarationLines('ololo',v=>"lol("+v+")").get(),[
-				"vec3 ololo=lol(vec3(+1.000,+2.000,+3.000));"
+				"vec3 ololo=lol(vec3(1.0,2.0,3.0));"
 			])
 		})
 		it("returns vec3 map component",()=>{
@@ -68,12 +68,12 @@ describe("GlslVector",()=>{
 		})
 		it("returns constant vec3 with one component as value",()=>{
 			assert.equal(vector.getGlslValue(),
-				"vec3(+2.000)"
+				"vec3(2.0)"
 			)
 		})
 		it("returns constant vec2 with one component",()=>{
 			assert.equal(vector.getGlslComponentsValue('yz'),
-				"vec2(+2.000)"
+				"vec2(2.0)"
 			)
 		})
 		it("returns empty js interface",()=>{
@@ -95,12 +95,12 @@ describe("GlslVector",()=>{
 		})
 		it("returns vec3 made of float and constants as value",()=>{
 			assert.equal(vector.getGlslValue(),
-				"vec3(fooX,+2.000,+3.000)"
+				"vec3(fooX,2.0,3.0)"
 			)
 		})
 		it("returns vec2 of float and constant as xy components",()=>{
 			assert.equal(vector.getGlslComponentsValue('xy'),
-				"vec2(fooX,+2.000)"
+				"vec2(fooX,2.0)"
 			)
 		})
 		it("returns float as x component",()=>{
@@ -139,7 +139,7 @@ describe("GlslVector",()=>{
 		})
 		it("returns vec3 made of vec2 and constant as value",()=>{
 			assert.equal(vector.getGlslValue(),
-				"vec3(foo,+3.000)"
+				"vec3(foo,3.0)"
 			)
 		})
 		it("returns original vec2 .x as components",()=>{
@@ -159,7 +159,7 @@ describe("GlslVector",()=>{
 		})
 		it("returns original vec2 component and constant as components",()=>{
 			assert.equal(vector.getGlslComponentsValue('yz'),
-				"vec2(foo.y,+3.000)"
+				"vec2(foo.y,3.0)"
 			)
 		})
 		it("returns interface with 1 location and 2 simple listeners",()=>{
@@ -233,7 +233,7 @@ describe("GlslVector",()=>{
 		})
 		it("returns vec3 made of floats and constant as value",()=>{
 			assert.equal(vector.getGlslValue(),
-				"vec3(fooX,+2.000,fooZ)"
+				"vec3(fooX,2.0,fooZ)"
 			)
 		})
 		it("returns interface with 2 locations and 2 simple listeners",()=>{
@@ -278,7 +278,7 @@ describe("GlslVector",()=>{
 			featureContext.hasStartTime=true // animated
 			assert.deepEqual(vector.getJsInitLines(featureContext).get(),[
 				"var fooLoc=gl.getUniformLocation(program,'foo')",
-				"var fooY=+2.000",
+				"var fooY=2",
 				"function updateFoo() {",
 				"	gl.uniform2f(fooLoc,",
 				"		parseFloat(document.getElementById('foo.x').value),",
@@ -291,8 +291,8 @@ describe("GlslVector",()=>{
 			assert.deepEqual(featureContext.getJsAfterInitLines().get(),[
 				"canvas.addEventListener('mousemove',function(ev){",
 				"	var rect=this.getBoundingClientRect()",
-				"	var minFooY=-4.000",
-				"	var maxFooY=+4.000",
+				"	var minFooY=-4",
+				"	var maxFooY=+4",
 				"	fooY=minFooY+(maxFooY-minFooY)*(ev.clientX-rect.left)/(rect.width-1)",
 				"	updateFoo()",
 				"})"
@@ -309,13 +309,13 @@ describe("GlslVector",()=>{
 			featureContext.hasStartTime=true // animated
 			assert.deepEqual(vector.getJsInitLines(featureContext).get(),[
 				"var barYLoc=gl.getUniformLocation(program,'barY')",
-				"gl.uniform1f(barYLoc,+2.500)"
+				"gl.uniform1f(barYLoc,2.5)"
 			])
 			assert.deepEqual(featureContext.getJsAfterInitLines().get(),[
 				"canvas.addEventListener('mousemove',function(ev){",
 				"	var rect=this.getBoundingClientRect()",
-				"	var minBarY=-4.000",
-				"	var maxBarY=+4.000",
+				"	var minBarY=-4",
+				"	var maxBarY=+4",
 				"	var barY=minBarY+(maxBarY-minBarY)*(rect.bottom-1-ev.clientY)/(rect.height-1)",
 				"	gl.uniform1f(barYLoc,barY)",
 				"})"
@@ -332,16 +332,16 @@ describe("GlslVector",()=>{
 			featureContext.hasStartTime=true // animated
 			assert.deepEqual(vector.getJsInitLines(featureContext).get(),[
 				"var barLoc=gl.getUniformLocation(program,'bar')",
-				"gl.uniform2f(barLoc,+1.500,+2.500)"
+				"gl.uniform2f(barLoc,1.5,2.5)"
 			])
 			assert.deepEqual(featureContext.getJsAfterInitLines().get(),[
 				"canvas.addEventListener('mousemove',function(ev){",
 				"	var rect=this.getBoundingClientRect()",
-				"	var minBarX=-4.000",
-				"	var maxBarX=+4.000",
+				"	var minBarX=-4",
+				"	var maxBarX=+4",
 				"	var barX=minBarX+(maxBarX-minBarX)*(ev.clientX-rect.left)/(rect.width-1)",
-				"	var minBarY=-4.000",
-				"	var maxBarY=+4.000",
+				"	var minBarY=-4",
+				"	var maxBarY=+4",
 				"	var barY=minBarY+(maxBarY-minBarY)*(rect.bottom-1-ev.clientY)/(rect.height-1)",
 				"	gl.uniform2f(barLoc,barX,barY)",
 				"})"
@@ -359,17 +359,17 @@ describe("GlslVector",()=>{
 			assert.deepEqual(vector.getJsInitLines(featureContext).get(),[
 				"var barYLoc=gl.getUniformLocation(program,'barY')",
 				"var barZLoc=gl.getUniformLocation(program,'barZ')",
-				"gl.uniform1f(barYLoc,+2.500)",
-				"gl.uniform1f(barZLoc,+3.000)"
+				"gl.uniform1f(barYLoc,2.5)",
+				"gl.uniform1f(barZLoc,3.0)"
 			])
 			assert.deepEqual(featureContext.getJsAfterInitLines().get(),[
 				"canvas.addEventListener('mousemove',function(ev){",
 				"	var rect=this.getBoundingClientRect()",
-				"	var minBarY=-4.000",
-				"	var maxBarY=+4.000",
+				"	var minBarY=-4",
+				"	var maxBarY=+4",
 				"	var barY=minBarY+(maxBarY-minBarY)*(rect.bottom-1-ev.clientY)/(rect.height-1)",
-				"	var minBarZ=-4.000",
-				"	var maxBarZ=+4.000",
+				"	var minBarZ=-4",
+				"	var maxBarZ=+4",
 				"	var barZ=minBarZ+(maxBarZ-minBarZ)*(ev.clientX-rect.left)/(rect.width-1)",
 				"	gl.uniform1f(barYLoc,barY)",
 				"	gl.uniform1f(barZLoc,barZ)",
@@ -389,7 +389,7 @@ describe("GlslVector",()=>{
 		const vector=new GlslVector('color',options.fix().color.entries)
 		it("returns unsigned value",()=>{
 			assert.equal(vector.getGlslValue(),
-				"vec4(0.200,0.300,0.400,0.500)"
+				"vec4(0.2,0.3,0.4,0.5)"
 			)
 		})
 	})
@@ -461,12 +461,12 @@ describe("GlslVector",()=>{
 		})
 		it("returns vec3 made of float and constants as value",()=>{
 			assert.equal(vector.getGlslValue(),
-				"vec3(fooX,+0.400,+0.300)"
+				"vec3(fooX,0.4,0.3)"
 			)
 		})
 		it("returns vec2 of float and constant as xy components",()=>{
 			assert.equal(vector.getGlslComponentsValue('xy'),
-				"vec2(fooX,+0.400)"
+				"vec2(fooX,0.4)"
 			)
 		})
 		it("returns float as x component",()=>{
@@ -492,7 +492,7 @@ describe("GlslVector",()=>{
 		})
 		it("has loop with constant increment",()=>{
 			assert.deepEqual(vector.getJsLoopLines().get(),[
-				"var fooX=Math.min(+0.500+0.123*(time-startTime)/1000,+4.000)",
+				"var fooX=Math.min(0.5+0.123*(time-startTime)/1000,4)",
 				"gl.uniform1f(fooXLoc,fooX)"
 			])
 		})
@@ -511,7 +511,7 @@ describe("GlslVector",()=>{
 		})
 		it("has loop with no limit fn",()=>{
 			assert.deepEqual(vector.getJsLoopLines().get(),[
-				"var fooX=+1.000-3.456*(time-startTime)/1000",
+				"var fooX=1-3.456*(time-startTime)/1000",
 				"gl.uniform1f(fooXLoc,fooX)"
 			])
 		})
@@ -554,7 +554,7 @@ describe("GlslVector",()=>{
 		it("has loop with wrap()",()=>{
 			assert.deepEqual(vector.getJsLoopLines().get(),[
 				"var fooXInput=document.getElementById('foo.x')",
-				"var fooX=wrap(parseFloat(fooXInput.value)+fooXSpeed*(time-prevTime)/1000,+4.000)",
+				"var fooX=wrap(parseFloat(fooXInput.value)+fooXSpeed*(time-prevTime)/1000,4)",
 				"fooXInput.value=fooX",
 				"gl.uniform1f(fooXLoc,fooX)"
 			])

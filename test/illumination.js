@@ -61,7 +61,7 @@ describe("Illumination",()=>{
 		})
 		it("outputs constant literal for fragment shader",()=>{
 			assert.deepEqual(illumination.getGlslFragmentOutputLines(true,false).get(),[
-				"gl_FragColor=vec4(0.900,0.700,0.500,1.000);"
+				"gl_FragColor=vec4(0.9,0.7,0.5,1.0);"
 			])
 		})
 		it("returns empty js interface",()=>{
@@ -113,7 +113,7 @@ describe("Illumination",()=>{
 		})
 		it("outputs literal with 1 variable for fragment shader",()=>{
 			assert.deepEqual(illumination.getGlslFragmentOutputLines(true,false).get(),[
-				"gl_FragColor=vec4(materialColorR,0.700,0.500,1.000);"
+				"gl_FragColor=vec4(materialColorR,0.7,0.5,1.0);"
 			])
 		})
 		it("returns slider js interface",()=>{
@@ -213,7 +213,7 @@ describe("Illumination",()=>{
 		})
 		it("outputs constant literal for fragment shader",()=>{
 			assert.deepEqual(illumination.getGlslFragmentOutputLines(true,false).get(),[
-				"gl_FragColor=vec4(0.700,0.500,0.300,1.000);"
+				"gl_FragColor=vec4(0.7,0.5,0.3,1.0);"
 			])
 		})
 		it("returns empty js interface",()=>{
@@ -256,7 +256,7 @@ describe("Illumination",()=>{
 		})
 		it("outputs literal with 1 variable for fragment shader",()=>{
 			assert.deepEqual(illumination.getGlslFragmentOutputLines(true,false).get(),[
-				"gl_FragColor=vec4(0.700,0.500,materialAmbientColorB,1.000);"
+				"gl_FragColor=vec4(0.7,0.5,materialAmbientColorB,1.0);"
 			])
 		})
 		it("returns slider js interface (skipping unused specular color)",()=>{
@@ -305,7 +305,7 @@ describe("Illumination",()=>{
 		})
 		it("outputs literal with vec3 for fragment shader",()=>{
 			assert.deepEqual(illumination.getGlslFragmentOutputLines(true,false).get(),[
-				"gl_FragColor=vec4(materialAmbientColor,1.000);"
+				"gl_FragColor=vec4(materialAmbientColor,1.0);"
 			])
 		})
 	})
@@ -429,8 +429,8 @@ describe("Illumination",()=>{
 		it("outputs diffuse-only lighting for fragment shader",()=>{
 			assert.deepEqual(illumination.getGlslFragmentOutputLines(true,false).get(),[
 				"vec3 N=normalize(interpolatedNormal);",
-				"vec3 L=normalize(vec3(+2.000,-1.500,+0.500));",
-				"gl_FragColor=vec4(vec3(0.900,0.700,0.500)*max(0.0,dot(L,N)),1.000);"
+				"vec3 L=normalize(vec3(+2.0,-1.5,+0.5));",
+				"gl_FragColor=vec4(vec3(0.9,0.7,0.5)*max(0.0,dot(L,N)),1.0);"
 			])
 		})
 		it("returns empty js interface",()=>{
@@ -482,8 +482,8 @@ describe("Illumination",()=>{
 		it("outputs diffuse-only lighting for fragment shader",()=>{
 			assert.deepEqual(illumination.getGlslFragmentOutputLines(true,false).get(),[
 				"vec3 N=normalize(interpolatedNormal);",
-				"vec3 L=normalize(vec3(lightDirectionX,-1.500,+0.500));",
-				"gl_FragColor=vec4(vec3(0.900,0.700,0.500)*max(0.0,dot(L,N)),1.000);"
+				"vec3 L=normalize(vec3(lightDirectionX,-1.5,+0.5));",
+				"gl_FragColor=vec4(vec3(0.9,0.7,0.5)*max(0.0,dot(L,N)),1.0);"
 			])
 		})
 		it("returns light direction slider js interface",()=>{
@@ -561,28 +561,28 @@ describe("Illumination",()=>{
 		it("outputs phong shading for fragment shader",()=>{
 			assert.deepEqual(illumination.getGlslFragmentOutputLines(true,false).get(),[
 				"vec3 N=normalize(interpolatedNormal);",
-				"vec3 L=normalize(vec3(+2.000,-1.500,+0.500));",
+				"vec3 L=normalize(vec3(+2.0,-1.5,+0.5));",
 				"vec3 V=vec3(0.0,0.0,1.0);",
 				"vec3 H=normalize(L+V);",
 				"float shininess=100.0;",
 				"gl_FragColor=vec4(",
-				"	+vec3(0.900,0.700,0.500)*pow(max(0.0,dot(H,N)),shininess)",
-				"	+vec3(0.800,0.600,0.400)*max(0.0,dot(L,N))",
-				"	+vec3(0.700,0.500,0.300)",
+				"	+vec3(0.9,0.7,0.5)*pow(max(0.0,dot(H,N)),shininess)",
+				"	+vec3(0.8,0.6,0.4)*max(0.0,dot(L,N))",
+				"	+vec3(0.7,0.5,0.3)",
 				",1.0);"
 			])
 		})
 		it("outputs phong shading for fragment shader",()=>{
 			assert.deepEqual(illumination.getGlslFragmentOutputLines(false,false).get(),[
 				"vec3 N=normalize(interpolatedNormal);",
-				"vec3 L=normalize(vec3(+2.000,-1.500,+0.500));",
+				"vec3 L=normalize(vec3(+2.0,-1.5,+0.5));",
 				"vec3 V=normalize(interpolatedView);",
 				"vec3 H=normalize(L+V);",
 				"float shininess=100.0;",
 				"gl_FragColor=vec4(",
-				"	+vec3(0.900,0.700,0.500)*pow(max(0.0,dot(H,N)),shininess)",
-				"	+vec3(0.800,0.600,0.400)*max(0.0,dot(L,N))",
-				"	+vec3(0.700,0.500,0.300)",
+				"	+vec3(0.9,0.7,0.5)*pow(max(0.0,dot(H,N)),shininess)",
+				"	+vec3(0.8,0.6,0.4)*max(0.0,dot(L,N))",
+				"	+vec3(0.7,0.5,0.3)",
 				",1.0);"
 			])
 		})
@@ -590,14 +590,14 @@ describe("Illumination",()=>{
 			assert.deepEqual(illumination.getGlslFragmentOutputLines(true,true).get(),[
 				"vec3 N=normalize(interpolatedNormal);",
 				"if (!gl_FrontFacing) N=-N;",
-				"vec3 L=normalize(vec3(+2.000,-1.500,+0.500));",
+				"vec3 L=normalize(vec3(+2.0,-1.5,+0.5));",
 				"vec3 V=vec3(0.0,0.0,1.0);",
 				"vec3 H=normalize(L+V);",
 				"float shininess=100.0;",
 				"gl_FragColor=vec4(",
-				"	+vec3(0.900,0.700,0.500)*pow(max(0.0,dot(H,N)),shininess)",
-				"	+vec3(0.800,0.600,0.400)*max(0.0,dot(L,N))",
-				"	+vec3(0.700,0.500,0.300)",
+				"	+vec3(0.9,0.7,0.5)*pow(max(0.0,dot(H,N)),shininess)",
+				"	+vec3(0.8,0.6,0.4)*max(0.0,dot(L,N))",
+				"	+vec3(0.7,0.5,0.3)",
 				",1.0);"
 			])
 		})
@@ -653,14 +653,14 @@ describe("Illumination",()=>{
 		it("outputs blinn-phong shading for fragment shader",()=>{
 			assert.deepEqual(illumination.getGlslFragmentOutputLines(true,false).get(),[
 				"vec3 N=normalize(interpolatedNormal);",
-				"vec3 L=normalize(vec3(+2.000,-1.500,+0.500));",
+				"vec3 L=normalize(vec3(+2.0,-1.5,+0.5));",
 				"vec3 V=vec3(0.0,0.0,1.0);",
 				"vec3 H=normalize(L+V);",
 				"float shininess=100.0;",
 				"gl_FragColor=vec4(",
-				"	+vec3(materialSpecularColorR,0.700,0.500)*pow(max(0.0,dot(H,N)),shininess)",
-				"	+vec3(0.800,0.600,0.400)*max(0.0,dot(L,N))",
-				"	+vec3(0.700,0.500,0.300)",
+				"	+vec3(materialSpecularColorR,0.7,0.5)*pow(max(0.0,dot(H,N)),shininess)",
+				"	+vec3(0.8,0.6,0.4)*max(0.0,dot(L,N))",
+				"	+vec3(0.7,0.5,0.3)",
 				",1.0);"
 			])
 		})
@@ -734,7 +734,7 @@ describe("Illumination",()=>{
 		it("outputs blinn-phong shading for fragment shader",()=>{
 			assert.deepEqual(illumination.getGlslFragmentOutputLines(true,false).get(),[
 				"vec3 N=normalize(interpolatedNormal);",
-				"vec3 L=normalize(vec3(+2.000,-1.500,+0.500));",
+				"vec3 L=normalize(vec3(+2.0,-1.5,+0.5));",
 				"vec3 V=vec3(0.0,0.0,1.0);",
 				"vec3 H=normalize(L+V);",
 				"float shininess=100.0;",
@@ -761,7 +761,7 @@ describe("Illumination",()=>{
 		it("outputs phong shading for fragment shader",()=>{
 			assert.deepEqual(illumination.getGlslFragmentOutputLines(true,false).get(),[
 				"vec3 N=normalize(interpolatedNormal);",
-				"vec3 L=normalize(vec3(+2.000,-1.500,+0.500));",
+				"vec3 L=normalize(vec3(+2.0,-1.5,+0.5));",
 				"vec3 V=vec3(0.0,0.0,1.0);",
 				"vec3 R=reflect(-L,N);",
 				"float shininess=100.0;",

@@ -1,7 +1,8 @@
 'use strict'
 
 const camelCase=require('crnx-base/fake-lodash/camelcase')
-const fixOptHelp=require('./fixed-options-helpers')
+const formatNumber=require('crnx-base/format-number')
+const formatNumbers=require('crnx-base/format-numbers')
 const Input=require('./input-classes')
 const Lines=require('crnx-base/lines')
 const JsLines=require('crnx-base/js-lines')
@@ -48,15 +49,38 @@ class Vector extends NumericFeature {
 	}
 	// fns that can be mapped over components:
 	makeInitialComponentValue() {
+		const numbers={}
+		this.components.forEach(component=>{
+			if (component.value.input=='slider') {
+				// don't need formatted number for this case
+			} else {
+				numbers[component.value.name]=component.value
+			}
+		})
+		const fmt=formatNumbers.js(numbers)
 		return component=>{
 			if (component.value.input=='slider') {
 				return "parseFloat(document.getElementById('"+component.name+"').value)" // b/c slider could be init'd to a value different than the default
 			} else {
-				return fixOptHelp.formatNumber(component.value)
+				return fmt[component.value.name]
 			}
 		}
 	}
 	makeUpdatedComponentValue() {
+		const numbers={}
+		this.components.forEach(component=>{
+			if (
+				component.value.speed!=0 || component.value.speed.input!='constant' ||
+				component.value.input instanceof Input.MouseMove || component.value.input instanceof Input.Gamepad
+			) {
+				// don't need formatted number for this case
+			} else if (component.value.input=='slider') {
+				// don't need formatted number for this case
+			} else {
+				numbers[component.value.name]=component.value
+			}
+		})
+		const fmt=formatNumbers.js(numbers)
 		return component=>{
 			if (
 				component.value.speed!=0 || component.value.speed.input!='constant' ||
@@ -66,7 +90,7 @@ class Vector extends NumericFeature {
 			} else if (component.value.input=='slider') {
 				return "parseFloat(document.getElementById('"+component.name+"').value)"
 			} else {
-				return fixOptHelp.formatNumber(component.value)
+				return fmt[component.value.name]
 			}
 		}
 	}
@@ -105,13 +129,14 @@ class Vector extends NumericFeature {
 		const a=Lines.ba(super.getHtmlInputLines(i18n))
 		const writeInput=(v,opName,htmlName)=>{
 			if (v.input!='slider') return
-			const fmt=fixOptHelp.makeFormatNumber(v)
+			const fmtAttrs=formatNumbers.html({min:v.min,max:v.max,value:v.value},v.precision)
+			const fmtLabels=formatNumbers({min:v.min,max:v.max},v.precision)
 			a(
 				"<div>",
 				Lines.html`	<label for=${htmlName}>${i18n(opName)}</label>`,
-				Lines.html`	<span class=min>${i18n(opName+'.value',v.min)}</span>`,
-				Lines.html`	<input type=range id=${htmlName} min=${fmt(v.min)} max=${fmt(v.max)} value=${fmt(v)} step=any />`,
-				Lines.html`	<span class=max>${i18n(opName+'.value',v.max)}</span>`,
+				Lines.html`	<span class=min>${i18n(opName+'.value',fmtLabels.min)}</span>`,
+				Lines.html`	<input type=range id=${htmlName} min=${fmtAttrs.min} max=${fmtAttrs.max} value=${fmtAttrs.value} step=any />`,
+				Lines.html`	<span class=max>${i18n(opName+'.value',fmtLabels.max)}</span>`,
 				"</div>"
 			)
 		}
@@ -171,17 +196,29 @@ class Vector extends NumericFeature {
 		const someSpeeds=this.components.some(component=>component.hasSpeed())
 		const someValueSliders=this.components.some(component=>component.value.input=='slider')
 		const someGamepads=this.components.some(component=>component.hasInputClass(Input.Gamepad))
-		this.components.forEach(component=>{
-			if (
-				(component.value.input instanceof Input.MouseMove && (someValueSliders || someSpeeds || someGamepads)) || // mouse input required elsewhere
-				(component.value.speed.input!='constant' && component.value.input!='slider') // variable speed and no value input capable of storing the state
-			) {
-				a("var "+component.varName+"="+fixOptHelp.formatNumber(component.value)+";")
-			}
-			if (component.value.speed.input instanceof Input.MouseMove) {
-				a("var "+component.varNameSpeed+"="+fixOptHelp.formatNumber(component.value.speed)+";")
-			}
-		})
+		const writeVarLines=()=>{
+			let fmt, sfmt
+			const numbers={}, snumbers={}
+			const writes=[], swrites=[]
+			this.components.forEach(component=>{
+				if (
+					(component.value.input instanceof Input.MouseMove && (someValueSliders || someSpeeds || someGamepads)) || // mouse input required elsewhere
+					(component.value.speed.input!='constant' && component.value.input!='slider') // variable speed and no value input capable of storing the state
+				) {
+					numbers[component.value.name]=component.value
+					writes.push(component)
+				}
+				if (component.value.speed.input instanceof Input.MouseMove) {
+					snumbers[component.value.name]=component.value.speed
+					swrites.push(component)
+				}
+			})
+			fmt=formatNumbers.js(numbers)
+			sfmt=formatNumbers.js(snumbers)
+			writes.forEach(component=>a("var "+component.varName+"="+fmt[component.value.name]+";"))
+			swrites.forEach(component=>a("var "+component.varNameSpeed+"="+sfmt[component.value.name]+";"))
+		}
+		writeVarLines()
 		if (!someSpeeds && someValueSliders && !someGamepads) {
 			a(
 				WrapLines.b(
@@ -201,11 +238,12 @@ class Vector extends NumericFeature {
 			const entry=featureContext.canvasMousemoveListener.enter()
 			this.components.forEach(component=>{
 				if (component.value.input instanceof Input.MouseMove) {
-					const fmt=fixOptHelp.makeFormatNumber(component.value)
+					const fmt=formatNumbers.js({
+						min:component.value.min,
+						max:component.value.max,
+					},component.value.precision)
 					;((!someSpeeds && !someValueSliders && !someGamepads) ? entry.minMaxVarFloat : entry.minMaxFloat)(
-						component.value.input,component.varName,
-						fmt(component.value.min),
-						fmt(component.value.max)
+						component.value.input,component.varName,fmt.min,fmt.max
 					)
 					entry.log("console.log('"+component.name+" input value:',"+component.varName+");")
 					if (!someSpeeds && !someValueSliders && !someGamepads) {
@@ -224,9 +262,12 @@ class Vector extends NumericFeature {
 		if (this.components.some(component=>(component.value.speed.input instanceof Input.MouseMove))) {
 			const entry=featureContext.canvasMousemoveListener.enter()
 			this.components.forEach(component=>{
-				const fmt=fixOptHelp.makeFormatNumber(component.value.speed)
+				const fmt=formatNumbers.js({
+					min:component.value.speed.min,
+					max:component.value.speed.max,
+				},component.value.speed.precision)
 				if (component.value.speed.input instanceof Input.MouseMove) {
-					entry.minMaxFloat(component.value.speed.input,component.varNameSpeed,fmt(component.value.speed.min),fmt(component.value.speed.max))
+					entry.minMaxFloat(component.value.speed.input,component.varNameSpeed,fmt.min,fmt.max)
 						.log("console.log('"+component.name+".speed input value:',"+component.varNameSpeed+");")
 				}
 			})
@@ -247,11 +288,11 @@ class Vector extends NumericFeature {
 		const writeGamepad=(component,v,dotSuffix,varSuffix)=>{
 			if (v.input instanceof Input.Gamepad) {
 				needUpdate=true
-				const fmt=fixOptHelp.makeFormatNumber(v)
+				const fmt=formatNumbers.js({min:v.min,max:v.max,value:v.value},v.precision)
 				a(
-					"var "+component.minVarName+varSuffix+"="+fmt(v.min)+";",
-					"var "+component.maxVarName+varSuffix+"="+fmt(v.max)+";",
-					"var "+component.varName+varSuffix+"="+fmt(v)+";",
+					"var "+component.minVarName+varSuffix+"="+fmt.min+";",
+					"var "+component.maxVarName+varSuffix+"="+fmt.max+";",
+					"var "+component.varName+varSuffix+"="+fmt.value+";",
 					"if (gamepad && gamepad.axes.length>"+v.input.axis+") {",
 					"	"+component.varName+varSuffix+"="+component.minVarName+varSuffix+"+("+component.maxVarName+varSuffix+"-"+component.minVarName+varSuffix+")*(gamepad.axes["+v.input.axis+"]+1)/2;",
 					"}"
@@ -267,15 +308,13 @@ class Vector extends NumericFeature {
 			writeGamepad(component,v.speed,'.speed','Speed')
 			if (component.hasSpeed()) {
 				needUpdate=true
-				const fmt=fixOptHelp.makeFormatNumber(v)
-				const sfmt=fixOptHelp.makeFormatNumber(v.speed)
 				let addSpeed
 				if (v.speed.input=='slider') {
 					addSpeed="+parseFloat(document.getElementById('"+component.name+".speed').value)"
 				} else if (v.speed.input instanceof Input.MouseMove || v.speed.input instanceof Input.Gamepad) {
 					addSpeed="+"+component.varNameSpeed
 				} else {
-					addSpeed=add(sfmt(v.speed))
+					addSpeed=add(formatNumber.js(v.speed))
 				}
 				let limitFn=(x,dx)=>{
 					if (x==component.varName) {
@@ -285,11 +324,12 @@ class Vector extends NumericFeature {
 					}
 				}
 				if (component.wrapped) {
-					limitFn=(x,dx)=>"=wrap("+x+dx+","+fmt(v.max)+")"
+					limitFn=(x,dx)=>"=wrap("+x+dx+","+formatNumber.js(v.max,v.precision)+")"
 				} else if (component.clamped) {
-					limitFn=(x,dx)=>"=clamp("+x+dx+","+fmt(v.min)+","+fmt(v.max)+")"
+					const fmt=formatNumbers.js({min:v.min,max:v.max},v.precision)
+					limitFn=(x,dx)=>"=clamp("+x+dx+","+fmt.min+","+fmt.max+")"
 				} else if (component.capped) {
-					limitFn=(x,dx)=>"=Math."+(v.speed<0?"max":"min")+"("+x+dx+","+(v.speed<0?fmt(v.min):fmt(v.max))+")"
+					limitFn=(x,dx)=>"=Math."+(v.speed<0?"max":"min")+"("+x+dx+","+formatNumber.js(v.speed<0?v.min:v.max,v.precision)+")"
 				}
 				const incrementLine=(base,dt)=>component.varName+limitFn(base,addSpeed+"*"+dt+"/1000")+";"
 				if (v.input=='slider') {
@@ -301,7 +341,7 @@ class Vector extends NumericFeature {
 				} else if (v.input instanceof Input.MouseMove || v.speed.input!='constant') {
 					a(incrementLine(component.varName,"(time-prevTime)"))
 				} else {
-					a("var "+incrementLine(fmt(v),"(time-startTime)"))
+					a("var "+incrementLine(formatNumber.js(v),"(time-startTime)"))
 				}
 				if (featureContext && featureContext.debugOptions.animations) { // TODO always pass featureContext
 					a("console.log('"+component.name+" animation value:',"+component.varName+");")

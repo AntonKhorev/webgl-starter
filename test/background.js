@@ -31,7 +31,7 @@ describe("Background",()=>{
 		const featureContext=new FeatureContext(fixed.debug)
 		it("calls gl.clearColor",()=>{
 			assert.deepEqual(background.getJsInitLines(featureContext).get(),[
-				"gl.clearColor(1.000,1.000,1.000,1.000)",
+				"gl.clearColor(1,1,1,1)",
 			])
 		})
 		it("calls gl.clear",()=>{

@@ -28,7 +28,7 @@ describe("CallVector",()=>{
 			const featureContext=new FeatureContext(options.fix().debug)
 			featureContext.hasStartTime=true // animated
 			assert.deepEqual(vector.getJsInitLines(featureContext).get(),[
-				"do.something(0.200,0.300,0.400,0.500)"
+				"do.something(0.2,0.3,0.4,0.5)"
 			])
 			assert.deepEqual(featureContext.getJsAfterInitLines().get(),[
 			])
@@ -66,7 +66,7 @@ describe("CallVector",()=>{
 			featureContext.hasStartTime=true // animated
 			assert.deepEqual(vector.getJsInitLines(featureContext).get(),[
 				"function updateColor() {",
-				"	up(parseFloat(document.getElementById('color.r').value),0.300,0.400,0.500)",
+				"	up(parseFloat(document.getElementById('color.r').value),0.3,0.4,0.5)",
 				"}",
 				"updateColor()",
 				"document.getElementById('color.r').addEventListener('change',updateColor)"
@@ -93,9 +93,9 @@ describe("CallVector",()=>{
 				"function updateColor() {",
 				"	up(",
 				"		parseFloat(document.getElementById('color.r').value),",
-				"		0.300,",
+				"		0.3,",
 				"		parseFloat(document.getElementById('color.b').value),",
-				"		1.000",
+				"		1.0",
 				"	)",
 				"}",
 				"updateColor()",
@@ -138,13 +138,13 @@ describe("CallVector",()=>{
 			const featureContext=new FeatureContext(options.fix().debug)
 			featureContext.hasStartTime=true // animated
 			assert.deepEqual(vector.getJsInitLines(featureContext).get(),[
-				"up(0.200,0.300,0.400,1.000)"
+				"up(0.2,0.3,0.4,1.0)"
 			])
 			assert.deepEqual(featureContext.getJsAfterInitLines().get(),[
 				"canvas.addEventListener('mousemove',function(ev){",
 				"	var rect=this.getBoundingClientRect()",
 				"	var colorR=(ev.clientX-rect.left)/(rect.width-1)",
-				"	up(colorR,0.300,0.400,1.000)",
+				"	up(colorR,0.3,0.4,1.0)",
 				"})"
 			])
 		})
@@ -158,14 +158,14 @@ describe("CallVector",()=>{
 			const featureContext=new FeatureContext(options.fix().debug)
 			featureContext.hasStartTime=true // animated
 			assert.deepEqual(vector.getJsInitLines(featureContext).get(),[
-				"up(0.200,0.300,0.400,1.000)"
+				"up(0.2,0.3,0.4,1.0)"
 			])
 			assert.deepEqual(featureContext.getJsAfterInitLines().get(),[
 				"canvas.addEventListener('mousemove',function(ev){",
 				"	var rect=this.getBoundingClientRect()",
 				"	var colorR=(ev.clientX-rect.left)/(rect.width-1)",
 				"	var colorA=(rect.bottom-1-ev.clientY)/(rect.height-1)",
-				"	up(colorR,0.300,0.400,colorA)",
+				"	up(colorR,0.3,0.4,colorA)",
 				"})"
 			])
 		})
@@ -179,10 +179,10 @@ describe("CallVector",()=>{
 			const featureContext=new FeatureContext(options.fix().debug)
 			featureContext.hasStartTime=true // animated
 			assert.deepEqual(vector.getJsInitLines(featureContext).get(),[
-				"var colorR=0.200",
-				"var colorA=1.000",
+				"var colorR=0.2",
+				"var colorA=1.0",
 				"function updateColor() {",
-				"	up(colorR,parseFloat(document.getElementById('color.g').value),0.400,colorA)",
+				"	up(colorR,parseFloat(document.getElementById('color.g').value),0.4,colorA)",
 				"}",
 				"updateColor()",
 				"document.getElementById('color.g').addEventListener('change',updateColor)"
@@ -206,8 +206,8 @@ describe("CallVector",()=>{
 			const featureContext=new FeatureContext(options.fix().debug)
 			featureContext.hasStartTime=true // animated
 			assert.deepEqual(vector.getJsInitLines(featureContext).get(),[
-				"var colorR=0.200",
-				"var colorA=1.000",
+				"var colorR=0.2",
+				"var colorA=1.0",
 				"function updateColor() {",
 				"	up(",
 				"		colorR,",
@@ -252,8 +252,8 @@ describe("CallVector",()=>{
 		})
 		it("has loop with constant increment",()=>{
 			assert.deepEqual(vector.getJsLoopLines().get(),[
-				"var colorR=Math.min(0.500+0.123*(time-startTime)/1000,1.000)",
-				"setColor(colorR,0.400,0.300,1.000)"
+				"var colorR=Math.min(0.5+0.123*(time-startTime)/1000,1)",
+				"setColor(colorR,0.4,0.3,1.0)"
 			])
 		})
 	})
@@ -279,8 +279,8 @@ describe("CallVector",()=>{
 		})
 		it("has loop with constant increment",()=>{
 			assert.deepEqual(vector.getJsLoopLines().get(),[
-				"var colorR=Math.max(0.500-0.100*(time-startTime)/1000,0.000)",
-				"setColor(colorR,0.400,0.300,1.000)"
+				"var colorR=Math.max(0.5-0.1*(time-startTime)/1000,0)",
+				"setColor(colorR,0.4,0.3,1.0)"
 			])
 		})
 	})
@@ -301,8 +301,8 @@ describe("CallVector",()=>{
 		})
 		it("has loop with constant increment",()=>{
 			assert.deepEqual(vector.getJsLoopLines().get(),[
-				"var colorR=Math.min(0.500+0.123*(time-startTime)/1000,1.000)",
-				"setColor(colorR,parseFloat(document.getElementById('color.g').value),0.300,1.000)"
+				"var colorR=Math.min(0.5+0.123*(time-startTime)/1000,1)",
+				"setColor(colorR,parseFloat(document.getElementById('color.g').value),0.3,1.0)"
 			])
 		})
 	})
@@ -333,9 +333,9 @@ describe("CallVector",()=>{
 		it("has loop with time difference increment and slider update",()=>{
 			assert.deepEqual(vector.getJsLoopLines().get(),[
 				"var colorRInput=document.getElementById('color.r')",
-				"var colorR=Math.min(parseFloat(colorRInput.value)+0.123*(time-prevTime)/1000,1.000)",
+				"var colorR=Math.min(parseFloat(colorRInput.value)+0.123*(time-prevTime)/1000,1)",
 				"colorRInput.value=colorR",
-				"setColor(colorR,0.400,0.300,1.000)"
+				"setColor(colorR,0.4,0.3,1.0)"
 			])
 		})
 	})
@@ -357,7 +357,7 @@ describe("CallVector",()=>{
 			featureContext.hasStartTime=true // animated
 			featureContext.hasInputs=true
 			assert.deepEqual(vector.getJsInitLines(featureContext).get(),[
-				"var colorG=0.400"
+				"var colorG=0.4"
 			])
 			assert.deepEqual(featureContext.getJsAfterInitLines().get(),[
 				"canvas.addEventListener('mousemove',function(ev){",
@@ -368,8 +368,8 @@ describe("CallVector",()=>{
 		})
 		it("has loop with constant increment",()=>{
 			assert.deepEqual(vector.getJsLoopLines().get(),[
-				"var colorR=Math.min(0.500+0.123*(time-startTime)/1000,1.000)",
-				"setColor(colorR,colorG,0.300,1.000)"
+				"var colorR=Math.min(0.5+0.123*(time-startTime)/1000,1)",
+				"setColor(colorR,colorG,0.3,1.0)"
 			])
 		})
 	})
@@ -391,7 +391,7 @@ describe("CallVector",()=>{
 			featureContext.hasPrevTime=true // animated
 			featureContext.hasInputs=true
 			assert.deepEqual(vector.getJsInitLines(featureContext).get(),[
-				"var colorR=0.500"
+				"var colorR=0.5"
 			])
 			assert.deepEqual(featureContext.getJsAfterInitLines().get(),[
 				"canvas.addEventListener('mousemove',function(ev){",
@@ -402,8 +402,8 @@ describe("CallVector",()=>{
 		})
 		it("has loop with time difference increment",()=>{
 			assert.deepEqual(vector.getJsLoopLines().get(),[
-				"colorR=Math.min(colorR+0.123*(time-prevTime)/1000,1.000)",
-				"setColor(colorR,0.400,0.300,1.000)"
+				"colorR=Math.min(colorR+0.123*(time-prevTime)/1000,1)",
+				"setColor(colorR,0.4,0.3,1.0)"
 			])
 		})
 	})
@@ -429,15 +429,15 @@ describe("CallVector",()=>{
 			featureContext.hasSliders=true
 			featureContext.hasInputs=true
 			assert.deepEqual(vector.getJsInitLines(featureContext).get(),[
-				"var colorR=0.500"
+				"var colorR=0.5"
 			])
 			assert.deepEqual(featureContext.getJsAfterInitLines().get(),[
 			])
 		})
 		it("has loop with time difference increment",()=>{
 			assert.deepEqual(vector.getJsLoopLines().get(),[
-				"colorR=clamp(colorR+parseFloat(document.getElementById('color.r.speed').value)*(time-prevTime)/1000,0.000,1.000)",
-				"setColor(colorR,0.400,0.300,1.000)"
+				"colorR=clamp(colorR+parseFloat(document.getElementById('color.r.speed').value)*(time-prevTime)/1000,0,1)",
+				"setColor(colorR,0.4,0.3,1.0)"
 			])
 		})
 	})
@@ -470,9 +470,9 @@ describe("CallVector",()=>{
 		it("has loop with time difference increment",()=>{
 			assert.deepEqual(vector.getJsLoopLines().get(),[
 				"var colorRInput=document.getElementById('color.r')",
-				"var colorR=clamp(parseFloat(colorRInput.value)+parseFloat(document.getElementById('color.r.speed').value)*(time-prevTime)/1000,0.000,1.000)",
+				"var colorR=clamp(parseFloat(colorRInput.value)+parseFloat(document.getElementById('color.r.speed').value)*(time-prevTime)/1000,0,1)",
 				"colorRInput.value=colorR",
-				"setColor(colorR,0.400,0.300,1.000)"
+				"setColor(colorR,0.4,0.3,1.0)"
 			])
 		})
 	})
@@ -518,22 +518,22 @@ describe("CallVector",()=>{
 			featureContext.hasClampFn=true
 			featureContext.hasInputs=true
 			assert.deepEqual(vector.getJsInitLines(featureContext).get(),[
-				"var colorR=0.500",
+				"var colorR=0.5",
 				"var colorRSpeed=-0.321",
 			])
 			assert.deepEqual(featureContext.getJsAfterInitLines().get(),[
 				"canvas.addEventListener('mousemove',function(ev){",
 				"	var rect=this.getBoundingClientRect()",
-				"	var minColorRSpeed=-1.000",
-				"	var maxColorRSpeed=+1.000",
+				"	var minColorRSpeed=-1",
+				"	var maxColorRSpeed=+1",
 				"	colorRSpeed=minColorRSpeed+(maxColorRSpeed-minColorRSpeed)*(ev.clientX-rect.left)/(rect.width-1)",
 				"})"
 			])
 		})
 		it("has loop with constant increment",()=>{
 			assert.deepEqual(vector.getJsLoopLines().get(),[
-				"colorR=clamp(colorR+colorRSpeed*(time-prevTime)/1000,0.000,1.000)",
-				"setColor(colorR,0.400,0.300,1.000)"
+				"colorR=clamp(colorR+colorRSpeed*(time-prevTime)/1000,0,1)",
+				"setColor(colorR,0.4,0.3,1.0)"
 			])
 		})
 	})
@@ -561,13 +561,13 @@ describe("CallVector",()=>{
 		})
 		it("has loop with gamepad",()=>{
 			assert.deepEqual(vector.getJsLoopLines().get(),[
-				"var minColorR=0.000",
-				"var maxColorR=1.000",
-				"var colorR=0.500",
+				"var minColorR=0.0",
+				"var maxColorR=1.0",
+				"var colorR=0.5",
 				"if (gamepad && gamepad.axes.length>3) {",
 				"	colorR=minColorR+(maxColorR-minColorR)*(gamepad.axes[3]+1)/2",
 				"}",
-				"setColor(colorR,0.400,0.300,1.000)"
+				"setColor(colorR,0.4,0.3,1.0)"
 			])
 		})
 	})
@@ -596,13 +596,13 @@ describe("CallVector",()=>{
 		})
 		it("has loop with gamepad",()=>{
 			assert.deepEqual(vector.getJsLoopLines().get(),[
-				"var minColorR=0.000",
-				"var maxColorR=1.000",
-				"var colorR=0.500",
+				"var minColorR=0.0",
+				"var maxColorR=1.0",
+				"var colorR=0.5",
 				"if (gamepad && gamepad.axes.length>3) {",
 				"	colorR=minColorR+(maxColorR-minColorR)*(gamepad.axes[3]+1)/2",
 				"}",
-				"setColor(colorR,parseFloat(document.getElementById('color.g').value),0.300,1.000)"
+				"setColor(colorR,parseFloat(document.getElementById('color.g').value),0.3,1.0)"
 			])
 		})
 	})
@@ -624,7 +624,7 @@ describe("CallVector",()=>{
 			featureContext.pollsGamepad=true // animated
 			featureContext.hasInputs=true
 			assert.deepEqual(vector.getJsInitLines(featureContext).get(),[
-				"var colorG=0.400"
+				"var colorG=0.4"
 			])
 			assert.deepEqual(featureContext.getJsAfterInitLines().get(),[
 				"canvas.addEventListener('mousemove',function(ev){",
@@ -635,13 +635,13 @@ describe("CallVector",()=>{
 		})
 		it("has loop with gamepad",()=>{
 			assert.deepEqual(vector.getJsLoopLines().get(),[
-				"var minColorR=0.000",
-				"var maxColorR=1.000",
-				"var colorR=0.500",
+				"var minColorR=0.0",
+				"var maxColorR=1.0",
+				"var colorR=0.5",
 				"if (gamepad && gamepad.axes.length>3) {",
 				"	colorR=minColorR+(maxColorR-minColorR)*(gamepad.axes[3]+1)/2",
 				"}",
-				"setColor(colorR,colorG,0.300,1.000)"
+				"setColor(colorR,colorG,0.3,1.0)"
 			])
 		})
 	})
@@ -667,7 +667,7 @@ describe("CallVector",()=>{
 			featureContext.pollsGamepad=true
 			featureContext.hasInputs=true
 			assert.deepEqual(vector.getJsInitLines(featureContext).get(),[
-				"var colorR=0.500",
+				"var colorR=0.5",
 			])
 			assert.deepEqual(featureContext.getJsAfterInitLines().get(),[
 			])
@@ -680,8 +680,8 @@ describe("CallVector",()=>{
 				"if (gamepad && gamepad.axes.length>3) {",
 				"	colorRSpeed=minColorRSpeed+(maxColorRSpeed-minColorRSpeed)*(gamepad.axes[3]+1)/2",
 				"}",
-				"colorR=clamp(colorR+colorRSpeed*(time-prevTime)/1000,0.000,1.000)",
-				"setColor(colorR,0.400,0.300,1.000)"
+				"colorR=clamp(colorR+colorRSpeed*(time-prevTime)/1000,0,1)",
+				"setColor(colorR,0.4,0.3,1.0)"
 			])
 		})
 	})
