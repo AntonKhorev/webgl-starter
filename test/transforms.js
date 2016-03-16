@@ -19,6 +19,25 @@ describe("Transforms",()=>{
 			]
 		}
 	}
+	context("with 1 slider z-rotation",()=>{
+		const options=new TestOptions({transforms:{
+			model:[
+				{type:'rotate.z', input:'slider'},
+			]
+		}})
+		const transforms=new Transforms(options.fix().transforms)
+		it("has 2d rotation matrix",()=>{
+			const lines=transforms.getGlslVertexOutputLines(true,false,false)
+			assert.deepEqual(lines.get(),[
+				"float cz=cos(radians(rotateZ));",
+				"float sz=sin(radians(rotateZ));",
+				"gl_Position=vec4(position*mat2(",
+				"	cz, -sz,",
+				"	sz,  cz",
+				"),0,1);",
+			])
+		})
+	})
 	context("with 1 slider x-rotation",()=>{
 		const options=new TestOptions({transforms:{
 			model:[

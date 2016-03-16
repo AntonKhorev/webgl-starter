@@ -90,7 +90,7 @@ class Transforms extends Feature {
 	}
 	// private:
 	use2dTransform(flatShape) { // has flat shape and exactly one z rotation TODO multiple z rotations
-		return flatShape && this.options.model.length==1 && this.options.model[0].type=='rotate.z'
+		return flatShape && this.options.model.entries.length==1 && this.options.model.entries[0].type=='rotate.z'
 	}
 	getTransformMatricesLines(dim) { // dim==3 for normal transform, dim==4 for position transform
 		const a=Lines.ba("")
