@@ -1,8 +1,6 @@
 'use strict'
 
-const escape=require('crnx-base/fake-lodash/escape')
-
-let dataStrings={
+let strings={
 	'options.canvas': "Canvas",
 	'options.canvas.{width,height}': "Canvas {width,height}",
 
@@ -98,88 +96,7 @@ let dataStrings={
 	'units.1/second.2': "units per second", // "inverse seconds",
 }
 
-dataStrings=require('crnx-base/code-output-i18n')(dataStrings)
+strings=require('crnx-base/i18n-expand-curly')(strings)
+strings=require('crnx-base/code-output-i18n')(strings)
 
-const strings={}
-const expandRegexp=/^([^{]*)\{([^}]*)\}(.*)$/
-function expandIdAndString(id,string) {
-	let match
-	if (match=expandRegexp.exec(id)) {
-		const idStart=match[1]
-		const idMids=match[2].split(',')
-		const idEnd=match[3]
-		if ((typeof string=='string') && (match=expandRegexp.exec(string))) {
-			const stringStart=match[1]
-			const stringMids=match[2].split(',')
-			const stringEnd=match[3]
-			idMids.forEach((idMid,i)=>{
-				const stringMid=stringMids[i]
-				expandIdAndString(idStart+idMid+idEnd,stringStart+stringMid+stringEnd)
-			})
-		} else {
-			idMids.forEach(idMid=>{
-				expandIdAndString(idStart+idMid+idEnd,string)
-			})
-		}
-	} else {
-		strings[id]=string
-	}
-}
-for (let id in dataStrings) {
-	expandIdAndString(id,dataStrings[id])
-}
-
-const i18n=function(id){
-	if (strings[id]===undefined) {
-		throw new Error("undefined string "+id)
-	} if (typeof strings[id] == 'string') {
-		return strings[id]
-	}
-}
-
-i18n.number=function(n){
-	return String(n).replace('-','−')
-}
-
-i18n.pluralSuffix=function(n){
-	const ns=String(n)
-	if (ns.indexOf('.')<0) {
-		const nn=Number(n)
-		if (Math.abs(nn)==1) {
-			return '1'
-		} else {
-			return '2'
-		}
-	} else {
-		return '2'
-	}
-}
-
-i18n.plural=function(n,id){
-	return this(id+'.'+this.pluralSuffix(n))
-}
-
-i18n.numberWithUnits=function(n,unit,abbrFn){
-	if (abbrFn===undefined) { // codegen needs its own fn
-		abbrFn=(abbr,expansion)=>"<abbr title='"+escape(expansion)+"'>"+abbr+"</abbr>" // expansion is html for stuff like s^(-1)
-	}
-	let s=this.number(n)
-	if (unit!==undefined) {
-		if (unit.length==1 && /^\W/.test(unit)) {
-			s+=unit
-		} else {
-			s+=' ' // nbsp
-			let abbr
-			if (unit=='1/second') {
-				abbr=i18n('units.second.a')+"<sup>−1</sup>"
-			} else {
-				abbr=i18n('units.'+unit+'.a')
-			}
-			const expansion=this.plural(n,'units.'+unit)
-			s+=abbrFn(abbr,expansion)
-		}
-	}
-	return s
-}
-
-module.exports=i18n
+module.exports=require('crnx-base/i18n')({en:strings})

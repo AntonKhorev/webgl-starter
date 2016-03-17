@@ -5,7 +5,7 @@ function generateId() {
 	return 'webgl-starter-id-'+(idCounter++)
 }
 
-const i18n=require('./i18n')
+const i18n=require('./i18n')('en')
 const Options=require('./options')
 const Code=require('./code')
 const OptionsOutput=require('./options-output')
