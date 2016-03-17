@@ -127,32 +127,22 @@ class Vector extends NumericFeature {
 	}
 	getHtmlInputLines(i18n) {
 		const a=Lines.ba(super.getHtmlInputLines(i18n))
-		const writeInput=(v,opName,htmlName)=>{
-			if (v.input!='slider') return
-			const fmtAttrs=formatNumbers.html({min:v.min,max:v.max,value:v.value},v.precision)
-			const fmtLabels=formatNumbers({min:v.min,max:v.max},v.precision)
-			const minMax=n=>i18n.numberWithUnits(n,v.unit,(a,e)=>Lines.html`<abbr title=${e}>`+a+`</abbr>`)
-			a(
-				"<div>",
-				Lines.html`	<label for=${htmlName}>${i18n(opName)}</label>`,
-				"	<span class=min>"+minMax(fmtLabels.min)+"</span>",
-				Lines.html`	<input type=range id=${htmlName} min=${fmtAttrs.min} max=${fmtAttrs.max} value=${fmtAttrs.value} step=any />`,
-				"	<span class=max>"+minMax(fmtLabels.max)+"</span>",
-				"</div>"
-			)
-		}
-		this.components.forEach(component=>{
-			writeInput(
+		this.components.forEach(component=>a(
+			this.getHtmlSliderLines(
+				i18n,
 				component.value,
 				'options.'+this.i18nId+'.'+component.suffix,
-				component.name
-			)
-			writeInput(
+				component.name,
+				'any'
+			),
+			this.getHtmlSliderLines(
+				i18n,
 				component.value.speed,
 				'options.'+this.i18nId+'.'+component.suffix+'.speed',
-				component.name+'.speed'
+				component.name+'.speed',
+				'any'
 			)
-		})
+		))
 		return a.e()
 	}
 	getJsInitLines(featureContext) {

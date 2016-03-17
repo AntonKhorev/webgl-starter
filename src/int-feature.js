@@ -29,19 +29,15 @@ class IntFeature extends NumericFeature {
 	}
 	getHtmlInputLines(i18n) {
 		const a=Lines.ba(super.getHtmlInputLines(i18n))
-		const v=this.value
-		if (v.input=='slider') {
-			const fmt=formatNumbers({ min:v.min, max:v.max },v.precision)
-			const minMax=n=>i18n.numberWithUnits(n,v.unit,(a,e)=>Lines.html`<abbr title=${e}>`+a+`</abbr>`)
-			a(
-				"<div>",
-				Lines.html`	<label for=${this.name}>${i18n('options.'+this.name)}:</label>`,
-				"	<span class=min>"+minMax(fmt.min)+"</span>",
-				Lines.html`	<input type=range id=${this.name} min=${v.min} max=${v.max} value=${v} />`,
-				"	<span class=max>"+minMax(fmt.max)+"</span>",
-				"</div>"
+		a(
+			this.getHtmlSliderLines(
+				i18n,
+				this.value,
+				'options.'+this.name,
+				this.name,
+				false
 			)
-		}
+		)
 		return a.e()
 	}
 }
