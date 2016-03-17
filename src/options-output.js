@@ -7,13 +7,6 @@ class OptionsOutput extends BaseOptionsOutput {
 	setOptionClassWriters(optionClassWriters) {
 		super.setOptionClassWriters(optionClassWriters)
 		const baseSelectWriter=optionClassWriters.get(Option.Select)
-		optionClassWriters.set(Option.Select,(option,writeOption,i18n,generateId)=>{
-			const $option=baseSelectWriter(option,writeOption,i18n,generateId)
-			if (option.name=='elements') {
-				$option.append(" "+i18n('options-output.elements'))
-			}
-			return $option
-		})
 		optionClassWriters.set(Option.LiveNumber,(option,writeOption,i18n,generateId)=>{
 			const writeSubOption=option=>{
 				const p=option.precision

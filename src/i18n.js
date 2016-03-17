@@ -64,6 +64,8 @@ let strings={
 	'options.debug.inputs': "Log input values",
 	'options.debug.animations': "Log animated values",
 
+	'options-info.shape.elements.{8,16}': "choosing 8- or 16-bit index may limit available shape detail levels",
+
 	'options-output.inputs': "Input method",
 	'options-output.inputs.constant': "none",
 	'options-output.inputs.slider': "slider",
@@ -74,7 +76,6 @@ let strings={
 	'options-output.addSpeed': "Add speed",
 	'options-output.drag': "Drag or press up/down while in focus to reorder transforms",
 	'options-output.delete': "Delete transform",
-	'options-output.elements': "choosing 8- or 16-bit index may limit available shape detail levels",
 
 	'controls.type.mousemove{x,y}': "Move the mouse pointer {horizontally,vertically} over the canvas",
 	'controls.to': "to update",
