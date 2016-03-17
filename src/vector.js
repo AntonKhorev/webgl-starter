@@ -131,12 +131,13 @@ class Vector extends NumericFeature {
 			if (v.input!='slider') return
 			const fmtAttrs=formatNumbers.html({min:v.min,max:v.max,value:v.value},v.precision)
 			const fmtLabels=formatNumbers({min:v.min,max:v.max},v.precision)
+			const minMax=n=>i18n.numberWithUnits(n,v.unit,(a,e)=>Lines.html`<abbr title=${e}>`+a+`</abbr>`)
 			a(
 				"<div>",
 				Lines.html`	<label for=${htmlName}>${i18n(opName)}</label>`,
-				Lines.html`	<span class=min>${i18n(opName+'.value',fmtLabels.min)}</span>`,
+				"	<span class=min>"+minMax(fmtLabels.min)+"</span>",
 				Lines.html`	<input type=range id=${htmlName} min=${fmtAttrs.min} max=${fmtAttrs.max} value=${fmtAttrs.value} step=any />`,
-				Lines.html`	<span class=max>${i18n(opName+'.value',fmtLabels.max)}</span>`,
+				"	<span class=max>"+minMax(fmtLabels.max)+"</span>",
 				"</div>"
 			)
 		}

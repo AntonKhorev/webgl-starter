@@ -1,5 +1,6 @@
 'use strict'
 
+const formatNumbers=require('crnx-base/format-numbers')
 const Lines=require('crnx-base/lines')
 const NumericFeature=require('./numeric-feature')
 
@@ -30,12 +31,14 @@ class IntFeature extends NumericFeature {
 		const a=Lines.ba(super.getHtmlInputLines(i18n))
 		const v=this.value
 		if (v.input=='slider') {
+			const fmt=formatNumbers({ min:v.min, max:v.max },v.precision)
+			const minMax=n=>i18n.numberWithUnits(n,v.unit,(a,e)=>Lines.html`<abbr title=${e}>`+a+`</abbr>`)
 			a(
 				"<div>",
 				Lines.html`	<label for=${this.name}>${i18n('options.'+this.name)}:</label>`,
-				"	<span class=min>"+i18n('options.'+this.name+'.value',v.min)+"</span>", // html inserted, no escaping
+				"	<span class=min>"+minMax(fmt.min)+"</span>",
 				Lines.html`	<input type=range id=${this.name} min=${v.min} max=${v.max} value=${v} />`,
-				"	<span class=max>"+i18n('options.'+this.name+'.value',v.max)+"</span>",
+				"	<span class=max>"+minMax(fmt.max)+"</span>",
 				"</div>"
 			)
 		}

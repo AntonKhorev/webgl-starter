@@ -1,22 +1,10 @@
 'use strict'
 
-function number(n) {
-	return n.toString().replace('-','−')
-}
-function plural(n,word) {
-	if (n==1) {
-		return word
-	} else {
-		return word+'s'
-	}
-}
-const plainValue=x=>number(x)
-const pixelValue=n=>number(n)+" <abbr title='"+plural(n,'pixel')+"'>px</abbr>"
+const escape=require('crnx-base/fake-lodash/escape')
 
 let dataStrings={
 	'options.canvas': "Canvas",
 	'options.canvas.{width,height}': "Canvas {width,height}",
-	'options.canvas.{width,height}.value': pixelValue,
 
 	'options.background': "Background",
 	'options.background.type': "Background type",
@@ -24,9 +12,7 @@ let dataStrings={
 	'options.background.type.solid': "solid color",
 	'options.background.color': "Background color",
 	'options.background.color.{r,g,b,a}': 'Background color {red,green,blue,alpha} component',
-	'options.background.color.{r,g,b,a}.value': plainValue,
 	'options.background.color.{r,g,b,a}.speed': 'Background color {red,green,blue,alpha} speed',
-	'options.background.color.{r,g,b,a}.speed.value': plainValue,
 
 	'options.material': "Material",
 	'options.material.scope': "Set material color for objects",
@@ -38,14 +24,10 @@ let dataStrings={
 	'options.material.data.sda': "specular/diffuse/ambient colors",
 	'options.material.color': "Material color",
 	'options.material.color.{r,g,b,a}': "Material color {red,green,blue,alpha} component",
-	'options.material.color.{r,g,b,a}.value': plainValue,
 	'options.material.color.{r,g,b,a}.speed': "Material color {red,green,blue,alpha} speed",
-	'options.material.color.{r,g,b,a}.speed.value': plainValue,
 	'options.material.{specular,diffuse,ambient}Color': "Material {specular,diffuse,ambient} color",
 	'options.material.{specular,diffuse,ambient}Color.{r,g,b}': "{Specular,Diffuse,Ambient} color {red,green,blue} component",
-	'options.material.{specular,diffuse,ambient}Color.{r,g,b}.value': plainValue,
 	'options.material.{specular,diffuse,ambient}Color.{r,g,b}.speed': "Material {specular,diffuse,ambient} color {red,green,blue,alpha} speed",
-	'options.material.{specular,diffuse,ambient}Color.{r,g,b}.speed.value': plainValue,
 
 	'options.light': "Light", // directional if on
 	'options.light.type': "Light type",
@@ -54,9 +36,7 @@ let dataStrings={
 	'options.light.type.blinn': "on with Blinn–Phong reflections", // wp: Blinn–Phong shading model
 	'options.light.direction': "Light direction",
 	'options.light.direction.{x,y,z}': "Light direction {x,y,z} component",
-	'options.light.direction.{x,y,z}.value': plainValue,
 	'options.light.direction.{x,y,z}.speed': "Light direction {x,y,z} speed",
-	'options.light.direction.{x,y,z}.speed.value': plainValue,
 
 	'options.shape': "Shape",
 	'options.shape.type': "Shape to draw",
@@ -70,7 +50,6 @@ let dataStrings={
 	'options.shape.elements.0': "not used",
 	'options.shape.elements.{8,16,32}': "with {8,16,32}-bit index",
 	'options.shape.lod': "Shape detail level", // recursion depth for fractal shapes
-	'options.shape.lod.value': plainValue,
 
 	'options.transforms': "Transforms",
 	'options.transforms.projection': "Projection",
@@ -79,9 +58,7 @@ let dataStrings={
 	'options.transforms.model': "Model transform",
 	'options.transforms.model.rotate.{x,y,z}.add': "Add rotation around {x,y,z} axis",
 	'options.transforms.model.rotate.{x,y,z}': "Angle of rotation around {x,y,z} axis",
-	'options.transforms.model.rotate.{x,y,z}.value': plainValue,
 	'options.transforms.model.rotate.{x,y,z}.speed': "Speed of rotation around {x,y,z} axis",
-	'options.transforms.model.rotate.{x,y,z}.speed.value': plainValue,
 
 	'options.debug': "Debug options",
 	'options.debug.shaders': "Log shader compilation errors",
@@ -109,6 +86,16 @@ let dataStrings={
 	'controls.type.mousemovex': "Move the mouse pointer horizontally over the canvas",
 	'controls.type.mousemovey': "Move the mouse pointer vertically over the canvas",
 	'controls.to': "to update",
+
+	'units.pixel.a': "px",
+	'units.pixel.1': "pixel",
+	'units.pixel.2': "pixels",
+	'units.°/second.a': "°/s",
+	'units.°/second.1': "degree per second",
+	'units.°/second.2': "degrees per second",
+	'units.second.a': "s",
+	'units.1/second.1': "unit per second", // "inverse second",
+	'units.1/second.2': "units per second", // "inverse seconds",
 }
 
 dataStrings=require('crnx-base/code-output-i18n')(dataStrings)
@@ -142,12 +129,57 @@ for (let id in dataStrings) {
 	expandIdAndString(id,dataStrings[id])
 }
 
-module.exports=function(id,n){
+const i18n=function(id){
 	if (strings[id]===undefined) {
 		throw new Error("undefined string "+id)
 	} if (typeof strings[id] == 'string') {
 		return strings[id]
-	} else {
-		return strings[id](n)
 	}
 }
+
+i18n.number=function(n){
+	return String(n).replace('-','−')
+}
+
+i18n.pluralSuffix=function(n){
+	const ns=String(n)
+	if (ns.indexOf('.')<0) {
+		const nn=Number(n)
+		if (Math.abs(nn)==1) {
+			return '1'
+		} else {
+			return '2'
+		}
+	} else {
+		return '2'
+	}
+}
+
+i18n.plural=function(n,id){
+	return this(id+'.'+this.pluralSuffix(n))
+}
+
+i18n.numberWithUnits=function(n,unit,abbrFn){
+	if (abbrFn===undefined) { // codegen needs its own fn
+		abbrFn=(abbr,expansion)=>"<abbr title='"+escape(expansion)+"'>"+abbr+"</abbr>" // expansion is html for stuff like s^(-1)
+	}
+	let s=this.number(n)
+	if (unit!==undefined) {
+		if (unit.length==1 && /^\W/.test(unit)) {
+			s+=unit
+		} else {
+			s+=' ' // nbsp
+			let abbr
+			if (unit=='1/second') {
+				abbr=i18n('units.second.a')+"<sup>−1</sup>"
+			} else {
+				abbr=i18n('units.'+unit+'.a')
+			}
+			const expansion=this.plural(n,'units.'+unit)
+			s+=abbrFn(abbr,expansion)
+		}
+	}
+	return s
+}
+
+module.exports=i18n

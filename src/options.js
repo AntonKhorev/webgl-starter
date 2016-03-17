@@ -9,8 +9,8 @@ class Options extends BaseOptions {
 	get entriesDescription() {
 		return [
 			['Group','canvas',[
-				['CanvasLiveInt','width',[1,1024],512],
-				['CanvasLiveInt','height',[1,1024],512],
+				['CanvasLiveInt','width' ,[1,1024],512,{ unit: 'pixel' }],
+				['CanvasLiveInt','height',[1,1024],512,{ unit: 'pixel' }],
 			]],
 			['Group','background',[
 				['Select','type',['none','solid']],
@@ -54,9 +54,9 @@ class Options extends BaseOptions {
 			['Group','transforms',[
 				['Select','projection',['ortho','perspective']],
 				['Array','model',[
-					['LiveFloat','rotate.x',[-180,+180,-360,+360],0],
-					['LiveFloat','rotate.y',[-180,+180,-360,+360],0],
-					['LiveFloat','rotate.z',[-180,+180,-360,+360],0],
+					['LiveFloat','rotate.x',[-180,+180,-360,+360],0,{ unit: '°' }],
+					['LiveFloat','rotate.y',[-180,+180,-360,+360],0,{ unit: '°' }],
+					['LiveFloat','rotate.z',[-180,+180,-360,+360],0,{ unit: '°' }],
 				]],
 			]],
 			['Group','debug',[

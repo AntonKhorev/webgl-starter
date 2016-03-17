@@ -17,6 +17,7 @@ class FixedLiveNumber {
 			this.input=Input.createFromString('constant')
 		}
 		this.precision=src.precision
+		this.unit=src.unit
 	}
 	valueOf() {
 		return this.value
@@ -226,6 +227,13 @@ Option.LiveFloat = class extends Option.LiveNumber {
 			},
 			get precision() {
 				return option.precision
+			},
+			get unit() {
+				if (option.unit!==undefined) {
+					return option.unit+'/second'
+				} else {
+					return '1/second'
+				}
 			},
 			get availableInputTypes() {
 				return option.availableInputTypes

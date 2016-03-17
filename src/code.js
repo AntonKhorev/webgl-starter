@@ -73,12 +73,12 @@ class Code extends BaseWebCode {
 				"}",
 				".min {",
 				"	display: inline-block;",
-				"	width: 4em;",
+				"	width: 5em;",
 				"	text-align: right;",
 				"}",
 				".max {",
 				"	display: inline-block;",
-				"	width: 4em;",
+				"	width: 5em;",
 				"	text-align: left;",
 				"}"
 			)
