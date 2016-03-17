@@ -1,7 +1,7 @@
 'use strict'
 
-const fixOptHelp=require('../fixed-options-helpers')
 const Input=require('../input-classes')
+const Option=require('../option-classes')
 const JsLines=require('crnx-base/js-lines')
 const WrapLines=require('crnx-base/wrap-lines')
 const IndentLines=require('crnx-base/indent-lines')
@@ -13,7 +13,14 @@ const IntFeature=require('../int-feature')
 class LodShape extends Shape {
 	constructor(options,hasReflections,hasColorsPerVertex,hasColorsPerFace,colorAttrs) {
 		super(options,hasReflections,hasColorsPerVertex,hasColorsPerFace,colorAttrs)
-		this.lod=fixOptHelp.capNumber(options.lod,this.getMaxPossibleLod(options.lod.max))
+		const maxLod=this.getMaxPossibleLod(options.lod.max)
+		const cap=v=>Math.min(maxLod,v)
+		this.lod=Option.LiveInt.make('lod',[0,10],6)({
+			value: cap(options.lod.value),
+			min:   cap(options.lod.min),
+			max:   cap(options.lod.max),
+			input: String(options.lod.input),
+		}).fix()
 		this.features.push(
 			new IntFeature('shape.lod',this.lod)
 		)

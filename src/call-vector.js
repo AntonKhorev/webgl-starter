@@ -1,6 +1,5 @@
 'use strict'
 
-const fixOptHelp=require('./fixed-options-helpers')
 const JsLines=require('crnx-base/js-lines')
 const Vector=require('./vector')
 
