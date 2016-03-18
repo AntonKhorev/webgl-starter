@@ -26,7 +26,7 @@ class NumericFeature extends Feature {
 				"<div>",
 				Lines.html`	<label for=${htmlName}>${i18n(opName)}</label>`,
 				"	<span class=min>"+minMax(fmtLabels.min)+"</span>",
-				Lines.html`	<input type=range id=${htmlName} min=${fmtAttrs.min} max=${fmtAttrs.max} value=${fmtAttrs.value} step=${step} />`,
+				Lines.html`	<input type=range id=${htmlName} min=${fmtAttrs.min} max=${fmtAttrs.max} value=${fmtAttrs.value} step=${step}>`,
 				"	<span class=max>"+minMax(fmtLabels.max)+"</span>",
 				"</div>"
 			)
