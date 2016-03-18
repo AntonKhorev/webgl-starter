@@ -24,7 +24,7 @@ class NumericFeature extends Feature {
 			const minMax=n=>i18n.numberWithUnits(n,value.unit,(a,e)=>Lines.html`<abbr title=${e}>`+a+`</abbr>`)
 			a(
 				"<div>",
-				Lines.html`	<label for=${htmlName}>${i18n(opName)}</label>`,
+				Lines.html`	<label for=${htmlName}>`+i18n(opName)+`</label>`,
 				"	<span class=min>"+minMax(fmtLabels.min)+"</span>",
 				Lines.html`	<input type=range id=${htmlName} min=${fmtAttrs.min} max=${fmtAttrs.max} value=${fmtAttrs.value} step=${step}>`,
 				"	<span class=max>"+minMax(fmtLabels.max)+"</span>",
