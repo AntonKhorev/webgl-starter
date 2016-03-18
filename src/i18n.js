@@ -79,10 +79,7 @@ let strings={
 	'options-output.inputs.mousemove{x,y}': "mouse {} axis",
 	'options-output.inputs.gamepad{0,1,2,3}': "gamepad {} axis",
 	'options-output.range': "with range",
-	'options-output.reset': "Reset",
 	'options-output.addSpeed': "Add speed",
-	'options-output.drag': "Drag or press up/down while in focus to reorder transforms",
-	'options-output.delete': "Delete transform",
 
 	'controls.type.mousemove{x,y}': "Move the mouse pointer {horizontally,vertically} over the canvas",
 	'controls.to': "to update",
@@ -97,6 +94,7 @@ let strings={
 
 strings=require('crnx-base/i18n-expand-curly')(strings)
 strings=require('crnx-base/i18n-link-wikipedia')('en')(strings)
-strings=require('crnx-base/code-output-i18n')(strings)
+strings=require('crnx-base/options-output-i18n')('en')(strings)
+strings=require('crnx-base/code-output-i18n')('en')(strings)
 
 module.exports=require('crnx-base/i18n')({en:strings})
