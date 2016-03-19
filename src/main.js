@@ -11,13 +11,6 @@ const Code=require('./code')
 const OptionsOutput=require('./options-output')
 const CodeOutput=require('crnx-base/code-output')
 
-function getHtmlDataUri(html) {
-	// with base64: https://developer.mozilla.org/en-US/docs/Web/API/WindowBase64/btoa
-	//return "data:text/html;charset=utf-8;base64,"+window.btoa(unescape(encodeURIComponent(str)));
-	// without base64: https://en.wikipedia.org/wiki/Data_URI_scheme
-	return 'data:text/html;charset=utf-8,'+encodeURIComponent(html)
-}
-
 $(function(){
 	$('.webgl-starter').each(function(){
 		const $container=$(this)
