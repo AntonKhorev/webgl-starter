@@ -30,7 +30,7 @@ class FixedLiveNumber {
 // abstract classes
 
 Option.LiveNumber = class extends Option.Number {
-	constructor(name,settings,data,fullName,optionByFullName,updateCallback,makeEntry,isInsideArray) {
+	constructor(name,settings,data,parent,visibilityManager,makeEntry) {
 		let dataValue,dataMin,dataMax,dataInput
 		if (typeof data == 'object') {
 			dataValue=data.value
@@ -55,21 +55,21 @@ Option.LiveNumber = class extends Option.Number {
 	set input(input) {
 		this._input=input
 		this.updateInternalVisibility()
-		this.updateCallback()
+		this.update()
 	}
 	get min() {
 		return this._min
 	}
 	set min(min) {
 		this._min=min
-		this.updateCallback()
+		this.update()
 	}
 	get max() {
 		return this._max
 	}
 	set max(max) {
 		this._max=max
-		this.updateCallback()
+		this.update()
 	}
 	get $range() {
 		return this._$range
@@ -121,7 +121,7 @@ Option.LiveFloat = class extends Option.LiveNumber {
 		if (settings.speed.availableMax===undefined) settings.speed.availableMax=arrayArg[3]
 		return super.collectArgs(scalarArg,arrayArg,settings)
 	}
-	constructor(name,settings,data,fullName,optionByFullName,updateCallback,makeEntry,isInsideArray) {
+	constructor(name,settings,data,parent,visibilityManager,makeEntry) {
 		let dataSpeedValue,dataSpeedMin,dataSpeedMax,dataSpeedInput
 		if (typeof data == 'object') {
 			if (typeof data.speed == 'object') {
@@ -176,7 +176,7 @@ Option.LiveFloat = class extends Option.LiveNumber {
 	set addSpeed(addSpeed) {
 		this._addSpeed=addSpeed
 		this.updateInternalVisibility()
-		this.updateCallback()
+		this.update()
 	}
 	get availableInputTypes() {
 		return ['constant','slider','mousemovex','mousemovey','gamepad0','gamepad1','gamepad2','gamepad3']
@@ -195,7 +195,7 @@ Option.LiveFloat = class extends Option.LiveNumber {
 			},
 			set value(value) {
 				option._speedValue=value
-				option.updateCallback()
+				option.update()
 			},
 			get input() {
 				return option._speedInput
@@ -203,7 +203,7 @@ Option.LiveFloat = class extends Option.LiveNumber {
 			set input(input) {
 				option._speedInput=input
 				option.updateInternalVisibility()
-				option.updateCallback()
+				option.update()
 			},
 			get availableMin() {
 				return option._speedAvailableMin
@@ -216,14 +216,14 @@ Option.LiveFloat = class extends Option.LiveNumber {
 			},
 			set min(min) {
 				option._speedMin=min
-				option.updateCallback()
+				option.update()
 			},
 			get max() {
 				return option._speedMax
 			},
 			set max(max) {
 				option._speedMax=max
-				option.updateCallback()
+				option.update()
 			},
 			get precision() {
 				return option.precision
