@@ -22,24 +22,28 @@ class OptionsOutput extends BaseOptionsOutput {
 						}
 					})
 				const id=generateId()
-				const inputSelectId=generateId()
 				let $inputSelect,$rangeMinInput,$rangeMaxInput
 				const $output=optionClassWriters.get(Option.Number)(option,writeOption,i18n,generateId)
 				$output.find('button').before(
-					" <label for='"+inputSelectId+"'>"+i18n('options-output.inputs')+":</label> ",
-					$inputSelect=$("<select id='"+inputSelectId+"'>").append(
-						option.availableInputTypes.map(availableInputType=>
-							$("<option>").val(availableInputType).html(i18n('options-output.inputs.'+availableInputType))
-						)
-					).val(option.input).change(function(){
-						option.input=this.value
-					}),
+					$("<label class='nowrap'>").append(
+						i18n('options-output.inputs')+": ",
+						$inputSelect=$("<select>").append(
+							option.availableInputTypes.map(availableInputType=>
+								$("<option>").val(availableInputType).html(i18n('options-output.inputs.'+availableInputType))
+							)
+						).val(option.input).change(function(){
+							option.input=this.value
+						})
+					),
 					" ",
-					option.$range=$("<span class='range'>")
-						.append(i18n('options-output.range')+" ")
-						.append($rangeMinInput=writeMinMaxInput('min'))
-						.append(" .. ")
-						.append($rangeMaxInput=writeMinMaxInput('max')),
+					option.$range=$("<span class='range'>").append(
+						i18n('options-output.range')+" ",
+						$("<span class='nowrap'>").append(
+							$rangeMinInput=writeMinMaxInput('min'),
+							" .. ",
+							$rangeMaxInput=writeMinMaxInput('max')
+						)
+					),
 					" "
 				).click(function(){
 					$inputSelect.val('constant').change()
@@ -52,12 +56,13 @@ class OptionsOutput extends BaseOptionsOutput {
 				return option.$=$("<div>").append(
 					writeSubOption(option).append(
 						" ",
-						option.$addSpeed=$("<label> "+i18n('options-output.addSpeed')+"</label>").prepend(
+						option.$addSpeed=$("<label class='nowrap'>").append(
 							$("<input type='checkbox'>")
 								.prop('checked',option.addSpeed)
 								.change(function(){
 									option.addSpeed=this.checked
-								})
+								}),
+							" "+i18n('options-output.addSpeed')
 						)
 					),
 					option.speed.$=writeSubOption(option.speed)
