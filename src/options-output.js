@@ -2,6 +2,7 @@
 
 const Option=require('./option-classes')
 const BaseOptionsOutput=require('crnx-base/options-output')
+const ArrayOptionOutput=require('crnx-base/array-option-output')
 
 class OptionsOutput extends BaseOptionsOutput {
 	setOptionClassWriters(optionClassWriters) {
@@ -70,6 +71,9 @@ class OptionsOutput extends BaseOptionsOutput {
 			} else {
 				return option.$=writeSubOption(option)
 			}
+		})
+		optionClassWriters.set(Option.Array,function(){
+			return new ArrayOptionOutput(...arguments).$output
 		})
 	}
 }
